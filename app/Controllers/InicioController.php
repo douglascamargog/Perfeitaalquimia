@@ -4,8 +4,8 @@ namespace App\Controllers;
 use App\Core\Auth;
 
 /**
- * Tela inicial: o One (ajudante) com o resumo do dia — tarefas, recompra, metas, campanha e Academia —
- * e o mapa dos módulos disponíveis para o perfil.
+ * Tela inicial em blocos: saudação do One, previsão do tempo, agenda, metas, carteira, cobrança,
+ * funil, sugestões do One e os módulos disponíveis para o perfil.
  */
 class InicioController extends Controller
 {
@@ -19,6 +19,10 @@ class InicioController extends Controller
             // One, o ajudante: resumo do dia
             'saudacao' => \App\Services\OneAssistente::saudacao(),
             'falas'    => \App\Services\OneAssistente::falas('/'),
+            // Blocos do painel (tempo, agenda, metas, carteira, cobrança...)
+            'painel'   => \App\Services\PainelInicio::montar(),
+            'estilos'  => ['inicio.css'],
+            'scripts'  => ['inicio.js'],
         ]);
     }
 
