@@ -53,6 +53,17 @@ return [
     ['POST', '/reativacao/processar',           'ReativacaoController@processar', 'carteira.ver_todas'],
     ['POST', '/reativacao/{id}/devolver',       'ReativacaoController@devolver', 'carteira.ver_propria|carteira.ver_todas'],
 
+    // ---------- Meu mês (meta individual e da equipe) ----------
+    ['GET',  '/meu-mes',                        'MeuMesController@index',          'meu_mes.usar'],
+    ['POST', '/meu-mes/meta',                   'MeuMesController@salvarMeta',     'meu_mes.usar'],
+    ['POST', '/meu-mes/vendas',                 'MeuMesController@registrarVenda', 'meu_mes.usar'],
+    ['POST', '/meu-mes/vendas/{id}/excluir',    'MeuMesController@excluirVenda',   'meu_mes.usar'],
+    ['POST', '/meu-mes/folga',                  'MeuMesController@folga',          'meu_mes.usar'],
+    ['POST', '/meu-mes/tarefas',                'MeuMesController@salvarTarefa',   'meu_mes.usar'],
+    ['POST', '/meu-mes/tarefas/{id}/concluir',  'MeuMesController@concluirTarefa', 'meu_mes.usar'],
+    ['POST', '/meu-mes/tarefas/{id}/excluir',   'MeuMesController@excluirTarefa',  'meu_mes.usar'],
+    ['POST', '/meu-mes/equipe',                 'MeuMesController@salvarEquipe',   'metas.gerenciar'],
+
     // ---------- Academia (Central de Televendas) ----------
     ['GET',  '/academia',                       'AcademiaController@inicio',      'academia.ver'],
     ['GET',  '/academia/trilha',                'AcademiaController@trilha',      'academia.ver'],
