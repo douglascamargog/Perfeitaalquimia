@@ -40,6 +40,14 @@ $linkLista = fn(array $extra) => url('/cobranca/lista') . '?' . e(http_build_que
   <div class="cob-numero verde"><span>Recuperado no mês</span><strong><?= dinheiro((float) $resumo['recuperado_mes']) ?></strong><small>títulos pagos</small></div>
 </div>
 
+<?php if (Auth::pode('config.gerenciar')): $ia = \App\Services\BuscaContatoService::custoDoMes(); ?>
+  <p class="pequeno suave cob-custo-ia">
+    Busca de contatos com IA: modo <strong><?= \App\Core\Config::get('busca_ia.provedor', 'fake') === 'claude' ? 'real' : 'demonstração' ?></strong>
+    · este mês: <?= $n($ia['buscas']) ?> busca(s) real(is), <?= $n($ia['buscas_web']) ?> pesquisa(s) na web, custo estimado US$ <?= number_format((float) $ia['custo'], 2, ',', '.') ?>
+    · <a href="<?= url('/configuracoes') ?>">configurar</a>
+  </p>
+<?php endif; ?>
+
 <nav class="abas" aria-label="Visões da cobrança">
   <a href="<?= url('/cobranca') . ($query ? '?' . e($query) : '') ?>" class="<?= $aba === 'funil' ? 'ativa' : '' ?>">Funil</a>
   <a href="<?= url('/cobranca/lista') . ($query ? '?' . e($query) : '') ?>" class="<?= $aba === 'lista' ? 'ativa' : '' ?>">Lista</a>

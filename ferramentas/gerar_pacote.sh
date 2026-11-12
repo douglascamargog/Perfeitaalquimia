@@ -6,11 +6,11 @@
 #   bash ferramentas/gerar_pacote.sh --atualizacao    → pacote de ATUALIZAÇÃO (sistema já em uso)
 #   (opcional: pasta de saída como último argumento)
 #
-# Pacote de ATUALIZAÇÃO: só o código. NÃO leva config.php, referencias/ nem mídias,
+# Pacote de ATUALIZAÇÃO: só o código (+ vendor/). NÃO leva config.php, referencias/ nem mídias,
 # então extrair por cima na hospedagem não mexe nas senhas nem nos dados.
 #
 # O pacote de INSTALAÇÃO leva:
-#   - o código do sistema (o que está no git)
+#   - o código do sistema (o que está no git) + vendor/ (SDK da Anthropic, via composer)
 #   - a pasta referencias/ (Carteira V4 e Central de Televendas, usadas na instalação)
 #   - config/config.php PRONTO PARA EDITAR (só preencher os dados do banco) com um token de instalação novo
 # NÃO leva: .git, logs, config.php do seu computador.
@@ -28,6 +28,15 @@ mkdir -p "$DESTINO"
 
 # 1. Código (somente arquivos versionados no git)
 git archive HEAD | tar -x -C "$DESTINO"
+
+# Biblioteca da IA (SDK oficial da Anthropic) — instalada aqui, vai pronta dentro do zip
+# (na hospedagem não é preciso rodar nada). Sem o composer, o zip sai sem ela e só a busca real fica indisponível.
+if command -v composer >/dev/null 2>&1; then
+  (cd "$DESTINO" && composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --quiet)
+  find "$DESTINO/vendor" -type d \( -name .git -o -name tests -o -name Tests -o -name docs \) -prune -exec rm -rf {} +
+else
+  echo "Aviso: composer não encontrado — o pacote sai sem vendor/ (a busca de contatos real com IA não vai funcionar)."
+fi
 
 # Número da versão (aparece no rodapé do menu e em Administração › Atualização)
 echo "$VERSAO" > "$DESTINO/VERSAO"

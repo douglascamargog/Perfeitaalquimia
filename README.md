@@ -13,6 +13,8 @@ PHP 8 + MySQL/MariaDB, HTML/CSS/JS puro. Sem Composer e sem etapa de build.
 
 ## Rodar no seu computador
 
+> Para a busca real de contatos com IA, rode também `composer install` (cria a pasta `vendor/`).
+
 1. Crie um banco MySQL/MariaDB vazio (ex.: `perfeita`, utf8mb4).
 2. Copie `config/config.example.php` para `config/config.php` e preencha os dados do banco.
 3. Crie as tabelas e os dados de demonstração:
@@ -56,6 +58,20 @@ com o "Backup JSON" exportado pela V4.
   o sistema recalcula sozinho a projeção do dia (ritmo), a projeção do mês e o necessário por dia.
 - Regra da projeção: vendido ÷ dias de trabalho decorridos × dias de trabalho do mês (o dia de referência conta como completo).
 
+## Cobrança e busca de contatos com IA
+
+- **Cobrança** (menu Comercial; perfis Financeiro, Gestor e Admin): clientes com títulos em atraso, em um **funil próprio**
+  (Título vencido → Tentativa de contato → Sem contato — buscar contatos → Em negociação → Promessa de pagamento → Pago / Acordo / Jurídico / Perda).
+  As etapas ficam em Configurações › Listas › Funil de cobrança.
+- Os casos entram pelo botão **Ler títulos vencidos do ERP** (simulado no protótipo; Omie depois), pelo cron, ou pelo vendedor na ficha do
+  cliente (**Enviar para cobrança**). Vão para quem tem a função **Cobrança** (ou para o Financeiro).
+- Depois de X tentativas sem resposta (configurável) o caso vai para **Sem contato**. Promessa de pagamento cria uma tarefa para o dia;
+  promessa vencida volta para tentativa. Todos os títulos pagos encerram o caso como Pago.
+- **Buscar contatos com IA** (ficha do cliente e caso de cobrança): consulta a Receita (grátis) e pesquisa na web
+  telefone, WhatsApp, e-mail, Instagram e site. Mostra **sugestões com a fonte**; só grava o que a pessoa marcar
+  (o valor antigo fica na linha do tempo e na auditoria). Modo demonstração até o admin ligar a busca real (veja LEIA-ME-INSTALACAO, 9b).
+- A busca real usa o SDK oficial da Anthropic (`composer.json`). A pasta `vendor/` não vai para o git: o `gerar_pacote.sh` instala e coloca no zip.
+
 ## Tarefas agendadas (cron)
 
 No cPanel › Cron Jobs, cadastre (troque o caminho pelo da sua conta):
@@ -63,6 +79,7 @@ No cPanel › Cron Jobs, cadastre (troque o caminho pelo da sua conta):
 | Quando | Comando | Para quê |
 |---|---|---|
 | Todo dia às 6h | `php /home/USUARIO/public_html/cron/fila_reativacao.php` | Manda para a fila de reativação os clientes sem compra há X dias |
+| Todo dia às 7h | `php /home/USUARIO/public_html/cron/cobranca.php` | Lê títulos vencidos/pagos do ERP e trata promessas vencidas |
 
 ## Logins de demonstração
 
@@ -76,7 +93,7 @@ Senha de todos: `Demo@2026` — usuários fictícios, um por perfil e por funç�
 | externo1@demo.local | Vendedor · Externo |
 | reativacao@demo.local | Vendedor · Prospecção e Reativação |
 | terceirizacao@demo.local | Vendedor · Terceirização e Marca Própria |
-| financeiro@demo.local | Financeiro |
+| financeiro@demo.local | Financeiro · Cobrança |
 | marketing@demo.local | Marketing |
 | producao@demo.local | Produção |
 

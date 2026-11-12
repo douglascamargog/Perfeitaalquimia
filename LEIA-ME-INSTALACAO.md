@@ -86,6 +86,26 @@ php /home/doug9130/public_html/one/cron/fila_reativacao.php
 
 Ela envia para a fila de Reativação os clientes sem compra há mais de X dias (X fica em Configurações).
 
+Adicione também, uma vez por dia (ex.: 7h), a da **Cobrança** (lê os títulos vencidos/pagos do ERP e devolve
+para "Tentativa de contato" as promessas de pagamento que venceram):
+
+```
+php /home/doug9130/public_html/one/cron/cobranca.php
+```
+
+## 9b. Ligar a busca de contatos com IA (quando quiser)
+
+Até ligar, o botão **Buscar contatos com IA** funciona em modo demonstração (contatos fictícios, sem custo).
+
+1. Crie uma conta em **console.anthropic.com**, cadastre um cartão e crie uma chave em **API Keys**.
+   Dica: em **Limits**, defina um limite de gasto mensal (ex.: US$ 20).
+2. No cPanel › Gerenciador de arquivos › `one/config/config.php`, cole a chave em `'anthropic' => ['chave' => '...']`.
+   (Num sistema que já estava instalado, acrescente o bloco `'anthropic'` copiando de `config.example.php`.)
+3. No One, como admin: **Configurações › Busca de contatos (IA) › Provedor da busca** = `claude`.
+
+Custo estimado: de US$ 0,10 a 0,30 por empresa pesquisada. O admin vê o total do mês no topo da tela **Cobrança**.
+O limite de buscas por dia também fica em Configurações. Só dados públicos da empresa (CNPJ, nome, cidade) vão para a IA.
+
 ## 10. Trazer o trabalho da Carteira atual
 
 Na Carteira atual (`/carteira`), use **Backup JSON** para baixar o arquivo. No One: **Carteira › Importar** › envie o arquivo › confira a pré-visualização › Confirmar.
