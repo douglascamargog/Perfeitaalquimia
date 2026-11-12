@@ -9,6 +9,7 @@ namespace App\Core;
  *
  * O 4º item é a permissão exigida:
  *   'publico' → qualquer pessoa  ·  'logado' → qualquer usuário logado  ·  outra → precisa da permissão
+ *   'a|b' → basta ter UMA das permissões (ex.: 'carteira.ver_propria|carteira.ver_todas')
  *
  * Todo POST é conferido contra CSRF antes de chegar ao controller.
  */
@@ -65,7 +66,11 @@ class Roteador
             Sessao::aviso('aviso', 'Crie uma senha nova para continuar.');
             redirecionar('/minha-senha');
         }
-        if ($permissao !== 'logado' && !Auth::pode($permissao)) {
+        $temAlguma = false;
+        foreach (explode('|', $permissao) as $p) {
+            $temAlguma = $temAlguma || $p === 'logado' || Auth::pode($p);
+        }
+        if (!$temAlguma) {
             $this->erro(403, 'Seu perfil não tem acesso a esta área.');
             return false;
         }

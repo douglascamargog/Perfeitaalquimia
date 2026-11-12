@@ -41,7 +41,9 @@ function url_base(): string
         return $base = rtrim($configurada, '/');
     }
     // Ex.: SCRIPT_NAME = /sistema/public/index.php → /sistema/public
-    $base = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
+    // (só confia no SCRIPT_NAME quando ele aponta para o index.php; o servidor embutido do PHP às vezes põe a URL pedida)
+    $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+    $base = basename($script) === 'index.php' ? rtrim(dirname($script), '/') : '';
     // Quando o .htaccess da raiz redireciona para /public, a URL visível não tem "/public"
     $pedido = $_SERVER['REQUEST_URI'] ?? '';
     if (str_ends_with($base, '/public') && !str_starts_with($pedido, $base)) {

@@ -154,8 +154,9 @@ for ($i = 0; $i < 120; $i++) {
     } while (isset($usados[$nome . $cidade]));
     $usados[$nome . $cidade] = true;
 
-    // Última compra: 3/4 compraram nos últimos 80 dias; 1/4 está há mais de 90 dias (vão para a reativação)
-    $diasSemCompra = $i % 4 === 3 ? mt_rand(95, 320) : mt_rand(2, 80);
+    // Última compra: 3/4 compraram nos últimos 80 dias; 1/4 está há mais de 90 dias (vão para a reativação).
+    // intdiv($i, 4) faz os inativos se espalharem entre todos os vendedores.
+    $diasSemCompra = intdiv($i, 4) % 4 === 3 ? mt_rand(95, 320) : mt_rand(2, 80);
     $responsavel = $usuario($email);
     $id = CarteiraService::criar([
         'tipo' => 'cliente', 'razao_social' => $nome . ' Ltda', 'nome_fantasia' => $nome, 'cnpj' => $gerarCnpj(),
