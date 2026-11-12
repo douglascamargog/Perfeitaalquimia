@@ -23,6 +23,7 @@ return [
     ['titulo' => 'Usuários',        'url' => '/usuarios',      'icone' => 'usuario',   'grupo' => 'Administração',  'permissao' => 'usuarios.gerenciar',                      'pronto' => true,  'descricao' => 'Logins, perfis e funções das pessoas'],
     ['titulo' => 'Funções',         'url' => '/funcoes',       'icone' => 'etiqueta',  'grupo' => 'Administração',  'permissao' => 'usuarios.gerenciar',                      'pronto' => true,  'descricao' => 'Televendas, Externo, Reativação...'],
     ['titulo' => 'Configurações',   'url' => '/configuracoes', 'icone' => 'engrenagem', 'grupo' => 'Administração', 'permissao' => 'config.gerenciar',                        'pronto' => true,  'descricao' => 'Regras comerciais editáveis'],
+    ['titulo' => 'Listas',          'url' => '/configuracoes/listas', 'icone' => 'etiqueta', 'grupo' => 'Administração', 'permissao' => 'config.gerenciar',                 'pronto' => true,  'descricao' => 'Etapas do funil, segmentos e origens'],
     ['titulo' => 'Integração Omie', 'url' => '/integracao',    'icone' => 'nuvem',     'grupo' => 'Administração',  'permissao' => 'integracao.gerenciar',                    'pronto' => false, 'descricao' => 'Sincronização e fila de envio'],
     ['titulo' => 'Auditoria',       'url' => '/auditoria',     'icone' => 'escudo',    'grupo' => 'Administração',  'permissao' => 'auditoria.ver',                           'pronto' => true,  'descricao' => 'Quem fez o quê, e quando'],
 ];

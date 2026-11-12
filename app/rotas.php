@@ -66,5 +66,9 @@ return [
     ['GET',  '/configuracoes',          'ConfigController@index',  'config.gerenciar'],
     ['POST', '/configuracoes',          'ConfigController@salvar', 'config.gerenciar'],
 
+    ['GET',  '/configuracoes/listas',                 'ListaController@index',  'config.gerenciar'],
+    ['POST', '/configuracoes/listas/{lista}',         'ListaController@criar',  'config.gerenciar'],
+    ['POST', '/configuracoes/listas/{lista}/{id}',    'ListaController@salvar', 'config.gerenciar'],
+
     ['GET',  '/auditoria',              'AuditoriaController@index', 'auditoria.ver'],
 ];

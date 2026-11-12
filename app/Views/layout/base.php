@@ -11,11 +11,16 @@ $usuario = Auth::usuario();
 $caminhoAtual = '/' . trim(substr(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), strlen(url_base())), '/');
 $icones = asset('img/icones.svg');
 
-// Agrupa os itens do menu que este usuário pode ver
+// Agrupa os itens do menu que este usuário pode ver e acha o item da página atual
+// (o endereço mais longo que combina: /configuracoes/listas destaca "Listas", não "Configurações")
 $grupos = [];
+$itemAtual = '/';
 foreach (require RAIZ . '/app/menu.php' as $item) {
     if (InicioController::visivel($item)) {
         $grupos[$item['grupo']][] = $item;
+        if ($item['url'] !== '/' && str_starts_with($caminhoAtual . '/', $item['url'] . '/') && strlen($item['url']) > strlen($itemAtual)) {
+            $itemAtual = $item['url'];
+        }
     }
 }
 ?>
@@ -49,7 +54,7 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
       <?php foreach ($grupos as $grupo => $itens): ?>
         <?php if ($grupo !== ''): ?><div class="menu-grupo"><?= e($grupo) ?></div><?php endif; ?>
         <?php foreach ($itens as $item):
-            $ativo = $item['url'] === '/' ? $caminhoAtual === '/' : str_starts_with($caminhoAtual, $item['url']); ?>
+            $ativo = $item['url'] === '/' ? $caminhoAtual === '/' : $item['url'] === $itemAtual; ?>
           <?php if ($item['pronto']): ?>
             <a href="<?= url($item['url']) ?>" class="<?= $ativo ? 'ativo' : '' ?>">
               <svg class="icone"><use href="<?= $icones ?>#<?= e($item['icone']) ?>"/></svg><?= e($item['titulo']) ?>
