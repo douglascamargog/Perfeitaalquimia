@@ -17,3 +17,6 @@
 Thumbs.db
 .idea/
 .vscode/
+
+# Mídias extraídas da Central de Televendas (geradas pela instalação)
+/public/media/academia/

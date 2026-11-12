@@ -52,6 +52,10 @@ return [
     ['POST', '/reativacao/processar',           'ReativacaoController@processar', 'carteira.ver_todas'],
     ['POST', '/reativacao/{id}/devolver',       'ReativacaoController@devolver', 'carteira.ver_propria|carteira.ver_todas'],
 
+    // ---------- Academia (Central de Televendas) ----------
+    ['GET',  '/academia',                       'AcademiaController@central',  'academia.ver'],
+    ['GET',  '/academia/dados.js',              'AcademiaController@dados',    'academia.ver'],
+
     // ---------- Administração ----------
     ['GET',  '/usuarios',               'UsuarioController@index',    'usuarios.gerenciar'],
     ['GET',  '/usuarios/novo',          'UsuarioController@novo',     'usuarios.gerenciar'],
