@@ -19,6 +19,22 @@ return [
     ['GET',  '/instalar',      'InstalarController@index',    'publico'],
     ['POST', '/instalar',      'InstalarController@executar', 'publico'],
 
+    // ---------- Catálogo B2B (área do cliente; o controller confere o login do cliente) ----------
+    ['GET',  '/catalogo',                      'CatalogoController@vitrine',     'publico'],
+    ['GET',  '/catalogo/produto/{slug}',       'CatalogoController@produto',     'publico'],
+    ['GET',  '/catalogo/v/{codigo}',           'CatalogoController@vendedor',    'publico'],
+    ['GET',  '/catalogo/entrar',               'CatalogoController@formEntrar',  'publico'],
+    ['POST', '/catalogo/entrar',               'CatalogoController@entrar',      'publico'],
+    ['POST', '/catalogo/codigo',               'CatalogoController@pedirCodigo', 'publico'],
+    ['POST', '/catalogo/senha',                'CatalogoController@definirSenha', 'publico'],
+    ['POST', '/catalogo/sair',                 'CatalogoController@sair',        'publico'],
+    ['POST', '/catalogo/carrinho/quantidade',  'CatalogoController@quantidade',  'publico'],
+    ['GET',  '/catalogo/carrinho',             'CatalogoController@carrinho',    'publico'],
+    ['POST', '/catalogo/finalizar',            'CatalogoController@finalizar',   'publico'],
+    ['GET',  '/catalogo/pedidos',              'CatalogoController@pedidos',     'publico'],
+    ['POST', '/catalogo/pedidos/{id}/repetir', 'CatalogoController@repetir',     'publico'],
+    ['POST', '/catalogo/pedidos/{id}/cancelar', 'CatalogoController@cancelar',   'publico'],
+
     // ---------- Início ----------
     ['GET',  '/',              'InicioController@index', 'logado'],
     ['GET',  '/one/falas',     'OneController@falas',    'logado'],   // One, o ajudante
