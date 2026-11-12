@@ -21,6 +21,7 @@ return [
 
     // ---------- Início ----------
     ['GET',  '/',              'InicioController@index', 'logado'],
+    ['GET',  '/one/falas',     'OneController@falas',    'logado'],   // One, o ajudante
 
     // ---------- Carteira e CRM ----------
     ['GET',  '/carteira',                       'CarteiraController@visaoGeral', 'carteira.ver_propria|carteira.ver_todas'],

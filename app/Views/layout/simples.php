@@ -9,7 +9,8 @@ use App\Core\Sessao;
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= e($titulo ?? '') ?> · <?= e(config('app_nome')) ?></title>
+  <title><?= e($titulo ?? '') ?> · <?= e(config('app_nome')) ?> · <?= e(config('empresa_nome', 'Perfeita Alquimia')) ?></title>
+  <link rel="icon" type="image/svg+xml" href="<?= asset('img/one/one-ola-padrao.svg') ?>">
   <link rel="stylesheet" href="<?= asset('css/base.css') ?>">
   <style>
     .pagina-simples { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
@@ -29,7 +30,7 @@ use App\Core\Sessao;
   <div class="caixa-simples">
     <div class="marca-login">
       <span><img src="<?= asset('img/logo.png') ?>" alt="Logo <?= e(config('app_nome')) ?>"></span>
-      <div><strong><?= e(config('app_nome')) ?></strong><div style="font-size:.8rem;color:#a5b1a4">Sistema unificado</div></div>
+      <div><strong style="font-size:1.6rem;letter-spacing:-.04em"><?= e(config('app_nome')) ?></strong><div style="font-size:.8rem;color:#a5b1a4"><?= e(config('empresa_nome', 'Perfeita Alquimia')) ?></div></div>
     </div>
     <?php foreach (Sessao::avisos() as $aviso): ?>
       <div class="aviso <?= e($aviso['tipo']) ?>" role="status"><?= e($aviso['mensagem']) ?></div>

@@ -1,4 +1,10 @@
-# Sistema Unificado Perfeita Alquimia — Fase 0 (protótipo)
+# One — sistema unificado da Perfeita Alquimia (Fase 0 · protótipo)
+
+**One** é o nome do sistema e do mascote ajudante: um caldeirão de alquimista com um broto
+(arquivos em `public/assets/img/one/`, 6 expressões × 2 variações). O One aparece no login, no Início
+(resumo do dia), nas telas de erro e no botão flutuante, que mostra dicas conforme os dados de cada pessoa
+(`app/Services/OneAssistente.php`).
+
 
 Carteira e CRM, catálogo B2B com pedido, app do externo, painel de vendas, Academia e produção num só sistema,
 integrado ao Omie (no protótipo: **dados simulados**). Especificação completa em `CLAUDE.md`.

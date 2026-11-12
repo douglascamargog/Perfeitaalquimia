@@ -108,3 +108,52 @@ input[type=color] { width: 44px; height: 38px; padding: 2px; border: 1px solid v
 
 /* Item de campanha no menu (ex.: Black Friday) */
 .menu-lateral nav a.destaque:not(.ativo) { border: 1px solid #3b5734; background: linear-gradient(130deg, #263527, #172019 72%); color: #eaffc0; }
+
+/* =====================================================================
+   One — o ajudante (botão flutuante, painel de falas, card do Início)
+   Cores do mascote: petróleo #025150 · floresta #09463a · verde #15a454 · menta #5cd4b6
+   ===================================================================== */
+.marca-nome { font-size: 1.5rem !important; letter-spacing: -.05em; }
+.one-botao { position: fixed; right: 20px; bottom: 20px; z-index: 55; display: flex; align-items: center; gap: 6px; padding: 6px 16px 6px 8px;
+  border: 0; border-radius: 999px; background: #025150; color: #fff; font: 800 15px/1 var(--fonte); cursor: pointer;
+  box-shadow: 0 10px 28px rgba(2, 81, 80, .35); transition: transform .15s; }
+.one-botao:hover { transform: translateY(-2px); }
+.one-botao img { width: 40px; height: 44px; }
+.one-painel { position: fixed; right: 20px; bottom: 84px; z-index: 56; width: min(380px, calc(100% - 32px)); max-height: min(72vh, 620px); overflow-y: auto;
+  background: #fff; border-radius: 20px; box-shadow: 0 24px 60px rgba(0, 0, 0, .25); border: 1px solid #d6e6e3; animation: one-entrar .18s ease-out; }
+@keyframes one-entrar { from { transform: translateY(12px); opacity: 0; } }
+.one-painel header { position: sticky; top: 0; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #025150; color: #fff; border-radius: 20px 20px 0 0; }
+.one-painel header div { flex: 1; display: grid; }
+.one-painel header small { color: #9fd9cd; font-size: .72rem; }
+.one-painel-corpo { padding: 14px; }
+.one-carregando { display: flex; align-items: center; gap: 10px; color: var(--texto-suave); font-size: .88rem; margin: 0; }
+.one-falas { display: grid; gap: 10px; }
+.one-fala { display: flex; gap: 10px; align-items: flex-start; }
+.one-fala img { flex: none; }
+.one-fala > div { flex: 1; min-width: 0; background: #f1f8f6; border: 1px solid #d6ebe6; border-radius: 4px 14px 14px 14px; padding: 10px 12px; font-size: .86rem; }
+.one-fala p { margin: 0; }
+.one-fala a { display: inline-block; margin-top: 6px; font-weight: 750; font-size: .8rem; color: #087a45; text-decoration: none; }
+.one-fala.one-saudacao { align-items: center; }
+.one-fala.one-saudacao > div { background: #025150; color: #e6f6f2; border-color: #025150; font-weight: 600; }
+
+/* Card do One no Início */
+.one-inicio { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 20px; align-items: center; margin-bottom: 24px; padding: 24px 26px;
+  border-radius: 22px; background: radial-gradient(ellipse at 90% 0%, #5cd4b630 0, transparent 45%), linear-gradient(125deg, #01403f, #025150 60%, #09463a);
+  color: #d8f1ec; border: 1px solid #0b5f5d; }
+.one-inicio > img { width: 160px; height: auto; justify-self: center; }
+.one-inicio h2 { color: #fff; margin: 0 0 4px; font-size: 1.5rem; letter-spacing: -.03em; }
+.one-inicio > div > p { margin: 0 0 14px; color: #a9dcd2; }
+.one-inicio .one-falas { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.one-inicio .one-fala.one-saudacao { display: none; }
+.one-inicio .one-fala > div { background: #ffffff14; border-color: #ffffff24; color: #eefaf7; }
+.one-inicio .one-fala a { color: #5cd4b6; }
+.one-inicio .one-fala img { background: #fff; border-radius: 12px; padding: 3px; }
+
+@media (max-width: 760px) {
+  .one-botao-texto { display: none; }
+  .one-botao { padding: 6px; right: 14px; bottom: 14px; }
+  .one-inicio { grid-template-columns: 1fr; text-align: center; }
+  .one-inicio .one-fala { text-align: left; }
+}
+@media print { .one-botao, .one-painel { display: none !important; } }
+.one-painel header .botao-icone { background: #ffffff1a; border-color: #ffffff33; color: #fff; width: 32px; height: 32px; }

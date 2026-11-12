@@ -143,6 +143,15 @@ table.tabela { width: 100%; border-collapse: collapse; }
 /* ---------- Paginação ---------- */
 .paginacao { display: flex; gap: 6px; align-items: center; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
 
+/* ---------- One, o ajudante: login e telas de erro (o resto fica em app.css) ---------- */
+/* Login e erro */
+.one-boas-vindas { display: flex; align-items: center; gap: 14px; color: #d8f1ec; margin: -6px 0 14px; }
+.one-boas-vindas img { flex: none; }
+.one-boas-vindas p { margin: 0; background: #ffffff14; border: 1px solid #ffffff24; border-radius: 4px 14px 14px 14px; padding: 10px 12px; font-size: .9rem; }
+.card-erro { text-align: center; }
+.card-erro img { margin-bottom: 8px; }
+
+
 /* ---------- Impressão (relatórios em A4) ---------- */
 @media print {
   @page { size: A4; margin: 14mm; }

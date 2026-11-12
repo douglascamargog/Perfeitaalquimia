@@ -1,12 +1,15 @@
 <?php
-/** Tela inicial. Variáveis: $usuario, $modulos */
+/** Tela inicial. Variáveis: $usuario, $modulos, $saudacao e $falas (One, o ajudante) */
 $icones = asset('img/icones.svg');
 $primeiroNome = explode(' ', $usuario['nome'])[0];
 ?>
-<section class="boas-vindas">
-  <h2>Olá, <?= e($primeiroNome) ?>!</h2>
-  <p>Este é o protótipo do sistema unificado da Perfeita Alquimia: carteira e CRM, catálogo B2B, pedidos integrados ao Omie,
-     painel de vendas, Academia e produção num lugar só. Os módulos marcados como "em breve" estão em construção.</p>
+<section class="one-inicio" aria-label="One, seu ajudante">
+  <img src="<?= asset('img/one/one-' . e($saudacao['humor']) . '-invertido.svg') ?>" alt="One, o ajudante do sistema" width="160" height="176">
+  <div>
+    <h2><?= e(explode('!', $saudacao['texto'])[0]) ?>!</h2>
+    <p>Eu sou o One, seu ajudante. Separei o que merece sua atenção hoje:</p>
+    <?= \App\Core\Visao::renderizar('one/_falas', ['saudacao' => $saudacao, 'falas' => $falas]) ?>
+  </div>
 </section>
 
 <h2>Módulos disponíveis para o seu perfil</h2>

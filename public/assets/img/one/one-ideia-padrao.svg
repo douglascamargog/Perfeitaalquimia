@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="220" viewBox="0 0 200 220" role="img" aria-label="One, assistente de IA da Perfeita Alquimia">
+  <path d="M56 84 Q47 72 56 61 Q65 50 56 38" fill="none" stroke="#5cd4b6" stroke-width="5" stroke-linecap="round" opacity="0.8"></path>
+  <path d="M148 84 Q157 74 148 64 Q139 54 148 44" fill="none" stroke="#5cd4b6" stroke-width="4" stroke-linecap="round" opacity="0.6"></path>
+  <path d="M36 102 Q100 22 164 102" fill="none" stroke="#09463a" stroke-width="5" stroke-linecap="round"></path>
+  <ellipse cx="100" cy="214" rx="58" ry="5" fill="#000000" opacity="0.08"></ellipse>
+  <path d="M80 182 L77 204" fill="none" stroke="#09463a" stroke-width="9" stroke-linecap="round"></path>
+  <path d="M120 182 L123 204" fill="none" stroke="#09463a" stroke-width="9" stroke-linecap="round"></path>
+  <ellipse cx="72" cy="208" rx="13" ry="6.5" fill="#09463a"></ellipse>
+  <ellipse cx="128" cy="208" rx="13" ry="6.5" fill="#09463a"></ellipse>
+  <ellipse cx="68" cy="206" rx="5" ry="2" fill="#ffffff" opacity="0.2"></ellipse>
+  <ellipse cx="124" cy="206" rx="5" ry="2" fill="#ffffff" opacity="0.2"></ellipse>
+  <g><ellipse cx="22" cy="152" rx="10" ry="16" fill="#09463a" transform="rotate(22 22 152)"></ellipse></g>
+  <g><ellipse cx="178" cy="152" rx="10" ry="16" fill="#09463a" transform="rotate(-22 178 152)"></ellipse></g>
+  <path d="M40 104 C18 136 28 190 100 190 C172 190 182 136 160 104 Z" fill="#025150"></path>
+  <path d="M146 104 C168 132 168 182 106 189 C150 176 158 138 136 104 Z" fill="#09463a"></path>
+  <path d="M46 130 Q44 154 58 172" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.3"></path>
+  <path d="M46 174 Q100 190 154 174" fill="none" stroke="#09463a" stroke-width="7" stroke-linecap="round"></path>
+  <circle cx="62" cy="180" r="2.5" fill="#15a454"></circle>
+  <circle cx="100" cy="184" r="2.5" fill="#15a454"></circle>
+  <circle cx="138" cy="180" r="2.5" fill="#15a454"></circle>
+  <rect x="28" y="90" width="144" height="20" rx="10" fill="#09463a"></rect>
+  <path d="M40 95 L112 95" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.25"></path>
+  <ellipse cx="100" cy="93" rx="62" ry="6" fill="#15a454"></ellipse>
+  <path d="M76 93 Q88 89 100 93 Q112 97 124 93" fill="none" stroke="#5cd4b6" stroke-width="2.5" stroke-linecap="round"></path>
+  <circle cx="72" cy="80" r="4" fill="none" stroke="#5cd4b6" stroke-width="2"></circle>
+  <circle cx="84" cy="70" r="2.5" fill="#5cd4b6"></circle>
+  <circle cx="136" cy="82" r="3" fill="#5cd4b6"></circle>
+  <path d="M106 93 Q104 80 110 68" fill="none" stroke="#087a45" stroke-width="3" stroke-linecap="round"></path>
+  <path d="M110 70 Q94 58 104 40 Q120 54 110 70 Z" fill="#15a454"></path>
+  <path d="M110 70 Q104 56 104 44" fill="none" stroke="#087a45" stroke-width="1.5" stroke-linecap="round"></path>
+  <path d="M110 72 Q130 68 138 50 Q118 48 110 72 Z" fill="#087a45"></path>
+  <path d="M110 72 Q124 62 134 52" fill="none" stroke="#15a454" stroke-width="1.5" stroke-linecap="round"></path>
+  <ellipse cx="100" cy="144" rx="51" ry="29" fill="#ffffff" stroke="#09463a" stroke-width="3"></ellipse>
+  <ellipse cx="66" cy="156" rx="7" ry="4" fill="#5cd4b6" opacity="0.6"></ellipse>
+  <ellipse cx="134" cy="156" rx="7" ry="4" fill="#5cd4b6" opacity="0.6"></ellipse>
+  <g>
+    <path d="M72 121 Q82 114 92 121" fill="none" stroke="#025150" stroke-width="3" stroke-linecap="round"></path>
+    <path d="M108 121 Q118 114 128 121" fill="none" stroke="#025150" stroke-width="3" stroke-linecap="round"></path>
+    <ellipse cx="82" cy="139" rx="8" ry="11" fill="#025150"></ellipse>
+    <ellipse cx="118" cy="139" rx="8" ry="11" fill="#025150"></ellipse>
+    <circle cx="85" cy="135" r="3" fill="#ffffff"></circle>
+    <circle cx="121" cy="135" r="3" fill="#ffffff"></circle>
+    <circle cx="79" cy="143" r="1.5" fill="#ffffff"></circle>
+    <circle cx="115" cy="143" r="1.5" fill="#ffffff"></circle>
+    <ellipse cx="100" cy="159" rx="5" ry="6" fill="#025150"></ellipse>
+    <path d="M28 38 L32 50 L44 54 L32 58 L28 70 L24 58 L12 54 L24 50 Z" fill="#15a454"></path>
+    <circle cx="44" cy="30" r="4" fill="#5cd4b6"></circle>
+  </g>
+</svg>

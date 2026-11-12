@@ -33,7 +33,8 @@ if (str_starts_with($caminhoAtual, '/carteira') && ($_GET['origem'] ?? '') !== '
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= e($titulo ?? '') ?> · <?= e(config('app_nome')) ?></title>
+  <title><?= e($titulo ?? '') ?> · <?= e(config('app_nome')) ?> · <?= e(config('empresa_nome', 'Perfeita Alquimia')) ?></title>
+  <link rel="icon" type="image/svg+xml" href="<?= asset('img/one/one-ola-padrao.svg') ?>">
   <link rel="stylesheet" href="<?= asset('css/base.css') ?>">
   <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
   <?php // CSS extras da tela: $estilos = ['carteira.css'] ou endereços externos (https://...) ?>
@@ -52,7 +53,7 @@ if (str_starts_with($caminhoAtual, '/carteira') && ($_GET['origem'] ?? '') !== '
   <aside class="menu-lateral" aria-label="Menu principal">
     <a class="marca" href="<?= url('/') ?>">
       <span class="marca-logo"><img src="<?= asset('img/logo.png') ?>" alt="Logo <?= e(config('app_nome')) ?>"></span>
-      <span><strong><?= e(config('app_nome')) ?></strong><span>Sistema unificado</span></span>
+      <span><strong class="marca-nome"><?= e(config('app_nome')) ?></strong><span><?= e(config('empresa_nome', 'Perfeita Alquimia')) ?></span></span>
     </a>
     <nav>
       <?php foreach ($grupos as $grupo => $itens): ?>
@@ -100,6 +101,15 @@ if (str_starts_with($caminhoAtual, '/carteira') && ($_GET['origem'] ?? '') !== '
     </main>
   </div>
 </div>
+<!-- One, o ajudante: botão flutuante; as falas carregam quando a pessoa abre -->
+<button type="button" class="one-botao" data-one-abrir aria-expanded="false" aria-controls="one-painel" title="Falar com o One">
+  <img src="<?= asset('img/one/one-ola-invertido.svg') ?>" alt="" width="40" height="44"><span class="one-botao-texto">One</span>
+</button>
+<section class="one-painel" id="one-painel" hidden aria-label="One, seu ajudante">
+  <header><img src="<?= asset('img/one/one-piscando-invertido.svg') ?>" alt="" width="36" height="40"><div><strong>One</strong><small>Seu ajudante no sistema</small></div>
+    <button type="button" class="botao-icone escuro" data-one-fechar aria-label="Fechar">✕</button></header>
+  <div class="one-painel-corpo" data-one-corpo><p class="one-carregando"><img src="<?= asset('img/one/one-pensando-padrao.svg') ?>" alt="" width="40">Um instante, estou olhando seus dados…</p></div>
+</section>
 <script type="module" src="<?= asset('js/app.js') ?>"></script>
 <?php // JS extras da tela: $scripts = ['carteira.js'] (módulos) ou bibliotecas externas (https://...) ?>
 <?php foreach ($scripts ?? [] as $js): ?>

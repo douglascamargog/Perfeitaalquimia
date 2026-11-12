@@ -6,8 +6,10 @@
  * O config.php fica FORA do git (tem senhas). Este modelo pode ser versionado.
  */
 return [
-    // Nome que aparece no topo do sistema
-    'app_nome' => 'Perfeita Alquimia',
+    // Nome do sistema (aparece no menu, no login e nos títulos das páginas)
+    'app_nome' => 'One',
+    // Nome da empresa (aparece embaixo do nome do sistema)
+    'empresa_nome' => 'Perfeita Alquimia',
 
     // Endereço base do sistema. Deixe '' para detectar sozinho.
     // Exemplo se ficar numa subpasta: '/sistema'

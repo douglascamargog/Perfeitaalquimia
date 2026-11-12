@@ -1,3 +1,7 @@
+<div class="one-boas-vindas">
+  <img src="<?= asset('img/one/one-ola-invertido.svg') ?>" alt="One, o ajudante do sistema" width="110" height="121">
+  <p><strong>Oi! Eu sou o One.</strong> Entre com o seu login e eu te mostro o que é importante hoje.</p>
+</div>
 <div class="card">
   <h2>Entrar</h2>
   <p class="suave pequeno">Use o seu login individual.</p>
