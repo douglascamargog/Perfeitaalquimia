@@ -63,13 +63,14 @@ class Instalador
             if ($this->jaAplicado($nome)) {
                 continue;
             }
-            Banco::transacao(function () use ($arquivo) {
-                (static function (string $arquivo) {
-                    require $arquivo; // o seed usa App\Core\Banco para inserir os dados
+            // O seed pode devolver uma mensagem (ex.: aviso de arquivo de referência ausente) para o relatório
+            $mensagem = Banco::transacao(function () use ($arquivo) {
+                return (static function (string $arquivo) {
+                    return require $arquivo; // o seed usa App\Core\Banco para inserir os dados
                 })($arquivo);
             });
             Banco::inserir('migracoes', ['arquivo' => $nome]);
-            $this->log[] = 'Dados de demonstração carregados: ' . basename($arquivo);
+            $this->log[] = 'Dados de demonstração carregados: ' . basename($arquivo) . (is_string($mensagem) ? " — $mensagem" : '');
         }
     }
 

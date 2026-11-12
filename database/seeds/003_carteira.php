@@ -84,9 +84,8 @@ if (is_file($arquivoV4)) {
         $c['criado_em'] = '2026-11-09 08:00:00';
         $lojasIds[] = CarteiraService::criar($c, null, 'Importado da Carteira Comercial V4');
     }
-} else {
-    echo "Aviso: referencias/dashboard.html não encontrado — as 499 lojas não foram carregadas.\n";
 }
+$avisoLojas = is_file($arquivoV4) ? count($lojasIds) . ' lojas da Carteira V4 carregadas' : 'AVISO: referencias/dashboard.html não encontrado — as 499 lojas não foram carregadas';
 
 // Movimento de demonstração em parte das lojas (últimos 7 dias): contatos e avanço no funil
 $resumos = ['Apresentei a linha de suplementos; pediu catálogo.', 'Falei com o comprador, pediu retorno na semana que vem.',
@@ -180,3 +179,5 @@ for ($i = 0; $i < 120; $i++) {
         App\Models\Tarefa::definirRetorno($id, $responsavel, date('Y-m-d', strtotime(sprintf('%+d days', mt_rand(-3, 12)))), 'Oferecer reposição');
     }
 }
+
+return $avisoLojas . '; ' . $i . ' clientes de demonstração em outros estados.';

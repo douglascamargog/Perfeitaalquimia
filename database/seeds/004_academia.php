@@ -6,8 +6,7 @@
  */
 $arquivo = RAIZ . '/referencias/Central_TelevendasPA_V2.html';
 if (!is_file($arquivo)) {
-    echo "Aviso: referencias/Central_TelevendasPA_V2.html não encontrado — a Academia ficará vazia.\n";
-    return;
+    return 'AVISO: referencias/Central_TelevendasPA_V2.html não encontrado — a Academia ficou vazia.';
 }
 [$produtos, $blocos, $midias] = (new App\Services\CentralTelevendas($arquivo))->importarDados();
-echo "Academia: $produtos produtos, $blocos blocos de conteúdo, $midias mídias.\n";
+return "Academia: $produtos produtos, $blocos blocos de conteúdo, $midias mídias.";
