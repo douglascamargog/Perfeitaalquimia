@@ -241,3 +241,12 @@ form.devolver select { padding: 5px 8px; font-size: .8rem; min-width: 150px; }
 @media print {
   .abas, .filtros, .gaveta, .gaveta-fundo, .paginacao-barra nav { display: none !important; }
 }
+
+/* ---------- Importação ---------- */
+.grade-importacao { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.grade-importacao .card { margin: 0; }
+.lista-colunas { padding-left: 18px; display: grid; gap: 4px; }
+.agenda-resumo.quatro { grid-template-columns: repeat(4, 1fr); margin-bottom: 18px; }
+.agenda-resumo a.card { text-decoration: none; color: inherit; margin: 0; }
+.agenda-resumo a.card.ativo { outline: 2px solid var(--lima-escuro); }
+@media (max-width: 900px) { .grade-importacao, .agenda-resumo.quatro { grid-template-columns: 1fr; } }

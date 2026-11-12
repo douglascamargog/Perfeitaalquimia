@@ -24,6 +24,7 @@ $textos = [
   <div class="acoes">
     <a class="botao" href="<?= url('/carteira/clientes/novo') ?>"><svg class="icone"><use href="<?= $icones ?>#mais"/></svg>Novo estabelecimento</a>
     <?php if (Auth::pode('carteira.importar')): ?>
+      <a class="botao contorno" href="<?= url('/carteira/importar') ?>">Importar</a>
       <a class="botao contorno" href="<?= url('/carteira/exportar.csv') . ($query ? '?' . e($query) : '') ?>"><svg class="icone"><use href="<?= $icones ?>#baixar"/></svg>Exportar CSV</a>
     <?php endif; ?>
   </div>

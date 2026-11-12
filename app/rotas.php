@@ -39,6 +39,12 @@ return [
     ['POST', '/carteira/clientes/{id}/ligacao', 'ClienteController@ligacao',     'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/etapa',   'ClienteController@etapa',       'carteira.ver_propria|carteira.ver_todas'],
 
+    ['GET',  '/carteira/importar',                    'ImportacaoController@index',     'carteira.importar'],
+    ['POST', '/carteira/importar',                    'ImportacaoController@enviar',    'carteira.importar'],
+    ['GET',  '/carteira/importar/{id}',               'ImportacaoController@previa',    'carteira.importar'],
+    ['POST', '/carteira/importar/{id}/confirmar',     'ImportacaoController@confirmar', 'carteira.importar'],
+    ['POST', '/carteira/importar/{id}/cancelar',      'ImportacaoController@cancelar',  'carteira.importar'],
+
     ['GET',  '/agenda',                         'AgendaController@index',        'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/agenda/{id}/concluir',           'AgendaController@concluir',     'carteira.ver_propria|carteira.ver_todas'],
 
