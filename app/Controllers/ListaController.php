@@ -7,7 +7,7 @@ use App\Core\Sessao;
 use App\Models\Listas;
 
 /**
- * Configurações › Listas: etapas do funil, segmentos e origens.
+ * Configurações › Listas: etapas do funil, segmentos, origens e etapas do funil de cobrança.
  * Itens não são apagados (há clientes ligados a eles): são desativados e somem dos formulários e filtros.
  */
 class ListaController extends Controller
@@ -17,8 +17,12 @@ class ListaController extends Controller
         'etapas'    => ['tabela' => 'funil_etapas', 'ativo' => 'ativa', 'titulo' => 'Etapas do funil'],
         'segmentos' => ['tabela' => 'segmentos',    'ativo' => 'ativo', 'titulo' => 'Segmentos'],
         'origens'   => ['tabela' => 'origens',      'ativo' => 'ativo', 'titulo' => 'Origens'],
+        'cobranca'  => ['tabela' => 'cobranca_etapas', 'ativo' => 'ativa', 'titulo' => 'Funil de cobrança'],
     ];
     public const TIPOS_ETAPA = ['aberta' => 'Em andamento', 'ganho' => 'Ganho (cliente)', 'perdido' => 'Perdido', 'inativo' => 'Inativo'];
+    /** Tipos das etapas da cobrança: os de encerramento (pago, acordo, jurídico, perda) fecham o caso */
+    public const TIPOS_COBRANCA = ['aberta' => 'Em andamento', 'sem_contato' => 'Sem contato (buscar contatos)', 'promessa' => 'Promessa de pagamento',
+        'pago' => 'Encerra: pago', 'acordo' => 'Encerra: acordo', 'juridico' => 'Encerra: jurídico', 'perda' => 'Encerra: perda'];
 
     public function index(): void
     {
@@ -28,8 +32,11 @@ class ListaController extends Controller
             'etapas'    => Listas::etapas(false),
             'segmentos' => Listas::segmentos(false),
             'origens'   => Listas::origens(false),
-            'usos'      => ['etapas' => $contar('etapa_id'), 'segmentos' => $contar('segmento_id'), 'origens' => $contar('origem_id')],
+            'cobranca'  => Listas::etapasCobranca(false),
+            'usos'      => ['etapas' => $contar('etapa_id'), 'segmentos' => $contar('segmento_id'), 'origens' => $contar('origem_id'),
+                'cobranca' => array_column(Banco::todos("SELECT etapa_id AS id, COUNT(*) AS total FROM cobrancas WHERE situacao = 'aberta' GROUP BY etapa_id"), 'total', 'id')],
             'tipos'     => self::TIPOS_ETAPA,
+            'tiposCobranca' => self::TIPOS_COBRANCA,
         ]);
     }
 
@@ -80,9 +87,10 @@ class ListaController extends Controller
         if ($lista !== 'origens') {
             $dados['ordem'] = (int) $this->campo('ordem', (string) ($antes['ordem'] ?? 99));
         }
-        if ($lista === 'etapas') {
+        if ($lista === 'etapas' || $lista === 'cobranca') {
+            $tipos = $lista === 'etapas' ? self::TIPOS_ETAPA : self::TIPOS_COBRANCA;
             $dados['cor'] = preg_match('/^#[0-9a-f]{6}$/i', $this->campo('cor')) ? $this->campo('cor') : ($antes['cor'] ?? '#94a3b8');
-            $dados['tipo'] = array_key_exists($this->campo('tipo'), self::TIPOS_ETAPA) ? $this->campo('tipo') : 'aberta';
+            $dados['tipo'] = array_key_exists($this->campo('tipo'), $tipos) ? $this->campo('tipo') : 'aberta';
         }
         return $dados;
     }

@@ -33,6 +33,12 @@ class Listas
         return self::lembrar("eta$somenteAtivas", fn() => Banco::todos('SELECT * FROM funil_etapas ' . ($somenteAtivas ? 'WHERE ativa = 1 ' : '') . 'ORDER BY ordem, id'));
     }
 
+    /** Etapas do funil de cobrança (tabela própria, não se misturam com o funil de vendas) */
+    public static function etapasCobranca(bool $somenteAtivas = true): array
+    {
+        return self::lembrar("cob$somenteAtivas", fn() => Banco::todos('SELECT * FROM cobranca_etapas ' . ($somenteAtivas ? 'WHERE ativa = 1 ' : '') . 'ORDER BY ordem, id'));
+    }
+
     public static function origens(bool $somenteAtivas = true): array
     {
         return self::lembrar("ori$somenteAtivas", fn() => Banco::todos('SELECT * FROM origens ' . ($somenteAtivas ? 'WHERE ativo = 1 ' : '') . 'ORDER BY nome'));
