@@ -4,7 +4,7 @@ use App\Core\Visao;
 
 $query = http_build_query(array_filter($filtros));
 ?>
-<?= Visao::renderizar('carteira/_cabecalho', ['aba' => 'mapa', 'filtros' => $filtros]) ?>
+<?= Visao::renderizar('carteira/_cabecalho', ['aba' => 'mapa', 'filtros' => $filtros, 'campanha' => $campanha]) ?>
 <?= Visao::renderizar('carteira/_filtros', ['filtros' => $filtros, 'opcoes' => $opcoes, 'acao' => '/carteira/mapa']) ?>
 
 <section class="painel-mapa">

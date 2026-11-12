@@ -15,7 +15,7 @@ use App\Core\Config;
 class Cliente
 {
     /** Filtros aceitos (vêm da URL: ?uf=RS&segmento=2...) */
-    public const FILTROS = ['q', 'uf', 'cidade', 'regiao', 'segmento', 'etapa', 'prioridade', 'responsavel', 'funcao', 'compra', 'tipo'];
+    public const FILTROS = ['q', 'uf', 'cidade', 'regiao', 'segmento', 'etapa', 'prioridade', 'responsavel', 'funcao', 'compra', 'tipo', 'origem'];
 
     /** Ordenações permitidas: nome amigável => SQL */
     public const ORDENS = [
@@ -58,7 +58,7 @@ class Cliente
             }
         }
         $simples = ['uf' => 'c.uf', 'cidade' => 'c.cidade', 'regiao' => 'c.regiao_id', 'segmento' => 'c.segmento_id', 'etapa' => 'c.etapa_id',
-                    'prioridade' => 'c.prioridade', 'responsavel' => 'c.responsavel_id', 'funcao' => 'c.funcao_id', 'tipo' => 'c.tipo'];
+                    'prioridade' => 'c.prioridade', 'responsavel' => 'c.responsavel_id', 'funcao' => 'c.funcao_id', 'tipo' => 'c.tipo', 'origem' => 'c.origem_id'];
         foreach ($simples as $nome => $coluna) {
             if (($f[$nome] ?? '') !== '') {
                 $w[] = "$coluna = ?";

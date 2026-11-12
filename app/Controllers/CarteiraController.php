@@ -19,6 +19,7 @@ class CarteiraController extends Controller
     {
         $filtros = Cliente::filtrosDe($_GET);
         return [
+            'campanha' => self::campanha($filtros),
             'titulo'   => $titulo,
             'aba'      => $aba,
             'filtros'  => $filtros,
@@ -31,10 +32,35 @@ class CarteiraController extends Controller
                 'prioridades' => Listas::prioridades(),
                 'vendedores'  => Auth::pode('carteira.ver_todas') ? Listas::vendedores() : [],
                 'faixas'      => Config::get('carteira.faixas_sem_compra', [30, 60, 90]),
+                'origens'     => Listas::origens(),
             ],
             'estilos'  => ['carteira.css'],
             'scripts'  => ['carteira.js'],
         ];
+    }
+
+    /** Id da origem da campanha em destaque (configuração carteira.campanha_origem), ou null */
+    public static function campanhaOrigemId(): ?int
+    {
+        $nome = trim((string) Config::get('carteira.campanha_origem', ''));
+        return $nome === '' ? null : Listas::idPorNome(Listas::origens(false), $nome);
+    }
+
+    /** Dados da faixa da campanha quando a carteira está filtrada por ela */
+    private static function campanha(array $filtros): ?array
+    {
+        $id = self::campanhaOrigemId();
+        if (!$id || (string) $filtros['origem'] !== (string) $id) {
+            return null;
+        }
+        return ['titulo' => (string) Config::get('carteira.campanha_titulo', 'Campanha'), 'chamada' => (string) Config::get('carteira.campanha_chamada', '')];
+    }
+
+    /** Item "Black Friday 2026" do menu: abre a carteira filtrada pela campanha */
+    public function campanhaAtual(): void
+    {
+        $id = self::campanhaOrigemId();
+        redirecionar($id ? '/carteira?origem=' . $id : '/carteira');
     }
 
     public function visaoGeral(): void

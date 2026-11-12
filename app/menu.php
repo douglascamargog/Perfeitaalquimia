@@ -6,9 +6,14 @@
  * - 'pronto': false = módulo ainda em construção no protótipo (aparece com o selo "em breve")
  * - 'icone': nome de um ícone do arquivo public/assets/img/icones.svg
  */
-return [
+// Campanha em destaque (ex.: Black Friday 2026), configurável em Configurações › Campanha
+$campanha = trim((string) \App\Core\Config::get('carteira.campanha_titulo', ''));
+$temCampanha = $campanha !== '' && trim((string) \App\Core\Config::get('carteira.campanha_origem', '')) !== '';
+
+return array_values(array_filter([
     ['titulo' => 'Início',          'url' => '/',              'icone' => 'casa',      'grupo' => '',               'permissao' => 'logado',                                  'pronto' => true,  'descricao' => 'Resumo do dia'],
     ['titulo' => 'Carteira',        'url' => '/carteira',      'icone' => 'pessoas',   'grupo' => 'Comercial',      'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Clientes, funil, mapa e linha do tempo'],
+    $temCampanha ? ['titulo' => $campanha, 'url' => '/carteira/campanha', 'icone' => 'alvo', 'grupo' => 'Comercial', 'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true, 'destaque' => true, 'descricao' => 'Prospecção da campanha: lojas, funil e mapa'] : null,
     ['titulo' => 'Agenda',          'url' => '/agenda',        'icone' => 'calendario', 'grupo' => 'Comercial',     'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Retornos atrasados, de hoje e futuros'],
     ['titulo' => 'Reativação',      'url' => '/reativacao',    'icone' => 'relogio',   'grupo' => 'Comercial',      'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Clientes sem compra há X dias'],
     ['titulo' => 'Prospecção',      'url' => '/prospeccao',    'icone' => 'lupa',      'grupo' => 'Comercial',      'permissao' => 'prospeccao.usar',                         'pronto' => false, 'descricao' => 'Empresas ativas por cidade (base da Receita)'],
@@ -26,4 +31,4 @@ return [
     ['titulo' => 'Listas',          'url' => '/configuracoes/listas', 'icone' => 'etiqueta', 'grupo' => 'Administração', 'permissao' => 'config.gerenciar',                 'pronto' => true,  'descricao' => 'Etapas do funil, segmentos e origens'],
     ['titulo' => 'Integração Omie', 'url' => '/integracao',    'icone' => 'nuvem',     'grupo' => 'Administração',  'permissao' => 'integracao.gerenciar',                    'pronto' => false, 'descricao' => 'Sincronização e fila de envio'],
     ['titulo' => 'Auditoria',       'url' => '/auditoria',     'icone' => 'escudo',    'grupo' => 'Administração',  'permissao' => 'auditoria.ver',                           'pronto' => true,  'descricao' => 'Quem fez o quê, e quando'],
-];
+]));

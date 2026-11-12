@@ -24,6 +24,7 @@ return [
 
     // ---------- Carteira e CRM ----------
     ['GET',  '/carteira',                       'CarteiraController@visaoGeral', 'carteira.ver_propria|carteira.ver_todas'],
+    ['GET',  '/carteira/campanha',              'CarteiraController@campanhaAtual', 'carteira.ver_propria|carteira.ver_todas'],
     ['GET',  '/carteira/lista',                 'CarteiraController@lista',      'carteira.ver_propria|carteira.ver_todas'],
     ['GET',  '/carteira/funil',                 'CarteiraController@funil',      'carteira.ver_propria|carteira.ver_todas'],
     ['GET',  '/carteira/mapa',                  'CarteiraController@mapa',       'carteira.ver_propria|carteira.ver_todas'],

@@ -42,6 +42,10 @@ $algumFiltro = (bool) array_filter($filtros);
         <?php foreach ($opcoes['vendedores'] as $v): ?><option value="<?= (int) $v['id'] ?>" <?= $sel('responsavel', $v['id']) ?>><?= e($v['nome']) ?></option><?php endforeach; ?>
       </select>
     <?php endif; ?>
+    <select name="origem" aria-label="Origem / campanha">
+      <option value="">Todas as origens</option>
+      <?php foreach ($opcoes['origens'] as $o): ?><option value="<?= (int) $o['id'] ?>" <?= $sel('origem', $o['id']) ?>><?= e($o['nome']) ?></option><?php endforeach; ?>
+    </select>
     <select name="compra" aria-label="Situação de compra">
       <option value="">Qualquer situação de compra</option>
       <option value="nunca" <?= $sel('compra', 'nunca') ?>>Nunca comprou</option>

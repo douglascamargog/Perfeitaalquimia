@@ -23,6 +23,10 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
         }
     }
 }
+// Carteira filtrada pela campanha em destaque → acende o item da campanha (ex.: Black Friday 2026)
+if (str_starts_with($caminhoAtual, '/carteira') && ($_GET['origem'] ?? '') !== '' && (string) \App\Controllers\CarteiraController::campanhaOrigemId() === (string) $_GET['origem']) {
+    $itemAtual = '/carteira/campanha';
+}
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -56,7 +60,7 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
         <?php foreach ($itens as $item):
             $ativo = $item['url'] === '/' ? $caminhoAtual === '/' : $item['url'] === $itemAtual; ?>
           <?php if ($item['pronto']): ?>
-            <a href="<?= url($item['url']) ?>" class="<?= $ativo ? 'ativo' : '' ?>">
+            <a href="<?= url($item['url']) ?>" class="<?= trim(($ativo ? 'ativo' : '') . (!empty($item['destaque']) ? ' destaque' : '')) ?>">
               <svg class="icone"><use href="<?= $icones ?>#<?= e($item['icone']) ?>"/></svg><?= e($item['titulo']) ?>
             </a>
           <?php else: ?>

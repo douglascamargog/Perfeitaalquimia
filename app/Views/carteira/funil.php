@@ -3,7 +3,7 @@
 use App\Core\Visao;
 use App\Services\Normalizar;
 ?>
-<?= Visao::renderizar('carteira/_cabecalho', ['aba' => 'funil', 'filtros' => $filtros]) ?>
+<?= Visao::renderizar('carteira/_cabecalho', ['aba' => 'funil', 'filtros' => $filtros, 'campanha' => $campanha]) ?>
 <?= Visao::renderizar('carteira/_filtros', ['filtros' => $filtros, 'opcoes' => $opcoes, 'acao' => '/carteira/funil']) ?>
 
 <div class="funil" data-funil data-csrf="<?= e(\App\Core\Csrf::token()) ?>">
