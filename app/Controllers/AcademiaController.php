@@ -1,73 +1,152 @@
 <?php
 namespace App\Controllers;
 
-use App\Core\Banco;
-use App\Core\Visao;
+use App\Core\Auth;
+use App\Core\Sessao;
+use App\Services\AcademiaService as A;
 
 /**
- * Academia = Central de Televendas, agora servida pelo sistema (com login).
- *
- * - /academia          → as telas da Central (mesmo visual e funcionamento do arquivo original)
- * - /academia/dados.js → produtos e conteúdo, montados a partir do banco no formato que a Central espera
- *
- * "Meu mês", o progresso de estudo e o backup continuam salvos no navegador de cada pessoa, como antes.
+ * Academia comercial (conteúdo da Central de Televendas, no visual do sistema):
+ * início, trilha de treinamento, produtos, guia de atendimento e CRM na prática.
+ * O progresso de estudo fica salvo no servidor, por pessoa.
  */
 class AcademiaController extends Controller
 {
-    public function central(): void
+    private const POR_PAGINA = 24;
+
+    /** Dados comuns às telas da Academia */
+    private function tela_(string $pagina, string $aba, array $dados): void
     {
-        Visao::mostrar('academia/central', ['titulo' => 'Academia Comercial'], 'academia');
+        $progresso = A::progresso(Auth::id());
+        $itens = A::itensDeEstudo();
+        $feitos = count(array_intersect($itens, array_keys($progresso)));
+        $this->tela($pagina, $dados + [
+            'aba'       => $aba,
+            'progresso' => $progresso,
+            'percentual' => $itens ? round($feitos / count($itens) * 100) : 0,
+            'feitos'    => $feitos,
+            'totalItens' => count($itens),
+            'estilos'   => ['carteira.css', 'academia.css'],
+            'scripts'   => ['academia.js'],
+        ]);
     }
 
-    public function dados(): void
+    public function inicio(): void
     {
-        // Versão dos dados: muda quando um produto ou bloco de conteúdo é alterado (o navegador guarda em cache até lá)
-        $versao = md5(implode('|', [
-            Banco::valor('SELECT CONCAT(COUNT(*), MAX(atualizado_em)) FROM produtos'),
-            Banco::valor('SELECT CONCAT(COUNT(*), MAX(atualizado_em)) FROM academia_conteudo'),
-            url_base(),
-        ]));
-        header('Content-Type: application/javascript; charset=utf-8');
-        header('Cache-Control: private, max-age=0, must-revalidate');
-        header('ETag: "' . $versao . '"');
-        if (trim((string) ($_SERVER['HTTP_IF_NONE_MATCH'] ?? ''), '"') === $versao) {
-            http_response_code(304);
-            return;
-        }
-
-        $conteudo = array_column(Banco::todos('SELECT chave, conteudo_json FROM academia_conteudo'), 'conteudo_json', 'chave');
-        $bloco = fn(string $chave) => self::enderecos(json_decode($conteudo[$chave] ?? '[]', true));
-
-        $produtos = [];
-        $linhas = Banco::todos(
-            'SELECT p.*, c.nome AS categoria, m.arquivo AS imagem FROM produtos p
-               LEFT JOIN categorias c ON c.id = p.categoria_id LEFT JOIN midias m ON m.id = p.imagem_id
-              WHERE p.ativo = 1 ORDER BY p.ordem, p.nome'
-        );
-        foreach ($linhas as $p) {
-            $produtos[] = ['id' => (int) $p['ordem'], 'slug' => $p['slug'], 'name' => $p['nome'], 'pack' => $p['embalagem'], 'cat' => $p['categoria'],
-                'tagline' => $p['chamada'], 'image' => $p['imagem'] ? url('/' . $p['imagem']) : ''] + self::enderecos(json_decode($p['ficha_json'], true));
-        }
-        $dados = ['products' => $produtos, 'modules' => $bloco('modules'), 'topics' => $bloco('topics'), 'crm' => $bloco('crm'), 'media' => $bloco('media')];
-
-        if (str_contains($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip') && !ini_get('zlib.output_compression')) {
-            ob_start('ob_gzhandler'); // ~1,4 MB de texto viram ~300 KB
-        }
-        echo 'window.ACADEMIA_DADOS=' . json_encode($dados, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ";\n";
-        echo 'window.ACADEMIA_MARKETING=' . json_encode($bloco('marketing'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ";\n";
-    }
-
-    /** Caminhos de mídia guardados como "media/academia/x.webp" viram endereços completos do site */
-    private static function enderecos(mixed $valor): mixed
-    {
-        if (is_string($valor) && str_starts_with($valor, 'media/')) {
-            return url('/' . $valor);
-        }
-        if (is_array($valor)) {
-            foreach ($valor as $chave => $item) {
-                $valor[$chave] = self::enderecos($item);
+        $progresso = A::progresso(Auth::id());
+        $proximo = null;
+        foreach (A::modulos() as $m) {
+            if (!isset($progresso['modulo:' . $m['id']])) {
+                $proximo = $m;
+                break;
             }
         }
-        return $valor;
+        $this->tela_('academia/inicio', 'inicio', [
+            'titulo'     => 'Academia',
+            'proximo'    => $proximo,
+            'modulos'    => A::modulos(),
+            'totalProdutos' => count(A::produtos()),
+            'aulasCrm'   => A::aulasCrm(),
+            'categorias' => A::categorias(),
+            'temas'      => A::temas(),
+        ]);
+    }
+
+    public function trilha(): void
+    {
+        $this->tela_('academia/trilha', 'trilha', ['titulo' => 'Academia · Trilha', 'modulos' => A::modulos()]);
+    }
+
+    public function modulo(string $id): void
+    {
+        $m = A::modulo($id);
+        if (!$m) {
+            Sessao::aviso('erro', 'Módulo não encontrado.');
+            redirecionar('/academia/trilha');
+        }
+        $modulos = A::modulos();
+        $dados = ['titulo' => 'Academia · ' . $m['title'], 'm' => $m, 'anterior' => $modulos[$m['indice'] - 1] ?? null, 'proximo' => $modulos[$m['indice'] + 1] ?? null];
+        // Módulos com página própria
+        if ($id === 'empresa') {
+            $dados['pagina'] = A::conteudo('pagina_empresa');
+            $dados['produtos'] = A::produtos();
+        } elseif ($id === 'midias-marketing') {
+            $dados['pagina'] = A::conteudo('pagina_marketing');
+            $dados['imagens'] = A::conteudo('marketing');
+            $dados['linkCatalogo'] = A::link('catalogo');
+            $dados['linkGrupo'] = A::link('grupo_marketing');
+        } elseif (!empty($m['productSlug'])) {
+            $dados['produto'] = A::produto($m['productSlug']);
+        }
+        $this->tela_('academia/modulo', 'trilha', $dados);
+    }
+
+    public function produtos(): void
+    {
+        $q = trim((string) ($_GET['q'] ?? ''));
+        $categoria = (string) ($_GET['categoria'] ?? '');
+        $temaId = (string) ($_GET['tema'] ?? '');
+        [$lista, $tema] = A::buscar($q, $categoria, $temaId);
+        $total = count($lista);
+        $paginas = max(1, (int) ceil($total / self::POR_PAGINA));
+        $pagina = min(max(1, (int) ($_GET['pagina'] ?? 1)), $paginas);
+        $this->tela_('academia/produtos', 'produtos', [
+            'titulo'     => 'Academia · Produtos',
+            'lista'      => array_slice($lista, ($pagina - 1) * self::POR_PAGINA, self::POR_PAGINA),
+            'total'      => $total, 'pagina' => $pagina, 'paginas' => $paginas,
+            'q'          => $q, 'categoria' => $categoria, 'tema' => $tema,
+            'categorias' => A::categorias(), 'temas' => A::temas(),
+        ]);
+    }
+
+    public function produto(string $slug): void
+    {
+        $p = A::produto($slug);
+        if (!$p) {
+            Sessao::aviso('erro', 'Produto não encontrado.');
+            redirecionar('/academia/produtos');
+        }
+        // Abas: a de composição só aparece se houver dados; a de treinamento técnico só para produtos que têm
+        $abas = ['conheca' => 'Conheça o produto'];
+        if (!empty($p['nutrition']) || !empty($p['ingredients']) || !empty($p['capsule'])) {
+            $abas['composicao'] = 'Composição';
+        }
+        $abas += ['uso' => 'Uso e cuidados', 'atendimento' => 'No atendimento'];
+        if (!empty($p['technicalTraining'])) {
+            $abas['treinamento'] = 'Treinamento técnico';
+        }
+        $aba = array_key_exists($_GET['aba'] ?? '', $abas) ? $_GET['aba'] : 'conheca';
+        $relacionados = array_values(array_filter(array_map(fn($s) => A::produto($s), $p['related'] ?? [])));
+        $this->tela_('academia/produto', 'produtos', ['titulo' => 'Academia · ' . $p['nome'], 'p' => $p, 'abas' => $abas, 'abaProduto' => $aba, 'relacionados' => $relacionados]);
+    }
+
+    public function atendimento(): void
+    {
+        $this->tela_('academia/atendimento', 'atendimento', ['titulo' => 'Academia · Guia de atendimento', 'pagina' => A::conteudo('pagina_atendimento')]);
+    }
+
+    public function crm(string $id = ''): void
+    {
+        $aulas = A::aulasCrm();
+        $indice = 0;
+        foreach ($aulas as $i => $a) {
+            if ($a['id'] === $id) {
+                $indice = $i;
+            }
+        }
+        $this->tela_('academia/crm', 'crm', ['titulo' => 'Academia · CRM na prática', 'aulas' => $aulas, 'indice' => $indice, 'midias' => A::conteudo('media')]);
+    }
+
+    /** Marca/desmarca um item como estudado (formulário ou JavaScript) */
+    public function marcar(): void
+    {
+        $item = $this->campo('item');
+        A::marcar(Auth::id(), $item, $this->campo('concluido') === '1');
+        if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')) {
+            $this->json(['ok' => true]);
+            return;
+        }
+        $voltar = $this->campo('voltar');
+        redirecionar(str_starts_with($voltar, '/academia') ? $voltar : '/academia/trilha');
     }
 }

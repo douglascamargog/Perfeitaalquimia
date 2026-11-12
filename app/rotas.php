@@ -54,8 +54,15 @@ return [
     ['POST', '/reativacao/{id}/devolver',       'ReativacaoController@devolver', 'carteira.ver_propria|carteira.ver_todas'],
 
     // ---------- Academia (Central de Televendas) ----------
-    ['GET',  '/academia',                       'AcademiaController@central',  'academia.ver'],
-    ['GET',  '/academia/dados.js',              'AcademiaController@dados',    'academia.ver'],
+    ['GET',  '/academia',                       'AcademiaController@inicio',      'academia.ver'],
+    ['GET',  '/academia/trilha',                'AcademiaController@trilha',      'academia.ver'],
+    ['GET',  '/academia/trilha/{id}',           'AcademiaController@modulo',      'academia.ver'],
+    ['GET',  '/academia/produtos',              'AcademiaController@produtos',    'academia.ver'],
+    ['GET',  '/academia/produtos/{slug}',       'AcademiaController@produto',     'academia.ver'],
+    ['GET',  '/academia/atendimento',           'AcademiaController@atendimento', 'academia.ver'],
+    ['GET',  '/academia/crm',                   'AcademiaController@crm',         'academia.ver'],
+    ['GET',  '/academia/crm/{id}',              'AcademiaController@crm',         'academia.ver'],
+    ['POST', '/academia/progresso',             'AcademiaController@marcar',      'academia.ver'],
 
     // ---------- Administração ----------
     ['GET',  '/usuarios',               'UsuarioController@index',    'usuarios.gerenciar'],

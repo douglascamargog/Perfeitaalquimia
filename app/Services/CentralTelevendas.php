@@ -11,9 +11,9 @@ use App\Core\Banco;
  *   - dois blocos de dados JSON: "app-data" (produtos, trilha, temas, aulas) e "marketing-media",
  *   - com 177 imagens/vídeos embutidos em base64.
  *
- * Esta classe separa as partes:
- *   - extrairCodigo(): estilos, telas e programa → arquivos versionados (ferramentas/gerar_academia.php)
- *   - importarDados(): mídias → /public/media/academia; produtos → tabela produtos; resto → academia_conteudo (seed)
+ * importarDados() (usado pelo seed 004) separa os dados:
+ *   mídias → /public/media/academia; produtos → tabela produtos; trilha, temas, aulas e marketing → academia_conteudo.
+ * As telas da Academia foram refeitas no visual do sistema (app/Views/academia).
  */
 class CentralTelevendas
 {
@@ -140,27 +140,5 @@ class CentralTelevendas
             $corpo = substr($corpo, 0, $abre) . substr($corpo, $fecha + 9);
         }
         return $corpo;
-    }
-
-    /**
-     * Separa o código da Central (usado por ferramentas/gerar_academia.php):
-     * [css, js, corpo]. As imagens do corpo viram "{{MIDIA:caminho}}" para o template trocar pelo endereço certo.
-     */
-    public function extrairCodigo(): array
-    {
-        preg_match_all('#<style[^>]*>(.*?)</style>#s', $this->html, $estilos);
-        $css = implode("\n", $estilos[1]);
-
-        $inicioJs = strpos($this->html, "'use strict';\nconst data=JSON.parse");
-        $js = substr($this->html, $inicioJs, strpos($this->html, '</script>', $inicioJs) - $inicioJs);
-        // Os dados agora vêm do sistema (window.ACADEMIA_DADOS, carregado por /academia/dados.js)
-        $js = str_replace("const data=JSON.parse(document.getElementById('app-data').textContent)", 'const data=window.ACADEMIA_DADOS', $js);
-        $js = str_replace("const marketingMedia=JSON.parse(document.getElementById('marketing-media').textContent)", 'const marketingMedia=window.ACADEMIA_MARKETING', $js);
-
-        $corpo = preg_replace_callback('#data:image/([a-z]+);base64,([A-Za-z0-9+/=]+)#', function ($m) {
-            $extensao = ['jpeg' => 'jpg', 'png' => 'png', 'webp' => 'webp', 'gif' => 'gif'][$m[1]] ?? 'bin';
-            return '{{MIDIA:' . self::PASTA_MIDIA . '/' . sha1(base64_decode($m[2])) . '.' . $extensao . '}}';
-        }, $this->corpoBruto());
-        return [$css, $js, $corpo];
     }
 }
