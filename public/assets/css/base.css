@@ -1,0 +1,149 @@
+/* =====================================================================
+   Estilo base do Sistema Perfeita Alquimia
+   Identidade da Carteira Comercial: verde escuro + lima #caff4d, cards arredondados, tema claro.
+   Para mudar uma cor no sistema todo, mude só a variável aqui em :root.
+   ===================================================================== */
+:root {
+  --verde-escuro: #0f3b2e;      /* menu, títulos, botões principais */
+  --verde-medio: #1d5c47;
+  --verde-claro: #e8f2ec;
+  --lima: #caff4d;              /* destaque da marca */
+  --lima-escuro: #a6d92f;
+  --fundo: #f4f6f2;             /* fundo das telas */
+  --card: #ffffff;
+  --texto: #1b2622;
+  --texto-suave: #5d6b65;
+  --borda: #dfe5df;
+  --perigo: #c62828;
+  --perigo-fundo: #fdecea;
+  --aviso: #8a5a00;
+  --aviso-fundo: #fff4d6;
+  --sucesso: #1e7a3c;
+  --sucesso-fundo: #e5f6ea;
+  --raio: 16px;                 /* cantos arredondados dos cards */
+  --raio-pequeno: 10px;
+  --sombra: 0 1px 2px rgba(15, 59, 46, .06), 0 4px 16px rgba(15, 59, 46, .06);
+  --fonte: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: var(--fonte);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--texto);
+  background: var(--fundo);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--verde-medio); }
+h1, h2, h3 { color: var(--verde-escuro); line-height: 1.25; margin: 0 0 .5em; }
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.2rem; }
+h3 { font-size: 1rem; }
+p { margin: 0 0 1em; }
+.suave { color: var(--texto-suave); }
+.pequeno { font-size: .85rem; }
+
+.icone { width: 20px; height: 20px; flex: none; }
+
+/* ---------- Faixa de demonstração ---------- */
+.faixa-demo {
+  background: var(--lima);
+  color: var(--verde-escuro);
+  text-align: center;
+  font-size: .8rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  letter-spacing: .02em;
+}
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.card > h2:first-child { margin-top: 0; }
+
+/* ---------- Botões ---------- */
+.botao {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 9px 18px;
+  font: inherit; font-weight: 600; font-size: .9rem;
+  cursor: pointer; text-decoration: none;
+  background: var(--verde-escuro); color: #fff;
+  transition: filter .15s, background .15s;
+}
+.botao:hover { filter: brightness(1.15); }
+.botao:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible {
+  outline: 3px solid var(--lima-escuro); outline-offset: 2px;
+}
+.botao.lima { background: var(--lima); color: var(--verde-escuro); }
+.botao.contorno { background: transparent; color: var(--verde-escuro); border-color: var(--borda); }
+.botao.contorno:hover { background: var(--verde-claro); filter: none; }
+.botao.pequeno { padding: 5px 12px; font-size: .8rem; }
+.botao.largo { width: 100%; justify-content: center; }
+
+/* ---------- Formulários ---------- */
+.campo { margin-bottom: 16px; }
+.campo label { display: block; font-weight: 600; font-size: .85rem; margin-bottom: 6px; color: var(--verde-escuro); }
+.campo .ajuda { font-size: .8rem; color: var(--texto-suave); margin-top: 4px; }
+input[type=text], input[type=email], input[type=password], input[type=number], input[type=tel], select, textarea {
+  width: 100%;
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-pequeno);
+  background: #fff;
+  color: var(--texto);
+}
+textarea { min-height: 90px; resize: vertical; }
+.grade-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 16px; }
+.opcao { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 500; cursor: pointer; }
+.opcao input { width: 18px; height: 18px; accent-color: var(--verde-escuro); }
+.acoes-form { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+
+/* ---------- Avisos ---------- */
+.aviso { border-radius: var(--raio-pequeno); padding: 12px 16px; margin-bottom: 16px; font-weight: 500; }
+.aviso.erro    { background: var(--perigo-fundo);  color: var(--perigo); }
+.aviso.aviso   { background: var(--aviso-fundo);   color: var(--aviso); }
+.aviso.sucesso { background: var(--sucesso-fundo); color: var(--sucesso); }
+
+/* ---------- Tabelas ---------- */
+.tabela-rolagem { overflow-x: auto; }
+table.tabela { width: 100%; border-collapse: collapse; }
+.tabela th {
+  text-align: left; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--texto-suave); padding: 10px 12px; border-bottom: 1px solid var(--borda); white-space: nowrap;
+}
+.tabela td { padding: 12px; border-bottom: 1px solid var(--borda); vertical-align: top; }
+.tabela tr:last-child td { border-bottom: 0; }
+.tabela tr.inativo td { color: var(--texto-suave); }
+
+/* ---------- Selos ---------- */
+.selo {
+  display: inline-block; font-size: .72rem; font-weight: 700;
+  padding: 2px 10px; border-radius: 999px;
+  background: var(--verde-claro); color: var(--verde-medio); white-space: nowrap;
+}
+.selo.lima { background: var(--lima); color: var(--verde-escuro); }
+.selo.cinza { background: #eceff1; color: #607d8b; }
+.selo.vermelho { background: var(--perigo-fundo); color: var(--perigo); }
+
+/* ---------- Paginação ---------- */
+.paginacao { display: flex; gap: 6px; align-items: center; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+
+/* ---------- Impressão (relatórios em A4) ---------- */
+@media print {
+  @page { size: A4; margin: 14mm; }
+  body { background: #fff; font-size: 11pt; }
+  .menu-lateral, .topo, .faixa-demo, .nao-imprimir, .botao { display: none !important; }
+  .conteudo { margin: 0 !important; padding: 0 !important; }
+  .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+}
