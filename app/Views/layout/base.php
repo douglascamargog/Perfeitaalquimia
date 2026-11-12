@@ -73,7 +73,7 @@ if (str_starts_with($caminhoAtual, '/carteira') && ($_GET['origem'] ?? '') !== '
         <?php endforeach; ?>
       <?php endforeach; ?>
     </nav>
-    <div class="menu-rodape">Fase 0 · protótipo</div>
+    <div class="menu-rodape"><?= e(config('app_nome')) ?> · versão <?= e(\App\Controllers\AtualizacaoController::versao()) ?></div>
   </aside>
 
   <div class="principal">

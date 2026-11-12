@@ -2,9 +2,14 @@
 # =====================================================================
 # Gera o .zip para enviar à hospedagem (HostGator ou servidor próprio).
 #
-#   bash ferramentas/gerar_pacote.sh  [pasta-de-saida]
+#   bash ferramentas/gerar_pacote.sh                  → pacote de INSTALAÇÃO (primeira vez)
+#   bash ferramentas/gerar_pacote.sh --atualizacao    → pacote de ATUALIZAÇÃO (sistema já em uso)
+#   (opcional: pasta de saída como último argumento)
 #
-# O pacote leva:
+# Pacote de ATUALIZAÇÃO: só o código. NÃO leva config.php, referencias/ nem mídias,
+# então extrair por cima na hospedagem não mexe nas senhas nem nos dados.
+#
+# O pacote de INSTALAÇÃO leva:
 #   - o código do sistema (o que está no git)
 #   - a pasta referencias/ (Carteira V4 e Central de Televendas, usadas na instalação)
 #   - config/config.php PRONTO PARA EDITAR (só preencher os dados do banco) com um token de instalação novo
@@ -12,14 +17,31 @@
 # =====================================================================
 set -euo pipefail
 cd "$(dirname "$0")/.."
+TIPO=instalacao
+if [ "${1:-}" = "--atualizacao" ]; then TIPO=atualizacao; shift; fi
 SAIDA="${1:-$(pwd)/pacote}"
 DATA=$(date +%Y-%m-%d)
+VERSAO="$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)"
 TMP=$(mktemp -d)
 DESTINO="$TMP/one"
 mkdir -p "$DESTINO"
 
 # 1. Código (somente arquivos versionados no git)
 git archive HEAD | tar -x -C "$DESTINO"
+
+# Número da versão (aparece no rodapé do menu e em Administração › Atualização)
+echo "$VERSAO" > "$DESTINO/VERSAO"
+
+if [ "$TIPO" = "atualizacao" ]; then
+  rm -f "$DESTINO/config/config.php"   # nunca sobrescrever as senhas da hospedagem
+  mkdir -p "$SAIDA"
+  ARQUIVO="$SAIDA/one-atualizacao-$VERSAO.zip"
+  rm -f "$ARQUIVO"
+  (cd "$TMP" && zip -qr "$ARQUIVO" one)
+  echo "Pacote de ATUALIZAÇÃO: $ARQUIVO ($(du -h "$ARQUIVO" | cut -f1)) · versão $VERSAO"
+  rm -rf "$TMP"
+  exit 0
+fi
 
 # 2. Arquivos de referência (não vão para o git por terem dados de clientes)
 cp referencias/*.html "$DESTINO/referencias/" 2>/dev/null || echo "Aviso: referencias/*.html não encontrados — a instalação ficará sem as lojas e a Academia."
@@ -35,9 +57,9 @@ echo "$TOKEN" > "$TMP/token.txt"
 
 # 4. Zip
 mkdir -p "$SAIDA"
-ARQUIVO="$SAIDA/one-perfeita-alquimia-$DATA.zip"
+ARQUIVO="$SAIDA/one-instalacao-$VERSAO.zip"
 rm -f "$ARQUIVO"
 (cd "$TMP" && zip -qr "$ARQUIVO" one)
-echo "Pacote: $ARQUIVO ($(du -h "$ARQUIVO" | cut -f1))"
+echo "Pacote de INSTALAÇÃO: $ARQUIVO ($(du -h "$ARQUIVO" | cut -f1)) · versão $VERSAO"
 echo "Token de instalação: $TOKEN"
 rm -rf "$TMP"

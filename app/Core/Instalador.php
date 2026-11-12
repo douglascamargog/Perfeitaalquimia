@@ -2,20 +2,64 @@
 namespace App\Core;
 
 /**
- * Cria e atualiza o banco de dados.
+ * Cria e atualiza o banco de dados — SEM apagar os dados existentes.
  *
  * - Migrations: arquivos .sql numerados em database/migrations (001_..., 002_...).
  *   Cada arquivo roda UMA vez; o controle fica na tabela `migracoes`.
- * - Seeds: arquivos .php em database/seeds com os dados de demonstração. Também rodam uma vez.
+ * - Seeds: arquivos .php em database/seeds. Também rodam uma vez.
+ *     · seeds com "_demo" no nome (ex.: 007_vendas_demo.php) são DADOS DE DEMONSTRAÇÃO:
+ *       só rodam na instalação nova, nunca numa atualização.
+ *     · os demais são dados ESSENCIAIS (configurações novas, permissões, listas) e rodam também nas atualizações.
  *
- * Pode ser usado pelo terminal (php database/migrar.php) ou pela tela /instalar.
+ * Usado por: terminal (php database/migrar.php), tela /instalar (primeira instalação)
+ * e tela Administração › Atualização do sistema (versões novas).
  */
 class Instalador
 {
     /** Mensagens do que foi feito (mostradas na tela ou no terminal) */
     public array $log = [];
 
-    public function executar(bool $comSeeds = true): void
+    /**
+     * Aplica o que falta.
+     * $incluirDemo = true na instalação nova; false nas atualizações (não mistura dados fictícios com os reais).
+     */
+    public function executar(bool $incluirDemo = true): void
+    {
+        $this->criarControle();
+        $this->migrar();
+        $this->semear($incluirDemo);
+        if (!$this->log) {
+            $this->log[] = 'Nada a fazer: o banco já está atualizado.';
+        }
+    }
+
+    /** O que ainda não foi aplicado: ['migrations' => [...], 'seeds' => [...]] */
+    public function pendentes(bool $incluirDemo = false): array
+    {
+        $this->criarControle();
+        $faltam = fn(array $arquivos, string $prefixo) => array_values(array_filter(
+            array_map('basename', $arquivos),
+            fn($nome) => !$this->jaAplicado($prefixo . $nome)
+        ));
+        return [
+            'migrations' => $faltam($this->arquivos('migrations', 'sql'), ''),
+            'seeds'      => array_values(array_filter($faltam($this->arquivos('seeds', 'php'), 'seed:'), fn($n) => $incluirDemo || !self::ehDemo($n))),
+        ];
+    }
+
+    /** Lista do que já foi aplicado, do mais recente para o mais antigo */
+    public function historico(): array
+    {
+        $this->criarControle();
+        return Banco::todos('SELECT * FROM migracoes ORDER BY aplicada_em DESC, arquivo DESC');
+    }
+
+    public static function ehDemo(string $arquivo): bool
+    {
+        return str_contains(basename($arquivo), '_demo');
+    }
+
+    private function criarControle(): void
     {
         Banco::pdo()->exec(
             'CREATE TABLE IF NOT EXISTS migracoes (
@@ -23,13 +67,6 @@ class Instalador
                 aplicada_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
         );
-        $this->migrar();
-        if ($comSeeds) {
-            $this->semear();
-        }
-        if (!$this->log) {
-            $this->log[] = 'Nada a fazer: o banco já está atualizado.';
-        }
     }
 
     private function jaAplicado(string $nome): bool
@@ -52,15 +89,15 @@ class Instalador
                 }
             }
             Banco::inserir('migracoes', ['arquivo' => $nome]);
-            $this->log[] = "Migration aplicada: $nome";
+            $this->log[] = "Banco atualizado: $nome";
         }
     }
 
-    private function semear(): void
+    private function semear(bool $incluirDemo): void
     {
         foreach ($this->arquivos('seeds', 'php') as $arquivo) {
             $nome = 'seed:' . basename($arquivo);
-            if ($this->jaAplicado($nome)) {
+            if ($this->jaAplicado($nome) || (!$incluirDemo && self::ehDemo($arquivo))) {
                 continue;
             }
             // O seed pode devolver uma mensagem (ex.: aviso de arquivo de referência ausente) para o relatório
@@ -70,7 +107,7 @@ class Instalador
                 })($arquivo);
             });
             Banco::inserir('migracoes', ['arquivo' => $nome]);
-            $this->log[] = 'Dados de demonstração carregados: ' . basename($arquivo) . (is_string($mensagem) ? " — $mensagem" : '');
+            $this->log[] = 'Dados carregados: ' . basename($arquivo) . (is_string($mensagem) ? " — $mensagem" : '');
         }
     }
 

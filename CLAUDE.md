@@ -207,3 +207,16 @@ Portanto: código simples, legível, comentado em português, poucas dependênci
 - Tabela de pedido mínimo por região.
 - Carteiras exportadas por vendedor.
 - Lista de CNAEs dos clientes atuais.
+
+## 14. Versões novas com o sistema em uso (regras para não perder dados)
+
+O sistema se chama **One** (e o mascote ajudante também). Ele já roda com dados reais da equipe. Toda mudança deve respeitar:
+
+1. **Nunca editar uma migration já publicada.** Mudança no banco = arquivo NOVO numerado em `database/migrations/` (ex.: `006_...sql`).
+2. **Migrations só acrescentam:** `CREATE TABLE`, `ADD COLUMN` (com DEFAULT), `CREATE INDEX`. Nada de `DROP TABLE`, `DROP COLUMN`,
+   `TRUNCATE` ou `DELETE` de dados. Renomear/remover campo só em duas versões (cria o novo, copia os dados; remove o velho depois, com aprovação).
+3. **Dados essenciais** (configurações novas, permissões, listas) vão em seed com `INSERT ... ` que verifica se já existe (idempotente).
+4. **Dados de demonstração** vão em seed com `_demo` no nome (ex.: `007_pedidos_demo.php`): só rodam na instalação nova, nunca em atualização.
+5. Publicar: `bash ferramentas/gerar_pacote.sh --atualizacao` → passo a passo em `LEIA-ME-ATUALIZACAO.md`
+   (backup → extrair → Administração › Atualização › Aplicar).
+6. Antes de entregar: recriar o banco do zero (`php database/migrar.php`) **e** testar a atualização sobre um banco com dados.

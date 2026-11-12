@@ -20,10 +20,12 @@ class InstalarController extends Controller
         $log = [];
         if (!$this->ativo() || !hash_equals((string) config('instalar_token'), (string) ($_POST['token'] ?? ''))) {
             $log[] = 'Token inválido ou instalação desligada.';
+        } elseif ($this->jaInstalado()) {
+            $log[] = 'Este sistema já está instalado e em uso. Para aplicar uma versão nova, entre como admin e use Administração › Atualização (os dados não são apagados). Apague o instalar_token do config.php.';
         } else {
             try {
                 $instalador = new Instalador();
-                $instalador->executar(isset($_POST['seeds']));
+                $instalador->executar(true); // primeira instalação: estrutura + dados essenciais + demonstração
                 $log = $instalador->log;
             } catch (\Throwable $erro) {
                 error_log((string) $erro);
@@ -31,6 +33,16 @@ class InstalarController extends Controller
             }
         }
         $this->tela('instalar/index', ['titulo' => 'Instalação', 'ativo' => $this->ativo(), 'log' => $log], 'simples');
+    }
+
+    /** Já existe usuário cadastrado? Então é um sistema em uso: a instalação completa (com demonstração) não roda de novo. */
+    private function jaInstalado(): bool
+    {
+        try {
+            return (bool) \App\Core\Banco::valor('SELECT 1 FROM usuarios LIMIT 1');
+        } catch (\PDOException) {
+            return false; // tabela ainda não existe: instalação nova
+        }
     }
 
     private function ativo(): bool

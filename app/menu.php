@@ -31,5 +31,6 @@ return array_values(array_filter([
     ['titulo' => 'Configurações',   'url' => '/configuracoes', 'icone' => 'engrenagem', 'grupo' => 'Administração', 'permissao' => 'config.gerenciar',                        'pronto' => true,  'descricao' => 'Regras comerciais editáveis'],
     ['titulo' => 'Listas',          'url' => '/configuracoes/listas', 'icone' => 'etiqueta', 'grupo' => 'Administração', 'permissao' => 'config.gerenciar',                 'pronto' => true,  'descricao' => 'Etapas do funil, segmentos e origens'],
     ['titulo' => 'Integração Omie', 'url' => '/integracao',    'icone' => 'nuvem',     'grupo' => 'Administração',  'permissao' => 'integracao.gerenciar',                    'pronto' => false, 'descricao' => 'Sincronização e fila de envio'],
+    ['titulo' => 'Atualização',     'url' => '/sistema/atualizacao', 'icone' => 'nuvem', 'grupo' => 'Administração', 'permissao' => 'sistema.atualizar',                 'pronto' => true,  'descricao' => 'Versão instalada, backup do banco e aplicar versões novas'],
     ['titulo' => 'Auditoria',       'url' => '/auditoria',     'icone' => 'escudo',    'grupo' => 'Administração',  'permissao' => 'auditoria.ver',                           'pronto' => true,  'descricao' => 'Quem fez o quê, e quando'],
 ]));

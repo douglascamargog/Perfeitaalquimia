@@ -157,3 +157,10 @@ input[type=color] { width: 44px; height: 38px; padding: 2px; border: 1px solid v
 }
 @media print { .one-botao, .one-painel { display: none !important; } }
 .one-painel header .botao-icone { background: #ffffff1a; border-color: #ffffff33; color: #fff; width: 32px; height: 32px; }
+
+/* Atualização do sistema */
+.grade-atualizacao { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-bottom: 18px; }
+.grade-atualizacao .card { margin: 0; }
+.grade-atualizacao .sobretitulo { color: #668534; font-size: .66rem; font-weight: 850; letter-spacing: .12em; }
+.destaque-atualizacao { border: 2px solid var(--lima-escuro); }
+@media (max-width: 1000px) { .grade-atualizacao { grid-template-columns: 1fr; } }

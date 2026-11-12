@@ -4,7 +4,7 @@
   <?php if (!$ativo): ?>
     <p class="suave">A instalação pelo navegador está desligada. Para ligar, preencha <code>instalar_token</code> no arquivo <code>config/config.php</code>.</p>
   <?php else: ?>
-    <p class="suave pequeno">Cria as tabelas que faltam e carrega os dados de demonstração. Pode rodar mais de uma vez: só aplica o que é novo.</p>
+    <p class="suave pequeno">Primeira instalação: cria as tabelas e carrega os dados (lojas, Academia e demonstração). Para versões novas, use Administração › Atualização, dentro do sistema.</p>
     <form method="post" action="<?= url('/instalar') ?>">
       <?= csrf_campo() ?>
       <div class="campo">
@@ -12,7 +12,6 @@
         <input type="password" id="token" name="token" required>
         <div class="ajuda">É o valor de <code>instalar_token</code> no config.php.</div>
       </div>
-      <label class="opcao"><input type="checkbox" name="seeds" value="1" checked> Carregar dados de demonstração</label>
       <button class="botao largo" type="submit">Instalar / atualizar</button>
     </form>
   <?php endif; ?>

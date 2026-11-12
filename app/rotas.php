@@ -94,5 +94,9 @@ return [
     ['POST', '/configuracoes/listas/{lista}',         'ListaController@criar',  'config.gerenciar'],
     ['POST', '/configuracoes/listas/{lista}/{id}',    'ListaController@salvar', 'config.gerenciar'],
 
+    ['GET',  '/sistema/atualizacao',                  'AtualizacaoController@index',   'sistema.atualizar'],
+    ['POST', '/sistema/atualizacao/aplicar',          'AtualizacaoController@aplicar', 'sistema.atualizar'],
+    ['POST', '/sistema/atualizacao/backup',           'AtualizacaoController@backup',  'sistema.atualizar'],
+
     ['GET',  '/auditoria',              'AuditoriaController@index', 'auditoria.ver'],
 ];

@@ -31,5 +31,6 @@ return [
     'usuarios.gerenciar'      => ['Cadastrar usuários e funções', []],
     'config.gerenciar'        => ['Alterar configurações e regras comerciais', []],
     'auditoria.ver'           => ['Ver o log de auditoria', []],
+    'sistema.atualizar'       => ['Aplicar atualizações do sistema e baixar backup do banco', []],
     'integracao.gerenciar'    => ['Ver e disparar a sincronização com o Omie', []],
 ];
