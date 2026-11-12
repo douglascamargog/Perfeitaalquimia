@@ -39,6 +39,12 @@ class Listas
         return self::lembrar("cob$somenteAtivas", fn() => Banco::todos('SELECT * FROM cobranca_etapas ' . ($somenteAtivas ? 'WHERE ativa = 1 ' : '') . 'ORDER BY ordem, id'));
     }
 
+    /** Etapas dos posts do Marketing */
+    public static function etapasPosts(bool $somenteAtivas = true): array
+    {
+        return self::lembrar("pos$somenteAtivas", fn() => Banco::todos('SELECT * FROM mkt_post_etapas ' . ($somenteAtivas ? 'WHERE ativa = 1 ' : '') . 'ORDER BY ordem, id'));
+    }
+
     public static function origens(bool $somenteAtivas = true): array
     {
         return self::lembrar("ori$somenteAtivas", fn() => Banco::todos('SELECT * FROM origens ' . ($somenteAtivas ? 'WHERE ativo = 1 ' : '') . 'ORDER BY nome'));

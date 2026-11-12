@@ -83,6 +83,18 @@ $atalhos = array_filter([
       <?php endif; ?>
       <span class="b-link">Abrir agenda →</span>
     </a>
+  <?php elseif ($p['marketing']): $mk = $p['marketing']; ?>
+    <a class="b-card b-escuro span-3" href="<?= url('/marketing') ?>" aria-label="Posts aguardando aprovação">
+      <header class="b-topo"><span>Aguardando aprovação</span><span class="b-icone-redondo lima"><svg class="icone"><use href="<?= $icones ?>#check"/></svg></span></header>
+      <strong class="b-numero-grande"><?= $mk['aprovacao'] ?></strong>
+      <p class="b-sub"><?= $mk['ajuste'] ? '<span class="b-alerta">' . $mk['ajuste'] . ' com ajuste pedido</span>' : 'nenhum ajuste pendente' ?></p>
+      <?php if ($mk['proximos']): ?>
+        <ul class="b-lista-escura">
+          <?php foreach ($mk['proximos'] as $pp): ?><li><span><?= date('d/m', strtotime($pp['data_publicacao'])) ?></span><?= e(mb_strimwidth($pp['titulo'], 0, 30, '…')) ?></li><?php endforeach; ?>
+        </ul>
+      <?php endif; ?>
+      <span class="b-link">Abrir mural →</span>
+    </a>
   <?php elseif ($p['cobranca']): ?>
     <a class="b-card b-escuro span-3" href="<?= url('/cobranca') ?>">
       <header class="b-topo"><span>Promessas para hoje</span><span class="b-icone-redondo lima"><svg class="icone"><use href="<?= $icones ?>#moeda"/></svg></span></header>
@@ -137,6 +149,23 @@ $atalhos = array_filter([
       <strong class="b-valor"><?= $curto((float) $cb['total']) ?></strong>
       <div class="b-barra vermelha"><i style="width: <?= $cb['casos'] ? $pct($cb['mais90'] / $cb['casos'] * 100) : 0 ?>%"></i></div>
       <small><?= $n($cb['casos']) ?> caso(s) · <?= $n($cb['mais90']) ?> com mais de 90 dias · recuperado <?= $curto((float) $cb['recuperado_mes']) ?></small>
+    </a>
+  <?php endif; ?>
+
+  <?php if ($p['marketing']): $mk = $p['marketing']; ?>
+    <a class="b-card b-kpi span-3" href="<?= url('/marketing') ?>">
+      <header class="b-topo"><span>Posts desta semana</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#calendario"/></svg></span></header>
+      <strong class="b-valor"><?= $mk['semana'] ?> <small>de <?= $mk['meta'] ?></small></strong>
+      <div class="b-barra"><i style="width: <?= $mk['meta'] ? $pct($mk['semana'] / $mk['meta'] * 100) : 0 ?>%"></i></div>
+      <small><?= $mk['publicados_semana'] ?> publicado(s) · <?= $mk['aprovacao'] ?> aguardando aprovação</small>
+    </a>
+  <?php endif; ?>
+
+  <?php if ($p['ecommerce']): $ec = $p['ecommerce']; $v = $ec['variacao']['faturamento']; ?>
+    <a class="b-card b-kpi span-3" href="<?= url('/marketing/ecommerce') ?>">
+      <header class="b-topo"><span>E-commerce no mês</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#carrinho"/></svg></span></header>
+      <strong class="b-valor"><?= $curto((float) $ec['atual']['faturamento']) ?></strong>
+      <small><?php if ($v !== null): ?><b style="color: <?= $v >= 0 ? '#16a34a' : '#dc2626' ?>"><?= $v >= 0 ? '▲' : '▼' ?> <?= number_format(abs($v), 1, ',', '.') ?>%</b> vs. mês anterior · <?php endif; ?>hoje <?= $curto((float) $ec['hoje']['faturamento']) ?> em <?= $n($ec['hoje']['pedidos']) ?> pedido(s)</small>
     </a>
   <?php endif; ?>
 

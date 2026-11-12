@@ -5,6 +5,9 @@ use App\Integrations\BuscaContatos\BuscaContatosClaude;
 use App\Integrations\BuscaContatos\BuscaContatosFake;
 use App\Integrations\BuscaContatos\BuscaContatosInterface;
 use App\Integrations\LigueTalk\LigueTalkManual;
+use App\Integrations\Tray\EcommerceInterface;
+use App\Integrations\Tray\TrayClient;
+use App\Integrations\Tray\TrayFake;
 use App\Integrations\LigueTalk\TelefoniaInterface;
 use App\Integrations\Omie\ErpInterface;
 use App\Integrations\Omie\OmieClient;
@@ -53,6 +56,20 @@ class Integracoes
                 (string) config('integracoes.anthropic.modelo', 'claude-opus-5-5'),
             ),
             default  => new BuscaContatosFake(),
+        };
+    }
+
+    /** Loja virtual (Tray): 'fake' (demonstração) ou 'tray' (API real). Escolha em Configurações › E-commerce */
+    public static function ecommerce(): EcommerceInterface
+    {
+        return match (\App\Core\Config::get('ecommerce.provedor', 'fake')) {
+            'tray'  => new TrayClient(
+                (string) config('integracoes.tray.api', ''),
+                (string) config('integracoes.tray.consumer_key', ''),
+                (string) config('integracoes.tray.consumer_secret', ''),
+                (string) config('integracoes.tray.code', ''),
+            ),
+            default => new TrayFake(),
         };
     }
 

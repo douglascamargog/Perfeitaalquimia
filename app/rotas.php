@@ -74,6 +74,26 @@ return [
     ['POST', '/clientes/{id}/contatos-ia',          'BuscaContatoController@buscar',  'contatos.buscar_ia'],
     ['POST', '/clientes/{id}/contatos-ia/aplicar',  'BuscaContatoController@aplicar', 'contatos.buscar_ia'],
 
+    // ---------- Marketing (mural de posts, planejamento, e-commerce) ----------
+    ['GET',  '/marketing',                         'MarketingController@mural',        'marketing.ver'],
+    ['GET',  '/marketing/feed',                    'MarketingController@feed',         'marketing.ver'],
+    ['GET',  '/marketing/planejamento',            'MarketingController@planejamento', 'marketing.ver'],
+    ['POST', '/marketing/campanhas',               'MarketingController@salvarCampanha', 'marketing.editar'],
+    ['POST', '/marketing/campanhas/{id}',          'MarketingController@salvarCampanha', 'marketing.editar'],
+    ['GET',  '/marketing/ecommerce',               'MarketingController@ecommerce',    'ecommerce.ver'],
+    ['POST', '/marketing/ecommerce/atualizar',     'MarketingController@atualizarEcommerce', 'ecommerce.ver'],
+    ['GET',  '/marketing/posts/novo',              'PostController@novo',              'marketing.editar'],
+    ['POST', '/marketing/posts',                   'PostController@criar',             'marketing.editar'],
+    ['GET',  '/marketing/posts/{id}',              'PostController@ver',               'marketing.ver'],
+    ['POST', '/marketing/posts/{id}',              'PostController@salvar',            'marketing.editar'],
+    ['POST', '/marketing/posts/{id}/data',         'PostController@data',              'marketing.editar'],
+    ['POST', '/marketing/posts/{id}/etapa',        'PostController@etapa',             'marketing.editar|marketing.aprovar'],
+    ['POST', '/marketing/posts/{id}/enviar',       'PostController@enviarAprovacao',   'marketing.editar'],
+    ['POST', '/marketing/posts/{id}/aprovar',      'PostController@aprovar',           'marketing.aprovar'],
+    ['POST', '/marketing/posts/{id}/ajuste',       'PostController@ajuste',            'marketing.aprovar'],
+    ['POST', '/marketing/posts/{id}/publicar',     'PostController@publicar',          'marketing.editar'],
+    ['POST', '/marketing/posts/{id}/comentar',     'PostController@comentar',          'marketing.ver'],
+
     // ---------- Meu mês (meta individual e da equipe) ----------
     ['GET',  '/meu-mes',                        'MeuMesController@index',          'meu_mes.usar'],
     ['POST', '/meu-mes/meta',                   'MeuMesController@salvarMeta',     'meu_mes.usar'],

@@ -18,11 +18,15 @@ class ListaController extends Controller
         'segmentos' => ['tabela' => 'segmentos',    'ativo' => 'ativo', 'titulo' => 'Segmentos'],
         'origens'   => ['tabela' => 'origens',      'ativo' => 'ativo', 'titulo' => 'Origens'],
         'cobranca'  => ['tabela' => 'cobranca_etapas', 'ativo' => 'ativa', 'titulo' => 'Funil de cobrança'],
+        'posts'     => ['tabela' => 'mkt_post_etapas', 'ativo' => 'ativa', 'titulo' => 'Etapas dos posts'],
     ];
     public const TIPOS_ETAPA = ['aberta' => 'Em andamento', 'ganho' => 'Ganho (cliente)', 'perdido' => 'Perdido', 'inativo' => 'Inativo'];
     /** Tipos das etapas da cobrança: os de encerramento (pago, acordo, jurídico, perda) fecham o caso */
     public const TIPOS_COBRANCA = ['aberta' => 'Em andamento', 'sem_contato' => 'Sem contato (buscar contatos)', 'promessa' => 'Promessa de pagamento',
         'pago' => 'Encerra: pago', 'acordo' => 'Encerra: acordo', 'juridico' => 'Encerra: jurídico', 'perda' => 'Encerra: perda'];
+    /** Tipos das etapas dos posts do Marketing (a aprovação depende deles) */
+    public const TIPOS_POST = ['rascunho' => 'Ideia / rascunho', 'producao' => 'Em produção', 'aprovacao' => 'Aguardando aprovação',
+        'ajuste' => 'Ajuste pedido', 'aprovado' => 'Aprovado', 'agendado' => 'Agendado', 'publicado' => 'Publicado'];
 
     public function index(): void
     {
@@ -33,10 +37,13 @@ class ListaController extends Controller
             'segmentos' => Listas::segmentos(false),
             'origens'   => Listas::origens(false),
             'cobranca'  => Listas::etapasCobranca(false),
+            'posts'     => Listas::etapasPosts(false),
             'usos'      => ['etapas' => $contar('etapa_id'), 'segmentos' => $contar('segmento_id'), 'origens' => $contar('origem_id'),
-                'cobranca' => array_column(Banco::todos("SELECT etapa_id AS id, COUNT(*) AS total FROM cobrancas WHERE situacao = 'aberta' GROUP BY etapa_id"), 'total', 'id')],
+                'cobranca' => array_column(Banco::todos("SELECT etapa_id AS id, COUNT(*) AS total FROM cobrancas WHERE situacao = 'aberta' GROUP BY etapa_id"), 'total', 'id'),
+                'posts'    => array_column(Banco::todos('SELECT etapa_id AS id, COUNT(*) AS total FROM mkt_posts GROUP BY etapa_id'), 'total', 'id')],
             'tipos'     => self::TIPOS_ETAPA,
             'tiposCobranca' => self::TIPOS_COBRANCA,
+            'tiposPost' => self::TIPOS_POST,
         ]);
     }
 
@@ -87,8 +94,8 @@ class ListaController extends Controller
         if ($lista !== 'origens') {
             $dados['ordem'] = (int) $this->campo('ordem', (string) ($antes['ordem'] ?? 99));
         }
-        if ($lista === 'etapas' || $lista === 'cobranca') {
-            $tipos = $lista === 'etapas' ? self::TIPOS_ETAPA : self::TIPOS_COBRANCA;
+        if (in_array($lista, ['etapas', 'cobranca', 'posts'], true)) {
+            $tipos = ['etapas' => self::TIPOS_ETAPA, 'cobranca' => self::TIPOS_COBRANCA, 'posts' => self::TIPOS_POST][$lista];
             $dados['cor'] = preg_match('/^#[0-9a-f]{6}$/i', $this->campo('cor')) ? $this->campo('cor') : ($antes['cor'] ?? '#94a3b8');
             $dados['tipo'] = array_key_exists($this->campo('tipo'), $tipos) ? $this->campo('tipo') : 'aberta';
         }

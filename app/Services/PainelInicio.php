@@ -34,6 +34,25 @@ class PainelInicio
             'funil'        => $temCarteira ? self::funil() : null,
             'campanha'     => $temCarteira ? self::campanha() : null,
             'cobranca'     => Auth::pode('cobranca.ver') ? Cobranca::resumo() : null,
+            'marketing'    => Auth::pode('marketing.ver') ? self::marketing() : null,
+            'ecommerce'    => Auth::pode('ecommerce.ver') && Banco::valor('SELECT 1 FROM ecommerce_resumo_diario LIMIT 1') ? EcommerceService::painel(date('Y-m')) : null,
+        ];
+    }
+
+    /** Marketing: posts desta semana (seg → dom) e os que aguardam aprovação */
+    private static function marketing(): array
+    {
+        $seg = date('Y-m-d', strtotime('monday this week'));
+        $dom = date('Y-m-d', strtotime('sunday this week'));
+        return [
+            'semana'    => (int) Banco::valor('SELECT COUNT(*) FROM mkt_posts WHERE data_publicacao BETWEEN ? AND ?', [$seg, $dom]),
+            'publicados_semana' => (int) Banco::valor("SELECT COUNT(*) FROM mkt_posts p JOIN mkt_post_etapas e ON e.id = p.etapa_id WHERE p.data_publicacao BETWEEN ? AND ? AND e.tipo = 'publicado'", [$seg, $dom]),
+            'aprovacao' => (int) Banco::valor("SELECT COUNT(*) FROM mkt_posts p JOIN mkt_post_etapas e ON e.id = p.etapa_id WHERE e.tipo = 'aprovacao'"),
+            'ajuste'    => (int) Banco::valor("SELECT COUNT(*) FROM mkt_posts p JOIN mkt_post_etapas e ON e.id = p.etapa_id WHERE e.tipo = 'ajuste'"),
+            'meta'      => MarketingService::metaSemanal(),
+            'proximos'  => Banco::todos("SELECT p.id, p.titulo, p.formato, p.data_publicacao, p.hora, e.nome AS etapa, e.cor FROM mkt_posts p
+                JOIN mkt_post_etapas e ON e.id = p.etapa_id WHERE p.data_publicacao >= CURDATE() AND e.tipo <> 'publicado'
+                ORDER BY p.data_publicacao, p.hora LIMIT 3"),
         ];
     }
 

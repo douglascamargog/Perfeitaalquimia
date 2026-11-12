@@ -19,7 +19,7 @@
             <?php if ($item['tipo'] === 'booleano'): ?>
               <label class="opcao"><input type="checkbox" id="<?= $id ?>" name="<?= $nome ?>" value="1" <?= $item['valor'] === '1' ? 'checked' : '' ?>> Sim</label>
             <?php else: ?>
-              <?php if ($item['tipo'] === 'texto' && mb_strlen((string) $item['valor']) > 80): ?>
+              <?php if (in_array($item['tipo'], ['texto', 'lista'], true) && mb_strlen((string) $item['valor']) > 80): ?>
                 <textarea id="<?= $id ?>" name="<?= $nome ?>" rows="3"><?= e($item['valor']) ?></textarea>
               <?php else: ?>
                 <input type="<?= $item['tipo'] === 'numero' ? 'number' : 'text' ?>" id="<?= $id ?>" name="<?= $nome ?>" value="<?= e($item['valor']) ?>" step="any">

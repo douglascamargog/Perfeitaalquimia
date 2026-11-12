@@ -45,6 +45,12 @@ class OneAssistente
             $falas[] = self::promessasHoje();
             $falas[] = self::semContato();
         }
+        if (Auth::pode('marketing.aprovar')) {
+            $falas[] = self::postsParaAprovar();
+        }
+        if (Auth::pode('marketing.editar')) {
+            $falas[] = self::semanaQueVem();
+        }
         if (Auth::pode('meu_mes.usar')) {
             $falas[] = self::metaIndividual($id);
             $falas[] = self::metaEquipe();
@@ -86,6 +92,23 @@ class OneAssistente
     }
 
     /** Clientes que já passaram do intervalo médio de compra (alerta de recompra) */
+    /** Marketing: posts esperando aprovação */
+    private static function postsParaAprovar(): ?array
+    {
+        $qtd = (int) Banco::valor("SELECT COUNT(*) FROM mkt_posts p JOIN mkt_post_etapas e ON e.id = p.etapa_id WHERE e.tipo = 'aprovacao'");
+        $etapa = \App\Services\MarketingService::etapaDoTipo('aprovacao');
+        return $qtd ? ['humor' => 'ideia', 'texto' => "$qtd post(s) do Instagram aguardam a sua aprovação.", 'link' => '/marketing?etapa=' . (int) ($etapa['id'] ?? 0), 'acao' => 'Revisar posts'] : null;
+    }
+
+    /** Marketing: semana que vem com poucos posts planejados */
+    private static function semanaQueVem(): ?array
+    {
+        $meta = \App\Services\MarketingService::metaSemanal();
+        $seg = date('Y-m-d', strtotime('monday next week'));
+        $qtd = (int) Banco::valor('SELECT COUNT(*) FROM mkt_posts WHERE data_publicacao BETWEEN ? AND ?', [$seg, date('Y-m-d', strtotime("$seg +6 days"))]);
+        return $meta && $qtd < $meta ? ['humor' => 'pensando', 'texto' => "A semana que vem tem só $qtd post(s) planejado(s) (meta: $meta). Bora preencher o mural?", 'link' => '/marketing?mes=' . substr($seg, 0, 7), 'acao' => 'Abrir mural'] : null;
+    }
+
     /** Cobrança: promessas de pagamento que vencem hoje */
     private static function promessasHoje(): ?array
     {

@@ -22,8 +22,8 @@ function avisar(texto, tipo = 'sucesso') {
   avisar.timer = setTimeout(() => avisoFlutuante.classList.remove('visivel'), 2800);
 }
 
-/** Abre a ficha do cliente na gaveta lateral */
-async function abrirCliente(id) {
+/** Abre a ficha do cliente na gaveta lateral (enderecoExato: opcional, para abrir outro endereço, ex.: formulário novo) */
+async function abrirCliente(id, enderecoExato = null) {
   if (!gaveta) return;
   clienteAberto = id;
   gaveta.hidden = false;
@@ -33,7 +33,7 @@ async function abrirCliente(id) {
   try {
     // A gaveta pode carregar outra coisa (ex.: caso de cobrança): data-url="/cobranca/{id}/caso"
     const modelo = gaveta.dataset.url || '/carteira/clientes/{id}/ficha';
-    const resposta = await fetch(BASE + modelo.replace('{id}', encodeURIComponent(id)), { headers: { Accept: 'text/html' } });
+    const resposta = await fetch(BASE + (enderecoExato || modelo.replace('{id}', encodeURIComponent(id))), { headers: { Accept: 'text/html' } });
     if (resposta.redirected && resposta.url.includes('/entrar')) { window.location.href = resposta.url; return; }
     if (!resposta.ok) {
       const erro = await resposta.json().catch(() => ({}));
@@ -90,6 +90,7 @@ document.addEventListener('submit', async (evento) => {
     } else {
       avisar(dados.mensagem || 'Salvo.');
       alterouAlgo = true;
+      if (dados.abrir) clienteAberto = dados.abrir; // item recém-criado: a gaveta passa a mostrar ele
     }
     if (clienteAberto) await abrirCliente(clienteAberto);
   } catch (e) {

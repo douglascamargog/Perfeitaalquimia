@@ -52,5 +52,12 @@ return [
             'chave'  => '',
             'modelo' => 'claude-opus-5-5',
         ],
+        // Loja virtual Tray (painel do e-commerce no Marketing). Dados do aplicativo liberado pela Tray.
+        'tray' => [
+            'api'             => '',   // ex.: https://www.sualoja.com.br/web_api
+            'consumer_key'    => '',
+            'consumer_secret' => '',
+            'code'            => '',
+        ],
     ],
 ];
