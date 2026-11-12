@@ -8,8 +8,9 @@
  */
 return [
     ['titulo' => 'Início',          'url' => '/',              'icone' => 'casa',      'grupo' => '',               'permissao' => 'logado',                                  'pronto' => true,  'descricao' => 'Resumo do dia'],
-    ['titulo' => 'Carteira',        'url' => '/carteira',      'icone' => 'pessoas',   'grupo' => 'Comercial',      'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => false, 'descricao' => 'Clientes, funil, mapa e linha do tempo'],
-    ['titulo' => 'Reativação',      'url' => '/reativacao',    'icone' => 'relogio',   'grupo' => 'Comercial',      'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => false, 'descricao' => 'Clientes sem compra há X dias'],
+    ['titulo' => 'Carteira',        'url' => '/carteira',      'icone' => 'pessoas',   'grupo' => 'Comercial',      'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Clientes, funil, mapa e linha do tempo'],
+    ['titulo' => 'Agenda',          'url' => '/agenda',        'icone' => 'calendario', 'grupo' => 'Comercial',     'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Retornos atrasados, de hoje e futuros'],
+    ['titulo' => 'Reativação',      'url' => '/reativacao',    'icone' => 'relogio',   'grupo' => 'Comercial',      'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Clientes sem compra há X dias'],
     ['titulo' => 'Prospecção',      'url' => '/prospeccao',    'icone' => 'lupa',      'grupo' => 'Comercial',      'permissao' => 'prospeccao.usar',                         'pronto' => false, 'descricao' => 'Empresas ativas por cidade (base da Receita)'],
     ['titulo' => 'Pedidos',         'url' => '/pedidos',       'icone' => 'carrinho',  'grupo' => 'Comercial',      'permissao' => ['pedidos.criar', 'pedidos.ver_todos'],    'pronto' => false, 'descricao' => 'Pedidos do catálogo, do sistema e do app'],
     ['titulo' => 'Aprovação',       'url' => '/aprovacao',     'icone' => 'check',     'grupo' => 'Comercial',      'permissao' => 'pedidos.aprovar',                         'pronto' => false, 'descricao' => 'Financeiro aprova pedidos e confere crédito'],

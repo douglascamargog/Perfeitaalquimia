@@ -98,7 +98,7 @@ p { margin: 0 0 1em; }
 .campo { margin-bottom: 16px; }
 .campo label { display: block; font-weight: 600; font-size: .85rem; margin-bottom: 6px; color: var(--verde-escuro); }
 .campo .ajuda { font-size: .8rem; color: var(--texto-suave); margin-top: 4px; }
-input[type=text], input[type=email], input[type=password], input[type=number], input[type=tel], select, textarea {
+input[type=text], input[type=email], input[type=password], input[type=number], input[type=tel], input[type=search], input[type=date], select, textarea {
   width: 100%;
   font: inherit;
   padding: 10px 12px;

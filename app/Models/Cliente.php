@@ -102,7 +102,7 @@ class Cliente
               WHERE $where ORDER BY $ordemSql LIMIT $porPagina OFFSET " . (($pagina - 1) * $porPagina),
             $p
         );
-        return ['itens' => $itens, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
+        return ['itens' => $itens, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas, 'por_pagina' => $porPagina];
     }
 
     /** Ficha completa de um cliente (com nomes das listas) — sem checar escopo; use podeVer() */
