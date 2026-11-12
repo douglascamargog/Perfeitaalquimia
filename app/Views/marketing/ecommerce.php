@@ -17,7 +17,8 @@ $var = function (?float $v): string {
     return '<span class="mk-var ' . $classe . '">' . ($v >= 0 ? '▲' : '▼') . ' ' . number_format(abs($v), 1, ',', '.') . '%</span>';
 };
 $mesAtual = $p['mes'] === date('Y-m');
-$acoes = '<form method="post" action="' . url('/marketing/ecommerce/atualizar') . '">' . csrf_campo() . '<button class="botao contorno" type="submit"><svg class="icone"><use href="' . $icones . '#nuvem"/></svg>Atualizar agora</button></form>'
+$acoes = (\App\Core\Auth::pode('config.gerenciar') ? '<form method="post" action="' . url('/marketing/ecommerce/testar') . '">' . csrf_campo() . '<button class="botao contorno" type="submit">Testar conexão</button></form>' : '')
+    . '<form method="post" action="' . url('/marketing/ecommerce/atualizar') . '">' . csrf_campo() . '<button class="botao contorno" type="submit"><svg class="icone"><use href="' . $icones . '#nuvem"/></svg>Atualizar agora</button></form>'
     . '<button class="botao contorno" type="button" onclick="window.print()"><svg class="icone"><use href="' . $icones . '#imprimir"/></svg>Imprimir</button>';
 $situacaoCor = ['Aguardando pagamento' => 'laranja', 'Pago' => 'lima', 'Em separação' => 'cinza', 'Enviado' => 'cinza', 'Entregue' => 'verde'];
 $maxProduto = max(1, (float) ($p['produtos'][0]['faturamento'] ?? 1));
@@ -47,7 +48,7 @@ $maxProduto = max(1, (float) ($p['produtos'][0]['faturamento'] ?? 1));
     <strong class="b-valor"><?= dinheiro((float) $a['ticket_medio']) ?></strong><small><?= $var($p['variacao']['ticket']) ?></small>
   </section>
   <section class="b-card b-kpi span-2">
-    <header class="b-topo"><span>Novos clientes</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#usuario"/></svg></span></header>
+    <header class="b-topo"><span>Clientes que compraram</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#usuario"/></svg></span></header>
     <strong class="b-valor"><?= $n($a['novos_clientes']) ?></strong><small><?= $var($p['variacao']['novos']) ?></small>
   </section>
   <section class="b-card b-kpi b-lima span-2">
@@ -86,7 +87,7 @@ $maxProduto = max(1, (float) ($p['produtos'][0]['faturamento'] ?? 1));
           <thead><tr><th>Pedido</th><th>Quando</th><th>Cidade</th><th class="direita">Valor</th><th>Situação</th></tr></thead>
           <tbody>
           <?php foreach ($pedidos as $pd): ?>
-            <tr><td>#<?= e($pd['numero']) ?></td><td><?= data_br($pd['data'], true) ?></td><td class="suave"><?= e($pd['cidade']) ?>/<?= e($pd['uf']) ?></td>
+            <tr><td>#<?= e($pd['numero']) ?></td><td><?= data_br($pd['data'], true) ?></td><td class="suave"><?= $pd['cidade'] !== '' ? e($pd['cidade']) . '/' . e($pd['uf']) : '—' ?></td>
               <td class="direita"><strong><?= dinheiro((float) $pd['valor']) ?></strong></td><td><span class="selo <?= $situacaoCor[$pd['situacao']] ?? 'cinza' ?>"><?= e($pd['situacao']) ?></span></td></tr>
           <?php endforeach; ?>
           </tbody>

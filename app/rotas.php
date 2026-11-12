@@ -82,6 +82,7 @@ return [
     ['POST', '/marketing/campanhas/{id}',          'MarketingController@salvarCampanha', 'marketing.editar'],
     ['GET',  '/marketing/ecommerce',               'MarketingController@ecommerce',    'ecommerce.ver'],
     ['POST', '/marketing/ecommerce/atualizar',     'MarketingController@atualizarEcommerce', 'ecommerce.ver'],
+    ['POST', '/marketing/ecommerce/testar',        'MarketingController@testarEcommerce', 'config.gerenciar'],
     ['GET',  '/marketing/posts/novo',              'PostController@novo',              'marketing.editar'],
     ['POST', '/marketing/posts',                   'PostController@criar',             'marketing.editar'],
     ['GET',  '/marketing/posts/{id}',              'PostController@ver',               'marketing.ver'],

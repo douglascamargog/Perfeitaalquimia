@@ -72,6 +72,14 @@ com o "Backup JSON" exportado pela V4.
   (o valor antigo fica na linha do tempo e na auditoria). Modo demonstração até o admin ligar a busca real (veja LEIA-ME-INSTALACAO, 9b).
 - A busca real usa o SDK oficial da Anthropic (`composer.json`). A pasta `vendor/` não vai para o git: o `gerar_pacote.sh` instala e coloca no zip.
 
+## Marketing
+
+- **Mural de posts** (Instagram): calendário do mês, arrastar para mudar o dia, prévia do feed, fluxo Ideia → Em produção →
+  Aguardando aprovação → Aprovado → Agendado → Publicado. Só quem tem `marketing.aprovar` (Admin) aprova; mudar imagem/legenda
+  de post aprovado devolve para aprovação. As etapas ficam em Configurações › Listas.
+- **Planejamento**: campanhas em linha do tempo (3 meses), datas comemorativas (Configurações) e vendas do produto da campanha no site.
+- **E-commerce (Tray)**: faturamento, pedidos, ticket médio, gráficos e mais vendidos. Simulado até ligar a Tray (LEIA-ME-INSTALACAO, 9c).
+
 ## Tarefas agendadas (cron)
 
 No cPanel › Cron Jobs, cadastre (troque o caminho pelo da sua conta):
@@ -80,6 +88,7 @@ No cPanel › Cron Jobs, cadastre (troque o caminho pelo da sua conta):
 |---|---|---|
 | Todo dia às 6h | `php /home/USUARIO/public_html/cron/fila_reativacao.php` | Manda para a fila de reativação os clientes sem compra há X dias |
 | Todo dia às 7h | `php /home/USUARIO/public_html/cron/cobranca.php` | Lê títulos vencidos/pagos do ERP e trata promessas vencidas |
+| De hora em hora | `php /home/USUARIO/public_html/cron/ecommerce.php` | Copia os números da loja Tray para o painel do e-commerce |
 
 ## Logins de demonstração
 
@@ -94,7 +103,7 @@ Senha de todos: `Demo@2026` — usuários fictícios, um por perfil e por funç�
 | reativacao@demo.local | Vendedor · Prospecção e Reativação |
 | terceirizacao@demo.local | Vendedor · Terceirização e Marca Própria |
 | financeiro@demo.local | Financeiro · Cobrança |
-| marketing@demo.local | Marketing |
+| marketing@demo.local | Marketing (mural, planejamento, e-commerce) |
 | producao@demo.local | Produção |
 
 ## Onde fica cada coisa

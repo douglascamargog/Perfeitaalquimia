@@ -14,7 +14,7 @@ namespace App\Integrations\Tray;
  */
 interface EcommerceInterface
 {
-    /** Números por dia: [[data, pedidos, faturamento, visitas|null, novos_clientes], ...] */
+    /** Números por dia: [[data, pedidos, faturamento, visitas|null, novos_clientes (= clientes diferentes que compraram)], ...] */
     public function resumoPorDia(string $desde, string $ate): array;
 
     /** Mais vendidos do mês (AAAA-MM): [[produto_ref, nome, quantidade, faturamento], ...] */

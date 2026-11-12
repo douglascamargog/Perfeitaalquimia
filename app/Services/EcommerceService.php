@@ -17,6 +17,11 @@ class EcommerceService
     public static function sincronizar(): array
     {
         $loja = Integracoes::ecommerce();
+        // Trocou da demonstração para a loja real: os números simulados saem (não se misturam com os reais)
+        if ($loja->nome() !== 'fake' && Banco::valor("SELECT 1 FROM ecommerce_resumo_diario WHERE origem = 'fake' LIMIT 1")) {
+            Banco::executar("DELETE FROM ecommerce_resumo_diario WHERE origem = 'fake'");
+            Banco::executar('DELETE FROM ecommerce_produtos_mes');
+        }
         $vazio = !Banco::valor('SELECT 1 FROM ecommerce_resumo_diario LIMIT 1');
         $desde = $vazio ? date('Y-m-01', strtotime('-12 months')) : date('Y-m-d', strtotime('-7 days'));
 
@@ -31,7 +36,8 @@ class EcommerceService
             $dias++;
         }
 
-        $meses = $vazio ? array_map(fn($i) => date('Y-m', strtotime(date('Y-m-01') . " -$i months")), range(0, 12)) : [date('Y-m'), date('Y-m', strtotime(date('Y-m-01') . ' -1 month'))];
+        // Ranking de produtos: 13 meses só na demonstração; na loja real, mês atual e anterior (cada mês custa várias requisições)
+        $meses = $vazio && $loja->nome() === 'fake' ? array_map(fn($i) => date('Y-m', strtotime(date('Y-m-01') . " -$i months")), range(0, 12)) : [date('Y-m'), date('Y-m', strtotime(date('Y-m-01') . ' -1 month'))];
         foreach ($meses as $mes) {
             Banco::executar('DELETE FROM ecommerce_produtos_mes WHERE mes = ?', [$mes]); // o ranking do mês é substituído inteiro
             foreach ($loja->produtosMaisVendidos($mes, 10) as $p) {

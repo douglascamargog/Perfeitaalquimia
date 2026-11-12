@@ -105,8 +105,8 @@ class MarketingController extends Controller
     public function ecommerce(): void
     {
         $mes = $this->mes();
-        if (!Banco::valor('SELECT 1 FROM ecommerce_resumo_diario LIMIT 1')) {
-            EcommerceService::sincronizar(); // primeira vez: busca o histórico
+        if (!Banco::valor('SELECT 1 FROM ecommerce_resumo_diario LIMIT 1') && Integracoes::ecommerce()->nome() === 'fake') {
+            EcommerceService::sincronizar(); // demonstração: gera o histórico na hora (a loja real é lida pelo cron ou "Atualizar agora")
         }
         try {
             $pedidos = Integracoes::ecommerce()->pedidosRecentes(8);
@@ -121,8 +121,17 @@ class MarketingController extends Controller
         ]);
     }
 
+    /** Admin: confere se as chaves da Tray funcionam */
+    public function testarEcommerce(): void
+    {
+        [$ok, $mensagem] = Integracoes::ecommerce()->testarConexao();
+        Sessao::aviso($ok ? 'sucesso' : 'erro', 'Tray: ' . $mensagem);
+        redirecionar('/marketing/ecommerce');
+    }
+
     public function atualizarEcommerce(): void
     {
+        @set_time_limit(600); // a primeira leitura da loja real pode demorar (180 requisições/min na Tray)
         try {
             $r = EcommerceService::sincronizar();
             Sessao::aviso('sucesso', "Números atualizados ({$r['dias']} dia(s)).");

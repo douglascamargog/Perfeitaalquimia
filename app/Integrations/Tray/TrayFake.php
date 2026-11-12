@@ -33,7 +33,7 @@ class TrayFake implements EcommerceInterface
             $ticket = 148 + ($semente >> 5) % 45 + ($pico > 1 ? -18 : 0);
             $dias[] = [
                 'data' => $d, 'pedidos' => $pedidos, 'faturamento' => round($pedidos * $ticket, 2),
-                'visitas' => (int) round($pedidos / (0.016 + (($semente >> 9) % 8) / 1000)), 'novos_clientes' => (int) round($pedidos * (.32 + (($semente >> 12) % 15) / 100)),
+                'visitas' => (int) round($pedidos / (0.016 + (($semente >> 9) % 8) / 1000)), 'novos_clientes' => (int) round($pedidos * (.86 + (($semente >> 12) % 12) / 100)), // clientes que compraram (alguns compram 2x)
             ];
         }
         return $dias;

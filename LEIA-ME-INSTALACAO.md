@@ -106,6 +106,30 @@ Até ligar, o botão **Buscar contatos com IA** funciona em modo demonstração 
 Custo estimado: de US$ 0,10 a 0,30 por empresa pesquisada. O admin vê o total do mês no topo da tela **Cobrança**.
 O limite de buscas por dia também fica em Configurações. Só dados públicos da empresa (CNPJ, nome, cidade) vão para a IA.
 
+## 9c. Ligar o e-commerce real (Tray)
+
+Até ligar, o painel **Marketing › E-commerce** mostra números simulados. Para ver os dados reais da loja:
+
+1. **Chaves do aplicativo (só a Tray libera).** A API da Tray funciona por "aplicativo": a empresa cadastra um app no
+   programa de parceiros da Tray (developers.tray.com.br › Quero ser parceiro) e recebe por e-mail a **consumer key**
+   e a **consumer secret**. Se a agência que cuida da loja já tem um aplicativo Tray, ela pode fornecer essas chaves.
+2. **Autorizar na loja.** No painel da loja Tray › **Meus Aplicativos** › o aplicativo › **Acessar**: aparece o **code**.
+   O **endereço da API** é o endereço da loja + `/web_api` (ex.: `https://www.sualoja.com.br/web_api`).
+3. No cPanel › `one/config/config.php`, preencha o bloco `'tray'` (num sistema já instalado, copie o bloco de `config.example.php`):
+   ```
+   'tray' => ['api' => 'https://www.sualoja.com.br/web_api', 'consumer_key' => '...', 'consumer_secret' => '...', 'code' => '...'],
+   ```
+4. No One, como admin: **Configurações › E-commerce (Tray) › Origem dos números** = `tray`.
+5. **Marketing › E-commerce › Testar conexão.** Deu certo? Clique em **Atualizar agora**. A primeira leitura busca 13 meses
+   de pedidos e pode levar alguns minutos (a Tray limita 180 consultas por minuto). Os números simulados são apagados nessa hora.
+6. Cron de hora em hora (cPanel › Cron Jobs):
+   ```
+   0 * * * * php /home/doug9130/public_html/one/cron/ecommerce.php
+   ```
+
+O One só lê números (pedidos, valores, produtos). Não grava nada na loja e não guarda nome, e-mail ou endereço de comprador.
+Pedidos cancelados não entram no faturamento.
+
 ## 10. Trazer o trabalho da Carteira atual
 
 Na Carteira atual (`/carteira`), use **Backup JSON** para baixar o arquivo. No One: **Carteira › Importar** › envie o arquivo › confira a pré-visualização › Confirmar.
