@@ -15,6 +15,7 @@ return [
     'carteira.importar'       => ['Importar e exportar planilhas', ['gestor']],
     'leads.ver'               => ['Ver leads de tráfego (site e anúncios)', ['gestor', 'marketing']],
     'prospeccao.usar'         => ['Usar a prospecção automática', ['gestor', 'vendedor']],
+    'catalogo.acessos'        => ['Gerar acesso do cliente ao catálogo', ['gestor', 'vendedor']],
     'pedidos.criar'           => ['Criar pedidos para clientes', ['gestor', 'vendedor']],
     'pedidos.ver_todos'       => ['Ver pedidos de todos os vendedores', ['gestor', 'financeiro']],
     'pedidos.aprovar'         => ['Aprovar ou recusar pedidos', ['financeiro']],

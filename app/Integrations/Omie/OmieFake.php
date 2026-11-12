@@ -23,17 +23,48 @@ class OmieFake implements ErpInterface
 
     public function listarProdutos(?string $alteradoDesde = null): array
     {
-        return $this->filtrarPorData($this->ler('produtos'), $alteradoDesde);
+        $doArquivo = $this->ler('produtos');
+        if ($doArquivo) {
+            return $this->filtrarPorData($doArquivo, $alteradoDesde);
+        }
+        // Sem arquivo: os produtos do próprio cadastro (código do "Omie" = slug)
+        return array_map(fn($p) => ['omie_codigo' => $p['slug'], 'sku' => strtoupper(substr($p['slug'], 0, 12)), 'nome' => $p['nome'],
+            'unidade' => 'UN', 'ativo' => (bool) $p['ativo'], 'alterado_em' => $p['atualizado_em']],
+            \App\Core\Banco::todos('SELECT slug, nome, ativo, atualizado_em FROM produtos ORDER BY id'));
     }
 
+    /**
+     * Preços simulados, sempre os mesmos para o mesmo produto:
+     * Lojista = base · Distribuidor = 18% menos · Terceirização = 30% menos. ~3% dos produtos ficam sem preço (como acontece no ERP).
+     */
     public function listarPrecos(?string $alteradoDesde = null): array
     {
-        return $this->ler('precos');
+        $doArquivo = $this->ler('precos');
+        if ($doArquivo) {
+            return $doArquivo;
+        }
+        $precos = [];
+        foreach (\App\Core\Banco::todos('SELECT slug FROM produtos WHERE ativo = 1 ORDER BY id') as ['slug' => $slug]) {
+            $semente = crc32("preco-$slug");
+            if ($semente % 33 === 0) {
+                continue;
+            }
+            $base = 24.9 + ($semente % 110) + (($semente >> 8) % 10) / 10;
+            foreach (['lojista' => 1, 'distribuidor' => .82, 'terceirizacao' => .70] as $tabela => $fator) {
+                $precos[] = ['omie_codigo_produto' => $slug, 'tabela' => $tabela, 'preco' => round($base * $fator, 2)];
+            }
+        }
+        return $precos;
     }
 
     public function listarEstoque(): array
     {
-        return $this->ler('estoque');
+        $doArquivo = $this->ler('estoque');
+        if ($doArquivo) {
+            return $doArquivo;
+        }
+        return array_map(fn($p) => ['omie_codigo_produto' => $p['slug'], 'quantidade' => crc32("estoque-{$p['slug']}") % 400],
+            \App\Core\Banco::todos('SELECT slug FROM produtos WHERE ativo = 1 ORDER BY id'));
     }
 
     public function listarClientes(?string $alteradoDesde = null): array
@@ -128,6 +159,35 @@ class OmieFake implements ErpInterface
         return ['omie_codigo' => $novo['omie_codigo'], 'numero' => $novo['numero'], 'etapa' => $novo['etapa']];
     }
 
+    public function aprovarPedido(string $omieCodigo): array
+    {
+        $pedidos = $this->pedidos();
+        foreach ($pedidos as &$p) {
+            if ($p['omie_codigo'] === $omieCodigo) {
+                $p['etapa'] = '20'; // "aprovado" no Omie simulado
+                $this->gravarPedidos($pedidos);
+                return ['omie_codigo' => $omieCodigo, 'etapa' => '20'];
+            }
+        }
+        throw new \RuntimeException("Pedido $omieCodigo não encontrado no Omie (simulado).");
+    }
+
+    /** SÓ NA DEMONSTRAÇÃO: emite a "nota fiscal" de um pedido aprovado (no Omie real quem fatura é o Financeiro, no Omie) */
+    public function simularFaturamento(string $omieCodigo): string
+    {
+        $pedidos = $this->pedidos();
+        foreach ($pedidos as &$p) {
+            if ($p['omie_codigo'] === $omieCodigo) {
+                $p['etapa'] = '60';
+                $p['numero_nf'] ??= (string) (5000 + count(array_filter($pedidos, fn($x) => !empty($x['numero_nf']))) + 1);
+                $p['faturado_em'] ??= date('Y-m-d H:i:s');
+                $this->gravarPedidos($pedidos);
+                return $p['numero_nf'];
+            }
+        }
+        throw new \RuntimeException("Pedido $omieCodigo não encontrado no Omie (simulado).");
+    }
+
     public function consultarPedido(string $omieCodigo): array
     {
         foreach ($this->pedidos() as $p) {
@@ -136,20 +196,6 @@ class OmieFake implements ErpInterface
             }
         }
         throw new \RuntimeException("Pedido $omieCodigo não encontrado no Omie (simulado).");
-    }
-
-    /** Só no Fake: simula o faturamento de um pedido (usado na demonstração do fluxo completo) */
-    public function simularFaturamento(string $omieCodigo): void
-    {
-        $pedidos = $this->pedidos();
-        foreach ($pedidos as &$p) {
-            if ($p['omie_codigo'] === $omieCodigo) {
-                $p['etapa'] = '60';
-                $p['numero_nf'] = (string) random_int(10000, 99999);
-                $p['faturado_em'] = date('Y-m-d H:i:s');
-            }
-        }
-        $this->gravarPedidos($pedidos);
     }
 
     public function testarConexao(): array

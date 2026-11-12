@@ -102,6 +102,11 @@ class OmieClient implements ErpInterface
         throw new \LogicException('OmieClient::listarFaturamento — implementar na Fase 2 (produtos/nfconsultar).');
     }
 
+    public function aprovarPedido(string $omieCodigo): array
+    {
+        throw new \LogicException('OmieClient::aprovarPedido — implementar na Fase 2 (produtos/pedido, TrocarEtapaPedido para a etapa de aprovado).');
+    }
+
     public function enviarPedido(array $pedido): array
     {
         throw new \LogicException('OmieClient::enviarPedido — implementar na Fase 2 (produtos/pedido, IncluirPedido com codigo_pedido_integracao = uuid).');

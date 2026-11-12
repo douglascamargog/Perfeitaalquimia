@@ -42,6 +42,9 @@ interface ErpInterface
      */
     public function enviarPedido(array $pedido): array;
 
+    /** O Financeiro aprovou no One: avança o pedido no ERP para a etapa "aprovado". Devolve [omie_codigo, etapa] */
+    public function aprovarPedido(string $omieCodigo): array;
+
     /** Situação atual do pedido no ERP: [omie_codigo, etapa, faturado (bool), numero_nf] */
     public function consultarPedido(string $omieCodigo): array;
 
