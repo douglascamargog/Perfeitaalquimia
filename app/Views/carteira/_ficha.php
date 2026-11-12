@@ -1,8 +1,10 @@
 <?php
 /**
  * Ficha do cliente (carregada dentro da gaveta lateral).
- * Variáveis: $c (cliente), $eventos, $retorno, $etapas, $prioridades, $vendedores, $canais
+ * Variáveis: $c (cliente), $eventos, $retorno, $etapas, $prioridades, $vendedores, $canais, $cobranca (caso aberto ou null)
  */
+use App\Core\Auth;
+use App\Core\Visao;
 use App\Models\ClienteEvento;
 use App\Services\Normalizar;
 
@@ -35,7 +37,9 @@ $linkSeguro = function (?string $url): string {
     <div class="ficha-selos">
       <span class="selo-etapa" style="--cor: <?= e($c['etapa_cor']) ?>"><?= e($c['etapa']) ?></span>
       <span class="selo prioridade-<?= e(Normalizar::semAcento($c['prioridade'])) ?>"><?= e($c['prioridade']) ?></span>
-      <?php if ($c['credito_situacao'] === 'atraso'): ?><span class="selo vermelho">Título em atraso</span><?php endif; ?>
+      <?php if ($cobranca): ?>
+        <span class="selo vermelho">Em cobrança<?= Auth::pode('cobranca.ver') ? ' · ' . e(dinheiro((float) $cobranca['valor_total'])) . ' · ' . (int) $cobranca['dias_atraso'] . ' dias' : '' ?></span>
+      <?php elseif ($c['credito_situacao'] === 'atraso'): ?><span class="selo vermelho">Título em atraso</span><?php endif; ?>
     </div>
   </div>
   <button class="botao-icone escuro" type="button" data-fechar-gaveta aria-label="Fechar ficha"><svg class="icone"><use href="<?= $icones ?>#fechar"/></svg></button>
@@ -72,6 +76,7 @@ $linkSeguro = function (?string $url): string {
     </dl>
     <?php if ($c['mix_produtos']): ?><p class="ficha-nota"><strong>Mix:</strong> <?= e($c['mix_produtos']) ?></p><?php endif; ?>
     <?php if ($c['validacao']): ?><p class="ficha-nota alerta"><strong>A validar:</strong> <?= e($c['validacao']) ?></p><?php endif; ?>
+    <?= Visao::renderizar('carteira/_busca_contatos', ['clienteId' => $id, 'destaque' => !$c['telefone'] && !$c['whatsapp']]) ?>
   </section>
 
   <!-- Gestão comercial -->
@@ -140,6 +145,32 @@ $linkSeguro = function (?string $url): string {
       <?php endforeach; ?>
     </div>
   </section>
+
+  <?php if (Auth::pode('cobranca.enviar')): ?>
+    <!-- Cobrança -->
+    <?php if ($cobranca): ?>
+      <section class="ficha-secao">
+        <h3>Cobrança</h3>
+        <p class="pequeno">Este cliente está na Cobrança (etapa <strong><?= e($cobranca['etapa']) ?></strong>). Combine com o Financeiro antes de oferecer boleto.</p>
+        <?php if (Auth::pode('cobranca.ver')): ?><a class="botao contorno pequeno" href="<?= url('/cobranca/lista') ?>?q=<?= rawurlencode((string) ($c['cnpj'] ?: $c['razao_social'])) ?>">Abrir na Cobrança</a><?php endif; ?>
+      </section>
+    <?php else: ?>
+      <details class="ficha-secao">
+        <summary><h3>Enviar para cobrança</h3></summary>
+        <form method="post" action="<?= url("/carteira/clientes/$id/cobranca") ?>" data-ajax data-confirmar="Enviar este cliente para a Cobrança? O Financeiro passa a cuidar do título.">
+          <?= csrf_campo() ?>
+          <p class="pequeno suave">Use quando o cliente tem um título vencido e você não consegue resolver. O caso vai para a função Cobrança.</p>
+          <div class="grade-campos">
+            <div class="campo"><label for="cb-valor">Valor em aberto (R$)</label><input type="text" id="cb-valor" name="valor" inputmode="decimal" required placeholder="0,00"></div>
+            <div class="campo"><label for="cb-venc">Venceu em</label><input type="date" id="cb-venc" name="vencimento" max="<?= date('Y-m-d') ?>" required></div>
+            <div class="campo"><label for="cb-doc">Nota / boleto (opcional)</label><input type="text" id="cb-doc" name="documento" maxlength="40"></div>
+          </div>
+          <div class="campo"><label for="cb-obs">O que já foi tentado</label><input type="text" id="cb-obs" name="observacao" maxlength="300" placeholder="Ex.: não atende há 2 semanas, WhatsApp não responde"></div>
+          <button class="botao contorno" type="submit">Enviar para cobrança</button>
+        </form>
+      </details>
+    <?php endif; ?>
+  <?php endif; ?>
 
   <!-- Pedidos (etapa 4) -->
   <section class="ficha-secao">

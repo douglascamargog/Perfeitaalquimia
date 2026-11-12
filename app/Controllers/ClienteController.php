@@ -48,6 +48,7 @@ class ClienteController extends Controller
             'prioridades' => Listas::prioridades(),
             'vendedores'  => Auth::pode('carteira.transferir') ? Listas::vendedores() : [],
             'canais'      => array_keys(CarteiraService::CANAIS),
+            'cobranca'    => \App\Models\Cobranca::doCliente((int) $cliente['id']),
         ]);
     }
 

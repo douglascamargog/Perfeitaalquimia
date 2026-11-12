@@ -89,10 +89,16 @@ class Banco
         return self::executar("UPDATE `$tabela` SET $sets WHERE id = ?", [...array_values($dados), $id]);
     }
 
-    /** Executa várias operações juntas: ou tudo dá certo, ou nada é gravado */
+    /**
+     * Executa várias operações juntas: ou tudo dá certo, ou nada é gravado.
+     * Se já houver uma transação aberta (uma regra chamando outra), só executa dentro dela.
+     */
     public static function transacao(callable $funcao): mixed
     {
         $pdo = self::pdo();
+        if ($pdo->inTransaction()) {
+            return $funcao();
+        }
         $pdo->beginTransaction();
         try {
             $resultado = $funcao();

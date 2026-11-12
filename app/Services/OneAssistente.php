@@ -41,6 +41,10 @@ class OneAssistente
             $falas[] = self::recompra();
             $falas[] = self::campanha();
         }
+        if (Auth::pode('cobranca.ver')) {
+            $falas[] = self::promessasHoje();
+            $falas[] = self::semContato();
+        }
         if (Auth::pode('meu_mes.usar')) {
             $falas[] = self::metaIndividual($id);
             $falas[] = self::metaEquipe();
@@ -82,6 +86,20 @@ class OneAssistente
     }
 
     /** Clientes que já passaram do intervalo médio de compra (alerta de recompra) */
+    /** Cobrança: promessas de pagamento que vencem hoje */
+    private static function promessasHoje(): ?array
+    {
+        $qtd = (int) Banco::valor("SELECT COUNT(*) FROM cobrancas WHERE situacao = 'aberta' AND promessa_em = CURDATE()");
+        return $qtd ? ['humor' => 'ideia', 'texto' => "$qtd promessa(s) de pagamento vencem hoje. Vale conferir se o Pix/boleto entrou.", 'link' => '/cobranca', 'acao' => 'Abrir Cobrança'] : null;
+    }
+
+    /** Cobrança: casos sem contato (pedem a busca com IA) */
+    private static function semContato(): ?array
+    {
+        $qtd = (int) Banco::valor("SELECT COUNT(*) FROM cobrancas cb JOIN cobranca_etapas e ON e.id = cb.etapa_id WHERE cb.situacao = 'aberta' AND e.tipo = 'sem_contato'");
+        return $qtd ? ['humor' => 'pensando', 'texto' => "$qtd cliente(s) em cobrança estão sem contato. Que tal eu procurar telefones e WhatsApp novos na internet? É só abrir o caso e clicar em \"Buscar contatos com IA\".", 'link' => '/cobranca', 'acao' => 'Ver casos'] : null;
+    }
+
     private static function recompra(): ?array
     {
         $escopo = Auth::pode('carteira.ver_todas') ? '' : ' AND responsavel_id = ' . (int) Auth::id();

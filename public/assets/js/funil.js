@@ -46,7 +46,9 @@ if (funil) {
     corpo.append('etapa_id', destino.dataset.etapa);
     corpo.append('_csrf', CSRF);
     try {
-      const r = await fetch(`${BASE}/carteira/clientes/${card.dataset.cliente}/etapa`, { method: 'POST', body: corpo, headers: { Accept: 'application/json' } });
+      // O funil da Cobrança usa outro endereço: data-url-etapa="/cobranca/{id}/etapa"
+      const modelo = funil.dataset.urlEtapa || '/carteira/clientes/{id}/etapa';
+      const r = await fetch(BASE + modelo.replace('{id}', card.dataset.cliente), { method: 'POST', body: corpo, headers: { Accept: 'application/json' } });
       const dados = await r.json();
       if (!r.ok || !dados.ok) throw new Error(dados.mensagem || 'Não foi possível mudar a etapa.');
       avisar(`Movido para "${destino.querySelector('h3').textContent}".`);

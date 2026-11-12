@@ -41,9 +41,46 @@ class OmieFake implements ErpInterface
         return $this->filtrarPorData($this->ler('clientes'), $alteradoDesde);
     }
 
+    /**
+     * Títulos a receber simulados.
+     * Se existir database/seeds/omie_fake/titulos.json, usa o arquivo. Senão, inventa títulos de forma
+     * DETERMINÍSTICA (sempre os mesmos) para ~25% dos clientes (tipo cliente) com CNPJ: alguns vencidos, alguns pagos.
+     */
     public function listarTitulos(?string $alteradoDesde = null): array
     {
-        return $this->ler('titulos');
+        $doArquivo = $this->ler('titulos');
+        if ($doArquivo) {
+            return $this->filtrarPorData($doArquivo, $alteradoDesde);
+        }
+        $titulos = [];
+        $hoje = new \DateTimeImmutable('today');
+        $cnpjs = \App\Core\Banco::todos("SELECT cnpj FROM clientes WHERE tipo = 'cliente' AND cnpj IS NOT NULL AND excluido_em IS NULL ORDER BY id");
+        foreach ($cnpjs as ['cnpj' => $cnpj]) {
+            $semente = crc32($cnpj);
+            if ($semente % 4 !== 0) {
+                continue;
+            }
+            $parcelas = 1 + $semente % 3;
+            $atrasoBase = 3 + ($semente >> 4) % 140;                 // 3 a 142 dias
+            $valor = 280 + (($semente >> 8) % 45) * 97.35;           // R$ 280 a ~R$ 4.600
+            $nota = 10000 + ($semente >> 12) % 89999;
+            for ($p = 1; $p <= $parcelas; $p++) {
+                $vencimento = $hoje->modify('-' . max(1, $atrasoBase - ($p - 1) * 30) . ' days');
+                $pago = ($semente >> (16 + $p)) % 5 === 0;           // ~20% das parcelas já pagas
+                $titulos[] = [
+                    'omie_codigo' => "FAKE-$cnpj-$p",
+                    'cnpj'        => $cnpj,
+                    'documento'   => "NF $nota",
+                    'parcela'     => "$p/$parcelas",
+                    'valor'       => round($valor / $parcelas, 2),
+                    'vencimento'  => $vencimento->format('Y-m-d'),
+                    'pago_em'     => $pago ? $vencimento->modify('+2 days')->format('Y-m-d') : null,
+                    'situacao'    => $pago ? 'pago' : 'atrasado',
+                    'alterado_em' => $vencimento->format('Y-m-d H:i:s'),
+                ];
+            }
+        }
+        return $this->filtrarPorData($titulos, $alteradoDesde);
     }
 
     public function listarFaturamento(?string $alteradoDesde = null): array

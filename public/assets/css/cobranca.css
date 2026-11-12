@@ -1,0 +1,54 @@
+/* =====================================================================
+   Cobrança: números do topo, funil, caso na gaveta e relatório de impressão.
+   (Usa também carteira.css para filtros, funil e gaveta.)
+   ===================================================================== */
+.selo.laranja { background: var(--aviso-fundo); color: var(--aviso); }
+.selo.verde { background: var(--sucesso-fundo); color: var(--sucesso); }
+.direita { text-align: right; }
+
+/* Números do topo */
+.cob-numeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 0 0 18px; }
+.cob-numero { background: var(--card); border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px 16px; display: grid; gap: 2px;
+  color: var(--texto); text-decoration: none; box-shadow: var(--sombra); }
+.cob-numero span { font-size: .76rem; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .04em; }
+.cob-numero strong { font-size: clamp(1.15rem, 1.5vw, 1.45rem); color: var(--verde-escuro); white-space: nowrap; }
+.cob-numero small { font-size: .78rem; color: var(--texto-suave); }
+.cob-numero.destaque { background: var(--verde-escuro); border-color: var(--verde-escuro); }
+.cob-numero.destaque span, .cob-numero.destaque small { color: #c7d3c9; }
+.cob-numero.destaque strong { color: var(--lima); }
+.cob-numero.alerta strong { color: var(--perigo); }
+.cob-numero.verde strong { color: var(--sucesso); }
+a.cob-numero:hover { border-color: var(--lima-escuro); }
+
+/* Funil */
+.cob-coluna-valor { font-size: .78rem; color: #4a5a4d; margin: -6px 4px 10px; font-weight: 600; }
+.funil-coluna.encerra { background: #f3f4f1; }
+.cob-card-valor { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0 2px; }
+.cob-card-valor strong { font-size: .98rem; color: var(--verde-escuro); }
+.cob-promessa { color: var(--sucesso); font-weight: 600; }
+.funil-vazio { font-size: .8rem; color: var(--texto-suave); text-align: center; margin: 18px 0; }
+
+/* Caso na gaveta */
+.cob-valor-grande { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.cob-valor-grande > div { background: var(--verde-claro); border-radius: var(--raio-pequeno); padding: 10px 12px; display: grid; }
+.cob-valor-grande span { font-size: .72rem; color: var(--texto-suave); text-transform: uppercase; }
+.cob-valor-grande strong { font-size: 1.15rem; color: var(--verde-escuro); }
+.cob-valor-grande small { font-size: .78rem; color: var(--texto-suave); }
+.cob-titulos { font-size: .86rem; }
+.cob-titulos tr.pago td { color: var(--texto-suave); }
+.cob-mensagem { border: 1px solid var(--borda); border-radius: var(--raio-pequeno); padding: 10px 12px; margin-bottom: 10px; }
+.cob-mensagem p { margin: 4px 0 8px; font-size: .88rem; }
+.linha-campo { display: flex; gap: 6px; }
+.linha-campo select { flex: 1; min-width: 0; }
+
+/* Relatório para imprimir (A4) */
+.cob-relatorio { background: #fff; }
+.cob-relatorio table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.cob-relatorio th, .cob-relatorio td { border-bottom: 1px solid #ddd; padding: 5px 6px; text-align: left; }
+.cob-relatorio .direita { text-align: right; }
+@media print {
+  @page { size: A4; margin: 14mm; }
+  .menu-lateral, .topo, .faixa-demo, .one-botao, .one-painel, .nao-imprimir { display: none !important; }
+  body, .conteudo { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  .cob-relatorio { box-shadow: none; border: 0; }
+}

@@ -54,6 +54,26 @@ return [
     ['POST', '/reativacao/processar',           'ReativacaoController@processar', 'carteira.ver_todas'],
     ['POST', '/reativacao/{id}/devolver',       'ReativacaoController@devolver', 'carteira.ver_propria|carteira.ver_todas'],
 
+    // ---------- Cobrança (funil próprio) ----------
+    ['GET',  '/cobranca',                       'CobrancaController@funil',       'cobranca.ver'],
+    ['GET',  '/cobranca/lista',                 'CobrancaController@lista',       'cobranca.ver'],
+    ['GET',  '/cobranca/imprimir',              'CobrancaController@imprimir',    'cobranca.ver'],
+    ['GET',  '/cobranca/exportar.csv',          'CobrancaController@exportar',    'cobranca.ver'],
+    ['POST', '/cobranca/importar',              'CobrancaController@importar',    'cobranca.gerenciar'],
+    ['GET',  '/cobranca/{id}/caso',             'CobrancaController@caso',        'cobranca.ver'],
+    ['POST', '/cobranca/{id}/tentativa',        'CobrancaController@tentativa',   'cobranca.gerenciar'],
+    ['POST', '/cobranca/{id}/promessa',         'CobrancaController@promessa',    'cobranca.gerenciar'],
+    ['POST', '/cobranca/{id}/etapa',            'CobrancaController@etapa',       'cobranca.gerenciar'],
+    ['POST', '/cobranca/{id}/responsavel',      'CobrancaController@responsavel', 'cobranca.gerenciar'],
+    ['POST', '/cobranca/{id}/observacoes',      'CobrancaController@observacoes', 'cobranca.gerenciar'],
+    ['POST', '/cobranca/titulos/{id}/pago',     'CobrancaController@tituloPago',  'cobranca.gerenciar'],
+    ['POST', '/carteira/clientes/{id}/cobranca', 'CobrancaController@enviar',     'cobranca.enviar'],
+
+    // ---------- Busca de contatos com IA (ficha do cliente e caso de cobrança) ----------
+    ['GET',  '/clientes/{id}/contatos-ia',          'BuscaContatoController@ultima',  'contatos.buscar_ia'],
+    ['POST', '/clientes/{id}/contatos-ia',          'BuscaContatoController@buscar',  'contatos.buscar_ia'],
+    ['POST', '/clientes/{id}/contatos-ia/aplicar',  'BuscaContatoController@aplicar', 'contatos.buscar_ia'],
+
     // ---------- Meu mês (meta individual e da equipe) ----------
     ['GET',  '/meu-mes',                        'MeuMesController@index',          'meu_mes.usar'],
     ['POST', '/meu-mes/meta',                   'MeuMesController@salvarMeta',     'meu_mes.usar'],
