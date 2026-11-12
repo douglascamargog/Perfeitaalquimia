@@ -4,25 +4,27 @@
    Para mudar uma cor no sistema todo, mude só a variável aqui em :root.
    ===================================================================== */
 :root {
-  --verde-escuro: #0f3b2e;      /* menu, títulos, botões principais */
-  --verde-medio: #1d5c47;
-  --verde-claro: #e8f2ec;
+  /* Paleta da Carteira Comercial V4 */
+  --menu: #101711;              /* fundo do menu lateral (quase preto esverdeado) */
+  --verde-escuro: #14251b;      /* títulos e botões principais */
+  --verde-medio: #377b3e;       /* links */
+  --verde-claro: #eff8da;       /* fundos suaves */
   --lima: #caff4d;              /* destaque da marca */
-  --lima-escuro: #a6d92f;
-  --fundo: #f4f6f2;             /* fundo das telas */
+  --lima-escuro: #9bd344;
+  --fundo: #f4f6f3;             /* fundo das telas */
   --card: #ffffff;
-  --texto: #1b2622;
-  --texto-suave: #5d6b65;
-  --borda: #dfe5df;
+  --texto: #182218;
+  --texto-suave: #758078;
+  --borda: #e7ece6;
   --perigo: #c62828;
   --perigo-fundo: #fdecea;
   --aviso: #8a5a00;
   --aviso-fundo: #fff4d6;
   --sucesso: #1e7a3c;
   --sucesso-fundo: #e5f6ea;
-  --raio: 16px;                 /* cantos arredondados dos cards */
-  --raio-pequeno: 10px;
-  --sombra: 0 1px 2px rgba(15, 59, 46, .06), 0 4px 16px rgba(15, 59, 46, .06);
+  --raio: 21px;                 /* cantos arredondados dos cards */
+  --raio-pequeno: 11px;
+  --sombra: 0 14px 38px rgba(20, 32, 23, .05);
   --fonte: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -33,12 +35,13 @@ body {
   font-size: 15px;
   line-height: 1.5;
   color: var(--texto);
-  background: var(--fundo);
+  background: radial-gradient(circle at 84% 0%, rgba(209, 250, 155, .12), transparent 27%), var(--fundo);
+  letter-spacing: -.01em;
   -webkit-font-smoothing: antialiased;
 }
 a { color: var(--verde-medio); }
 h1, h2, h3 { color: var(--verde-escuro); line-height: 1.25; margin: 0 0 .5em; }
-h1 { font-size: 1.6rem; }
+h1 { font-size: 1.6rem; font-weight: 860; letter-spacing: -.04em; }
 h2 { font-size: 1.2rem; }
 h3 { font-size: 1rem; }
 p { margin: 0 0 1em; }
@@ -84,7 +87,8 @@ p { margin: 0 0 1em; }
 .botao:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible {
   outline: 3px solid var(--lima-escuro); outline-offset: 2px;
 }
-.botao.lima { background: var(--lima); color: var(--verde-escuro); }
+.botao { background: #191f18; color: #f1ffc2; }
+.botao.lima { background: var(--lima); color: #142214; }
 .botao.contorno { background: transparent; color: var(--verde-escuro); border-color: var(--borda); }
 .botao.contorno:hover { background: var(--verde-claro); filter: none; }
 .botao.pequeno { padding: 5px 12px; font-size: .8rem; }

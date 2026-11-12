@@ -13,11 +13,11 @@ use App\Core\Sessao;
   <link rel="stylesheet" href="<?= asset('css/base.css') ?>">
   <style>
     .pagina-simples { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
-      background: radial-gradient(circle at 85% 10%, rgba(202,255,77,.35), transparent 40%), var(--verde-escuro); }
+      background: radial-gradient(ellipse at 78% 8%, #a2de3c36 0, transparent 34%), linear-gradient(125deg, #0f1711 0%, #19261a 55%, #243927 100%); }
     .caixa-simples { width: 100%; max-width: 420px; }
     .caixa-simples .marca-login { display: flex; align-items: center; gap: 12px; color: #fff; margin-bottom: 20px; }
-    .caixa-simples .marca-login span { width: 44px; height: 44px; border-radius: 14px; background: var(--lima);
-      color: var(--verde-escuro); display: grid; place-items: center; }
+    .caixa-simples .marca-login span { width: 64px; height: 60px; border-radius: 14px; background: #fff; padding: 6px; display: grid; place-items: center; }
+    .caixa-simples .marca-login img { width: 100%; height: 100%; object-fit: contain; }
     .caixa-simples .marca-login strong { font-size: 1.2rem; }
   </style>
 </head>
@@ -28,8 +28,8 @@ use App\Core\Sessao;
 <div class="pagina-simples">
   <div class="caixa-simples">
     <div class="marca-login">
-      <span><svg class="icone"><use href="<?= asset('img/icones.svg') ?>#folha"/></svg></span>
-      <div><strong><?= e(config('app_nome')) ?></strong><div style="font-size:.8rem;color:#9fbcb0">Sistema unificado</div></div>
+      <span><img src="<?= asset('img/logo.png') ?>" alt="Logo <?= e(config('app_nome')) ?>"></span>
+      <div><strong><?= e(config('app_nome')) ?></strong><div style="font-size:.8rem;color:#a5b1a4">Sistema unificado</div></div>
     </div>
     <?php foreach (Sessao::avisos() as $aviso): ?>
       <div class="aviso <?= e($aviso['tipo']) ?>" role="status"><?= e($aviso['mensagem']) ?></div>

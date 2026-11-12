@@ -27,6 +27,12 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
   <title><?= e($titulo ?? '') ?> · <?= e(config('app_nome')) ?></title>
   <link rel="stylesheet" href="<?= asset('css/base.css') ?>">
   <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
+  <?php // CSS extras da tela: $estilos = ['carteira.css'] ou endereços externos (https://...) ?>
+  <?php foreach ($estilos ?? [] as $css): ?>
+    <link rel="stylesheet" href="<?= str_starts_with($css, 'https://') ? e($css) : asset('css/' . $css) ?>">
+  <?php endforeach; ?>
+  <meta name="csrf" content="<?= e(\App\Core\Csrf::token()) ?>">
+  <meta name="base" content="<?= e(url_base()) ?>">
 </head>
 <body>
 <?php if (config('modo_demo')): ?>
@@ -36,7 +42,7 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
 <div class="estrutura">
   <aside class="menu-lateral" aria-label="Menu principal">
     <a class="marca" href="<?= url('/') ?>">
-      <span class="marca-simbolo"><svg class="icone"><use href="<?= $icones ?>#folha"/></svg></span>
+      <span class="marca-logo"><img src="<?= asset('img/logo.png') ?>" alt="Logo <?= e(config('app_nome')) ?>"></span>
       <span><strong><?= e(config('app_nome')) ?></strong><span>Sistema unificado</span></span>
     </a>
     <nav>
@@ -86,5 +92,13 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
   </div>
 </div>
 <script type="module" src="<?= asset('js/app.js') ?>"></script>
+<?php // JS extras da tela: $scripts = ['carteira.js'] (módulos) ou bibliotecas externas (https://...) ?>
+<?php foreach ($scripts ?? [] as $js): ?>
+  <?php if (str_starts_with($js, 'https://')): ?>
+    <script src="<?= e($js) ?>"></script>
+  <?php else: ?>
+    <script type="module" src="<?= asset('js/' . $js) ?>"></script>
+  <?php endif; ?>
+<?php endforeach; ?>
 </body>
 </html>
