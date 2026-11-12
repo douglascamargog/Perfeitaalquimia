@@ -1,0 +1,2 @@
+# Segurança extra: esta pasta nunca deve ser acessada pela web
+Require all denied

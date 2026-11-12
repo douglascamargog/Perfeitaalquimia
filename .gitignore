@@ -1,0 +1,19 @@
+# Configuração com senhas e chaves — nunca versionar
+/config/config.php
+
+# Arquivos gerados em execução (logs, uploads de importação, cache, pedidos do OmieFake)
+/storage/*
+!/storage/.htaccess
+!/storage/*/
+/storage/*/*
+!/storage/*/.gitkeep
+
+# Referências originais (arquivos grandes, com dados de clientes — LGPD)
+/referencias/*
+!/referencias/LEIA-ME.md
+
+# Sistema operacional / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

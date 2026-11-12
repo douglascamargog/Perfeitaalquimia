@@ -1,0 +1,8 @@
+# Usado quando o projeto inteiro é enviado para public_html (HostGator).
+# Tudo é redirecionado internamente para a pasta /public — as pastas app/, config/,
+# database/, storage/ e referencias/ ficam inacessíveis pela web.
+Options -Indexes
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
