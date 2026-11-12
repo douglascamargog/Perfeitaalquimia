@@ -1,0 +1,67 @@
+/* =====================================================================
+   One Vendas — app do vendedor externo (celular primeiro).
+   ===================================================================== */
+body.ap { background: var(--fundo); min-height: 100vh; padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
+.ap-topo { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--verde-escuro); color: #fff; }
+.ap-titulo { display: grid; flex: 1; min-width: 0; }
+.ap-titulo small { color: #a8b5aa; font-size: .76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ap-rede { font-size: .72rem; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 99px; }
+.ap-rede.on { background: var(--lima); color: var(--verde-escuro); }
+.ap-rede.off { background: #ff9b8f; color: #4a0f08; }
+.ap-aviso { background: var(--aviso-fundo); color: var(--aviso); padding: 10px 14px; font-size: .86rem; }
+.ap-aviso button, .ap-aviso a { color: var(--verde-escuro); font-weight: 800; background: none; border: 0; text-decoration: underline; cursor: pointer; font: inherit; }
+.ap-conteudo { padding: 12px 14px; max-width: 720px; margin: 0 auto; }
+.ap-carregando, .ap-vazio { text-align: center; color: var(--texto-suave); padding: 40px 10px; }
+.ap-abas { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(3, 1fr); background: #fff; border-top: 1px solid var(--borda);
+  padding-bottom: env(safe-area-inset-bottom); }
+.ap-abas button { position: relative; border: 0; background: none; padding: 14px 4px; font: inherit; font-weight: 700; color: var(--texto-suave); cursor: pointer; }
+.ap-abas button.ativa { color: var(--verde-escuro); box-shadow: inset 0 3px 0 var(--lima-escuro); }
+.ap-abas b { position: absolute; top: 6px; right: 18%; min-width: 20px; height: 20px; border-radius: 99px; background: #e8590c; color: #fff; font-size: .72rem; display: grid; place-items: center; padding: 0 5px; }
+.ap-busca input { width: 100%; font-size: 1rem; }
+.ap-contagem { font-size: .8rem; color: var(--texto-suave); margin: 8px 2px; }
+.ap-clientes, .ap-produtos, .ap-fila { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ap-cliente, .ap-item, .ap-cartao { background: #fff; border: 1px solid var(--borda); border-radius: 16px; padding: 12px; }
+.ap-cliente-topo, .ap-item-topo { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.ap-cliente small, .ap-item small { color: var(--texto-suave); display: block; margin: 2px 0 8px; }
+.ap-selos { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.ap-acoes { display: flex; flex-wrap: wrap; gap: 6px; }
+.selo.laranja { background: var(--aviso-fundo); color: var(--aviso); }
+.selo.verde { background: var(--sucesso-fundo); color: var(--sucesso); }
+.ap-pedido-topo { margin-bottom: 10px; }
+.ap-pedido-topo h1 { margin: 4px 0 0; font-size: 1.3rem; letter-spacing: -.02em; }
+.ap-pedido-topo small { color: var(--texto-suave); }
+.ap-voltar { background: none; border: 0; color: var(--verde-medio); font-weight: 700; padding: 0; cursor: pointer; font: inherit; }
+.ap-produtos { margin-top: 10px; }
+.ap-produtos li { display: grid; grid-template-columns: 52px minmax(0, 1fr) 130px; gap: 10px; align-items: center; background: #fff; border: 1px solid var(--borda); border-radius: 14px; padding: 8px; }
+.ap-produtos li.escolhido { border-color: var(--lima-escuro); background: #f6fde8; }
+.ap-produtos img, .ap-sem-foto { width: 52px; height: 52px; object-fit: contain; background: #f3f6f0; border-radius: 10px; display: block; }
+.ap-produtos div:nth-child(2) { display: grid; min-width: 0; }
+.ap-produtos strong { font-size: .88rem; line-height: 1.2; }
+.ap-produtos small { color: var(--texto-suave); font-size: .74rem; }
+.ap-produtos b { color: var(--verde-escuro); }
+.ap-qtd { display: grid; grid-template-columns: 36px 1fr 36px; gap: 3px; }
+.ap-qtd button { height: 40px; border-radius: 10px; border: 1px solid var(--borda); background: #f3f6f0; font-size: 1.2rem; font-weight: 700; color: var(--verde-escuro); }
+.ap-qtd button[data-mais] { background: var(--lima); border-color: var(--lima); }
+.ap-qtd input { height: 40px; text-align: center; padding: 0; min-width: 0; font-weight: 700; font-size: 1rem; }
+.ap-resumo { position: sticky; bottom: calc(60px + env(safe-area-inset-bottom)); margin-top: 12px; background: #fff; border: 1px solid var(--borda); border-radius: 18px; padding: 12px;
+  display: grid; gap: 8px; box-shadow: 0 -8px 24px rgba(20, 32, 23, .08); max-height: 60vh; overflow-y: auto; }
+.ap-total { display: flex; justify-content: space-between; align-items: baseline; }
+.ap-total strong { font-size: 1.4rem; color: var(--verde-escuro); }
+.ap-minimo { border-radius: 10px; padding: 8px 10px; font-size: .84rem; font-weight: 600; }
+.ap-minimo.falta { background: var(--aviso-fundo); color: var(--aviso); }
+.ap-minimo.ok { background: var(--sucesso-fundo); color: var(--sucesso); }
+.ap-forma { border: 1px solid var(--borda); border-radius: 12px; padding: 4px 10px 8px; margin: 0; display: grid; gap: 4px; }
+.ap-forma legend { font-weight: 800; font-size: .88rem; padding: 0 4px; }
+.ap-forma.bloqueada { background: #f6f6f4; color: var(--texto-suave); }
+.ap-forma .opcao.desligada { color: var(--texto-suave); }
+.ap-nota { color: var(--texto-suave); font-size: .76rem; display: block; }
+.ap-cabeca { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.ap-cabeca h1 { margin: 0; font-size: 1.25rem; }
+.ap-erro { background: var(--perigo-fundo); color: var(--perigo); border-radius: 10px; padding: 8px 10px; font-size: .84rem; margin: 6px 0; }
+.ap-cartao { display: grid; gap: 8px; margin-bottom: 10px; }
+.ap-cartao p { margin: 0; }
+.aviso-flutuante { bottom: calc(80px + env(safe-area-inset-bottom)) !important; }
+.aviso-flutuante { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; z-index: 80;
+  background: #14251b; color: #eaffc0; padding: 12px 20px; border-radius: 12px; font-weight: 650; font-size: .88rem; transition: .2s; box-shadow: 0 10px 30px #0003; }
+.aviso-flutuante.visivel { opacity: 1; transform: translate(-50%, 0); }
+.aviso-flutuante.erro { background: var(--perigo); color: #fff; }

@@ -135,6 +135,14 @@ return [
     ['GET',  '/recompra',               'RecompraController@index',  'recompra.ver'],
     ['POST', '/recompra/{id}/agendar',  'RecompraController@agendar', 'recompra.ver'],
 
+    // ---------- App do vendedor externo (PWA offline) ----------
+    ['GET',  '/app',                      'AppController@index',       'app.usar'],
+    ['GET',  '/app/manifest.webmanifest', 'AppController@manifest',    'publico'],
+    ['GET',  '/app/sw.js',                'AppController@sw',          'publico'],
+    ['GET',  '/app/api/dados',            'AppController@dados',       'app.usar'],
+    ['POST', '/app/api/sincronizar',      'AppController@sincronizar', 'app.usar'],
+    ['GET',  '/app/api/situacao',         'AppController@situacao',    'app.usar'],
+
     // ---------- Meu mês (meta individual e da equipe) ----------
     ['GET',  '/meu-mes',                        'MeuMesController@index',          'meu_mes.usar'],
     ['POST', '/meu-mes/meta',                   'MeuMesController@salvarMeta',     'meu_mes.usar'],

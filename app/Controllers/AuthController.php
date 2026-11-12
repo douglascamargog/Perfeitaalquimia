@@ -30,7 +30,10 @@ class AuthController extends Controller
             Sessao::aviso('aviso', 'Crie uma senha nova para continuar.');
             redirecionar('/minha-senha');
         }
-        redirecionar('/');
+        // Volta para onde a pessoa estava indo (só caminhos internos)
+        $voltar = (string) Sessao::get('voltar_para', '/');
+        Sessao::remover('voltar_para');
+        redirecionar(preg_match('#^/[a-z0-9/_-]*$#i', $voltar) && $voltar !== '/entrar' ? $voltar : '/');
     }
 
     public function sair(): void

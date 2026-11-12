@@ -34,6 +34,12 @@ class Roteador
             }
             $parametros = array_filter($partes, 'is_string', ARRAY_FILTER_USE_KEY);
 
+            if ($metodo === 'POST' && !Csrf::valido() && self::querJson()) {
+                http_response_code(419);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['ok' => false, 'login' => true, 'mensagem' => 'A sessão mudou. Abra o app de novo com internet.']);
+                return;
+            }
             if ($metodo === 'POST' && !Csrf::valido()) {
                 $this->erro(419, 'A página expirou. Volte, recarregue e tente de novo.');
                 return;
@@ -57,6 +63,18 @@ class Roteador
             return true;
         }
         if (!Auth::logado()) {
+            // Chamada de API (o app pede JSON): responde 401 em vez de mandar para a tela de login
+            if (self::querJson()) {
+                http_response_code(401);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['ok' => false, 'login' => true, 'mensagem' => 'Sessão encerrada. Entre de novo.']);
+                exit;
+            }
+            // Depois de entrar, volta para a página que a pessoa tentou abrir (ex.: o app /app)
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+                $caminho = '/' . trim(substr((string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), strlen(url_base())), '/');
+                Sessao::set('voltar_para', $caminho);
+            }
             Sessao::aviso('aviso', 'Entre com seu usuário para continuar.');
             redirecionar('/entrar');
         }
@@ -75,6 +93,12 @@ class Roteador
             return false;
         }
         return true;
+    }
+
+    /** A requisição pede JSON (chamadas do app e dos scripts)? */
+    public static function querJson(): bool
+    {
+        return str_contains((string) ($_SERVER['HTTP_ACCEPT'] ?? ''), 'application/json') && !str_contains((string) ($_SERVER['HTTP_ACCEPT'] ?? ''), 'text/html');
     }
 
     public function erro(int $codigo, string $mensagem): void
