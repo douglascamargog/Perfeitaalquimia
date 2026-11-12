@@ -35,8 +35,20 @@ As 499 lojas da Carteira Comercial V4 são lidas de `referencias/dashboard.html`
 Esse arquivo **não vai para o git** (dados de clientes — LGPD): envie a pasta `referencias/` por FTP junto com o projeto
 antes de rodar a instalação. Sem ele, o sistema instala normalmente, só sem as lojas.
 
+Da mesma forma, a **Academia** (161 produtos, trilha, aulas e as imagens/vídeos) é lida de
+`referencias/Central_TelevendasPA_V2.html` na instalação. As imagens vão para `public/media/academia/` (fora do git).
+Os textos que eram fixos na Central (página da empresa, mídias do marketing, guia de atendimento) estão em
+`database/seeds/dados/academia_paginas.php`.
+
 Para trazer o trabalho que a equipe fez na Carteira V4 (etapas, contatos, histórico), use **Carteira › Importar**
 com o "Backup JSON" exportado pela V4.
+
+## Meu mês e meta da equipe
+
+- Cada pessoa cadastra a própria meta, registra as vendas e vê quantidade de vendas, ticket médio, projeção do dia e do mês.
+- O **gestor** (perfil Gestor = supervisor de vendas) cadastra a **meta da equipe** e lança o **total vendido pela equipe até o momento**;
+  o sistema recalcula sozinho a projeção do dia (ritmo), a projeção do mês e o necessário por dia.
+- Regra da projeção: vendido ÷ dias de trabalho decorridos × dias de trabalho do mês (o dia de referência conta como completo).
 
 ## Tarefas agendadas (cron)
 
