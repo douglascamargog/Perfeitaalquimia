@@ -25,6 +25,7 @@ return [
     'cobranca.enviar'         => ['Enviar um cliente da carteira para a Cobrança', ['gestor', 'vendedor', 'financeiro']],
     'contatos.buscar_ia'      => ['Buscar contatos novos do cliente na internet (IA)', ['gestor', 'vendedor', 'financeiro']],
     'painel.ver'              => ['Ver painel de vendas', ['gestor', 'financeiro']],
+    'recompra.ver'            => ['Ver a fila de recompra (clientes que passaram do prazo)', ['gestor', 'vendedor']],
     'metas.gerenciar'         => ['Cadastrar metas e lançar o vendido da equipe', ['gestor']],
     'meu_mes.usar'            => ['Usar o Meu mês (meta individual, vendas, tarefas)', ['gestor', 'vendedor']],
     'marketing.ver'           => ['Ver o Marketing (mural de posts e planejamento)', ['marketing', 'gestor']],
