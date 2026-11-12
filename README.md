@@ -85,6 +85,17 @@ com o "Backup JSON" exportado pela V4.
 - **Produtos** (Marketing): o mesmo cadastro da Academia; preços e estoque vêm do ERP; aqui se escolhe o que aparece no catálogo.
 - Demonstração: 5 clientes com acesso ao catálogo (senha `Demo@2026`; os CNPJs aparecem no relatório da instalação).
 
+## App do vendedor externo (One Vendas)
+
+- Endereço: `/app` (menu Comercial › App do externo). Abre no celular e **instala como aplicativo**: no Android, menu ⋮ › "Instalar app";
+  no iPhone, Compartilhar › "Adicionar à Tela de Início". Entra com o mesmo usuário do sistema.
+- Guarda no celular a **carteira da pessoa, os produtos, os preços da tabela de cada cliente** e as fotos. Depois funciona **sem internet**:
+  novo pedido (mesmas regras: mínimo da região, boleto bloqueado, condição com valor mínimo) e "Registrar visita".
+- Tudo vai para uma fila e é enviado sozinho quando a internet volta (ou no botão "Enviar agora"). Cada item tem um código único:
+  reenviar **nunca duplica**. Se o servidor recusar (ex.: preço mudou e ficou abaixo do mínimo), o item fica "com erro" com o motivo,
+  e dá para corrigir e reenviar. A tela Pedidos mostra: aguardando envio → enviado → aprovado → faturado (com NF) / recusado.
+- Precisa de **HTTPS** no subdomínio (o cPanel da HostGator emite o certificado grátis: SSL/TLS Status › Run AutoSSL).
+
 ## Painel de vendas, metas e recompra
 
 - **Painel de vendas** (Gestão; Gestor e Financeiro): faturamento dos **pedidos faturados** (bate com o ERP), pedidos, ticket médio,

@@ -2,7 +2,7 @@
 // Fila de envio: pedidos e visitas anotados no celular vão para o servidor
 // quando há internet. Cada item tem um uuid: reenviar nunca duplica.
 // =====================================================================
-import { listarFila, salvarItem, lerPacote } from './banco.js';
+import { listarFila, salvarItem, lerPacote, guardarPacote } from './banco.js';
 
 const BASE = document.querySelector('meta[name="base"]')?.content || '';
 const FINAIS = ['faturado', 'recusado', 'cancelado'];
@@ -22,8 +22,15 @@ async function chamar(caminho, opcoes = {}) {
 export async function enviar() {
   const pendentes = (await listarFila()).filter((i) => i.estado === 'pendente');
   if (!pendentes.length || !navigator.onLine) return { enviados: 0, erros: 0, login: false };
-  const resposta = await chamar('/app/api/sincronizar', { method: 'POST', body: JSON.stringify({ itens: pendentes }) });
-  if (resposta.login) return { enviados: 0, erros: 0, login: true };
+  let resposta = await chamar('/app/api/sincronizar', { method: 'POST', body: JSON.stringify({ itens: pendentes }) });
+  if (resposta.login) {
+    // O token pode ter mudado (novo login): busca o pacote atualizado e tenta uma vez de novo
+    const novo = await baixarPacote().catch(() => null);
+    if (!novo || novo.login) return { enviados: 0, erros: 0, login: true };
+    await guardarPacote(novo);
+    resposta = await chamar('/app/api/sincronizar', { method: 'POST', body: JSON.stringify({ itens: pendentes }) });
+    if (resposta.login) return { enviados: 0, erros: 0, login: true };
+  }
   let enviados = 0, erros = 0;
   for (const item of pendentes) {
     const r = resposta.resultados?.[item.uuid];

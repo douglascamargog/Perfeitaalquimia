@@ -334,8 +334,8 @@ navigator.serviceWorker?.addEventListener('message', (e) => { if (e.data === 'en
   pacote = await lerPacote();
   await mostrar('clientes');
   if (navigator.onLine) {
-    await sincronizar();          // primeiro envia o que ficou pendente
-    await baixar();               // depois atualiza carteira e preços
+    await baixar();               // atualiza carteira, preços e o token de segurança da sessão atual
+    await sincronizar();          // depois envia o que ficou pendente no celular
     await mostrar();
   }
 })();

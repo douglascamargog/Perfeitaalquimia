@@ -99,6 +99,12 @@ para "Tentativa de contato" as promessas de pagamento que venceram):
 php /home/doug9130/public_html/one/cron/cobranca.php
 ```
 
+## 9a. HTTPS (obrigatório para o app do externo)
+
+O app do vendedor externo (`/app`) só funciona offline com **HTTPS**. No cPanel › **SSL/TLS Status** › marque o subdomínio › **Run AutoSSL**
+(grátis). Depois abra `https://one.somosalquimia.com.br/app` no celular e instale (Android: menu ⋮ › Instalar app; iPhone: Compartilhar ›
+Adicionar à Tela de Início).
+
 ## 9b. Ligar a busca de contatos com IA (quando quiser)
 
 Até ligar, o botão **Buscar contatos com IA** funciona em modo demonstração (contatos fictícios, sem custo).
