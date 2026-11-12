@@ -29,6 +29,23 @@ PHP 8 + MySQL/MariaDB, HTML/CSS/JS puro. Sem Composer e sem etapa de build.
 5. Depois de instalar, **apague o `instalar_token`** do config.php.
 6. A pasta `storage/` precisa de permissão de escrita.
 
+## Dados da Carteira (as 499 lojas)
+
+As 499 lojas da Carteira Comercial V4 são lidas de `referencias/dashboard.html` na instalação.
+Esse arquivo **não vai para o git** (dados de clientes — LGPD): envie a pasta `referencias/` por FTP junto com o projeto
+antes de rodar a instalação. Sem ele, o sistema instala normalmente, só sem as lojas.
+
+Para trazer o trabalho que a equipe fez na Carteira V4 (etapas, contatos, histórico), use **Carteira › Importar**
+com o "Backup JSON" exportado pela V4.
+
+## Tarefas agendadas (cron)
+
+No cPanel › Cron Jobs, cadastre (troque o caminho pelo da sua conta):
+
+| Quando | Comando | Para quê |
+|---|---|---|
+| Todo dia às 6h | `php /home/USUARIO/public_html/cron/fila_reativacao.php` | Manda para a fila de reativação os clientes sem compra há X dias |
+
 ## Logins de demonstração
 
 Senha de todos: `Demo@2026` — usuários fictícios, um por perfil e por função.
