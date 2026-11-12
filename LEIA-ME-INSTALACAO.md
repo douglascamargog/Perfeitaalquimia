@@ -86,7 +86,13 @@ php /home/doug9130/public_html/one/cron/fila_reativacao.php
 
 Ela envia para a fila de Reativação os clientes sem compra há mais de X dias (X fica em Configurações).
 
-Adicione também, uma vez por dia (ex.: 7h), a da **Cobrança** (lê os títulos vencidos/pagos do ERP e devolve
+Adicione também a do **ERP** a cada 30 minutos (preços do catálogo, envio de pedidos e faturamento):
+
+```
+0,30 * * * * php /home/doug9130/public_html/one/cron/sincronizar_erp.php
+```
+
+E, uma vez por dia (ex.: 7h), a da **Cobrança** (lê os títulos vencidos/pagos do ERP e devolve
 para "Tentativa de contato" as promessas de pagamento que venceram):
 
 ```

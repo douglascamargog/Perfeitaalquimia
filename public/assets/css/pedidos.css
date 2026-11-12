@@ -1,0 +1,96 @@
+/* =====================================================================
+   Pedidos da equipe, aprovação do Financeiro e produtos.
+   Reaproveita do catálogo: barra do mínimo (.cat-minimo) e formas de pagamento (.cat-forma).
+   ===================================================================== */
+.selo.laranja { background: var(--aviso-fundo); color: var(--aviso); }
+.selo.verde { background: var(--sucesso-fundo); color: var(--sucesso); }
+.direita { text-align: right; }
+td small { display: block; }
+.ped-link-vendedor { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: #f2fbe4; border: 1px solid #dff0c6; border-radius: 14px; padding: 10px 14px; margin-bottom: 14px; font-size: .86rem; }
+.ped-link-vendedor code { background: #fff; padding: 3px 8px; border-radius: 8px; overflow-wrap: anywhere; }
+.ped-busca { display: flex; gap: 8px; }
+.ped-busca input { flex: 1; min-width: 0; }
+.ped-clientes { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.ped-clientes a { display: grid; text-decoration: none; color: var(--texto); }
+.ped-clientes small { color: var(--texto-suave); }
+.ped-clientes a:hover { border-color: var(--lima-escuro); }
+
+/* Novo pedido */
+.ped-novo { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+.ped-produtos { padding: 12px; }
+.ped-produtos-topo { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+.ped-produtos-topo input[type=search] { flex: 1; min-width: 180px; }
+.ped-tabela td { vertical-align: middle; }
+.ped-tabela tr.escolhido { background: #f4fbe6; }
+.ped-produto { display: flex; gap: 10px; align-items: center; }
+.ped-produto img { width: 40px; height: 40px; object-fit: contain; background: #f3f6f0; border-radius: 8px; flex: none; }
+.ped-produto span { display: grid; }
+.ped-produto small { color: var(--texto-suave); }
+.ped-qtd { width: 80px; text-align: center; }
+.ped-resumo { position: sticky; top: 16px; display: grid; gap: 10px; }
+.ped-resumo h2, .ped-resumo h3 { margin: 0; }
+.ped-total { display: flex; justify-content: space-between; align-items: baseline; }
+.ped-total strong { font-size: 1.6rem; color: var(--verde-escuro); }
+.cat-minimo { border-radius: 14px; padding: 10px 12px; font-size: .86rem; }
+.cat-minimo.falta { background: var(--aviso-fundo); color: var(--aviso); }
+.cat-minimo.ok { background: var(--sucesso-fundo); color: var(--sucesso); }
+.cat-minimo-barra { height: 7px; border-radius: 99px; background: #ffffffb0; margin-top: 6px; overflow: hidden; }
+.cat-minimo-barra i { display: block; height: 100%; background: currentColor; border-radius: 99px; transition: width .2s; }
+.cat-forma { border: 1px solid var(--borda); border-radius: 12px; padding: 6px 10px 8px; margin: 0; display: grid; gap: 4px; }
+.cat-forma legend { font-weight: 800; padding: 0 4px; }
+.cat-forma.bloqueada { background: #f6f6f4; color: var(--texto-suave); }
+.opcao.desligada { color: var(--texto-suave); }
+
+/* Página do pedido */
+.ped-pagina { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+.ped-espelho-topo { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.ped-espelho-topo img { object-fit: contain; }
+.ped-espelho-topo div { display: grid; flex: 1; }
+.ped-espelho-topo small { color: var(--texto-suave); }
+.ped-dados { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin: 0 0 14px; }
+.ped-dados div { background: #f6f8f4; border-radius: 12px; padding: 8px 10px; }
+.ped-dados dt { font-size: .7rem; text-transform: uppercase; color: var(--texto-suave); font-weight: 700; letter-spacing: .05em; }
+.ped-dados dd { margin: 2px 0 0; }
+.ped-total-final td { font-size: 1.1rem; font-weight: 800; }
+.ped-lateral { display: grid; gap: 14px; }
+.so-imprimir { display: none; }
+
+/* Crédito e aprovação */
+.ped-credito { border-radius: 16px; padding: 12px 14px; }
+.ped-credito.ok { background: var(--sucesso-fundo); }
+.ped-credito.alerta { background: var(--perigo-fundo); }
+.ped-credito h3 { margin: 0 0 6px; font-size: .95rem; }
+.ped-credito dl { margin: 0; display: grid; gap: 4px; }
+.ped-credito div { display: flex; justify-content: space-between; gap: 10px; font-size: .84rem; }
+.ped-credito dt { color: var(--texto-suave); }
+.ped-credito dd { margin: 0; font-weight: 700; text-align: right; }
+.ped-acoes-aprovacao { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+.ped-acoes-aprovacao form { margin: 0; }
+.ped-acoes-aprovacao details { flex: 1; min-width: 200px; }
+.ped-acoes-aprovacao summary { list-style: none; display: inline-flex; cursor: pointer; }
+.ped-acoes-aprovacao details form { display: grid; gap: 6px; margin-top: 8px; }
+.ped-fila { display: grid; gap: 14px; }
+.ped-fila-item header { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.ped-fila-item h2 { margin: 4px 0 2px; font-size: 1.15rem; }
+.ped-fila-item header small { color: var(--texto-suave); }
+.ped-fila-valor { display: grid; text-align: right; }
+.ped-fila-valor strong { font-size: 1.5rem; color: var(--verde-escuro); }
+.ped-fila-valor small { color: var(--texto-suave); }
+.ped-fila-corpo { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; margin: 12px 0; }
+.ped-fila-itens { margin: 0; padding-left: 18px; font-size: .88rem; display: grid; gap: 2px; }
+.ped-vazio { display: flex; align-items: center; gap: 16px; }
+.ped-produto-form { display: flex; gap: 6px; align-items: center; }
+.ped-produto-form input[type=text] { min-width: 220px; }
+tr.inativo td { opacity: .6; }
+
+@media (max-width: 980px) {
+  .ped-novo, .ped-pagina, .ped-fila-corpo { grid-template-columns: minmax(0, 1fr); }
+  .ped-resumo { position: static; }
+}
+@media print {
+  .ped-pagina { grid-template-columns: 1fr; }
+  .so-imprimir { display: inline-flex; }
+  .ped-espelho { box-shadow: none; border: 0; }
+}
+
+.ped-tabela td.direita, .ped-itens td.direita, table.tabela td.direita { white-space: nowrap; }

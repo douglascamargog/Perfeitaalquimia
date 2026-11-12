@@ -290,3 +290,13 @@ details.ficha-secao > summary { cursor: pointer; list-style: none; }
 details.ficha-secao > summary h3 { display: inline; }
 details.ficha-secao > summary::before { content: '▸ '; color: var(--texto-suave); }
 details.ficha-secao[open] > summary::before { content: '▾ '; }
+
+/* ---------- Pedidos na ficha do cliente ---------- */
+.ficha-pedidos { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 4px; }
+.ficha-pedidos li { display: flex; align-items: center; gap: 8px; font-size: .88rem; }
+.ficha-pedidos li b { margin-left: auto; }
+.ficha-catalogo { border-top: 1px dashed var(--borda); margin-top: 10px; padding-top: 8px; }
+.ficha-codigo { font-size: 1rem; }
+.ficha-codigo strong { letter-spacing: .15em; font-size: 1.3rem; background: var(--lima); padding: 2px 10px; border-radius: 8px; }
+.selo.laranja { background: var(--aviso-fundo); color: var(--aviso); }
+.selo.verde { background: var(--sucesso-fundo); color: var(--sucesso); }

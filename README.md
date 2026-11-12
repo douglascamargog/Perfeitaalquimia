@@ -72,6 +72,19 @@ com o "Backup JSON" exportado pela V4.
   (o valor antigo fica na linha do tempo e na auditoria). Modo demonstração até o admin ligar a busca real (veja LEIA-ME-INSTALACAO, 9b).
 - A busca real usa o SDK oficial da Anthropic (`composer.json`). A pasta `vendor/` não vai para o git: o `gerar_pacote.sh` instala e coloca no zip.
 
+## Catálogo B2B e pedidos
+
+- **Catálogo** em `/catalogo` (para o cliente, no celular): visitante vê produtos sem preço; o cliente entra com o **CNPJ + senha**
+  e vê a **tabela dele** (Lojista / Distribuidor / Terceirização). Primeiro acesso ou senha esquecida: código por e-mail
+  ou gerado pelo vendedor na ficha do cliente ("Gerar acesso ao catálogo") e enviado pelo WhatsApp.
+- **Carrinho** com o pedido mínimo da UF/região (Configurações), formas de pagamento (boleto bloqueado para quem está em cobrança),
+  "Meus pedidos" e "Repetir pedido". **Link do vendedor**: `/catalogo/v/{código do vendedor}` (o código fica no cadastro do usuário).
+- **Pedidos** (equipe): lista, novo pedido pela ficha do cliente, página do pedido para imprimir. Todo pedido vai ao ERP como orçamento
+  (o mesmo pedido nunca entra duas vezes) e passa pela **Aprovação** do Financeiro, com o quadro de crédito do cliente.
+  O faturamento volta do ERP pelo cron e atualiza a última compra do cliente. Na demonstração: botão "Simular faturamento".
+- **Produtos** (Marketing): o mesmo cadastro da Academia; preços e estoque vêm do ERP; aqui se escolhe o que aparece no catálogo.
+- Demonstração: 5 clientes com acesso ao catálogo (senha `Demo@2026`; os CNPJs aparecem no relatório da instalação).
+
 ## Marketing
 
 - **Mural de posts** (Instagram): calendário do mês, arrastar para mudar o dia, prévia do feed, fluxo Ideia → Em produção →
@@ -87,6 +100,7 @@ No cPanel › Cron Jobs, cadastre (troque o caminho pelo da sua conta):
 | Quando | Comando | Para quê |
 |---|---|---|
 | Todo dia às 6h | `php /home/USUARIO/public_html/cron/fila_reativacao.php` | Manda para a fila de reativação os clientes sem compra há X dias |
+| A cada 30 min | `php /home/USUARIO/public_html/cron/sincronizar_erp.php` | Preços e estoque do ERP; reenvia pedidos pendentes; traz o faturamento (NF) |
 | Todo dia às 7h | `php /home/USUARIO/public_html/cron/cobranca.php` | Lê títulos vencidos/pagos do ERP e trata promessas vencidas |
 | De hora em hora | `php /home/USUARIO/public_html/cron/ecommerce.php` | Copia os números da loja Tray para o painel do e-commerce |
 

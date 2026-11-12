@@ -12,7 +12,7 @@ $pos = fn(string $data) => max(0, min(100, (strtotime($data) - $inicio) / 86400 
 $meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 $situacoes = ['planejada' => ['Planejada', 'cinza'], 'ativa' => ['Ativa', 'lima'], 'encerrada' => ['Encerrada', 'cinza']];
 $c = $editar ?? [];
-$form = fn(string $campo, $padrao = '') => e((string) (antigo($campo) ?: ($c[$campo] ?? $padrao)));
+$form = fn(string $campo, $padrao = '') => antigo($campo) !== '' ? antigo($campo) : e((string) ($c[$campo] ?? $padrao)); // antigo() já vem escapado
 ?>
 <?= Visao::renderizar('marketing/_cabecalho', ['aba' => 'planejamento', 'mes' => $mes, 'titulo' => 'Planejamento',
     'sobretitulo' => 'MARKETING · CAMPANHAS', 'subtitulo' => 'Campanhas dos próximos 3 meses, datas comemorativas e resultado no e-commerce.']) ?>

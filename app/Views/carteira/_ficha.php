@@ -1,7 +1,8 @@
 <?php
 /**
  * Ficha do cliente (carregada dentro da gaveta lateral).
- * Variáveis: $c (cliente), $eventos, $retorno, $etapas, $prioridades, $vendedores, $canais, $cobranca (caso aberto ou null)
+ * Variáveis: $c (cliente), $eventos, $retorno, $etapas, $prioridades, $vendedores, $canais, $cobranca (caso aberto ou null),
+ *            $pedidos (últimos), $acesso (catálogo), $codigoCatalogo (código recém-gerado, aparece uma vez)
  */
 use App\Core\Auth;
 use App\Core\Visao;
@@ -172,10 +173,32 @@ $linkSeguro = function (?string $url): string {
     <?php endif; ?>
   <?php endif; ?>
 
-  <!-- Pedidos (etapa 4) -->
+  <!-- Pedidos -->
   <section class="ficha-secao">
     <h3>Pedidos</h3>
-    <p class="suave pequeno">Pedidos e faturamento chegam do Omie no módulo de Pedidos (próxima etapa do protótipo).</p>
+    <div class="ficha-acoes">
+      <?php if (Auth::pode('pedidos.criar')): ?><a class="botao lima pequeno" href="<?= url('/pedidos/novo') ?>?cliente=<?= $id ?>">Novo pedido</a><?php endif; ?>
+      <?php if (Auth::pode('pedidos.criar') && $pedidos): ?><a class="botao contorno pequeno" href="<?= url('/pedidos/novo') ?>?cliente=<?= $id ?>&repetir=1">Repetir último</a><?php endif; ?>
+    </div>
+    <?php if (!$pedidos): ?><p class="suave pequeno">Nenhum pedido ainda.</p><?php endif; ?>
+    <ul class="ficha-pedidos">
+      <?php foreach ($pedidos as $pd): [$rot, $cor] = \App\Services\PedidoService::SITUACOES[$pd['situacao']] ?? [$pd['situacao'], 'cinza']; ?>
+        <li><a href="<?= url('/pedidos/' . (int) $pd['id']) ?>">#<?= (int) $pd['id'] ?></a> <span class="pequeno suave"><?= data_br($pd['criado_em']) ?></span>
+          <b><?= e(dinheiro((float) $pd['total'])) ?></b> <span class="selo <?= $cor ?>"><?= $rot ?></span></li>
+      <?php endforeach; ?>
+    </ul>
+    <?php if (Auth::pode('catalogo.acessos')): ?>
+      <div class="ficha-catalogo">
+        <p class="pequeno">Catálogo: <?= !empty($acesso['tem_senha']) ? 'cliente já tem senha' . (!empty($acesso['ultimo_acesso_em']) ? ' · último acesso ' . data_br($acesso['ultimo_acesso_em']) : '') : 'cliente ainda não acessou' ?>.</p>
+        <?php if ($codigoCatalogo):
+            $msg = 'Olá! Seu código para acessar o catálogo da ' . \App\Core\Config::get('empresa.nome', 'Perfeita Alquimia') . " é $codigoCatalogo (vale " . (int) \App\Core\Config::get('catalogo.codigo_validade_minutos', 10) . ' min). Entre em ' . (isset($_SERVER['HTTP_HOST']) ? 'https://' . $_SERVER['HTTP_HOST'] : '') . url('/catalogo/entrar') . '?modo=codigo, informe o CNPJ e crie sua senha.'; ?>
+          <p class="ficha-codigo">Código: <strong data-codigo-catalogo><?= e($codigoCatalogo) ?></strong></p>
+          <?php if ($whats): ?><a class="botao lima pequeno" href="https://wa.me/55<?= e($whats) ?>?text=<?= rawurlencode($msg) ?>" target="_blank" rel="noopener noreferrer">Enviar pelo WhatsApp</a><?php endif; ?>
+        <?php else: ?>
+          <form method="post" action="<?= url("/carteira/clientes/$id/acesso-catalogo") ?>" data-ajax><?= csrf_campo() ?><button class="botao contorno pequeno" type="submit">Gerar acesso ao catálogo</button></form>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
   </section>
 
   <!-- Linha do tempo -->

@@ -49,7 +49,27 @@ class ClienteController extends Controller
             'vendedores'  => Auth::pode('carteira.transferir') ? Listas::vendedores() : [],
             'canais'      => array_keys(CarteiraService::CANAIS),
             'cobranca'    => \App\Models\Cobranca::doCliente((int) $cliente['id']),
+            'pedidos'     => \App\Models\Pedido::doCliente((int) $cliente['id'], 5),
+            'acesso'      => \App\Core\Banco::um('SELECT senha_hash IS NOT NULL AS tem_senha, ultimo_acesso_em FROM cliente_acessos WHERE cliente_id = ?', [$cliente['id']]),
+            'codigoCatalogo' => \App\Core\Sessao::get('codigo_catalogo_' . $cliente['id']),
         ]);
+        \App\Core\Sessao::remover('codigo_catalogo_' . $cliente['id']); // o código aparece uma vez só
+    }
+
+    /**
+     * Gera um código de acesso ao catálogo para o vendedor mandar pelo WhatsApp
+     * (primeiro acesso ou esqueceu a senha). O código aparece na ficha uma vez só.
+     */
+    public function acessoCatalogo(string $id): void
+    {
+        $cliente = $this->clienteOuErro($id);
+        if (!$cliente['cnpj']) {
+            $this->json(['ok' => false, 'mensagem' => 'Cadastre o CNPJ do cliente primeiro: o login do catálogo é pelo CNPJ.'], 422);
+            return;
+        }
+        \App\Core\Sessao::set('codigo_catalogo_' . $cliente['id'], \App\Services\CatalogoAcesso::gerarCodigo((int) $cliente['id']));
+        \App\Core\Auditoria::registrar('cliente', (int) $cliente['id'], 'codigo_catalogo');
+        $this->json(['ok' => true, 'mensagem' => 'Código gerado. Envie pelo WhatsApp.']);
     }
 
     /** Salva os campos da ficha (gestão comercial) — chamado pelo drawer */

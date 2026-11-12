@@ -49,7 +49,7 @@ $pct = $c['minimo'] > 0 ? min(100, round($c['subtotal'] / $c['minimo'] * 100)) :
         </fieldset>
       <?php endforeach; ?>
     </div>
-    <div class="campo"><label for="obs">Observação (opcional)</label><textarea id="obs" name="observacoes" rows="2" maxlength="1000" placeholder="Ex.: entregar pela manhã"><?= e(antigo('observacoes')) ?></textarea></div>
+    <div class="campo"><label for="obs">Observação (opcional)</label><textarea id="obs" name="observacoes" rows="2" maxlength="1000" placeholder="Ex.: entregar pela manhã"><?= antigo('observacoes') ?></textarea></div>
     <div class="cat-total"><span>Subtotal</span><strong><?= dinheiro($c['subtotal']) ?></strong></div>
     <p class="pequeno suave">Descontos da forma de pagamento são aplicados no pedido. O Financeiro confere e aprova; você acompanha em "Meus pedidos".</p>
     <button class="botao largo" type="submit" <?= $c['falta'] > 0 ? 'disabled' : '' ?>><?= $c['falta'] > 0 ? 'Complete o pedido mínimo' : 'Enviar pedido' ?></button>

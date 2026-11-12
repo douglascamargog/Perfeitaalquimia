@@ -41,6 +41,10 @@ class OneAssistente
             $falas[] = self::recompra();
             $falas[] = self::campanha();
         }
+        if (Auth::pode('pedidos.aprovar')) {
+            $qtd = (int) Banco::valor("SELECT COUNT(*) FROM pedidos WHERE situacao = 'aguardando_aprovacao'");
+            $falas[] = $qtd ? ['humor' => 'ideia', 'texto' => "$qtd pedido(s) aguardam a sua aprovação. O cliente está esperando!", 'link' => '/aprovacao', 'acao' => 'Aprovar pedidos'] : null;
+        }
         if (Auth::pode('cobranca.ver')) {
             $falas[] = self::promessasHoje();
             $falas[] = self::semContato();

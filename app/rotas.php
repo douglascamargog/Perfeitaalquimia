@@ -111,6 +111,21 @@ return [
     ['POST', '/marketing/posts/{id}/publicar',     'PostController@publicar',          'marketing.editar'],
     ['POST', '/marketing/posts/{id}/comentar',     'PostController@comentar',          'marketing.ver'],
 
+    // ---------- Pedidos, aprovação e produtos ----------
+    ['GET',  '/pedidos',                        'PedidoController@index',   'pedidos.criar|pedidos.ver_todos|pedidos.aprovar'],
+    ['GET',  '/pedidos/novo',                   'PedidoController@novo',    'pedidos.criar'],
+    ['POST', '/pedidos',                        'PedidoController@criar',   'pedidos.criar'],
+    ['GET',  '/pedidos/{id}',                   'PedidoController@ver',     'pedidos.criar|pedidos.ver_todos|pedidos.aprovar'],
+    ['POST', '/pedidos/{id}/cancelar',          'PedidoController@cancelar', 'pedidos.criar|pedidos.ver_todos'],
+    ['POST', '/pedidos/{id}/simular-faturamento', 'PedidoController@simularFaturamento', 'pedidos.aprovar|pedidos.ver_todos'],
+    ['GET',  '/aprovacao',                      'AprovacaoController@index',   'pedidos.aprovar'],
+    ['POST', '/aprovacao/{id}/aprovar',         'AprovacaoController@aprovar', 'pedidos.aprovar'],
+    ['POST', '/aprovacao/{id}/recusar',         'AprovacaoController@recusar', 'pedidos.aprovar'],
+    ['GET',  '/produtos',                       'ProdutoController@index',     'catalogo.editar'],
+    ['POST', '/produtos/sincronizar',           'ProdutoController@sincronizar', 'catalogo.editar'],
+    ['POST', '/produtos/{id}',                  'ProdutoController@salvar',    'catalogo.editar'],
+    ['POST', '/carteira/clientes/{id}/acesso-catalogo', 'ClienteController@acessoCatalogo', 'catalogo.acessos'],
+
     // ---------- Meu mês (meta individual e da equipe) ----------
     ['GET',  '/meu-mes',                        'MeuMesController@index',          'meu_mes.usar'],
     ['POST', '/meu-mes/meta',                   'MeuMesController@salvarMeta',     'meu_mes.usar'],
