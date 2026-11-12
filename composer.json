@@ -1,0 +1,15 @@
+{
+    "name": "perfeita-alquimia/one",
+    "description": "One — sistema comercial da Perfeita Alquimia. Única dependência: SDK oficial da Anthropic (busca de contatos com IA).",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "anthropic-ai/sdk": "^1.8",
+        "guzzlehttp/guzzle": "^7.9"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    }
+}

@@ -262,3 +262,31 @@ form.devolver select { padding: 5px 8px; font-size: .8rem; min-width: 150px; }
 .faixa-campanha em { font-style: normal; color: var(--lima); }
 .faixa-campanha small { font-size: .66rem; letter-spacing: .12em; color: #bed0b9; font-weight: 760; }
 .faixa-campanha .botao { position: relative; z-index: 1; margin-right: 70px; background: #fff; }
+
+/* ---------- Buscar contatos com IA (ficha do cliente e caso de cobrança) ---------- */
+.busca-ia { border: 1px dashed #cfd9c9; border-radius: var(--raio-pequeno); padding: 12px; margin-top: 12px; background: #fafcf7; }
+.busca-ia.destaque { border: 1px solid var(--lima-escuro); background: var(--verde-claro); }
+.busca-ia-topo { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.busca-ia-topo strong { display: block; font-size: .92rem; }
+.busca-ia-topo small { color: var(--texto-suave); font-size: .8rem; }
+.busca-ia-one { flex: none; transition: transform .3s; }
+.busca-ia.procurando .busca-ia-one { animation: one-procura 1s ease-in-out infinite; }
+@keyframes one-procura { 0%, 100% { transform: translateX(0) rotate(0); } 25% { transform: translateX(-3px) rotate(-6deg); } 75% { transform: translateX(3px) rotate(6deg); } }
+@media (prefers-reduced-motion: reduce) { .busca-ia.procurando .busca-ia-one { animation: none; } }
+.busca-ia-procurando { font-size: .88rem; color: var(--verde-medio); }
+.busca-ia-resumo { font-size: .85rem; background: #fff; border-radius: 9px; padding: 8px 10px; margin: 6px 0 10px; }
+.busca-ia-item { display: flex; gap: 10px; align-items: flex-start; background: #fff; border: 1px solid var(--borda); border-radius: 10px; padding: 9px 10px; margin-bottom: 7px; cursor: pointer; }
+.busca-ia-item.igual { opacity: .65; cursor: default; }
+.busca-ia-item input { margin-top: 4px; }
+.busca-ia-texto { display: grid; gap: 1px; min-width: 0; }
+.busca-ia-texto strong { overflow-wrap: anywhere; }
+.busca-ia-texto small { font-size: .78rem; color: var(--texto-suave); }
+.busca-ia-tipo { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--verde-medio); font-weight: 700; }
+.conf-alta { color: var(--sucesso); }
+.conf-media { color: var(--aviso); }
+.conf-baixa { color: var(--perigo); }
+.botao-link { background: none; border: 0; color: var(--verde-medio); text-decoration: underline; cursor: pointer; padding: 4px 6px; font: inherit; }
+details.ficha-secao > summary { cursor: pointer; list-style: none; }
+details.ficha-secao > summary h3 { display: inline; }
+details.ficha-secao > summary::before { content: '▸ '; color: var(--texto-suave); }
+details.ficha-secao[open] > summary::before { content: '▾ '; }

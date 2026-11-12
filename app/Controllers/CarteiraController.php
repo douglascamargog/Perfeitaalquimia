@@ -35,7 +35,7 @@ class CarteiraController extends Controller
                 'origens'     => Listas::origens(),
             ],
             'estilos'  => ['carteira.css'],
-            'scripts'  => ['carteira.js'],
+            'scripts'  => ['carteira.js', 'busca_contatos.js'],
         ];
     }
 

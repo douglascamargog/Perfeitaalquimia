@@ -1,6 +1,6 @@
 // =====================================================================
 // Carteira: gaveta da ficha do cliente, formulários sem recarregar e filtros.
-// Usado nas telas da Carteira, Agenda e Reativação.
+// Usado nas telas da Carteira, Agenda, Reativação e Cobrança.
 // =====================================================================
 
 const BASE = document.querySelector('meta[name="base"]')?.content || '';
@@ -31,7 +31,9 @@ async function abrirCliente(id) {
   document.body.classList.add('gaveta-aberta');
   conteudo.innerHTML = '<p class="gaveta-carregando">Carregando ficha…</p>';
   try {
-    const resposta = await fetch(`${BASE}/carteira/clientes/${encodeURIComponent(id)}/ficha`, { headers: { Accept: 'text/html' } });
+    // A gaveta pode carregar outra coisa (ex.: caso de cobrança): data-url="/cobranca/{id}/caso"
+    const modelo = gaveta.dataset.url || '/carteira/clientes/{id}/ficha';
+    const resposta = await fetch(BASE + modelo.replace('{id}', encodeURIComponent(id)), { headers: { Accept: 'text/html' } });
     if (resposta.redirected && resposta.url.includes('/entrar')) { window.location.href = resposta.url; return; }
     if (!resposta.ok) {
       const erro = await resposta.json().catch(() => ({}));
@@ -69,7 +71,7 @@ document.addEventListener('keydown', (evento) => { if (evento.key === 'Escape' &
 // Formulários da ficha (data-ajax): enviam sem recarregar e atualizam a ficha
 document.addEventListener('submit', async (evento) => {
   const form = evento.target.closest('form[data-ajax]');
-  if (!form) return;
+  if (!form || evento.defaultPrevented) return; // defaultPrevented: a pessoa cancelou o "tem certeza?"
   evento.preventDefault();
   const botao = form.querySelector('button[type="submit"]');
   if (botao) botao.disabled = true;
@@ -107,7 +109,13 @@ document.querySelectorAll('form[data-filtros]').forEach((form) => {
 });
 
 // Disponível para os outros scripts (mapa.js, funil.js) sem carregar este arquivo duas vezes
-window.Carteira = { abrirCliente, avisar };
+/** Recarrega o que está aberto na gaveta (depois de salvar algo por outro script) */
+function recarregar() {
+  alterouAlgo = true;
+  if (clienteAberto) abrirCliente(clienteAberto);
+}
+
+window.Carteira = { abrirCliente, avisar, recarregar };
 
 // Abre a ficha automaticamente quando a URL tem ?abrir=ID (ex.: depois de cadastrar)
 const abrirNaCarga = new URLSearchParams(window.location.search).get('abrir');

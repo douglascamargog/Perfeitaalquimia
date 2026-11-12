@@ -24,7 +24,7 @@ class AgendaController extends Controller
             'pessoa'     => $pessoa,
             'vendedores' => $verTodas ? \App\Models\Listas::vendedores() : [],
             'estilos'    => ['carteira.css'],
-            'scripts'    => ['carteira.js'],
+            'scripts'    => ['carteira.js', 'busca_contatos.js'],
         ]);
     }
 

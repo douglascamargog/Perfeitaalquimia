@@ -46,5 +46,11 @@ return [
         ],
         // 'manual' = plano B (registrar ligação com 1 clique); 'api' quando o Ligue Talk liberar
         'telefonia' => 'manual',
+        // Busca de contatos com IA (Claude, da Anthropic). Chave criada em console.anthropic.com › API Keys.
+        // Com a chave vazia, a busca funciona só no modo demonstração (Configurações › busca_ia.provedor = fake).
+        'anthropic' => [
+            'chave'  => '',
+            'modelo' => 'claude-opus-5-5',
+        ],
     ],
 ];

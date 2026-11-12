@@ -1,6 +1,9 @@
 <?php
 namespace App\Integrations;
 
+use App\Integrations\BuscaContatos\BuscaContatosClaude;
+use App\Integrations\BuscaContatos\BuscaContatosFake;
+use App\Integrations\BuscaContatos\BuscaContatosInterface;
 use App\Integrations\LigueTalk\LigueTalkManual;
 use App\Integrations\LigueTalk\TelefoniaInterface;
 use App\Integrations\Omie\ErpInterface;
@@ -36,6 +39,21 @@ class Integracoes
     {
         // Quando existir a API do Ligue Talk: 'api' => new LigueTalkClient(...)
         return self::$telefonia ??= new LigueTalkManual();
+    }
+
+    /**
+     * Busca de contatos na internet: 'fake' (demonstração) ou 'claude' (IA real).
+     * Escolhida em Configurações › busca_ia.provedor; a chave fica no config.php.
+     */
+    public static function buscaContatos(): BuscaContatosInterface
+    {
+        return match (\App\Core\Config::get('busca_ia.provedor', 'fake')) {
+            'claude' => new BuscaContatosClaude(
+                (string) config('integracoes.anthropic.chave', ''),
+                (string) config('integracoes.anthropic.modelo', 'claude-opus-5-5'),
+            ),
+            default  => new BuscaContatosFake(),
+        };
     }
 
     /** true quando o ERP é o simulado (usado para mostrar avisos na tela) */

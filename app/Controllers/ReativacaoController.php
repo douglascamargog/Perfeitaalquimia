@@ -34,7 +34,7 @@ class ReativacaoController extends Controller
             'aguardando' => Auth::pode('carteira.ver_todas') ? $aguardando : 0,
             'vendedores' => Auth::pode('carteira.transferir') || Auth::temFuncao('prospeccao_reativacao') ? Listas::vendedores() : [],
             'estilos'    => ['carteira.css'],
-            'scripts'    => ['carteira.js'],
+            'scripts'    => ['carteira.js', 'busca_contatos.js'],
         ]);
     }
 

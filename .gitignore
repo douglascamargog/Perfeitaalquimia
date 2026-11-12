@@ -22,3 +22,6 @@ Thumbs.db
 /public/media/academia/
 /pacote/
 /VERSAO
+
+# Dependências do Composer (geradas: composer install). Vão dentro do pacote zip, não no git
+/vendor/
