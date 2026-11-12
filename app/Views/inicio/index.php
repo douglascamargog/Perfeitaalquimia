@@ -152,6 +152,23 @@ $atalhos = array_filter([
     </a>
   <?php endif; ?>
 
+  <?php if ($p['vendas']): $vd = $p['vendas']; ?>
+    <a class="b-card b-kpi span-3" href="<?= url('/painel') ?>">
+      <header class="b-topo"><span>Faturado no mês</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#grafico"/></svg></span></header>
+      <strong class="b-valor"><?= $curto((float) $vd['faturado']) ?></strong>
+      <?php if ($vd['meta'] > 0): ?><div class="b-barra"><i style="width: <?= $pct($vd['faturado'] / $vd['meta'] * 100) ?>%"></i></div><?php endif; ?>
+      <small><?= $vd['meta'] > 0 ? $pct($vd['faturado'] / $vd['meta'] * 100) . '% da meta da equipe · ' : '' ?><?= $n($vd['pedidos']) ?> pedido(s) faturado(s)<?= $vd['a_aprovar'] ? ' · ' . $vd['a_aprovar'] . ' para aprovar' : '' ?></small>
+    </a>
+  <?php endif; ?>
+
+  <?php if ($p['recompra'] !== null): ?>
+    <a class="b-card b-kpi span-3" href="<?= url('/recompra') ?>">
+      <header class="b-topo"><span>Recompra</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#relogio"/></svg></span></header>
+      <strong class="b-valor"><?= $n($p['recompra']) ?> <small>clientes</small></strong>
+      <small>passaram do tempo normal de recompra · ligue antes que esfriem</small>
+    </a>
+  <?php endif; ?>
+
   <?php if ($p['marketing']): $mk = $p['marketing']; ?>
     <a class="b-card b-kpi span-3" href="<?= url('/marketing') ?>">
       <header class="b-topo"><span>Posts desta semana</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#calendario"/></svg></span></header>

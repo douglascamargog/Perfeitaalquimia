@@ -85,6 +85,17 @@ com o "Backup JSON" exportado pela V4.
 - **Produtos** (Marketing): o mesmo cadastro da Academia; preços e estoque vêm do ERP; aqui se escolhe o que aparece no catálogo.
 - Demonstração: 5 clientes com acesso ao catálogo (senha `Demo@2026`; os CNPJs aparecem no relatório da instalação).
 
+## Painel de vendas, metas e recompra
+
+- **Painel de vendas** (Gestão; Gestor e Financeiro): faturamento dos **pedidos faturados** (bate com o ERP), pedidos, ticket médio,
+  clientes, recorrência, comparação com o período anterior, gráficos (mês a mês com a meta da equipe, UF, origem), vendedores e funções
+  com a meta do mês, top clientes e produtos, clientes sem compra há 30/60/90 dias. Filtros: período, vendedor, função, região, UF, origem.
+  Imprimir e CSV.
+- **Metas** (Gestor): meta do mês por vendedor e por função, faturado, projeção pelo ritmo, quanto falta por dia, histórico de 6 meses,
+  "copiar metas do mês anterior". A meta da equipe continua no Meu mês.
+- **Recompra** (Comercial): clientes que passaram do próprio intervalo médio de compra (recalculado a cada faturamento), com os produtos
+  que costumam comprar, WhatsApp com mensagem pronta, "Novo pedido (repetir)" e "Agendar retorno". O vendedor vê só a carteira dele.
+
 ## Marketing
 
 - **Mural de posts** (Instagram): calendário do mês, arrastar para mudar o dia, prévia do feed, fluxo Ideia → Em produção →

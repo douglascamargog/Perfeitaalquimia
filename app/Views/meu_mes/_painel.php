@@ -53,6 +53,9 @@ $pendentes = array_slice(array_filter($tarefas, fn($t) => !$t['concluida_em']), 
   <div class="kpi"><span>Necessário por dia</span><strong><?= $temMeta ? $ou($eu['necessario_dia']) : '—' ?></strong><small><?= (int) $eu['restantes'] ?> de <?= (int) $eu['dias_trabalho'] ?> dias de trabalho restantes</small></div>
   <div class="kpi"><span>Maior venda</span><strong><?= $eu['maior_venda'] ? dinheiro($eu['maior_venda']) : '—' ?></strong><small><?= $eu['melhor_dia'] ? 'Melhor dia: ' . data_br($eu['melhor_dia']['data']) . ' (' . dinheiro($eu['melhor_dia']['valor']) . ')' : 'sem vendas ainda' ?></small></div>
   <div class="kpi"><span>Comparado ao mês anterior</span><strong class="<?= ($eu['variacao'] ?? 0) >= 0 ? 'positivo' : 'negativo' ?>"><?= $eu['variacao'] === null ? '—' : ($eu['variacao'] >= 0 ? '+' : '') . $pct($eu['variacao']) ?></strong><small>mês anterior: <?= dinheiro($eu['mes_anterior']) ?></small></div>
+  <?php if (!empty($faturadoSistema)): ?>
+    <div class="kpi"><span>Faturado no sistema</span><strong><?= dinheiro($faturadoSistema['valor']) ?></strong><small><?= (int) $faturadoSistema['pedidos'] ?> pedido(s) faturado(s) com você como vendedor(a)</small></div>
+  <?php endif; ?>
   <div class="kpi"><span>Minha participação na equipe</span><strong><?= $participacao === null ? '—' : $pct($participacao) ?></strong><small><?= $equipe ? 'do vendido pela equipe' : 'meta da equipe não cadastrada' ?></small></div>
 </div>
 

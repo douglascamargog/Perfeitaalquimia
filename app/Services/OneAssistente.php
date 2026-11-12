@@ -129,15 +129,13 @@ class OneAssistente
 
     private static function recompra(): ?array
     {
-        $escopo = Auth::pode('carteira.ver_todas') ? '' : ' AND responsavel_id = ' . (int) Auth::id();
-        $qtd = (int) Banco::valor(
-            "SELECT COUNT(*) FROM clientes WHERE excluido_em IS NULL AND tipo = 'cliente' AND intervalo_medio_dias > 0
-                AND ultima_compra_em + INTERVAL intervalo_medio_dias DAY < CURDATE()
-                AND ultima_compra_em >= CURDATE() - INTERVAL ? DAY$escopo",
-            [(int) Config::get('carteira.dias_inatividade', 90)]
-        );
-        return $qtd ? ['humor' => 'ideia', 'texto' => "$qtd cliente(s) já passaram do tempo normal de recompra. Um contato agora pode virar pedido!", 'link' => '/carteira/lista?tipo=cliente&ordem=compra', 'acao' => 'Ver clientes'] : null;
+        if (!Auth::pode('recompra.ver')) {
+            return null;
+        }
+        $qtd = \App\Services\VendasService::qtdRecompra();
+        return $qtd ? ['humor' => 'ideia', 'texto' => "$qtd cliente(s) já passaram do tempo normal de recompra. Um contato agora pode virar pedido!", 'link' => '/recompra', 'acao' => 'Ver recompra'] : null;
     }
+
 
     /** Lojas da campanha (ex.: Black Friday) ainda não abordadas */
     private static function campanha(): ?array

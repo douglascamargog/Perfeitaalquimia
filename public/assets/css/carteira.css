@@ -300,3 +300,5 @@ details.ficha-secao[open] > summary::before { content: '▾ '; }
 .ficha-codigo strong { letter-spacing: .15em; font-size: 1.3rem; background: var(--lima); padding: 2px 10px; border-radius: 8px; }
 .selo.laranja { background: var(--aviso-fundo); color: var(--aviso); }
 .selo.verde { background: var(--sucesso-fundo); color: var(--sucesso); }
+
+.ficha-recompra-atrasada { color: #c2410c; font-weight: 600; }

@@ -35,8 +35,19 @@ class PainelInicio
             'campanha'     => $temCarteira ? self::campanha() : null,
             'cobranca'     => Auth::pode('cobranca.ver') ? Cobranca::resumo() : null,
             'marketing'    => Auth::pode('marketing.ver') ? self::marketing() : null,
+            'vendas'       => Auth::pode('painel.ver') ? self::vendas($mes) : null,
+            'recompra'     => Auth::pode('recompra.ver') ? VendasService::qtdRecompra() : null,
             'ecommerce'    => Auth::pode('ecommerce.ver') && Banco::valor('SELECT 1 FROM ecommerce_resumo_diario LIMIT 1') ? EcommerceService::painel(date('Y-m')) : null,
         ];
+    }
+
+    /** Faturado no mês (pedidos faturados) e % da meta da equipe */
+    private static function vendas(string $mes): array
+    {
+        $r = VendasService::resumo(['de' => "$mes-01", 'ate' => date('Y-m-d')]);
+        $meta = (float) Banco::valor('SELECT meta FROM metas_equipe WHERE mes = ?', [$mes]);
+        return ['faturado' => $r['faturamento'], 'pedidos' => $r['pedidos'], 'meta' => $meta,
+            'a_aprovar' => (int) Banco::valor("SELECT COUNT(*) FROM pedidos WHERE situacao = 'aguardando_aprovacao'")];
     }
 
     /** Marketing: posts desta semana (seg → dom) e os que aguardam aprovação */

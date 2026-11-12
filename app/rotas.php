@@ -126,6 +126,15 @@ return [
     ['POST', '/produtos/{id}',                  'ProdutoController@salvar',    'catalogo.editar'],
     ['POST', '/carteira/clientes/{id}/acesso-catalogo', 'ClienteController@acessoCatalogo', 'catalogo.acessos'],
 
+    // ---------- Painel de vendas, metas e recompra ----------
+    ['GET',  '/painel',                 'PainelController@index',    'painel.ver'],
+    ['GET',  '/painel/exportar.csv',    'PainelController@exportar', 'painel.ver'],
+    ['GET',  '/metas',                  'MetasController@index',     'metas.gerenciar'],
+    ['POST', '/metas',                  'MetasController@salvar',    'metas.gerenciar'],
+    ['POST', '/metas/copiar',           'MetasController@copiar',    'metas.gerenciar'],
+    ['GET',  '/recompra',               'RecompraController@index',  'recompra.ver'],
+    ['POST', '/recompra/{id}/agendar',  'RecompraController@agendar', 'recompra.ver'],
+
     // ---------- Meu mês (meta individual e da equipe) ----------
     ['GET',  '/meu-mes',                        'MeuMesController@index',          'meu_mes.usar'],
     ['POST', '/meu-mes/meta',                   'MeuMesController@salvarMeta',     'meu_mes.usar'],

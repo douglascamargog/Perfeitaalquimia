@@ -180,6 +180,11 @@ $linkSeguro = function (?string $url): string {
       <?php if (Auth::pode('pedidos.criar')): ?><a class="botao lima pequeno" href="<?= url('/pedidos/novo') ?>?cliente=<?= $id ?>">Novo pedido</a><?php endif; ?>
       <?php if (Auth::pode('pedidos.criar') && $pedidos): ?><a class="botao contorno pequeno" href="<?= url('/pedidos/novo') ?>?cliente=<?= $id ?>&repetir=1">Repetir último</a><?php endif; ?>
     </div>
+    <?php if ($c['intervalo_medio_dias'] && $c['ultima_compra_em']):
+        $previsao = strtotime($c['ultima_compra_em'] . ' +' . (int) $c['intervalo_medio_dias'] . ' days'); ?>
+      <p class="pequeno <?= $previsao < strtotime('today') ? 'ficha-recompra-atrasada' : 'suave' ?>">Compra a cada ~<?= (int) $c['intervalo_medio_dias'] ?> dias ·
+        <?= $previsao < strtotime('today') ? 'deveria ter comprado em ' . date('d/m', $previsao) . ' (recompra atrasada)' : 'próxima compra prevista em ' . date('d/m', $previsao) ?></p>
+    <?php endif; ?>
     <?php if (!$pedidos): ?><p class="suave pequeno">Nenhum pedido ainda.</p><?php endif; ?>
     <ul class="ficha-pedidos">
       <?php foreach ($pedidos as $pd): [$rot, $cor] = \App\Services\PedidoService::SITUACOES[$pd['situacao']] ?? [$pd['situacao'], 'cinza']; ?>

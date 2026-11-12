@@ -38,4 +38,4 @@ $nome = explode(' ', Auth::usuario()['nome'])[0];
   <?php endforeach; ?>
 </nav>
 
-<?= Visao::renderizar('meu_mes/_' . $aba, compact('mes', 'dia', 'eu', 'equipe', 'tarefas', 'participacao', 'nomeMes', 'pct', 'ou', 'link')) ?>
+<?= Visao::renderizar('meu_mes/_' . $aba, compact('mes', 'dia', 'eu', 'equipe', 'tarefas', 'participacao', 'faturadoSistema', 'nomeMes', 'pct', 'ou', 'link')) ?>

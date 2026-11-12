@@ -38,6 +38,8 @@ class MeuMesController extends Controller
             'tarefas'  => $tarefas,
             'podeEquipe' => Auth::pode('metas.gerenciar'),
             'participacao' => $equipe && $equipe['vendido'] > 0 ? $eu['vendido'] / $equipe['vendido'] * 100 : null,
+            // Pedidos faturados no sistema (catálogo, sistema, app) em que a pessoa é a vendedora
+            'faturadoSistema' => \App\Services\VendasService::faturadoNoMes($mes, 'vendedor', (int) Auth::id()),
             'estilos'  => ['carteira.css', 'meu_mes.css'],
         ]);
     }
