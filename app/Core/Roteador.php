@@ -1,0 +1,80 @@
+<?php
+namespace App\Core;
+
+/**
+ * Roteador: olha o endereço pedido (ex.: /usuarios/5/editar) e chama o controller certo.
+ *
+ * As rotas ficam em app/rotas.php, uma por linha:
+ *     ['GET', '/usuarios/{id}/editar', 'UsuarioController@editar', 'usuarios.gerenciar'],
+ *
+ * O 4º item é a permissão exigida:
+ *   'publico' → qualquer pessoa  ·  'logado' → qualquer usuário logado  ·  outra → precisa da permissão
+ *
+ * Todo POST é conferido contra CSRF antes de chegar ao controller.
+ */
+class Roteador
+{
+    public function __construct(private array $rotas)
+    {
+    }
+
+    public function despachar(string $metodo, string $caminho): void
+    {
+        $caminho = '/' . trim($caminho, '/');
+
+        foreach ($this->rotas as [$metodoRota, $padrao, $destino, $permissao]) {
+            if ($metodoRota !== $metodo) {
+                continue;
+            }
+            // Transforma '/usuarios/{id}' numa expressão que captura o {id}
+            $regex = '#^' . preg_replace('#\{(\w+)\}#', '(?P<$1>[^/]+)', $padrao) . '$#';
+            if (!preg_match($regex, $caminho, $partes)) {
+                continue;
+            }
+            $parametros = array_filter($partes, 'is_string', ARRAY_FILTER_USE_KEY);
+
+            if ($metodo === 'POST' && !Csrf::valido()) {
+                $this->erro(419, 'A página expirou. Volte, recarregue e tente de novo.');
+                return;
+            }
+            if (!$this->autorizado($permissao)) {
+                return;
+            }
+
+            [$classe, $acao] = explode('@', $destino);
+            $classe = 'App\\Controllers\\' . $classe;
+            (new $classe())->$acao(...array_values($parametros));
+            return;
+        }
+
+        $this->erro(404, 'Página não encontrada.');
+    }
+
+    private function autorizado(string $permissao): bool
+    {
+        if ($permissao === 'publico') {
+            return true;
+        }
+        if (!Auth::logado()) {
+            Sessao::aviso('aviso', 'Entre com seu usuário para continuar.');
+            redirecionar('/entrar');
+        }
+        // Senha provisória: só pode trocar a senha ou sair até criar uma senha própria
+        $caminho = '/' . trim(substr(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), strlen(url_base())), '/');
+        if (Auth::usuario()['trocar_senha'] && !in_array($caminho, ['/minha-senha', '/sair'], true)) {
+            Sessao::aviso('aviso', 'Crie uma senha nova para continuar.');
+            redirecionar('/minha-senha');
+        }
+        if ($permissao !== 'logado' && !Auth::pode($permissao)) {
+            $this->erro(403, 'Seu perfil não tem acesso a esta área.');
+            return false;
+        }
+        return true;
+    }
+
+    public function erro(int $codigo, string $mensagem): void
+    {
+        http_response_code($codigo);
+        Visao::mostrar('erros/erro', ['titulo' => 'Erro ' . $codigo, 'codigo' => $codigo, 'mensagem' => $mensagem], Auth::logado() ? 'base' : 'simples');
+    }
+}
