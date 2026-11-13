@@ -83,6 +83,17 @@ class ErpSync
     public static function tudo(): array
     {
         [$enviados, $faturados] = self::pedidos();
-        return ['precos' => self::precos(), 'estoque' => self::estoque(), 'enviados' => $enviados, 'faturados' => $faturados];
+        $r = ['precos' => self::precos(), 'estoque' => self::estoque(), 'enviados' => $enviados, 'faturados' => $faturados];
+        // Guarda a última sincronização para a tela Administração › Integração Omie
+        @file_put_contents(self::ARQUIVO_ULTIMA, json_encode($r + ['em' => date('Y-m-d H:i:s')]));
+        return $r;
+    }
+
+    private const ARQUIVO_ULTIMA = RAIZ . '/storage/logs/erp_ultima_sincronizacao.json';
+
+    /** Resultado da última sincronização (cron ou botão), ou null */
+    public static function ultima(): ?array
+    {
+        return is_file(self::ARQUIVO_ULTIMA) ? (json_decode((string) file_get_contents(self::ARQUIVO_ULTIMA), true) ?: null) : null;
     }
 }

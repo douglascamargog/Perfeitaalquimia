@@ -95,3 +95,9 @@
 .lp-obrigado strong { font-size: 1.6rem; display: block; margin-bottom: 8px; }
 .ld-codigo { background: #14251b; color: #e7ffc0; border-radius: 12px; padding: 14px; overflow-x: auto; font-size: .8rem; white-space: pre-wrap; word-break: break-all; }
 @media (max-width: 800px) { .lp-caixa { grid-template-columns: 1fr; } }
+
+/* Integração Omie */
+.int-passos { margin: 0; padding-left: 20px; display: grid; gap: 8px; line-height: 1.5; }
+.int-passos code { background: #f0f3ee; padding: 1px 6px; border-radius: 6px; font-size: .85em; }
+.b-alerta-suave { background: #fff4ec !important; }
+.b-alerta-suave .b-valor { color: #c2410c; }

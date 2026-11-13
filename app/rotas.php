@@ -234,5 +234,9 @@ return [
     ['POST', '/sistema/atualizacao/aplicar',          'AtualizacaoController@aplicar', 'sistema.atualizar'],
     ['POST', '/sistema/atualizacao/backup',           'AtualizacaoController@backup',  'sistema.atualizar'],
 
+    ['GET',  '/integracao',             'IntegracaoController@index',       'integracao.gerenciar'],
+    ['POST', '/integracao/testar',      'IntegracaoController@testar',      'integracao.gerenciar'],
+    ['POST', '/integracao/sincronizar', 'IntegracaoController@sincronizar', 'integracao.gerenciar'],
+
     ['GET',  '/auditoria',              'AuditoriaController@index', 'auditoria.ver'],
 ];
