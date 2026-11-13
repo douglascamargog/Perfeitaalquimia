@@ -43,7 +43,8 @@ $fica = ['Prospecção e funil', 'Carteira e vendedor responsável', 'Histórico
 
   <section class="b-card span-4"><header class="b-topo"><h2>Vem do Omie</h2><span class="b-chip">a cada 30 min</span></header>
     <ul class="pr-alertas"><?php foreach ($vem as [$t, $d]): ?><li><div><strong><?= $t ?></strong><br><small class="suave"><?= $d ?></small></div></li><?php endforeach; ?></ul>
-    <p class="suave pequeno"><?= $n($produtos) ?> produtos com preço · <?= $n($estoque) ?> com estoque no catálogo.</p></section>
+    <p class="suave pequeno"><?= $n($produtos) ?> produtos com preço · <?= $n($estoque) ?> com estoque no catálogo.</p>
+    <?php if ($semPreco): ?><p class="pn-vermelho pequeno" data-sem-preco><?= $n($semPreco) ?> produto(s) ativo(s) sem preço: não aparecem no catálogo do cliente. Clique em "Sincronizar agora".</p><?php endif; ?></section>
   <section class="b-card span-4"><header class="b-topo"><h2>Vai para o Omie</h2><span class="b-chip">na hora</span></header>
     <ul class="pr-alertas"><?php foreach ($vai as [$t, $d]): ?><li><div><strong><?= $t ?></strong><br><small class="suave"><?= $d ?></small></div></li><?php endforeach; ?></ul></section>
   <section class="b-card span-4"><header class="b-topo"><h2>Fica no One</h2><span class="b-chip">fonte da verdade</span></header>

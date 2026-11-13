@@ -26,6 +26,7 @@ class IntegracaoController extends Controller
                     SUM(situacao = 'faturado' AND faturado_em >= CURDATE() - INTERVAL 29 DAY) AS faturados_30d
                 FROM pedidos"),
             'produtos' => (int) Banco::valor('SELECT COUNT(DISTINCT produto_id) FROM produto_precos'),
+            'semPreco' => (int) Banco::valor('SELECT COUNT(*) FROM produtos p WHERE p.ativo = 1 AND NOT EXISTS (SELECT 1 FROM produto_precos pp WHERE pp.produto_id = p.id)'),
             'estoque' => (int) Banco::valor('SELECT COUNT(*) FROM produto_estoque'),
             'estilos' => ['carteira.css', 'inicio.css', 'painel.css', 'prospeccao.css'],
         ]);

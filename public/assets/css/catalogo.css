@@ -124,3 +124,4 @@ body.cat { background: var(--fundo); min-height: 100vh; display: flex; flex-dire
   .cat-marca span { display: none; }
   .cat-nav { gap: 10px; }
 }
+.cat-aviso-preco { background: #fff8db; border: 1px solid #f3e3a1; color: #6b5300; border-radius: 14px; padding: 14px 16px; text-align: left; }

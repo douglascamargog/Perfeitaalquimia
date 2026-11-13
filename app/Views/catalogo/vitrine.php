@@ -1,5 +1,5 @@
 <?php
-/** Vitrine. Variáveis: $busca, $categoria, $categorias, $produtos, $carrinho, $logado, $minimo */
+/** Vitrine. Variáveis: $busca, $categoria, $categorias, $produtos, $carrinho, $logado, $minimo, $tabelaNome, $semPrecos */
 use App\Core\Config;
 
 $icones = asset('img/icones.svg');
@@ -13,7 +13,7 @@ $icones = asset('img/icones.svg');
 </section>
 
 <form class="cat-busca" method="get" action="<?= url('/catalogo') ?>">
-  <input type="search" name="q" value="<?= e($busca) ?>" placeholder="Buscar produto…" aria-label="Buscar produto">
+  <input type="search" name="q" value="<?= e($busca) ?>" placeholder="Buscar produto ou código…" aria-label="Buscar produto">
   <?php if ($categoria): ?><input type="hidden" name="categoria" value="<?= (int) $categoria ?>"><?php endif; ?>
   <button class="botao" type="submit">Buscar</button>
 </form>
@@ -24,7 +24,10 @@ $icones = asset('img/icones.svg');
   <?php endforeach; ?>
 </nav>
 
-<?php if (!$produtos): ?><p class="cat-vazio">Nenhum produto encontrado.</p><?php endif; ?>
+<?php if (!empty($semPrecos)): ?>
+  <div class="cat-vazio cat-aviso-preco" role="status"><strong>Ainda não há produtos com preço na sua tabela (<?= e($tabelaNome) ?>).</strong>
+    Os preços chegam do nosso sistema de faturamento. Fale com seu vendedor: ele faz o pedido para você enquanto isso.</div>
+<?php elseif (!$produtos): ?><p class="cat-vazio">Nenhum produto encontrado.</p><?php endif; ?>
 <div class="cat-grade">
   <?php foreach ($produtos as $p): $qtd = $carrinho[$p['id']] ?? 0; ?>
     <article class="cat-card">
@@ -32,7 +35,7 @@ $icones = asset('img/icones.svg');
         <?php if ($p['imagem']): ?><img src="<?= url('/' . $p['imagem']) ?>" alt="<?= e($p['nome']) ?>" loading="lazy"><?php endif; ?>
       </a>
       <div class="cat-card-corpo">
-        <small><?= e($p['categoria']) ?></small>
+        <small><?= !empty($p['codigo']) ? '<span class="cod-produto">' . e($p['codigo']) . '</span> ' : '' ?><?= e($p['categoria']) ?></small>
         <a href="<?= url('/catalogo/produto/' . rawurlencode($p['slug'])) ?>"><strong><?= e($p['nome']) ?></strong></a>
         <span class="cat-embalagem"><?= e($p['embalagem']) ?></span>
         <?php if ($logado): ?>

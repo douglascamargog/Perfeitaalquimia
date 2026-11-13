@@ -53,6 +53,9 @@ class CatalogoController extends Controller
             'produtos' => Produto::vitrine($busca, $categoria, $tabela ? (int) $tabela['id'] : null, (bool) Config::get('catalogo.mostrar_sem_preco', false)),
             'carrinho' => CatalogoAcesso::carrinho(), 'logado' => (bool) $cliente,
             'minimo' => $cliente ? PedidoService::pedidoMinimo($cliente['uf']) : null,
+            'tabelaNome' => $tabela['nome'] ?? '',
+            // Cliente logado e nenhum produto com preço na tabela dele (preços ainda não vieram do ERP)
+            'semPrecos' => $tabela && !\App\Core\Banco::valor('SELECT 1 FROM produto_precos WHERE tabela_preco_id = ? LIMIT 1', [(int) $tabela['id']]),
         ]);
     }
 
