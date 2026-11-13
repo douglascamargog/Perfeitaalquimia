@@ -29,8 +29,8 @@ if ($p['carteira']) {
 }
 $maxSemana = max(1, ...array_column($semana ?: [['total' => 1]], 'total'));
 
-// Atalhos do topo (conforme o perfil)
-$atalhos = array_filter([
+// Atalhos do topo (conforme o perfil; a diretoria tem os seus)
+$atalhos = $p['admin'] ? [['Painel de vendas', '/painel', 'grafico'], ['Aprovação', '/aprovacao', 'check'], ['Usuários', '/usuarios', 'usuario']] : array_filter([
     Auth::pode('carteira.ver_propria') || Auth::pode('carteira.ver_todas') ? ['Novo estabelecimento', '/carteira/clientes/novo', 'mais'] : null,
     Auth::pode('meu_mes.usar') ? ['Registrar venda', '/meu-mes', 'grafico'] : null,
     Auth::pode('cobranca.ver') ? ['Cobrança', '/cobranca', 'alerta'] : null,
@@ -67,8 +67,15 @@ $atalhos = array_filter([
     </section>
   <?php endif; ?>
 
-  <!-- ===== Hoje (agenda) ===== -->
-  <?php if ($agenda !== null): ?>
+  <!-- ===== Hoje (agenda) — ou, para a diretoria, os pedidos que aguardam aprovação ===== -->
+  <?php if ($p['aprovacao']): $ap = $p['aprovacao']; ?>
+    <a class="b-card b-escuro span-3" href="<?= url('/aprovacao') ?>" data-card="aprovacao">
+      <header class="b-topo"><span>Pedidos para aprovar</span><span class="b-icone-redondo lima"><svg class="icone"><use href="<?= $icones ?>#check"/></svg></span></header>
+      <strong class="b-numero-grande"><?= $n($ap['qtd']) ?></strong>
+      <p class="b-sub"><?= $ap['qtd'] ? $curto((float) $ap['valor']) . ' aguardando o Financeiro' : 'Nenhum pedido parado na aprovação.' ?></p>
+      <span class="b-link">Abrir aprovação →</span>
+    </a>
+  <?php elseif ($agenda !== null): ?>
     <a class="b-card b-escuro span-3" href="<?= url('/agenda') ?>" aria-label="Agenda de hoje">
       <header class="b-topo"><span>Retornos de hoje</span><span class="b-icone-redondo lima"><svg class="icone"><use href="<?= $icones ?>#calendario"/></svg></span></header>
       <strong class="b-numero-grande"><?= count($agenda['hoje']) ?></strong>
@@ -105,6 +112,23 @@ $atalhos = array_filter([
   <?php endif; ?>
 
   <!-- ===== Indicadores ===== -->
+  <!-- ===== Aniversariantes do mês (só dia e mês, nunca o ano) ===== -->
+  <?php if ($p['aniversariantes']): ?>
+    <section class="b-card span-3 b-aniver" data-card="aniversariantes">
+      <header class="b-topo"><span>Aniversariantes de <?= e(['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'][(int) date('n') - 1]) ?></span><span class="b-icone-redondo" aria-hidden="true">🎂</span></header>
+      <ul class="b-aniver-lista">
+        <?php foreach (array_slice($p['aniversariantes'], 0, 6) as $a): ?>
+          <li class="<?= $a['hoje'] ? 'hoje' : ($a['passou'] ? 'passou' : '') ?>">
+            <?= \App\Services\EquipeService::avatar($a, 34) ?>
+            <span><strong><?= e($a['apelido'] ?: explode(' ', $a['nome'])[0]) ?></strong><small><?= e($a['nome']) ?></small></span>
+            <b><?= $a['hoje'] ? 'Hoje! 🎉' : str_pad((string) $a['dia'], 2, '0', STR_PAD_LEFT) . '/' . date('m') ?></b>
+          </li>
+        <?php endforeach; ?>
+      </ul>
+      <?php if (count($p['aniversariantes']) > 6): ?><small class="suave">e mais <?= count($p['aniversariantes']) - 6 ?> pessoa(s)</small><?php endif; ?>
+    </section>
+  <?php endif; ?>
+
   <?php if ($p['meta']): $m = $p['meta']; ?>
     <a class="b-card b-kpi span-3" href="<?= url('/meu-mes') ?>">
       <header class="b-topo"><span>Minha meta</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#alvo"/></svg></span></header>
@@ -157,6 +181,9 @@ $atalhos = array_filter([
       <header class="b-topo"><span>Faturado no mês</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#grafico"/></svg></span></header>
       <strong class="b-valor"><?= $curto((float) $vd['faturado']) ?></strong>
       <?php if ($vd['meta'] > 0): ?><div class="b-barra"><i style="width: <?= $pct($vd['faturado'] / $vd['meta'] * 100) ?>%"></i></div><?php endif; ?>
+      <?php if ($vd['anterior'] !== null && $vd['anterior'] > 0): $var = ($vd['faturado'] - $vd['anterior']) / $vd['anterior'] * 100; ?>
+        <small class="<?= $var >= 0 ? 'b-sobe' : 'b-desce' ?>"><?= $var >= 0 ? '▲' : '▼' ?> <?= number_format(abs($var), 1, ',', '.') ?>% vs. o mesmo período do mês passado</small>
+      <?php endif; ?>
       <small><?= $vd['meta'] > 0 ? $pct($vd['faturado'] / $vd['meta'] * 100) . '% da meta da equipe · ' : '' ?><?= $n($vd['pedidos']) ?> pedido(s) faturado(s)<?= $vd['a_aprovar'] ? ' · ' . $vd['a_aprovar'] . ' para aprovar' : '' ?></small>
     </a>
   <?php endif; ?>

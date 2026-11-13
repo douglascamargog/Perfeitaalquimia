@@ -6,7 +6,7 @@ $perfilAtual = (int) \App\Core\Sessao::antigo('perfil_id', $usuario['perfil_id']
 $marcadas = array_map('intval', (array) \App\Core\Sessao::antigo('funcoes', $funcoesMarcadas));
 $ativo = $novo || $usuario['ativo'];
 ?>
-<form method="post" action="<?= url($novo ? '/usuarios' : '/usuarios/' . (int) $usuario['id']) ?>" class="card" style="max-width:820px">
+<form method="post" action="<?= url($novo ? '/usuarios' : '/usuarios/' . (int) $usuario['id']) ?>" class="card" style="max-width:820px" enctype="multipart/form-data">
   <?= csrf_campo() ?>
   <h2>Dados de acesso</h2>
   <div class="grade-campos">
@@ -28,15 +28,14 @@ $ativo = $novo || $usuario['ativo'];
       </select>
     </div>
     <div class="campo">
-      <label for="telefone">Telefone / WhatsApp</label>
-      <input type="tel" id="telefone" name="telefone" value="<?= $valor('telefone') ?>">
-    </div>
-    <div class="campo">
       <label for="codigo_vendedor">Código de vendedor</label>
       <input type="text" id="codigo_vendedor" name="codigo_vendedor" value="<?= $valor('codigo_vendedor') ?>" maxlength="20">
       <div class="ajuda">Usado no link do catálogo: /catalogo/v/CÓDIGO. Deixe vazio se a pessoa não vende.</div>
     </div>
   </div>
+
+  <h2>Ficha do funcionário</h2>
+  <?= \App\Core\Visao::renderizar('usuarios/_ficha', ['u' => $usuario, 'completo' => true]) ?>
 
   <h2>Funções</h2>
   <p class="suave pequeno">As filas e regras (ex.: reativação) usam a função, não a pessoa. Trocou o funcionário? Basta mudar as funções.</p>

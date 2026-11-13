@@ -35,8 +35,11 @@ class OneAssistente
     {
         $falas = [];
         $id = (int) Auth::id();
+        $falas[] = self::aniversario($id);
+        // A diretoria (admin) não trabalha carteira, metas individuais nem posts: recebe só os avisos da empresa
+        $admin = (Auth::usuario()['perfil_slug'] ?? '') === 'admin';
 
-        if (Auth::pode('carteira.ver_propria') || Auth::pode('carteira.ver_todas')) {
+        if (!$admin && (Auth::pode('carteira.ver_propria') || Auth::pode('carteira.ver_todas'))) {
             $falas[] = self::tarefas($id);
             $falas[] = self::recompra();
             $falas[] = self::prospeccao();
@@ -51,24 +54,24 @@ class OneAssistente
             $falas[] = self::promessasHoje();
             $falas[] = self::semContato();
         }
-        if (Auth::pode('marketing.aprovar')) {
+        if (!$admin && Auth::pode('marketing.aprovar')) {
             $falas[] = self::postsParaAprovar();
         }
-        if (Auth::pode('leads.ver') && !Auth::pode('carteira.ver_todas')) {
+        if (!$admin && Auth::pode('leads.ver') && !Auth::pode('carteira.ver_todas')) {
             $semana = (int) Banco::valor("SELECT COUNT(*) FROM leads_recebidos WHERE resultado IN ('criado', 'existente') AND criado_em >= CURDATE() - INTERVAL 6 DAY");
             $falas[] = $semana ? ['humor' => 'feliz', 'texto' => "$semana lead(s) chegaram pelo site e pelos anúncios nos últimos 7 dias. Veja quais campanhas convertem mais.", 'link' => '/leads', 'acao' => 'Leads do site'] : null;
         }
-        if (Auth::pode('marketing.editar')) {
+        if (!$admin && Auth::pode('marketing.editar')) {
             $falas[] = self::semanaQueVem();
         }
-        if (Auth::pode('producao.gerenciar')) {
+        if (Auth::pode('producao.gerenciar') && !$admin) {
             $falas = array_merge($falas, self::producao());
         }
-        if (Auth::pode('meu_mes.usar')) {
+        if (!$admin && Auth::pode('meu_mes.usar')) {
             $falas[] = self::metaIndividual($id);
             $falas[] = self::metaEquipe();
         }
-        if (Auth::pode('academia.ver')) {
+        if (!$admin && Auth::pode('academia.ver')) {
             $falas[] = self::academia($id);
         }
         if (Auth::pode('usuarios.gerenciar')) {
@@ -79,6 +82,21 @@ class OneAssistente
         // Dicas da tela atual aparecem primeiro
         usort($falas, fn($a, $b) => (int) self::daPagina($b, $pagina) <=> (int) self::daPagina($a, $pagina));
         return $falas ?: [['humor' => 'feliz', 'texto' => 'Tudo em ordem por aqui. Quando houver algo importante, eu aviso!']];
+    }
+
+    /** Aniversário de hoje (o próprio ou de colegas) */
+    private static function aniversario(int $id): ?array
+    {
+        $hoje = array_values(array_filter(EquipeService::aniversariantes(), fn($a) => $a['hoje']));
+        if (!$hoje) {
+            return null;
+        }
+        $eu = array_filter($hoje, fn($a) => (int) $a['id'] === $id);
+        if ($eu) {
+            return ['humor' => 'feliz', 'texto' => 'Feliz aniversário! 🎉 A equipe toda torce por você hoje.'];
+        }
+        $nomes = array_map(fn($a) => $a['apelido'] ?: explode(' ', $a['nome'])[0], $hoje);
+        return ['humor' => 'feliz', 'texto' => 'Hoje é aniversário de ' . implode(' e ', $nomes) . '! 🎉 Que tal mandar os parabéns?'];
     }
 
     /** Produção: matérias-primas para comprar e produtos para reabastecer */

@@ -203,6 +203,10 @@ return [
     ['POST', '/producao/ordens/{id}/concluir',   'OrdemProducaoController@concluir',     'producao.gerenciar'],
     ['POST', '/producao/ordens/{id}/cancelar',   'OrdemProducaoController@cancelar',     'producao.gerenciar'],
 
+    // ---------- Meu perfil (foto, aniversário, contatos) ----------
+    ['GET',  '/meu-perfil',                     'MeuPerfilController@index',  'logado'],
+    ['POST', '/meu-perfil',                     'MeuPerfilController@salvar', 'logado'],
+
     // ---------- Academia (Central de Televendas) ----------
     ['GET',  '/academia',                       'AcademiaController@inicio',      'academia.ver'],
     ['GET',  '/academia/trilha',                'AcademiaController@trilha',      'academia.ver'],

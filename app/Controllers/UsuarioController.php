@@ -60,6 +60,10 @@ class UsuarioController extends Controller
             return $id;
         });
         Auditoria::registrar('usuario', $id, 'criar', null, $dados);
+        if ($erroFoto = $this->tratarFoto($id)) {
+            Sessao::aviso('erro', "Usuário criado, mas a foto não foi salva: $erroFoto");
+            redirecionar("/usuarios/$id/editar");
+        }
         Sessao::aviso('sucesso', 'Usuário criado. No primeiro acesso ele vai trocar a senha.');
         redirecionar('/usuarios');
     }
@@ -94,6 +98,10 @@ class UsuarioController extends Controller
             Usuario::definirFuncoes($id, (array) ($_POST['funcoes'] ?? []));
         });
         $funcoesDepois = array_column(Usuario::funcoesDe($id), 'nome');
+        if ($erroFoto = $this->tratarFoto($id)) {
+            Sessao::aviso('erro', "Dados salvos, mas a foto não: $erroFoto");
+            redirecionar("/usuarios/$id/editar");
+        }
 
         Auditoria::registrar('usuario', $id, 'editar',
             array_intersect_key($antes, $dados) + ['funcoes' => implode(', ', $funcoesAntes)],
@@ -110,9 +118,22 @@ class UsuarioController extends Controller
             'email'           => mb_strtolower($this->campo('email')),
             'perfil_id'       => (int) $this->campo('perfil_id'),
             'codigo_vendedor' => $codigo !== '' ? $codigo : null,
-            'telefone'        => preg_replace('/\D/', '', $this->campo('telefone')) ?: null,
             'ativo'           => isset($_POST['ativo']) ? 1 : 0,
-        ];
+        ] + \App\Services\EquipeService::dadosFicha($_POST); // ficha do funcionário: apelido, nascimento, admissão, contatos
+    }
+
+    /** Foto enviada no formulário (ou "remover foto"). Devolve a mensagem de erro, se houver */
+    private function tratarFoto(int $id): ?string
+    {
+        try {
+            if (!empty($_POST['remover_foto'])) {
+                \App\Services\EquipeService::removerFoto($id);
+            }
+            \App\Services\EquipeService::salvarFoto($id, $_FILES['foto'] ?? null);
+            return null;
+        } catch (\RuntimeException $e) {
+            return $e->getMessage();
+        }
     }
 
     private function validar(array $dados, ?int $id): array

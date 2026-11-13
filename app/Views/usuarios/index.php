@@ -13,7 +13,8 @@
       <tbody>
       <?php foreach ($usuarios as $u): ?>
         <tr class="<?= $u['ativo'] ? '' : 'inativo' ?>">
-          <td><strong><?= e($u['nome']) ?></strong><?= $u['ativo'] ? '' : ' <span class="selo cinza">inativo</span>' ?></td>
+          <td><span class="usuario-linha"><?= \App\Services\EquipeService::avatar($u, 32) ?><span><strong><?= e($u['nome']) ?></strong><?= $u['ativo'] ? '' : ' <span class="selo cinza">inativo</span>' ?>
+            <?php if ($u['data_nascimento']): ?><small class="suave">aniversário <?= e(date('d/m', strtotime($u['data_nascimento']))) ?></small><?php endif; ?></span></span></td>
           <td><?= e($u['email']) ?></td>
           <td><span class="selo"><?= e($u['perfil_nome']) ?></span></td>
           <td><?= e($u['funcoes_nomes'] ?: '—') ?></td>

@@ -21,33 +21,42 @@ class PainelInicio
     public static function montar(): array
     {
         $id = (int) Auth::id();
-        $temCarteira = Auth::pode('carteira.ver_propria') || Auth::pode('carteira.ver_todas');
         $mes = date('Y-m');
+        // Admin (sócios e diretor) tem todas as permissões, mas não trabalha carteira nem tem meta individual:
+        // vê um Início de diretoria (números da empresa), sem os cartões do dia a dia do vendedor.
+        $admin = (Auth::usuario()['perfil_slug'] ?? '') === 'admin';
+        $pode = fn(string $permissao) => !$admin && Auth::pode($permissao);
+        $temCarteira = $pode('carteira.ver_propria') || $pode('carteira.ver_todas');
 
         return [
+            'admin'        => $admin,
+            'aniversariantes' => EquipeService::aniversariantes(),
+            'aprovacao'    => $admin ? Banco::um("SELECT COUNT(*) AS qtd, COALESCE(SUM(total), 0) AS valor FROM pedidos WHERE situacao = 'aguardando_aprovacao'") : null,
             'data_extenso' => self::DIAS[(int) date('w')] . ', ' . (int) date('d') . ' de ' . self::MESES[(int) date('n') - 1],
             'clima'        => self::clima(),
             'agenda'       => $temCarteira ? Tarefa::agenda($id) : null,
-            'meta'         => Auth::pode('meu_mes.usar') ? self::meta($id, $mes) : null,
-            'equipe'       => Auth::pode('meu_mes.usar') || Auth::pode('metas.gerenciar') ? MetaService::equipe($mes) : null,
+            'meta'         => $pode('meu_mes.usar') ? self::meta($id, $mes) : null,
+            'equipe'       => $pode('meu_mes.usar') || $pode('metas.gerenciar') ? MetaService::equipe($mes) : null,
             'carteira'     => $temCarteira ? self::carteira() : null,
             'funil'        => $temCarteira ? self::funil() : null,
             'prospeccao'   => Auth::pode('prospeccao.usar') ? self::prospeccao() : null,
             'cobranca'     => Auth::pode('cobranca.ver') ? Cobranca::resumo() : null,
-            'marketing'    => Auth::pode('marketing.ver') ? self::marketing() : null,
-            'vendas'       => Auth::pode('painel.ver') ? self::vendas($mes) : null,
-            'recompra'     => Auth::pode('recompra.ver') ? VendasService::qtdRecompra() : null,
+            'marketing'    => $pode('marketing.ver') ? self::marketing() : null,
+            'vendas'       => Auth::pode('painel.ver') ? self::vendas($mes, $admin) : null,
+            'recompra'     => $pode('recompra.ver') ? VendasService::qtdRecompra() : null,
             'producao'     => Auth::pode('producao.gerenciar') || Auth::pode('producao.ver') ? ProducaoService::alertas() : null,
             'ecommerce'    => Auth::pode('ecommerce.ver') && Banco::valor('SELECT 1 FROM ecommerce_resumo_diario LIMIT 1') ? EcommerceService::painel(date('Y-m')) : null,
         ];
     }
 
     /** Faturado no mês (pedidos faturados) e % da meta da equipe */
-    private static function vendas(string $mes): array
+    private static function vendas(string $mes, bool $admin = false): array
     {
         $r = VendasService::resumo(['de' => "$mes-01", 'ate' => date('Y-m-d')]);
-        $meta = (float) Banco::valor('SELECT meta FROM metas_equipe WHERE mes = ?', [$mes]);
-        return ['faturado' => $r['faturamento'], 'pedidos' => $r['pedidos'], 'meta' => $meta,
+        $meta = $admin ? 0.0 : (float) Banco::valor('SELECT meta FROM metas_equipe WHERE mes = ?', [$mes]);
+        // Para a diretoria: comparação com o mesmo período do mês anterior
+        $anterior = $admin ? VendasService::resumo(['de' => date('Y-m-01', strtotime("$mes-01 -1 month")), 'ate' => date('Y-m-d', strtotime('-1 month'))])['faturamento'] : null;
+        return ['faturado' => $r['faturamento'], 'pedidos' => $r['pedidos'], 'meta' => $meta, 'anterior' => $anterior,
             'a_aprovar' => (int) Banco::valor("SELECT COUNT(*) FROM pedidos WHERE situacao = 'aguardando_aprovacao'")];
     }
 

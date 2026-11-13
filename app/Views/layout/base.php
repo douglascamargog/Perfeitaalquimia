@@ -77,10 +77,13 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
       <button class="botao-icone abrir-menu" type="button" aria-label="Abrir menu"><svg class="icone"><use href="<?= $icones ?>#menu"/></svg></button>
       <h1><?= e($titulo ?? '') ?></h1>
       <div class="usuario">
-        <div class="usuario-nome">
-          <strong><?= e($usuario['nome']) ?></strong>
-          <span><?= e($usuario['perfil_nome']) ?><?= $usuario['funcoes'] ? ' · ' . e(implode(', ', array_column($usuario['funcoes'], 'nome'))) : '' ?></span>
-        </div>
+        <a class="usuario-perfil" href="<?= url('/meu-perfil') ?>" title="Meu perfil">
+          <span class="usuario-nome">
+            <strong><?= e($usuario['nome']) ?></strong>
+            <span><?= e($usuario['perfil_nome']) ?><?= $usuario['funcoes'] ? ' · ' . e(implode(', ', array_column($usuario['funcoes'], 'nome'))) : '' ?></span>
+          </span>
+          <?= \App\Services\EquipeService::avatar($usuario, 38) ?>
+        </a>
         <a class="botao-icone" href="<?= url('/minha-senha') ?>" title="Minha senha" aria-label="Minha senha"><svg class="icone"><use href="<?= $icones ?>#chave"/></svg></a>
         <form method="post" action="<?= url('/sair') ?>">
           <?= csrf_campo() ?>
