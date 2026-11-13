@@ -17,6 +17,13 @@
  */
 return [
     [
+        'versao' => '4.1', 'data' => '2026-11-13', 'titulo' => 'Página do cliente',
+        'novo' => [
+            'Cada cliente tem a sua página com tudo da empresa: quanto comprou em 12 meses, ticket médio, próxima compra prevista, todos os pedidos, o que mais compra, retornos abertos e a linha do tempo completa.',
+            'A ficha lateral continua como acesso rápido. Para ver tudo, clique em "Abrir página completa".',
+        ],
+    ],
+    [
         'versao' => '4.0', 'data' => '2026-11-13', 'titulo' => 'Equipe de vendas, Meu mês do vendedor e Terceirização',
         'novo' => [
             'Equipe de vendas (menu Comercial): a meta da equipe e os números de cada frente (Externos, Televendas e Terceirização), com o ranking do mês.',

@@ -3,6 +3,7 @@
  * Ficha do cliente (carregada dentro da gaveta lateral).
  * Variáveis: $c (cliente), $eventos, $retorno, $etapas, $prioridades, $vendedores, $canais, $cobranca (caso aberto ou null),
  *            $pedidos (últimos), $acesso (catálogo), $codigoCatalogo (código recém-gerado, aparece uma vez)
+ *            $pagina (true = dentro da página do cliente: sem cabeçalho, pedidos e linha do tempo, que a página mostra completos)
  */
 use App\Core\Auth;
 use App\Core\Visao;
@@ -11,6 +12,7 @@ use App\Services\Normalizar;
 
 $icones = asset('img/icones.svg');
 $id = (int) $c['id'];
+$pagina = !empty($pagina);
 $tel = $c['telefone'] ? Normalizar::telefoneFormatado($c['telefone']) : '';
 $whats = $c['whatsapp'] ?: (strlen((string) $c['telefone']) === 11 ? $c['telefone'] : '');
 $enderecoMapa = trim(implode(' ', array_filter([$c['endereco'], $c['cidade'], $c['uf']])));
@@ -30,6 +32,7 @@ $linkSeguro = function (?string $url): string {
     return filter_var($url, FILTER_VALIDATE_URL) ? $url : '';
 };
 ?>
+<?php if (!$pagina): ?>
 <header class="ficha-topo">
   <div>
     <div class="sobretitulo"><?= e($c['segmento'] ?? 'Sem segmento') ?> · <?= e($c['tipo'] === 'cliente' ? 'Cliente' : 'Lead') ?></div>
@@ -43,8 +46,12 @@ $linkSeguro = function (?string $url): string {
       <?php elseif ($c['credito_situacao'] === 'atraso'): ?><span class="selo vermelho">Título em atraso</span><?php endif; ?>
     </div>
   </div>
-  <button class="botao-icone escuro" type="button" data-fechar-gaveta aria-label="Fechar ficha"><svg class="icone"><use href="<?= $icones ?>#fechar"/></svg></button>
+  <div class="ficha-topo-botoes">
+    <a class="botao-icone escuro" href="<?= url("/carteira/clientes/$id") ?>" title="Abrir a página do cliente" aria-label="Abrir a página do cliente" data-abrir-pagina><svg class="icone"><use href="<?= $icones ?>#externo"/></svg></a>
+    <button class="botao-icone escuro" type="button" data-fechar-gaveta aria-label="Fechar ficha"><svg class="icone"><use href="<?= $icones ?>#fechar"/></svg></button>
+  </div>
 </header>
+<?php endif; ?>
 
 <div class="ficha-corpo">
   <!-- Ações rápidas -->
@@ -53,6 +60,7 @@ $linkSeguro = function (?string $url): string {
     <?php if ($whats): ?><a class="botao contorno pequeno" href="https://wa.me/55<?= e($whats) ?>" target="_blank" rel="noopener noreferrer"><svg class="icone"><use href="<?= $icones ?>#conversa"/></svg>WhatsApp</a><?php endif; ?>
     <?php if ($enderecoMapa): ?><a class="botao contorno pequeno" href="https://www.google.com/maps/search/?api=1&query=<?= rawurlencode($enderecoMapa) ?>" target="_blank" rel="noopener noreferrer"><svg class="icone"><use href="<?= $icones ?>#externo"/></svg>Rota</a><?php endif; ?>
     <a class="botao contorno pequeno" href="<?= url("/carteira/clientes/$id/editar") ?>"><svg class="icone"><use href="<?= $icones ?>#editar"/></svg>Editar cadastro</a>
+    <?php if (!$pagina): ?><a class="botao pequeno" href="<?= url("/carteira/clientes/$id") ?>"><svg class="icone"><use href="<?= $icones ?>#externo"/></svg>Abrir página completa</a><?php endif; ?>
   </div>
 
   <?php if (Auth::pode('mensagens.usar') && ($modelosMsg = \App\Services\MensagemService::paraCliente($c, Auth::usuario()))): ?>
@@ -205,6 +213,7 @@ $linkSeguro = function (?string $url): string {
       <p class="pequeno <?= $previsao < strtotime('today') ? 'ficha-recompra-atrasada' : 'suave' ?>">Compra a cada ~<?= (int) $c['intervalo_medio_dias'] ?> dias ·
         <?= $previsao < strtotime('today') ? 'deveria ter comprado em ' . date('d/m', $previsao) . ' (recompra atrasada)' : 'próxima compra prevista em ' . date('d/m', $previsao) ?></p>
     <?php endif; ?>
+    <?php if (!$pagina): ?>
     <?php if (!$pedidos): ?><p class="suave pequeno">Nenhum pedido ainda.</p><?php endif; ?>
     <ul class="ficha-pedidos">
       <?php foreach ($pedidos as $pd): [$rot, $cor] = \App\Services\PedidoService::SITUACOES[$pd['situacao']] ?? [$pd['situacao'], 'cinza']; ?>
@@ -212,6 +221,7 @@ $linkSeguro = function (?string $url): string {
           <b><?= e(dinheiro((float) $pd['total'])) ?></b> <span class="selo <?= $cor ?>"><?= $rot ?></span></li>
       <?php endforeach; ?>
     </ul>
+    <?php endif; ?>
     <?php if (Auth::pode('catalogo.acessos')): ?>
       <div class="ficha-catalogo">
         <p class="pequeno">Catálogo: <?= !empty($acesso['tem_senha']) ? 'cliente já tem senha' . (!empty($acesso['ultimo_acesso_em']) ? ' · último acesso ' . data_br($acesso['ultimo_acesso_em']) : '') : 'cliente ainda não acessou' ?>.</p>
@@ -226,6 +236,7 @@ $linkSeguro = function (?string $url): string {
     <?php endif; ?>
   </section>
 
+  <?php if (!$pagina): ?>
   <!-- Linha do tempo -->
   <section class="ficha-secao">
     <h3>Linha do tempo</h3>
@@ -240,4 +251,5 @@ $linkSeguro = function (?string $url): string {
       <?php endforeach; ?>
     </ol>
   </section>
+  <?php endif; ?>
 </div>

@@ -58,6 +58,51 @@ class ClienteController extends Controller
     }
 
     /**
+     * Página do cliente: tudo da empresa numa tela só (a gaveta continua como acesso rápido).
+     * Mesma ficha da gaveta (com os mesmos formulários) + números de 12 meses, todos os pedidos,
+     * produtos mais comprados, produtos com a marca do cliente e a linha do tempo completa.
+     */
+    public function pagina(string $id): void
+    {
+        $cliente = Cliente::buscar((int) $id);
+        if (!$cliente || !Cliente::podeVer($cliente)) {
+            http_response_code($cliente ? 403 : 404);
+            Visao::mostrar('erros/erro', ['titulo' => 'Cliente', 'codigo' => $cliente ? 403 : 404,
+                'mensagem' => $cliente ? 'Este cliente não está na sua carteira.' : 'Cliente não encontrado.'], 'base');
+            return;
+        }
+        $cid = (int) $cliente['id'];
+        \App\Services\NotificacaoService::marcarDoCliente((int) Auth::id(), $cid);
+        $de = date('Y-m-d', strtotime('-12 months'));
+        $resumo = \App\Core\Banco::um("SELECT COALESCE(SUM(total), 0) AS faturado, COUNT(*) AS pedidos, MIN(faturado_em) AS primeira
+            FROM pedidos WHERE cliente_id = ? AND situacao = 'faturado' AND faturado_em >= ?", [$cid, $de]);
+        $this->tela('carteira/cliente', [
+            'titulo' => $cliente['nome_fantasia'] ?: $cliente['razao_social'],
+            'c' => $cliente, 'resumo' => $resumo,
+            'primeiraCompra' => \App\Core\Banco::valor("SELECT MIN(faturado_em) FROM pedidos WHERE cliente_id = ? AND situacao = 'faturado'", [$cid]),
+            'todosPedidos' => \App\Models\Pedido::doCliente($cid, 50),
+            'maisComprados' => \App\Core\Banco::todos("SELECT i.nome, COALESCE(i.codigo, pr.codigo) AS codigo, SUM(i.quantidade) AS quantidade, SUM(i.total) AS valor, MAX(p.faturado_em) AS ultima
+                FROM pedido_itens i JOIN pedidos p ON p.id = i.pedido_id LEFT JOIN produtos pr ON pr.id = i.produto_id
+                WHERE p.cliente_id = ? AND p.situacao = 'faturado' AND p.faturado_em >= ? GROUP BY i.nome, COALESCE(i.codigo, pr.codigo) ORDER BY valor DESC LIMIT 12", [$cid, $de]),
+            'marca' => \App\Services\TerceirizacaoService::produtos($cid),
+            'tarefas' => \App\Core\Banco::todos('SELECT t.*, u.nome AS usuario FROM tarefas t LEFT JOIN usuarios u ON u.id = t.usuario_id
+                WHERE t.cliente_id = ? AND t.concluida_em IS NULL ORDER BY t.vence_em, t.hora', [$cid]),
+            'linhaDoTempo' => ClienteEvento::doCliente($cid, 200),
+            // a ficha (mesma da gaveta), sem o cabeçalho
+            'ficha' => Visao::renderizar('carteira/_ficha', [
+                'c' => $cliente, 'eventos' => [], 'retorno' => Tarefa::proximoRetorno($cid), 'etapas' => Listas::etapas(),
+                'prioridades' => Listas::prioridades(), 'vendedores' => Auth::pode('carteira.transferir') ? Listas::vendedores() : [],
+                'canais' => array_keys(CarteiraService::CANAIS), 'cobranca' => \App\Models\Cobranca::doCliente($cid), 'pedidos' => [],
+                'acesso' => \App\Core\Banco::um('SELECT senha_hash IS NOT NULL AS tem_senha, ultimo_acesso_em FROM cliente_acessos WHERE cliente_id = ?', [$cid]),
+                'codigoCatalogo' => \App\Core\Sessao::get('codigo_catalogo_' . $cid), 'pagina' => true,
+            ]),
+            'cobranca' => \App\Models\Cobranca::doCliente($cid),
+            'estilos' => ['carteira.css', 'cliente.css'], 'scripts' => ['carteira.js', 'busca_contatos.js'],
+        ]);
+        \App\Core\Sessao::remover('codigo_catalogo_' . $cid);
+    }
+
+    /**
      * Gera um código de acesso ao catálogo para o vendedor mandar pelo WhatsApp
      * (primeiro acesso ou esqueceu a senha). O código aparece na ficha uma vez só.
      */

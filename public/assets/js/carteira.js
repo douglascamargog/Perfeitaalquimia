@@ -93,6 +93,7 @@ document.addEventListener('submit', async (evento) => {
       if (dados.abrir) clienteAberto = dados.abrir; // item recém-criado: a gaveta passa a mostrar ele
     }
     if (clienteAberto) await abrirCliente(clienteAberto);
+    else if (form.closest('[data-pagina-cliente]')) location.reload(); // página do cliente: mostra o que mudou (a rolagem é mantida)
   } catch (e) {
     avisar('Sem conexão: nada foi salvo. Tente de novo.', 'erro');
   } finally {
