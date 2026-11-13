@@ -1,6 +1,9 @@
 <?php
 /** Uma versão do One: título, data e listas de novidades, melhorias e correções. Variável: $versao */
 $grupos = ['novo' => ['Novidades', 'novo'], 'melhoria' => ['Melhorias', 'melhoria'], 'correcao' => ['Correções', 'correcao']];
+if (\App\Services\Versoes::ehAdministrador()) { // recado técnico: só quem administra o sistema vê
+    $grupos['admin'] = ['Para o administrador', 'admin'];
+}
 ?>
 <article class="nov-versao" data-versao="<?= e($versao['versao']) ?>">
   <header><strong>ONE_V<?= e($versao['versao']) ?></strong><span><?= e($versao['titulo']) ?></span><small><?= e(data_br($versao['data'])) ?></small></header>

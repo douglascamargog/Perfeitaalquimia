@@ -218,10 +218,11 @@ O sistema se chama **One** (e o mascote ajudante também). Ele já roda com dado
 3. **Dados essenciais** (configurações novas, permissões, listas) vão em seed com `INSERT ... ` que verifica se já existe (idempotente).
 4. **Dados de demonstração** vão em seed com `_demo` no nome (ex.: `007_pedidos_demo.php`): só rodam na instalação nova, nunca em atualização.
 5. Publicar: `bash ferramentas/gerar_pacote.sh --atualizacao` → passo a passo em `LEIA-ME-ATUALIZACAO.md`
-   (backup → extrair → Administração › Atualização › Aplicar).
+   (backup → extrair; na 1ª visita o One faz backup e aplica sozinho as mudanças do banco).
 6. Antes de entregar: recriar o banco do zero (`php database/migrar.php`) **e** testar a atualização sobre um banco com dados.
 7. **Número da versão** (pedido do usuário): toda entrega nova acrescenta uma versão no TOPO de `app/versoes.php`, com o que
-   mudou em linguagem simples (`novo`, `melhoria`, `correcao`). Atualização pequena muda a decimal (V2.0 → V2.1);
+   mudou (`novo`, `melhoria`, `correcao`) escrito PARA A EQUIPE: o que ela percebe no dia a dia, sem "como fazer", banco,
+   backup ou telas de administração. Recado técnico vai em `admin` (só quem administra vê). Atualização pequena muda a decimal (V2.0 → V2.1);
    grande (módulo novo, mudança no jeito de usar) muda o número (V2.x → V3.0). O pacote sai como `pacote/ONE_V2.1.zip`.
    O sistema avisa todos os usuários sozinho (sino + janela "Novidades" uma vez por pessoa). Ao entregar, informar ao
    usuário só o nome da versão (ex.: ONE_V2.1) e o resumo das mudanças.

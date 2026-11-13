@@ -268,3 +268,5 @@ input[type=color] { width: 44px; height: 38px; padding: 2px; border: 1px solid v
 .nov-historico { display: grid; gap: 14px; max-width: 820px; }
 .nov-historico .card { padding: 6px 22px; }
 @media print { .nov-fundo { display: none; } }
+.nov-tipo.admin { color: var(--texto-suave); border-top: 1px dashed var(--borda); padding-top: 8px; }
+.nov-tipo.admin + ul { color: var(--texto-suave); font-size: .86rem; }

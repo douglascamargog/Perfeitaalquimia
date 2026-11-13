@@ -144,12 +144,12 @@ unset($itensDoGrupo);
 <?php // Novidades da versão: aparece uma vez para quem ainda não viu a versão atual
 $usuarioNov = Auth::usuario();
 \App\Services\Versoes::avisarSeNova(); // versão nova? avisa a equipe no sino (uma vez)
-if ($usuarioNov && array_key_exists('versao_vista', $usuarioNov) && empty($usuarioNov['trocar_senha']) && $caminhoAtual !== '/novidades' && ($novasVersoes = \App\Services\Versoes::naoVistas($usuarioNov['versao_vista'] ?? null))): ?>
+if ($usuarioNov && array_key_exists('versao_vista', $usuarioNov) && empty($usuarioNov['trocar_senha']) && $caminhoAtual !== '/novidades' && ($novasVersoes = \App\Services\Versoes::naoVistas($usuarioNov['versao_vista'] ?? null, \App\Services\Versoes::ehAdministrador()))): ?>
   <div class="nov-fundo" data-novidades>
     <section class="nov-janela" role="dialog" aria-modal="true" aria-labelledby="nov-titulo">
       <header class="nov-topo">
         <img src="<?= asset('img/one/one-ola-padrao.svg') ?>" alt="" width="54" height="60">
-        <div><span class="nov-rotulo">O One foi atualizado</span><h2 id="nov-titulo">Novidades da <?= e(\App\Services\Versoes::nome()) ?></h2></div>
+        <div><span class="nov-rotulo">O One foi atualizado</span><h2 id="nov-titulo">O que há de novo</h2></div>
       </header>
       <div class="nov-corpo">
         <?php foreach ($novasVersoes as $versao): ?><?= \App\Core\Visao::renderizar('novidades/_versao', ['versao' => $versao]) ?><?php endforeach; ?>

@@ -20,11 +20,15 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   sql(`delete from migracoes where arquivo='versao:${atual}'`);
   sql("update usuarios set versao_vista=null");
   sql("update usuarios set versao_vista='1.0' where email='gestor@demo.local'");
-  const ativos = sql('select count(*) from usuarios where ativo=1');
+  // versão com novidade para a equipe → todos; versão só com recado técnico → só quem administra
+  const soAdmin = execSync(`php -r 'define("RAIZ", getcwd()); $v = (require "app/versoes.php")[0]; echo empty($v["novo"]) && empty($v["melhoria"]) && empty($v["correcao"]) ? 1 : 0;'`, { cwd: RAIZ }).toString().trim() === '1';
+  const esperados = soAdmin ? sql("select count(*) from usuarios u join perfil_permissoes pp on pp.perfil_id=u.perfil_id where u.ativo=1 and pp.permissao in ('*','sistema.atualizar','usuarios.gerenciar') and not exists (select 1 from perfil_permissoes x where x.perfil_id=u.perfil_id and x.permissao in ('*','sistema.atualizar','usuarios.gerenciar') and x.permissao < pp.permissao)")
+    : sql('select count(*) from usuarios where ativo=1');
   execSync('php database/migrar.php --atualizacao', { cwd: RAIZ });
-  ok(sql("select count(*) from notificacoes where tipo='versao_nova'") === ativos, `atualização avisa no sino todos os ${ativos} usuários ativos`);
+  ok(sql("select count(*) from notificacoes where tipo='versao_nova'") === esperados, `atualização avisa no sino ${soAdmin ? 'só quem administra' : 'todos os usuários ativos'} (${esperados})`);
+  if (soAdmin) ok(sql("select count(*) from notificacoes n join usuarios u on u.id=n.usuario_id where n.tipo='versao_nova' and u.email='televendas1@demo.local'") === '0', 'versão só com recado técnico não incomoda a equipe');
   execSync('php database/migrar.php --atualizacao', { cwd: RAIZ });
-  ok(sql("select count(*) from notificacoes where tipo='versao_nova'") === ativos, 'rodar a atualização de novo não repete o aviso');
+  ok(sql("select count(*) from notificacoes where tipo='versao_nova'") === esperados, 'rodar a atualização de novo não repete o aviso');
 
   const b = await chromium.launch();
   const erros = [];
@@ -35,8 +39,9 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   await entrar(ven, 'televendas1@demo.local');
   const janela = ven.locator('[data-novidades]');
   ok(await janela.isVisible(), 'janela de novidades aparece no primeiro acesso depois da atualização');
-  ok((await janela.locator('#nov-titulo').innerText()).includes('ONE_V' + atual), 'título com o nome da versão (ONE_V' + atual + ')');
-  ok(await janela.locator('.nov-versao').count() === 1, 'quem nunca viu nenhuma vê só a versão atual');
+  ok((await janela.locator('.nov-versao strong').first().innerText()).startsWith('ONE_V'), 'cada versão com o nome ONE_Vx.y');
+  ok(await janela.locator('.nov-tipo.admin').count() === 0, 'vendedor não vê os recados "Para o administrador"');
+  ok(await janela.locator('.nov-versao').count() === 1, 'quem nunca viu nenhuma vê só a versão mais recente com novidade para ele');
   ok(await janela.locator('.nov-versao li').count() >= 1, 'lista as mudanças');
   await ven.goto(BASE + '/agenda');
   await Promise.all([ven.waitForNavigation(), ven.click('[data-novidades-ok]')]);
@@ -55,7 +60,9 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
 
   // 5. Histórico completo e rodapé do menu
   await ges.goto(BASE + '/novidades');
-  ok(await ges.locator('.nov-historico .nov-versao').count() === Number(execSync(`php -r 'define("RAIZ", getcwd()); echo count(require "app/versoes.php");'`, { cwd: RAIZ }).toString()), 'página Novidades com todas as versões');
+  const paraEquipe = Number(execSync(`php -r 'define("RAIZ", getcwd()); echo count(array_filter(require "app/versoes.php", fn($v) => !empty($v["novo"]) || !empty($v["melhoria"]) || !empty($v["correcao"])));'`, { cwd: RAIZ }).toString());
+  ok(await ges.locator('.nov-historico .nov-versao').count() === paraEquipe, `página Novidades com as versões que têm algo para a equipe (${paraEquipe})`);
+  ok(await ges.locator('.nov-historico .nov-tipo.admin').count() === 0, 'histórico da equipe sem recados técnicos');
   ok(await ges.locator('[data-novidades]').count() === 0, 'abrir o histórico também conta como visto');
   ok((await ges.locator('.menu-rodape a').innerText()).includes('ONE_V' + atual), 'rodapé do menu mostra ONE_V' + atual + ' com link para as novidades');
 
@@ -64,11 +71,13 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   await entrar(fin, 'financeiro@demo.local');
   await fin.click('[data-novidades-ok]');
   const lista = await (await fin.request.get(BASE + '/notificacoes/resumo?lista=1', { headers: { Accept: 'application/json' } })).json();
-  ok(lista.lista.some(n => String(n.titulo).includes('ONE_V' + atual)), 'aviso "One atualizado" no sino de cada pessoa');
+  ok(soAdmin ? !lista.lista.some(n => String(n.titulo).includes('ONE_V' + atual)) : lista.lista.some(n => String(n.titulo).includes('ONE_V' + atual)),
+    soAdmin ? 'Financeiro não recebe aviso de versão só técnica' : 'aviso "One atualizado" no sino de cada pessoa');
 
   // 7. Usuário novo não recebe novidades antigas
   const adm = await nova();
   await entrar(adm, 'admin@demo.local');
+  ok(await adm.locator('[data-novidades] .nov-tipo.admin').count() >= 1, 'admin vê os recados "Para o administrador"');
   await adm.click('[data-novidades-ok]');
   await adm.goto(BASE + '/usuarios/novo');
   await adm.fill('#nome', 'Pessoa Nova Teste');

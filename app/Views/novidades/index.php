@@ -7,7 +7,7 @@ use App\Core\Visao;
     <p>Versão instalada: <strong><?= e($atual) ?></strong>. Atualizações pequenas mudam a decimal (V2.1, V2.2); as grandes mudam o número (V3.0).</p></div>
 </div>
 <div class="nov-historico">
-  <?php foreach ($versoes as $versao): ?>
+  <?php foreach ($versoes as $versao): if (!\App\Services\Versoes::temAlgoPara($versao, \App\Services\Versoes::ehAdministrador())) continue; ?>
     <div class="card"><?= Visao::renderizar('novidades/_versao', ['versao' => $versao]) ?></div>
   <?php endforeach; ?>
 </div>
