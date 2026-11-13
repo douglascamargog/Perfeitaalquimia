@@ -76,6 +76,13 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
     <header class="topo">
       <button class="botao-icone abrir-menu" type="button" aria-label="Abrir menu"><svg class="icone"><use href="<?= $icones ?>#menu"/></svg></button>
       <h1><?= e($titulo ?? '') ?></h1>
+      <div class="busca-rapida" data-busca-rapida>
+        <svg class="icone" aria-hidden="true"><use href="<?= $icones ?>#lupa"/></svg>
+        <input type="search" placeholder="<?= Auth::pode('carteira.ver_propria') || Auth::pode('carteira.ver_todas') ? 'Buscar cliente, CNPJ, telefone ou código…' : 'Buscar produto ou código…' ?>"
+               aria-label="Busca rápida" autocomplete="off" data-busca-campo>
+        <kbd aria-hidden="true">/</kbd>
+        <div class="busca-resultados" data-busca-resultados hidden role="listbox"></div>
+      </div>
       <div class="usuario">
         <a class="usuario-perfil" href="<?= url('/meu-perfil') ?>" title="Meu perfil">
           <span class="usuario-nome">
@@ -110,6 +117,7 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
   <div class="one-painel-corpo" data-one-corpo><p class="one-carregando"><img src="<?= asset('img/one/one-pensando-padrao.svg') ?>" alt="" width="40">Um instante, estou olhando seus dados…</p></div>
 </section>
 <script type="module" src="<?= asset('js/app.js') ?>"></script>
+<script type="module" src="<?= asset('js/busca.js') ?>"></script>
 <?php // JS extras da tela: $scripts = ['carteira.js'] (módulos) ou bibliotecas externas (https://...) ?>
 <?php foreach ($scripts ?? [] as $js): ?>
   <?php if (str_starts_with($js, 'https://')): ?>
