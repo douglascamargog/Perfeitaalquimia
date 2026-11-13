@@ -214,6 +214,8 @@ return [
     ['GET',  '/academia/produtos',              'AcademiaController@produtos',    'academia.ver'],
     ['GET',  '/academia/produtos/{slug}',       'AcademiaController@produto',     'academia.ver'],
     ['GET',  '/academia/atendimento',           'AcademiaController@atendimento', 'academia.ver'],
+    ['GET',  '/academia/sistema',               'AcademiaController@sistema',     'academia.ver'],
+    ['GET',  '/academia/sistema/{id}',          'AcademiaController@sistema',     'academia.ver'],
     ['GET',  '/academia/crm',                   'AcademiaController@crm',         'academia.ver'],
     ['GET',  '/academia/crm/{id}',              'AcademiaController@crm',         'academia.ver'],
     ['POST', '/academia/progresso',             'AcademiaController@marcar',      'academia.ver'],

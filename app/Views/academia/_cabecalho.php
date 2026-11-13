@@ -8,7 +8,7 @@ $abas = [
     'trilha'      => ['Trilha de treinamento', '/academia/trilha'],
     'produtos'    => ['Produtos', '/academia/produtos'],
     'atendimento' => ['Guia de atendimento', '/academia/atendimento'],
-    'crm'         => ['CRM na prática', '/academia/crm'],
+    'sistema'     => ['Como usar o One', '/academia/sistema'],
 ];
 ?>
 <div class="cabecalho-secao">

@@ -1,5 +1,5 @@
 <?php
-/** Início da Academia. Variáveis: $proximo, $modulos, $totalProdutos, $aulasCrm, $categorias, $temas, $progresso + cabeçalho */
+/** Início da Academia. Variáveis: $proximo, $modulos, $totalProdutos, $aulasOne, $categorias, $temas, $progresso + cabeçalho */
 use App\Core\Auth;
 use App\Core\Visao;
 use App\Services\AcademiaService;
@@ -26,7 +26,7 @@ $nome = explode(' ', Auth::usuario()['nome'])[0];
   <div class="academia-hero-numeros">
     <div><strong><?= count($modulos) ?></strong><span>módulos na trilha</span></div>
     <div><strong><?= (int) $totalProdutos ?></strong><span>produtos para consulta</span></div>
-    <div><strong><?= count($aulasCrm) ?></strong><span>aulas de CRM na prática</span></div>
+    <div><strong><?= count($aulasOne) ?></strong><span>aulas de como usar o One</span></div>
   </div>
 </section>
 
@@ -38,7 +38,7 @@ $nome = explode(' ', Auth::usuario()['nome'])[0];
     <a class="v4-acao" href="<?= url('/meu-mes') ?>"><span class="v4-acao-icone lima"><svg class="icone"><use href="<?= $icones ?>#alvo"/></svg></span><div><strong>Meu mês</strong><small>Sua meta, a meta da equipe, vendas e tarefas</small></div><b>↗</b></a>
   <?php endif; ?>
   <a class="v4-acao" href="<?= url('/academia/trilha/midias-marketing') ?>"><span class="v4-acao-icone verde"><svg class="icone"><use href="<?= $icones ?>#nuvem"/></svg></span><div><strong>Mídias do marketing</strong><small>Materiais para o cliente divulgar</small></div><b>↗</b></a>
-  <a class="v4-acao" href="<?= url('/academia/crm') ?>"><span class="v4-acao-icone pessego"><svg class="icone"><use href="<?= $icones ?>#check"/></svg></span><div><strong>CRM na prática</strong><small><?= count($aulasCrm) ?> aulas com demonstrações</small></div><b>↗</b></a>
+  <a class="v4-acao" href="<?= url('/academia/sistema') ?>"><span class="v4-acao-icone pessego"><svg class="icone"><use href="<?= $icones ?>#check"/></svg></span><div><strong>Como usar o One</strong><small><?= count($aulasOne) ?> aulas, do primeiro acesso ao pedido</small></div><b>↗</b></a>
 </div>
 
 <div class="grade-2">

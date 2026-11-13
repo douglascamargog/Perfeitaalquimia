@@ -40,7 +40,13 @@ class AcademiaService
         return null;
     }
 
-    /** Aulas práticas de CRM (Leads2b) */
+    /** Aulas "Como usar o One" (no lugar das aulas do Leads2b) */
+    public static function aulasOne(): array
+    {
+        return self::conteudo('sistema_one');
+    }
+
+    /** Aulas antigas de CRM (Leads2b) — guardadas, não aparecem mais no menu */
     public static function aulasCrm(): array
     {
         return self::conteudo('crm');
@@ -144,12 +150,12 @@ class AcademiaService
         return array_column(Banco::todos('SELECT item, concluido_em FROM academia_progresso WHERE usuario_id = ?', [$usuarioId]), 'concluido_em', 'item');
     }
 
-    /** Todos os itens que contam no progresso: módulos da trilha + aulas de CRM */
+    /** Todos os itens que contam no progresso: módulos da trilha + aulas "Como usar o One" */
     public static function itensDeEstudo(): array
     {
         return [
             ...array_map(fn($m) => 'modulo:' . $m['id'], self::modulos()),
-            ...array_map(fn($a) => 'crm:' . $a['id'], self::aulasCrm()),
+            ...array_map(fn($a) => 'one:' . $a['id'], self::aulasOne()),
         ];
     }
 

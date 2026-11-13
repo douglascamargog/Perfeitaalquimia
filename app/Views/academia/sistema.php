@@ -1,17 +1,17 @@
 <?php
-/** CRM na prática (aulas do Leads2b). Variáveis: $aulas, $indice, $midias, $progresso + cabeçalho */
+/** Como usar o One (aulas do sistema). Variáveis: $aulas, $indice, $midias, $progresso + cabeçalho */
 use App\Core\Visao;
 
 $a = $aulas[$indice];
-$feito = isset($progresso['crm:' . $a['id']]);
+$feito = isset($progresso['one:' . $a['id']]);
 $proxima = $aulas[$indice + 1] ?? null;
 ?>
-<?= Visao::renderizar('academia/_cabecalho', get_defined_vars() + ['sobretitulo' => 'Aprender fazendo', 'titulo_pagina' => 'CRM na prática', 'chamada' => 'Aulas sobre a rotina no Leads2b, com demonstrações. Os conceitos (cliente, negociação, funil e próxima atividade) valem também para a Carteira deste sistema.']) ?>
+<?= Visao::renderizar('academia/_cabecalho', get_defined_vars() + ['sobretitulo' => 'Aprender fazendo', 'titulo_pagina' => 'Como usar o One', 'chamada' => 'Aulas curtas sobre o sistema: do primeiro acesso ao pedido, com um exercício no fim de cada uma.']) ?>
 
 <div class="crm-layout">
   <nav class="card crm-indice" aria-label="Aulas">
-    <?php foreach ($aulas as $i => $x): $ok = isset($progresso['crm:' . $x['id']]); ?>
-      <a href="<?= url('/academia/crm/' . e($x['id'])) ?>" class="<?= $i === $indice ? 'ativa' : '' ?>">
+    <?php foreach ($aulas as $i => $x): $ok = isset($progresso['one:' . $x['id']]); ?>
+      <a href="<?= url('/academia/sistema/' . e($x['id'])) ?>" class="<?= $i === $indice ? 'ativa' : '' ?>">
         <span class="trilha-numero"><?= $ok ? '✓' : str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
         <span><strong><?= e($x['title']) ?></strong><small><?= e($x['short']) ?></small></span>
       </a>
@@ -20,7 +20,7 @@ $proxima = $aulas[$indice + 1] ?? null;
 
   <article>
     <section class="card">
-      <span class="sobretitulo">AULA <?= str_pad((string) ($indice + 1), 2, '0', STR_PAD_LEFT) ?> DE <?= str_pad((string) count($aulas), 2, '0', STR_PAD_LEFT) ?> · LEADS2B</span>
+      <span class="sobretitulo">AULA <?= str_pad((string) ($indice + 1), 2, '0', STR_PAD_LEFT) ?> DE <?= str_pad((string) count($aulas), 2, '0', STR_PAD_LEFT) ?> · ONE</span>
       <h2><?= e($a['title']) ?></h2>
       <p class="nota-destaque"><strong>Ao terminar, você vai conseguir: </strong><?= e(mb_strtolower($a['goal'])) ?></p>
       <?php foreach ($a['blocks'] as [$titulo, $itens]): ?>
@@ -56,8 +56,8 @@ $proxima = $aulas[$indice + 1] ?? null;
     </section>
 
     <div class="fim-aula">
-      <?= Visao::renderizar('academia/_marcar', ['item' => 'crm:' . $a['id'], 'feito' => $feito, 'rotulo' => 'Já estudei esta aula', 'voltar' => '/academia/crm/' . $a['id']]) ?>
-      <?php if ($proxima): ?><a class="botao" href="<?= url('/academia/crm/' . e($proxima['id'])) ?>">Próxima aula →</a><?php else: ?><a class="botao" href="<?= url('/academia/trilha') ?>">Voltar à trilha</a><?php endif; ?>
+      <?= Visao::renderizar('academia/_marcar', ['item' => 'one:' . $a['id'], 'feito' => $feito, 'rotulo' => 'Já estudei esta aula', 'voltar' => '/academia/sistema/' . $a['id']]) ?>
+      <?php if ($proxima): ?><a class="botao" href="<?= url('/academia/sistema/' . e($proxima['id'])) ?>">Próxima aula →</a><?php else: ?><a class="botao" href="<?= url('/academia/trilha') ?>">Voltar à trilha</a><?php endif; ?>
     </div>
   </article>
 </div>

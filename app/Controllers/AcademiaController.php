@@ -46,7 +46,7 @@ class AcademiaController extends Controller
             'proximo'    => $proximo,
             'modulos'    => A::modulos(),
             'totalProdutos' => count(A::produtos()),
-            'aulasCrm'   => A::aulasCrm(),
+            'aulasOne'   => A::aulasOne(),
             'categorias' => A::categorias(),
             'temas'      => A::temas(),
         ]);
@@ -125,16 +125,26 @@ class AcademiaController extends Controller
         $this->tela_('academia/atendimento', 'atendimento', ['titulo' => 'Academia · Guia de atendimento', 'pagina' => A::conteudo('pagina_atendimento')]);
     }
 
-    public function crm(string $id = ''): void
+    /** Como usar o One: aulas do sistema (no lugar das aulas do Leads2b) */
+    public function sistema(string $id = ''): void
     {
-        $aulas = A::aulasCrm();
+        $aulas = A::aulasOne();
+        if (!$aulas) {
+            redirecionar('/academia');
+        }
         $indice = 0;
         foreach ($aulas as $i => $a) {
             if ($a['id'] === $id) {
                 $indice = $i;
             }
         }
-        $this->tela_('academia/crm', 'crm', ['titulo' => 'Academia · CRM na prática', 'aulas' => $aulas, 'indice' => $indice, 'midias' => A::conteudo('media')]);
+        $this->tela_('academia/sistema', 'sistema', ['titulo' => 'Academia · Como usar o One', 'aulas' => $aulas, 'indice' => $indice, 'midias' => A::conteudo('media')]);
+    }
+
+    /** Endereço antigo (aulas do Leads2b): leva para o treinamento do One */
+    public function crm(string $id = ''): void
+    {
+        redirecionar('/academia/sistema');
     }
 
     /** Marca/desmarca um item como estudado (formulário ou JavaScript) */
