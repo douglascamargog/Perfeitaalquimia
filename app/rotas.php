@@ -203,6 +203,9 @@ return [
     ['POST', '/producao/ordens/{id}/concluir',   'OrdemProducaoController@concluir',     'producao.gerenciar'],
     ['POST', '/producao/ordens/{id}/cancelar',   'OrdemProducaoController@cancelar',     'producao.gerenciar'],
 
+    // ---------- Busca rápida do topo ----------
+    ['GET',  '/busca',                          'BuscaController@rapida',     'logado'],
+
     // ---------- Meu perfil (foto, aniversário, contatos) ----------
     ['GET',  '/meu-perfil',                     'MeuPerfilController@index',  'logado'],
     ['POST', '/meu-perfil',                     'MeuPerfilController@salvar', 'logado'],

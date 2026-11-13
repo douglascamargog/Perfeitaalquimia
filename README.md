@@ -206,6 +206,23 @@ A tela **Administração › Integração Omie** mostra o que vem e vai para o E
 O roteiro da demonstração para a diretoria (ordem das telas, logins, falas, perguntas prováveis e decisões)
 foi publicado como página à parte. Logins de demonstração: veja a tabela acima (senha `Demo@2026`).
 
+## Testes automáticos
+
+Mais de 400 verificações em `tests/` (Playwright): `bash tests/rodar.sh`. Veja `tests/LEIA-ME.md`.
+Rode antes de publicar qualquer mudança. Eles apagam e recriam o banco: use só no ambiente de teste.
+
+## Novidades depois da Fase 0
+
+- **Código do produto** em todo o sistema (catálogo, pedidos, app, Academia, Produção e busca). Cadastre em
+  Conteúdo › Produtos ou importe de uma planilha (colunas Código e Produto). Na Fase 2 vem do Omie.
+- **Busca rápida** no topo (tecla `/`): cliente por nome, CNPJ ou telefone, e produto pelo código.
+- **Ficha do funcionário** (Administração › Usuários) e **Meu perfil** (clique no seu nome): foto, aniversário, contatos.
+  O Início mostra os **aniversariantes do mês** (só dia e mês).
+- **Início da diretoria** para o perfil Admin: pedidos para aprovar, faturado, cobrança, prospecção, produção, e-commerce.
+- **Academia › Como usar o One** no lugar das aulas do Leads2b.
+- **Mensagens num lugar só**: a Recompra e a Cobrança usam os modelos de Conteúdo › Mensagens prontas.
+- **Backup automático** diário (`cron/backup.php`), com a data do último em Administração › Atualização.
+
 ## Regras do projeto
 
 - Nunca usar nomes de funcionários em regras, filas ou código. Tudo usa **funções**.

@@ -28,6 +28,8 @@ mkdir -p "$DESTINO"
 
 # 1. Código (somente arquivos versionados no git)
 git archive HEAD | tar -x -C "$DESTINO"
+# Os testes automáticos ficam só no projeto: não vão para o servidor
+rm -rf "$DESTINO/tests"
 
 # Biblioteca da IA (SDK oficial da Anthropic) — instalada aqui, vai pronta dentro do zip
 # (na hospedagem não é preciso rodar nada). Sem o composer, o zip sai sem ela e só a busca real fica indisponível.

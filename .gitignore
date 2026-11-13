@@ -28,3 +28,4 @@ Thumbs.db
 # Dependências do Composer (geradas: composer install). Vão dentro do pacote zip, não no git
 /vendor/
 /public/media/equipe/
+/tests/saida/
