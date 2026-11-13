@@ -5,14 +5,10 @@
 .selo.verde { background: #dcf5e3; color: #15803d; }
 
 /* Abas do módulo */
-.pr-abas { display: flex; gap: 6px; flex-wrap: wrap; margin: -4px 0 16px; }
-.pr-abas a { padding: 7px 14px; border-radius: 99px; text-decoration: none; font-weight: 600; font-size: .85rem; color: var(--verde-escuro); background: #fff; border: 1px solid var(--borda); }
-.pr-abas a:hover { background: var(--verde-claro); }
-.pr-abas a.ativo { background: #191f18; color: var(--lima); border-color: #191f18; }
 
 /* Listas de alerta do painel */
 .pr-alertas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.pr-alertas li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: #f7f9f5; border-radius: 14px; padding: 9px 12px; }
+.pr-alertas li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--primaria-clara); border-radius: 14px; padding: 9px 12px; }
 .pr-alertas li > a { flex: 1 1 220px; min-width: 0; text-decoration: none; color: var(--texto); display: grid; }
 .pr-alertas li > a strong { font-size: .9rem; }
 .pr-alertas li > a small { color: var(--texto-suave); font-size: .78rem; }

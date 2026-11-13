@@ -22,7 +22,7 @@
               <?php if (in_array($item['tipo'], ['texto', 'lista'], true) && mb_strlen((string) $item['valor']) > 80): ?>
                 <textarea id="<?= $id ?>" name="<?= $nome ?>" rows="3"><?= e($item['valor']) ?></textarea>
               <?php else: ?>
-                <input type="<?= $item['tipo'] === 'numero' ? 'number' : 'text' ?>" id="<?= $id ?>" name="<?= $nome ?>" value="<?= e($item['valor']) ?>" step="any">
+                <input type="<?= ['numero' => 'number', 'cor' => 'color'][$item['tipo']] ?? 'text' ?>" id="<?= $id ?>" name="<?= $nome ?>" value="<?= e($item['valor']) ?>" step="any">
               <?php endif; ?>
             <?php endif; ?>
           </div>

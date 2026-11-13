@@ -13,6 +13,9 @@ $pendencias = \App\Services\PendenciasService::doUsuario();
 $naoLidas = \App\Services\NotificacaoService::naoLidas((int) $usuario['id']);
 $totalAtencao = array_sum($pendencias) + $naoLidas;
 $caminhoAtual = '/' . trim(substr(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), strlen(url_base())), '/');
+// Quem está online: registra onde a pessoa está (só o nome da aba) e pega quem mais está usando agora
+\App\Services\Presenca::registrar((int) Auth::id(), $caminhoAtual);
+$online = \App\Services\Presenca::online((int) Auth::id());
 $icones = asset('img/icones.svg');
 
 // Agrupa TODOS os itens do menu (todo mundo vê todas as abas): sem acesso → cadeado; só leitura → olho.
@@ -46,6 +49,9 @@ unset($itensDoGrupo);
   <?php foreach ($estilos ?? [] as $css): ?>
     <link rel="stylesheet" href="<?= str_starts_with($css, 'https://') ? e($css) : asset('css/' . $css) ?>">
   <?php endforeach; ?>
+  <?php // Cores do sistema: as da pessoa (Meu perfil › Aparência) ou as da empresa ?>
+  <?= \App\Services\Aparencia::estilo(Auth::usuario()) ?>
+  <link rel="preload" href="<?= asset('fonts/montserrat-latin.woff2') ?>" as="font" type="font/woff2" crossorigin>
   <meta name="csrf" content="<?= e(\App\Core\Csrf::token()) ?>">
   <meta name="base" content="<?= e(url_base()) ?>">
 </head>
@@ -96,6 +102,7 @@ unset($itensDoGrupo);
         <div class="busca-resultados" data-busca-resultados hidden role="listbox"></div>
       </div>
       <div class="usuario">
+        <details class="online" data-online <?= $online ? '' : 'hidden' ?>><?= \App\Core\Visao::renderizar('layout/_online', ['online' => $online]) ?></details>
         <div class="sino" data-sino>
           <button class="botao-icone" type="button" aria-label="Notificações" aria-haspopup="true" aria-expanded="false" data-sino-botao>
             <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
@@ -116,7 +123,7 @@ unset($itensDoGrupo);
           </span>
           <?= \App\Services\EquipeService::avatar($usuario, 38) ?>
         </a>
-        <a class="botao-icone" href="<?= url('/minha-senha') ?>" title="Minha senha" aria-label="Minha senha"><svg class="icone"><use href="<?= $icones ?>#chave"/></svg></a>
+        <a class="botao-icone so-tela-grande" href="<?= url('/minha-senha') ?>" title="Minha senha" aria-label="Minha senha"><svg class="icone"><use href="<?= $icones ?>#chave"/></svg></a>
         <form method="post" action="<?= url('/sair') ?>">
           <?= csrf_campo() ?>
           <button class="botao-icone" type="submit" title="Sair" aria-label="Sair"><svg class="icone"><use href="<?= $icones ?>#sair"/></svg></button>

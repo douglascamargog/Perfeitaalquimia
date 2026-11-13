@@ -6,8 +6,8 @@
 .contador { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 99px; background: #ce6345; color: #fff; font-size: .7rem; margin-left: 4px; }
 
 /* Meta da equipe (bloco escuro, destaque no topo) */
-.meta-equipe { border-radius: 22px; padding: 26px 28px; margin-bottom: 18px; color: #c0d1c2; border: 1px solid #354435;
-  background: radial-gradient(ellipse at 85% 0%, #a2de3c30 0, transparent 40%), linear-gradient(125deg, #0f1711 0%, #19261a 55%, #243927 100%); }
+.meta-equipe { border-radius: 22px; padding: 26px 28px; margin-bottom: 18px; color: #c0d1c2; border: 1px solid var(--primaria-escura);
+  background: radial-gradient(ellipse at 85% 0%, color-mix(in srgb, var(--secundaria-escura) 19%, transparent) 0, transparent 40%), linear-gradient(125deg, var(--primaria) 0%, var(--primaria-escura) 55%, var(--primaria-escura) 100%); }
 .meta-equipe .sobretitulo { color: var(--lima); }
 .meta-equipe-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .meta-equipe h2 { color: #fff; font-size: clamp(26px, 3vw, 40px); letter-spacing: -.04em; margin: 6px 0 4px; }
@@ -16,17 +16,17 @@
 .meta-equipe-pct strong { display: block; font-size: 2.4rem; color: var(--lima); letter-spacing: -.05em; line-height: 1; }
 .meta-equipe-pct span { font-size: .75rem; }
 .barra-meta { position: relative; height: 14px; border-radius: 99px; background: #ffffff1c; margin: 18px 0; overflow: visible; }
-.barra-meta > span { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #9bd344, var(--lima)); }
-.barra-meta.clara { background: #eef2ec; }
+.barra-meta > span { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--secundaria-escura), var(--lima)); }
+.barra-meta.clara { background: var(--primaria-clara); }
 .marca-projecao { position: absolute; top: -5px; width: 3px; height: 24px; background: #efc07a; border-radius: 2px; transform: translateX(-1px); }
 .meta-equipe-numeros { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
-.meta-equipe-numeros > div { background: #f6ffe810; border: 1px solid #dbf5b126; border-radius: 16px; padding: 14px; display: grid; gap: 2px; }
+.meta-equipe-numeros > div { background: color-mix(in srgb, var(--secundaria-clara) 6%, transparent); border: 1px solid color-mix(in srgb, var(--secundaria) 15%, transparent); border-radius: 16px; padding: 14px; display: grid; gap: 2px; }
 .meta-equipe-numeros span { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: #a8bba9; }
 .meta-equipe-numeros strong { font-size: 1.25rem; color: #fff; letter-spacing: -.02em; }
 .meta-equipe-numeros small { font-size: .72rem; color: #a8bba9; }
 .meta-equipe-numeros .destaque { background: var(--lima); border-color: var(--lima); }
-.meta-equipe-numeros .destaque span, .meta-equipe-numeros .destaque small { color: #3a5a12; }
-.meta-equipe-numeros .destaque strong { color: #14251b; }
+.meta-equipe-numeros .destaque span, .meta-equipe-numeros .destaque small { color: var(--primaria); }
+.meta-equipe-numeros .destaque strong { color: var(--primaria-escura); }
 .meta-equipe-rodape { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-top: 14px; font-size: .8rem; }
 .meta-equipe-rodape summary, .form-equipe summary { cursor: pointer; color: var(--lima); font-weight: 700; }
 .meta-equipe-rodape details p { margin: 8px 0 0; max-width: 760px; line-height: 1.6; }
@@ -35,7 +35,7 @@
 .grafico-evolucao .linha-meta { stroke: #efc07a; stroke-dasharray: 6 6; }
 .grafico-evolucao .linha-ideal { stroke: #ffffff40; stroke-dasharray: 3 5; }
 .grafico-evolucao .linha-real { fill: none; stroke: var(--lima); stroke-width: 3; }
-.grafico-evolucao circle { fill: var(--lima); stroke: #14251b; stroke-width: 2; }
+.grafico-evolucao circle { fill: var(--lima); stroke: var(--primaria-escura); stroke-width: 2; }
 .legenda-evolucao { display: flex; gap: 16px; font-size: .72rem; margin-top: 6px; }
 .legenda-evolucao i { display: inline-block; width: 14px; height: 3px; margin-right: 6px; vertical-align: middle; }
 .legenda-evolucao .real { background: var(--lima); }
@@ -49,33 +49,33 @@
 .grade-meu-mes { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; margin-bottom: 18px; }
 .grade-meu-mes > .card { margin: 0; }
 .meta-individual h2 { font-size: 2rem; letter-spacing: -.04em; margin: 6px 0 4px; }
-.meta-individual .meta-equipe-pct strong { color: #5c8423; }
-.meta-individual.atingida { border-color: var(--lima-escuro); background: linear-gradient(135deg, #f6ffe0, #fff); }
+.meta-individual .meta-equipe-pct strong { color: var(--primaria); }
+.meta-individual.atingida { border-color: var(--lima-escuro); background: linear-gradient(135deg, var(--secundaria-clara), #fff); }
 .linha-valores { display: flex; justify-content: space-between; gap: 12px; margin: 0; }
 .linha-valores > div, .linha-valores { font-size: .85rem; }
 .linha-valores span { display: block; color: var(--texto-suave); font-size: .75rem; }
 .linha-valores strong { font-size: 1.2rem; }
 .form-meta { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--borda); }
-.form-meta summary { cursor: pointer; font-weight: 700; color: #377b3e; font-size: .88rem; }
+.form-meta summary { cursor: pointer; font-weight: 700; color: var(--primaria); font-size: .88rem; }
 .form-meta form { margin-top: 12px; }
 .form-venda .campo { margin-bottom: 10px; }
-.nota-mes { font-size: .85rem; background: #f6f9f2; border-radius: 10px; padding: 10px 12px; margin-top: 12px; }
+.nota-mes { font-size: .85rem; background: var(--primaria-clara); border-radius: 10px; padding: 10px 12px; margin-top: 12px; }
 .kpis-meu-mes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
 .kpi { background: #fff; border: 1px solid var(--borda); border-radius: 18px; padding: 16px; display: grid; gap: 2px; box-shadow: var(--sombra); }
 .kpi span { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); font-weight: 700; }
-.kpi strong { font-size: 1.45rem; color: #14251b; letter-spacing: -.03em; }
-.kpi small { font-size: .74rem; color: #638b2e; }
-.kpi.destaque { background: linear-gradient(135deg, #d4ff67, #bcf83c); border-color: #d1ff71; }
-.kpi.destaque span, .kpi.destaque small { color: #2f4a12; }
+.kpi strong { font-size: 1.45rem; color: var(--primaria-escura); letter-spacing: -.03em; }
+.kpi small { font-size: .74rem; color: var(--primaria); }
+.kpi.destaque { background: linear-gradient(135deg, var(--secundaria), var(--secundaria)); border-color: var(--secundaria); }
+.kpi.destaque span, .kpi.destaque small { color: var(--primaria-escura); }
 .kpi .positivo { color: #2f7d32; }
 .kpi .negativo { color: #c62828; }
 .barras-dias { display: flex; align-items: flex-end; gap: 4px; height: 170px; padding: 8px 0 0; }
 .barras-dias > div { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; min-width: 0; }
-.barras-dias span { width: 100%; max-width: 22px; background: #9bd344; border-radius: 5px 5px 0 0; }
+.barras-dias span { width: 100%; max-width: 22px; background: var(--secundaria-escura); border-radius: 5px 5px 0 0; }
 .barras-dias small { font-size: .62rem; color: var(--texto-suave); }
-.barras-dias .hoje small { color: #14251b; font-weight: 800; }
+.barras-dias .hoje small { color: var(--primaria-escura); font-weight: 800; }
 .lista-tarefas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.lista-tarefas li { padding: 10px 12px; border-radius: 12px; background: #f6f9f2; border-left: 4px solid #9bd344; display: grid; gap: 2px; }
+.lista-tarefas li { padding: 10px 12px; border-radius: 12px; background: var(--primaria-clara); border-left: 4px solid var(--secundaria-escura); display: grid; gap: 2px; }
 .lista-tarefas.com-acoes li { grid-template-columns: 1fr auto; align-items: center; }
 .lista-tarefas li small { color: var(--texto-suave); font-size: .76rem; display: block; }
 .lista-tarefas li.atrasada { border-left-color: #ce6345; background: #fff0e9; }
@@ -91,10 +91,10 @@
   display: flex; flex-direction: column; gap: 2px; background: #fff; }
 .calendario-grade a:hover { border-color: var(--lima-escuro); }
 .calendario-grade a.folga { background: #f1f2ef; color: #9aa39b; }
-.calendario-grade a.hoje { border: 2px solid #14251b; }
-.calendario-grade a.selecionado { background: #eff8da; border-color: #9bd344; }
+.calendario-grade a.hoje { border: 2px solid var(--primaria-escura); }
+.calendario-grade a.selecionado { background: var(--primaria-clara); border-color: var(--secundaria-escura); }
 .calendario-grade small { font-size: .66rem; }
-.calendario-grade .valor-dia { color: #3e6c12; font-weight: 700; }
+.calendario-grade .valor-dia { color: var(--primaria); font-weight: 700; }
 .ponto-tarefa { position: absolute; right: 8px; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: #ce6345; }
 
 @media (max-width: 1100px) {

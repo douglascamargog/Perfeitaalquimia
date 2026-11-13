@@ -217,6 +217,7 @@ return [
     ['POST', '/novidades/vista',                'NovidadesController@vista',  'logado'],
     ['GET',  '/meu-perfil',                     'MeuPerfilController@index',  'logado'],
     ['POST', '/meu-perfil',                     'MeuPerfilController@salvar', 'logado'],
+    ['POST', '/meu-perfil/aparencia',           'MeuPerfilController@aparencia', 'logado'],
 
     // ---------- Academia (Central de Televendas) ----------
     ['GET',  '/academia',                       'AcademiaController@inicio',      'academia.ver'],

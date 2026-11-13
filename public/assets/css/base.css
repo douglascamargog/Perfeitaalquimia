@@ -1,31 +1,55 @@
 /* =====================================================================
    Estilo base do Sistema Perfeita Alquimia
-   Identidade da Carteira Comercial: verde escuro + lima #caff4d, cards arredondados, tema claro.
+   Identidade da Carteira Comercial: verde escuro + lima var(--secundaria), cards arredondados, tema claro.
    Para mudar uma cor no sistema todo, mude só a variável aqui em :root.
    ===================================================================== */
+/* Fonte da marca (fica no próprio sistema, funciona offline) */
+@font-face {
+  font-family: "Montserrat";
+  src: url("../fonts/montserrat-latin.woff2") format("woff2");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  /* Paleta da Carteira Comercial V4 */
-  --menu: #101711;              /* fundo do menu lateral (quase preto esverdeado) */
-  --verde-escuro: #14251b;      /* títulos e botões principais */
-  --verde-medio: #377b3e;       /* links */
-  --verde-claro: #eff8da;       /* fundos suaves */
-  --lima: #caff4d;              /* destaque da marca */
-  --lima-escuro: #9bd344;
-  --fundo: #f4f6f3;             /* fundo das telas */
+  /* ===== Cores da marca Perfeita Alquimia =====
+     Estes são os valores PADRÃO. As cores de verdade vêm de app/Services/Aparencia.php
+     (escolha da pessoa em Meu perfil › Aparência ou o padrão da empresa em Configurações),
+     que imprime um <style> com as mesmas variáveis depois deste arquivo. */
+  --primaria: #025150;          /* verde-petróleo: menu, botões, títulos */
+  --primaria-texto: #ffffff;    /* texto legível sobre a primária */
+  --primaria-escura: #014342;   /* títulos e botões sobre fundo branco */
+  --primaria-clara: #ebf1f1;    /* fundos suaves, hover */
+  --primaria-suave: #d1e1e1;
+  --secundaria: #5cd4b6;        /* menta: destaques, item ativo, selos */
+  --secundaria-texto: #10201d;  /* texto legível sobre a secundária */
+  --secundaria-escura: #3c8a76;
+  --secundaria-clara: #dcf5ef;
+  --fundo: #f0f3f3;             /* fundo das telas */
+
+  /* Nomes antigos (Carteira V4) → apontam para as cores novas; não precisa mudar as telas */
+  --menu: var(--primaria);
+  --verde-escuro: var(--primaria-escura);
+  --verde-medio: var(--primaria);
+  --verde-claro: var(--primaria-clara);
+  --lima: var(--secundaria);
+  --lima-escuro: var(--secundaria-escura);
+
   --card: #ffffff;
-  --texto: #182218;
-  --texto-suave: #758078;
-  --borda: #e7ece6;
+  --texto: #1d2726;
+  --texto-suave: #6a7674;
+  --borda: #e3e9e8;
   --perigo: #c62828;
   --perigo-fundo: #fdecea;
   --aviso: #8a5a00;
   --aviso-fundo: #fff4d6;
   --sucesso: #1e7a3c;
   --sucesso-fundo: #e5f6ea;
-  --raio: 21px;                 /* cantos arredondados dos cards */
-  --raio-pequeno: 11px;
-  --sombra: 0 14px 38px rgba(20, 32, 23, .05);
-  --fonte: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --raio: 16px;                 /* cantos arredondados dos cards */
+  --raio-pequeno: 10px;
+  --sombra: 0 2px 6px rgba(0, 0, 0, .05), 0 10px 30px rgba(2, 40, 40, .04);
+  --fonte: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -35,13 +59,12 @@ body {
   font-size: 15px;
   line-height: 1.5;
   color: var(--texto);
-  background: radial-gradient(circle at 84% 0%, rgba(209, 250, 155, .12), transparent 27%), var(--fundo);
-  letter-spacing: -.01em;
+  background: var(--fundo);
   -webkit-font-smoothing: antialiased;
 }
 a { color: var(--verde-medio); }
 h1, h2, h3 { color: var(--verde-escuro); line-height: 1.25; margin: 0 0 .5em; }
-h1 { font-size: 1.6rem; font-weight: 860; letter-spacing: -.04em; }
+h1 { font-size: 1.55rem; font-weight: 800; letter-spacing: -.02em; }
 h2 { font-size: 1.2rem; }
 h3 { font-size: 1rem; }
 p { margin: 0 0 1em; }
@@ -52,8 +75,8 @@ p { margin: 0 0 1em; }
 
 /* ---------- Faixa de demonstração ---------- */
 .faixa-demo {
-  background: var(--lima);
-  color: var(--verde-escuro);
+  background: var(--secundaria);
+  color: var(--secundaria-texto);
   text-align: center;
   font-size: .8rem;
   font-weight: 600;
@@ -80,15 +103,15 @@ p { margin: 0 0 1em; }
   padding: 9px 18px;
   font: inherit; font-weight: 600; font-size: .9rem;
   cursor: pointer; text-decoration: none;
-  background: var(--verde-escuro); color: #fff;
+  background: var(--primaria); color: var(--primaria-texto);
   transition: filter .15s, background .15s;
 }
 .botao:hover { filter: brightness(1.15); }
 .botao:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible {
   outline: 3px solid var(--lima-escuro); outline-offset: 2px;
 }
-.botao { background: #191f18; color: #f1ffc2; }
-.botao.lima { background: var(--lima); color: #142214; }
+.botao { background: var(--primaria); color: var(--primaria-texto); }
+.botao.lima { background: var(--secundaria); color: var(--secundaria-texto); }
 .botao.contorno { background: transparent; color: var(--verde-escuro); border-color: var(--borda); }
 .botao.contorno:hover { background: var(--verde-claro); filter: none; }
 .botao.pequeno { padding: 5px 12px; font-size: .8rem; }
@@ -167,18 +190,18 @@ table.tabela { width: 100%; border-collapse: collapse; }
 
 /* Código do produto (aparece antes do nome em catálogo, pedidos, app, Academia e Produção) */
 .cod-produto { display: inline-block; font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: .78em; font-weight: 700; letter-spacing: .02em;
-  background: #eef3e8; color: #24412b; border-radius: 6px; padding: 1px 6px; margin-right: 2px; vertical-align: 1px; white-space: nowrap; }
+  background: var(--primaria-clara); color: var(--primaria-escura); border-radius: 6px; padding: 1px 6px; margin-right: 2px; vertical-align: 1px; white-space: nowrap; }
 
 /* Avatar da equipe (foto ou iniciais) e ficha do funcionário */
-.avatar { border-radius: 50%; object-fit: cover; flex: none; display: inline-block; vertical-align: middle; background: #dfe9d8; }
-.avatar-iniciais { display: inline-grid; place-items: center; background: #14251b; color: #caff4d; font-weight: 800; letter-spacing: .02em; }
+.avatar { border-radius: 50%; object-fit: cover; flex: none; display: inline-block; vertical-align: middle; background: var(--secundaria); }
+.avatar-iniciais { display: inline-grid; place-items: center; background: var(--primaria-escura); color: var(--secundaria); font-weight: 800; letter-spacing: .02em; }
 .ficha-func { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 8px 24px; align-items: start; margin-bottom: 8px; }
 .ficha-func-foto { display: grid; justify-items: center; gap: 8px; text-align: center; }
 .ficha-func-arquivo { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .ficha-func-obs { grid-column: 2; }
 @media (max-width: 640px) { .ficha-func { grid-template-columns: 1fr; } .ficha-func-obs { grid-column: 1; } }
 .usuario-perfil { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; border-radius: 99px; padding: 2px 2px 2px 8px; }
-.usuario-perfil:hover { background: #f0f4ec; }
+.usuario-perfil:hover { background: var(--primaria-clara); }
 .usuario-perfil .usuario-nome { display: grid; text-align: right; }
 .usuario-linha { display: flex; gap: 10px; align-items: center; } .usuario-linha > span { display: grid; }
 

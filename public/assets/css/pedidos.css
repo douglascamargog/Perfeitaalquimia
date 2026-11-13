@@ -6,7 +6,7 @@
 .selo.verde { background: var(--sucesso-fundo); color: var(--sucesso); }
 .direita { text-align: right; }
 td small { display: block; }
-.ped-link-vendedor { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: #f2fbe4; border: 1px solid #dff0c6; border-radius: 14px; padding: 10px 14px; margin-bottom: 14px; font-size: .86rem; }
+.ped-link-vendedor { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: var(--secundaria-clara); border: 1px solid var(--secundaria-clara); border-radius: 14px; padding: 10px 14px; margin-bottom: 14px; font-size: .86rem; }
 .ped-link-vendedor code { background: #fff; padding: 3px 8px; border-radius: 8px; overflow-wrap: anywhere; }
 .ped-busca { display: flex; gap: 8px; }
 .ped-busca input { flex: 1; min-width: 0; }
@@ -21,9 +21,9 @@ td small { display: block; }
 .ped-produtos-topo { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
 .ped-produtos-topo input[type=search] { flex: 1; min-width: 180px; }
 .ped-tabela td { vertical-align: middle; }
-.ped-tabela tr.escolhido { background: #f4fbe6; }
+.ped-tabela tr.escolhido { background: var(--secundaria-clara); }
 .ped-produto { display: flex; gap: 10px; align-items: center; }
-.ped-produto img { width: 40px; height: 40px; object-fit: contain; background: #f3f6f0; border-radius: 8px; flex: none; }
+.ped-produto img { width: 40px; height: 40px; object-fit: contain; background: var(--primaria-clara); border-radius: 8px; flex: none; }
 .ped-produto span { display: grid; }
 .ped-produto small { color: var(--texto-suave); }
 .ped-qtd { width: 80px; text-align: center; }
@@ -48,7 +48,7 @@ td small { display: block; }
 .ped-espelho-topo div { display: grid; flex: 1; }
 .ped-espelho-topo small { color: var(--texto-suave); }
 .ped-dados { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin: 0 0 14px; }
-.ped-dados div { background: #f6f8f4; border-radius: 12px; padding: 8px 10px; }
+.ped-dados div { background: var(--primaria-clara); border-radius: 12px; padding: 8px 10px; }
 .ped-dados dt { font-size: .7rem; text-transform: uppercase; color: var(--texto-suave); font-weight: 700; letter-spacing: .05em; }
 .ped-dados dd { margin: 2px 0 0; }
 .ped-total-final td { font-size: 1.1rem; font-weight: 800; }

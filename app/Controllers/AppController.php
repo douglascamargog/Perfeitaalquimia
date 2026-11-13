@@ -13,6 +13,7 @@ class AppController extends Controller
     public function index(): void
     {
         header('Cache-Control: no-cache');
+        \App\Services\Presenca::registrar((int) \App\Core\Auth::id(), '/app'); // aparece como "App do externo"
         echo Visao::renderizar('app/index', ['titulo' => 'One Vendas']);
     }
 

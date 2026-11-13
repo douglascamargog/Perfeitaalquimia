@@ -126,7 +126,7 @@ async function sair(p) { await p.goto(BASE + '/'); await p.click('form[action$="
   // ---------- Academia ----------
   await entrar(p, 'televendas1@demo.local');
   await p.goto(BASE + '/academia/sistema');
-  ok(await p.locator('.crm-indice a').count() === 9 && !(await p.content()).toLowerCase().includes('leads2b'), 'Academia: 9 aulas "Como usar o One", sem citar o Leads2b');
+  ok(await p.locator('.crm-indice a').count() === 10 && !(await p.content()).toLowerCase().includes('leads2b'), 'Academia: 10 aulas "Como usar o One", sem citar o Leads2b');
   const r2 = await p.request.get(BASE + '/academia/crm', { maxRedirects: 0 });
   ok(r2.status() === 302 && (r2.headers()['location'] || '').endsWith('/academia/sistema'), 'endereço antigo das aulas do Leads2b leva ao treinamento do One');
   await p.goto(BASE + '/academia/trilha/crm');

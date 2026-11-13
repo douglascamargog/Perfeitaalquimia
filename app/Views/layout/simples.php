@@ -21,6 +21,7 @@ use App\Core\Sessao;
     .caixa-simples .marca-login img { width: 100%; height: 100%; object-fit: contain; }
     .caixa-simples .marca-login strong { font-size: 1.2rem; }
   </style>
+  <?= \App\Services\Aparencia::estilo(null, true) /* cores do sistema */ ?>
 </head>
 <body>
 <?php if (config('modo_demo')): ?>

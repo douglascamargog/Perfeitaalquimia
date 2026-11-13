@@ -98,12 +98,7 @@ class Roteador
             }
             // Aba sem acesso: página amigável dizendo qual aba é e a quem pedir
             $caminho = '/' . trim(substr((string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), strlen(url_base())), '/');
-            $aba = null;
-            foreach (require RAIZ . '/app/menu.php' as $item) {
-                if ($item['url'] !== '/' && str_starts_with($caminho . '/', $item['url'] . '/') && strlen($item['url']) > strlen((string) ($aba['url'] ?? ''))) {
-                    $aba = $item;
-                }
-            }
+            $aba = Menu::itemDe($caminho);
             http_response_code(403);
             Visao::mostrar('erros/sem_acesso', ['titulo' => 'Sem acesso', 'aba' => $aba['titulo'] ?? 'esta tela'], 'base');
             return false;

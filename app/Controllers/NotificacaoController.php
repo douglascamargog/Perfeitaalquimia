@@ -23,7 +23,12 @@ class NotificacaoController extends Controller
     {
         $id = (int) Auth::id();
         $depois = max(0, (int) ($_GET['depois'] ?? 0));
+        // A pessoa continua "online" mesmo parada numa tela; guarda só o nome da aba
+        \App\Services\Presenca::registrar($id, (string) ($_GET['onde'] ?? '/'));
+        $online = \App\Services\Presenca::online($id);
         $this->json([
+            'online_qtd' => count($online),
+            'online_html' => \App\Core\Visao::renderizar('layout/_online', ['online' => $online]),
             'nao_lidas' => NotificacaoService::naoLidas($id),
             'pendencias' => PendenciasService::doUsuario(true), // a consulta automática (1 por minuto) sempre recalcula
             'novas' => $depois > 0 ? array_map(fn($n) => ['id' => (int) $n['id'], 'titulo' => $n['titulo'], 'texto' => $n['texto'], 'link' => url('/notificacoes/' . (int) $n['id'])],

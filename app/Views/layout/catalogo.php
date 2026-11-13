@@ -14,13 +14,14 @@ $icones = asset('img/icones.svg');
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#14251b">
+  <meta name="theme-color" content="<?= e(\App\Services\Aparencia::padrao()[0]) ?>">
   <title><?= e($titulo ?? 'Catálogo') ?> · <?= e(Config::get('catalogo.titulo', 'Catálogo')) ?></title>
   <link rel="icon" type="image/png" href="<?= asset('img/logo.png') ?>">
   <link rel="stylesheet" href="<?= asset('css/base.css') ?>">
   <link rel="stylesheet" href="<?= asset('css/catalogo.css') ?>">
   <meta name="csrf" content="<?= e(\App\Core\Csrf::token()) ?>">
   <meta name="base" content="<?= e(url_base()) ?>">
+  <?= \App\Services\Aparencia::estilo(null, true) /* cores do sistema */ ?>
 </head>
 <body class="cat">
 <?php if (config('modo_demo')): ?><div class="faixa-demo">Ambiente de demonstração — dados simulados</div><?php endif; ?>

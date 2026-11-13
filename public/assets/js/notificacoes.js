@@ -16,13 +16,20 @@ if (sino) {
   let ultima = null;
 
   const pedir = async (extra = '') => {
-    const r = await fetch(`${BASE}/notificacoes/resumo?depois=${ultima ?? 0}${extra}`, { headers: { Accept: 'application/json' } }).catch(() => null);
+    const onde = encodeURIComponent(location.pathname.slice(BASE.length) || '/');
+    const r = await fetch(`${BASE}/notificacoes/resumo?depois=${ultima ?? 0}&onde=${onde}${extra}`, { headers: { Accept: 'application/json' } }).catch(() => null);
     // Sessão expirada ou senha provisória: o servidor manda uma página, não os dados → ignora até a próxima vez
     if (!r || !r.ok || !(r.headers.get('content-type') || '').includes('json')) return null;
     return r.json().catch(() => null);
   };
 
   const aplicar = (d) => {
+    // Quem está online (fotinhas do topo)
+    const online = document.querySelector('[data-online]');
+    if (online && typeof d.online_html === 'string') {
+      online.hidden = !d.online_qtd;
+      online.innerHTML = d.online_html;
+    }
     contador.hidden = !d.nao_lidas;
     contador.textContent = d.nao_lidas > 99 ? '99+' : d.nao_lidas;
     let pendente = 0;

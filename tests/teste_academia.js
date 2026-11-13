@@ -16,7 +16,7 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   await p.goto(BASE + '/academia'); ok(p.url().endsWith('/entrar'), 'sem login vai para o login');
   await entrar(p, 'televendas1@demo.local');
   await p.goto(BASE + '/academia');
-  ok((await p.locator('.progresso-estudo').innerText()).includes('0 de 19'), 'progresso começa em 0 de 19 (10 módulos + 9 aulas do One)');
+  ok((await p.locator('.progresso-estudo').innerText()).includes('0 de 20'), 'progresso começa em 0 de 20 (10 módulos + 10 aulas do One)');
   // Trilha: todos os módulos abrem
   const modulos = JSON.parse(sql("select conteudo_json from academia_conteudo where chave='modules'").replace(/\\\\/g, '\\'));
   for (const m of modulos) {
@@ -34,7 +34,7 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   // Marcar como estudado
   await Promise.all([p.waitForNavigation(), p.click('.marcar-estudo button')]);
   ok(sql("select count(*) from academia_progresso ap join usuarios u on u.id=ap.usuario_id where u.email='televendas1@demo.local' and item='modulo:midias-marketing'") === '1', 'progresso salvo no servidor');
-  ok((await p.locator('.progresso-estudo').innerText()).includes('1 de 19'), 'progresso atualizado (1 de 19)');
+  ok((await p.locator('.progresso-estudo').innerText()).includes('1 de 20'), 'progresso atualizado (1 de 20)');
   // Produtos: busca por tema, por texto e por categoria
   await p.goto(BASE + '/academia/produtos?q=perder peso');
   const temaQtd = Number(sql("select count(*) from produtos where json_contains_path(ficha_json, 'one', '$.topics.emagrecimento')"));

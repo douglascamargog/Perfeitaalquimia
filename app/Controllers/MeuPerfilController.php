@@ -16,7 +16,30 @@ class MeuPerfilController extends Controller
     public function index(): void
     {
         $id = (int) Auth::id();
-        $this->tela('usuarios/meu_perfil', ['titulo' => 'Meu perfil', 'u' => Auth::usuario()]);
+        $this->tela('usuarios/meu_perfil', ['titulo' => 'Meu perfil', 'u' => Auth::usuario(), 'scripts' => ['aparencia.js']]);
+    }
+
+    /** Meu perfil › Aparência: cores do sistema só para esta pessoa */
+    public function aparencia(): void
+    {
+        $id = (int) Auth::id();
+        $antes = Banco::um('SELECT cor_primaria, cor_secundaria FROM usuarios WHERE id = ?', [$id]);
+        if (!empty($_POST['padrao'])) {
+            $dados = ['cor_primaria' => null, 'cor_secundaria' => null];
+            Sessao::aviso('sucesso', 'Pronto: você voltou para as cores da empresa.');
+        } else {
+            $p = \App\Services\Aparencia::valida((string) ($_POST['cor_primaria'] ?? ''));
+            $s = \App\Services\Aparencia::valida((string) ($_POST['cor_secundaria'] ?? ''));
+            if (!$p || !$s) {
+                Sessao::aviso('erro', 'Escolha as duas cores (formato #rrggbb).');
+                redirecionar('/meu-perfil');
+            }
+            $dados = ['cor_primaria' => $p, 'cor_secundaria' => $s];
+            Sessao::aviso('sucesso', 'Cores salvas.');
+        }
+        Banco::executar('UPDATE usuarios SET cor_primaria = ?, cor_secundaria = ? WHERE id = ?', [$dados['cor_primaria'], $dados['cor_secundaria'], $id]);
+        Auditoria::registrar('usuario', $id, 'aparencia', $antes, $dados);
+        redirecionar('/meu-perfil');
     }
 
     public function salvar(): void

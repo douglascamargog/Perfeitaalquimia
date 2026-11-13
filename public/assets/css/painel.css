@@ -13,12 +13,12 @@ td small { display: block; }
 .mk-lima { color: var(--lima); }
 .mk-dinheiro { font-size: clamp(1.9rem, 3.2vw, 2.7rem); white-space: nowrap; }
 .mk-grafico { position: relative; height: 250px; }
-.b-chip { font-size: .76rem; font-weight: 700; padding: 5px 11px; border-radius: 99px; background: #f0f3ee; color: var(--verde-escuro); text-decoration: none; white-space: nowrap; align-self: flex-start; }
+.b-chip { font-size: .76rem; font-weight: 700; padding: 5px 11px; border-radius: 99px; background: var(--primaria-clara); color: var(--verde-escuro); text-decoration: none; white-space: nowrap; align-self: flex-start; }
 .mk-ranking { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .mk-ranking li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
 .mk-ranking strong { font-size: .84rem; display: block; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mk-ranking a { color: var(--texto); text-decoration: none; }
-.mk-posicao { width: 28px; height: 28px; border-radius: 50%; background: #f0f3ee; display: grid; place-items: center; font-weight: 800; font-size: .78rem; }
+.mk-posicao { width: 28px; height: 28px; border-radius: 50%; background: var(--primaria-clara); display: grid; place-items: center; font-weight: 800; font-size: .78rem; }
 .mk-ranking li:first-child .mk-posicao { background: var(--lima); }
 .mk-ranking-num { display: grid; text-align: right; font-size: .8rem; }
 .mk-ranking-num small { color: var(--texto-suave); }
@@ -28,8 +28,8 @@ td small { display: block; }
 .pn-meta small { color: var(--texto-suave); font-size: .74rem; }
 .pn-meta small.ok { color: var(--sucesso); font-weight: 700; }
 .pn-sem-compra { display: grid; gap: 8px; }
-.pn-sem-compra a { display: flex; align-items: baseline; gap: 8px; text-decoration: none; color: var(--texto); background: #f7f9f5; border-radius: 14px; padding: 10px 12px; }
-.pn-sem-compra a:hover { background: #eef7dd; }
+.pn-sem-compra a { display: flex; align-items: baseline; gap: 8px; text-decoration: none; color: var(--texto); background: var(--primaria-clara); border-radius: 14px; padding: 10px 12px; }
+.pn-sem-compra a:hover { background: var(--secundaria-clara); }
 .pn-sem-compra strong { font-size: 1.5rem; color: var(--verde-escuro); letter-spacing: -.03em; }
 .pn-sem-compra a:last-child strong { color: #c2410c; }
 .pn-sem-compra span { color: var(--texto-suave); font-size: .84rem; }
@@ -41,7 +41,7 @@ td small { display: block; }
 .pn-verde { color: var(--sucesso); font-weight: 700; }
 .pn-vermelho { color: #c2410c; font-weight: 700; }
 .pn-historico { display: flex; gap: 3px; }
-.pn-historico span { font-size: .66rem; font-weight: 700; padding: 3px 5px; border-radius: 6px; background: #eef1ec; color: var(--texto-suave); text-transform: uppercase; }
+.pn-historico span { font-size: .66rem; font-weight: 700; padding: 3px 5px; border-radius: 6px; background: var(--primaria-clara); color: var(--texto-suave); text-transform: uppercase; }
 .pn-historico .bateu { background: #dcf5e3; color: var(--sucesso); }
 .pn-historico .nao { background: #fde8e4; color: #b42318; }
 .pn-salvar { position: sticky; bottom: 12px; display: flex; justify-content: flex-end; margin-top: 8px; padding-right: 150px; } /* não fica embaixo do botão do One */
@@ -54,7 +54,7 @@ td small { display: block; }
 .rc-principal { display: grid; gap: 2px; }
 .rc-principal .nome-cliente { font-size: 1.05rem; }
 .rc-numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.rc-numeros div { background: #f7f9f5; border-radius: 12px; padding: 8px 10px; display: grid; }
+.rc-numeros div { background: var(--primaria-clara); border-radius: 12px; padding: 8px 10px; display: grid; }
 .rc-numeros span { font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); }
 .rc-numeros small { color: var(--texto-suave); font-size: .74rem; }
 .rc-atraso { background: #fff1e8 !important; }

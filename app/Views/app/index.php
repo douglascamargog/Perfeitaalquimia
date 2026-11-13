@@ -9,7 +9,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#14251b">
+  <meta name="theme-color" content="<?= e(\App\Services\Aparencia::padrao()[0]) ?>">
   <meta name="base" content="<?= e(url_base()) ?>">
   <title>One Vendas</title>
   <link rel="manifest" href="<?= url('/app/manifest.webmanifest') ?>">
@@ -19,6 +19,7 @@
   <link rel="icon" type="image/png" href="<?= asset('app/icone-192.png') ?>">
   <link rel="stylesheet" href="<?= asset('css/base.css') ?>">
   <link rel="stylesheet" href="<?= asset('app/app.css') ?>">
+  <?= \App\Services\Aparencia::estilo(\App\Core\Auth::usuario()) /* cores do sistema */ ?>
 </head>
 <body class="ap">
 <?php if (config('modo_demo')): ?><div class="faixa-demo">Ambiente de demonstração — dados simulados</div><?php endif; ?>

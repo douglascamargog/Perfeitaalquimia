@@ -17,6 +17,22 @@
  */
 return [
     [
+        'versao' => '3.0', 'data' => '2026-11-13', 'titulo' => 'Visual novo nas cores da Perfeita Alquimia',
+        'novo' => [
+            'Visual novo, com o verde-petróleo e a menta da Perfeita Alquimia e a fonte da marca.',
+            'Escolha as suas cores: em Meu perfil › Aparência há combinações prontas ou você monta a sua. Valem só para você.',
+            'Fotinhas de quem está online no alto da tela. Clique para ver quem é e em que aba está (nunca o cliente que a pessoa está vendo).',
+        ],
+        'melhoria' => [
+            'Menu lateral novo: a aba aberta "encaixa" na tela, fica fácil saber onde você está.',
+            'As abas de Carteira, Prospecção, Produção, Marketing, Cobrança, Academia e Meu mês viraram abas de pasta.',
+        ],
+        'admin' => [
+            'Cores padrão da empresa em Configurações › Aparência (valem para quem não escolheu as suas e para o catálogo do cliente).',
+            'Fonte Montserrat gravada no próprio sistema (public/assets/fonts), sem depender do Google.',
+        ],
+    ],
+    [
         'versao' => '2.4', 'data' => '2026-11-13', 'titulo' => 'Pedido no app e tabela de produtos',
         'correcao' => [
             'App do externo: a parte do pagamento não fica mais na frente dos produtos. Uma barra fina mostra o total e o botão "Pagamento" leva até as formas de pagamento.',

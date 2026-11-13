@@ -13,12 +13,13 @@ $v = fn(string $c) => e((string) ($_POST[$c] ?? ''));
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#14251b">
+  <meta name="theme-color" content="<?= e(\App\Services\Aparencia::padrao()[0]) ?>">
   <title>Seja um revendedor · <?= e($empresa) ?></title>
   <meta name="description" content="Venda os suplementos e produtos naturais da <?= e($empresa) ?> na sua loja.">
   <link rel="icon" type="image/png" href="<?= asset('img/logo.png') ?>">
   <link rel="stylesheet" href="<?= asset('css/base.css') ?>">
   <link rel="stylesheet" href="<?= asset('css/prospeccao.css') ?>">
+  <?= \App\Services\Aparencia::estilo(null, true) /* cores do sistema */ ?>
 </head>
 <body class="lp">
 <?php if (config('modo_demo')): ?><div class="faixa-demo">Ambiente de demonstração — dados simulados</div><?php endif; ?>

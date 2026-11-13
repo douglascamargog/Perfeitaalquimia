@@ -38,6 +38,10 @@ class ConfigController extends Controller
                 ? (isset($valores[$item['chave']]) ? '1' : '0')
                 : trim((string) ($valores[$item['chave']] ?? $item['valor']));
 
+            if ($item['tipo'] === 'cor' && \App\Services\Aparencia::valida($valor) === null) {
+                $erros[] = "\"{$item['rotulo']}\" precisa ser uma cor (ex.: #025150).";
+                continue;
+            }
             if ($item['tipo'] === 'numero' && !is_numeric($valor)) {
                 $erros[] = "\"{$item['rotulo']}\" precisa ser um número.";
                 continue;
