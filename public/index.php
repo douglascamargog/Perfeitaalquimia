@@ -19,6 +19,9 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: same-origin');
 
+// Versão nova extraída? Aplica as mudanças do banco antes de qualquer tela (com backup antes).
+App\Core\AtualizacaoAutomatica::verificar();
+
 Sessao::iniciar();
 // Toda ação (POST) pode mudar o que está pendente: o contador do menu é recalculado na próxima página
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
@@ -39,5 +42,12 @@ try {
     if (config('depurar')) {
         throw $erro;
     }
-    $roteador->erro(500, 'Algo deu errado. O erro foi registrado; tente de novo em instantes.');
+    try {
+        $roteador->erro(500, 'Algo deu errado. O erro foi registrado; tente de novo em instantes.');
+    } catch (\Throwable $erroNaPagina) { // nem a página de erro abriu (ex.: banco fora do ar): mensagem simples
+        error_log((string) $erroNaPagina);
+        http_response_code(500);
+        echo '<!doctype html><meta charset="utf-8"><title>One</title><p style="font-family:system-ui;padding:24px">Algo deu errado. '
+            . 'O erro foi registrado (storage/logs/php-erros.log). Tente de novo em instantes.</p>';
+    }
 }

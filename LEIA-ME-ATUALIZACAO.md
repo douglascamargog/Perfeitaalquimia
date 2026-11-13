@@ -27,7 +27,8 @@ Faça de preferência fora do horário de uso da equipe.
 2. **Enviar** — cPanel › Gerenciador de arquivos › `public_html` › **Carregar** o zip de atualização.
 3. **Extrair** — botão direito no zip › **Extrair** em `public_html`. Se perguntar, **substitua** os arquivos.
    Depois apague o zip.
-4. **Aplicar** — volte ao One › **Administração › Atualização**.
+4. **Aplicar** — é automático: na primeira visita depois de extrair, o One faz o backup (storage/backups) e aplica
+   sozinho as mudanças do banco. Para conferir, abra **Administração › Atualização**.
    - Se aparecer "atualização(ões) pendente(s)", clique em **Aplicar atualização**.
    - Se aparecer "Banco em dia ✓", não há nada a fazer.
 5. **Conferir** — o número da versão (ex.: ONE_V2.1) aparece no rodapé do menu. Abra a Carteira e o Meu mês para conferir.

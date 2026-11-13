@@ -37,7 +37,7 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   ok(await janela.isVisible(), 'janela de novidades aparece no primeiro acesso depois da atualização');
   ok((await janela.locator('#nov-titulo').innerText()).includes('ONE_V' + atual), 'título com o nome da versão (ONE_V' + atual + ')');
   ok(await janela.locator('.nov-versao').count() === 1, 'quem nunca viu nenhuma vê só a versão atual');
-  ok(await janela.locator('.nov-versao li').count() >= 3, 'lista as mudanças');
+  ok(await janela.locator('.nov-versao li').count() >= 1, 'lista as mudanças');
   await ven.goto(BASE + '/agenda');
   await Promise.all([ven.waitForNavigation(), ven.click('[data-novidades-ok]')]);
   ok(new URL(ven.url()).pathname.endsWith('/agenda'), '"Entendi" volta para a mesma página');

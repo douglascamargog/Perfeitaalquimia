@@ -14,6 +14,15 @@
  */
 return [
     [
+        'versao' => '2.1', 'data' => '2026-11-13', 'titulo' => 'Atualização automática do banco',
+        'melhoria' => [
+            'Para atualizar, basta extrair o pacote: na primeira visita, o One faz o backup e aplica sozinho as mudanças do banco.',
+        ],
+        'correcao' => [
+            'Depois de extrair uma versão nova, o site inteiro dava "erro 500" até a atualização ser aplicada, e a própria tela de Atualização não abria.',
+        ],
+    ],
+    [
         'versao' => '2.0', 'data' => '2026-11-13', 'titulo' => 'Acessos por aba e o que aparece para cada um',
         'novo' => [
             'Administração › Acessos: o administrador define, para cada perfil, se cada aba fica Sem acesso, Ver ou Ver e editar.',
