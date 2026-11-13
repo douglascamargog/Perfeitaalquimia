@@ -77,8 +77,9 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   // 7. Usuário novo não recebe novidades antigas
   const adm = await nova();
   await entrar(adm, 'admin@demo.local');
-  ok(await adm.locator('[data-novidades] .nov-tipo.admin').count() >= 1, 'admin vê os recados "Para o administrador"');
   await adm.click('[data-novidades-ok]');
+  await adm.goto(BASE + '/novidades');
+  ok(await adm.locator('.nov-historico .nov-tipo.admin').count() >= 1, 'admin vê os recados "Para o administrador"');
   await adm.goto(BASE + '/usuarios/novo');
   await adm.fill('#nome', 'Pessoa Nova Teste');
   await adm.fill('#email', 'nova.versao@demo.local');
