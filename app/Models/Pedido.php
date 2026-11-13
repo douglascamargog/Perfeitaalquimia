@@ -59,6 +59,11 @@ class Pedido
                 $par[] = $f[$campo];
             }
         }
+        // Setor de venda (escolhido no menu): pedidos dos clientes da carteira daquele setor
+        if (ctype_digit((string) ($f['funcao'] ?? ''))) {
+            $w[] = 'c.funcao_id = ?';
+            $par[] = (int) $f['funcao'];
+        }
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $f['de'] ?? '')) {
             $w[] = 'p.criado_em >= ?';
             $par[] = $f['de'];

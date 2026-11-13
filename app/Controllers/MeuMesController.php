@@ -45,7 +45,7 @@ class MeuMesController extends Controller
                 'melhores' => $aba === 'clientes' ? \App\Services\EquipeVendasService::melhores((int) Auth::id(), 10) : [],
                 'do_mes' => $aba === 'painel' ? \App\Services\EquipeVendasService::melhores((int) Auth::id(), 3, $mes) : [],
                 'faixas' => $aba === 'clientes' ? \App\Services\VendasService::semCompra(['vendedor' => (int) Auth::id()]) : [],
-                'parados' => $aba === 'clientes' ? \App\Services\EquipeVendasService::semComprar((int) Auth::id(), (int) (\App\Core\Config::get('carteira.faixas_sem_compra', [30])[0] ?? 30)) : [],
+                'parados' => $aba === 'clientes' ? \App\Services\EquipeVendasService::semComprar((int) Auth::id(), (int) (\App\Core\Config::get('carteira.faixas_sem_compra', [30])[0] ?? 30), 60, \App\Services\Setores::funcaoIdAtual()) : [],
             ],
             'estilos'  => ['carteira.css', 'meu_mes.css'],
             'scripts'  => $aba === 'clientes' ? ['carteira.js'] : [], // ficha do cliente na lateral

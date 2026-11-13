@@ -19,7 +19,7 @@ class PedidoController extends Controller
 {
     public function index(): void
     {
-        $filtros = Pedido::filtrosDaUrl();
+        $filtros = Pedido::filtrosDaUrl() + ['funcao' => (string) (\App\Services\Setores::funcaoIdAtual() ?? '')];
         $this->tela('pedidos/index', [
             'titulo' => 'Pedidos', 'filtros' => $filtros, 'resultado' => Pedido::listar($filtros, (int) ($_GET['pagina'] ?? 1)),
             'vendedores' => Auth::pode('pedidos.ver_todos') ? Listas::vendedores() : [],

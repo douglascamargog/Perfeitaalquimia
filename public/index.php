@@ -28,6 +28,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     Sessao::remover('pendencias');
 }
 
+// Setor de venda escolhido no menu (?setor=televendas): filtra Carteira, Agenda, Pedidos e Recompra
+App\Services\Setores::lerDaUrl();
+
 // Caminho pedido, sem a pasta base e sem a "?query"
 $caminho = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 if (url_base() !== '' && str_starts_with($caminho, url_base())) {

@@ -19,7 +19,7 @@ class AgendaController extends Controller
         $pessoa = $verTodas ? ((int) ($_GET['pessoa'] ?? 0) ?: null) : Auth::id();
         $this->tela('agenda/index', [
             'titulo'     => 'Agenda',
-            'grupos'     => Tarefa::agenda($pessoa),
+            'grupos'     => Tarefa::agenda($pessoa, \App\Services\Setores::funcaoIdAtual()),
             'verTodas'   => $verTodas,
             'pessoa'     => $pessoa,
             'vendedores' => $verTodas ? \App\Models\Listas::vendedores() : [],

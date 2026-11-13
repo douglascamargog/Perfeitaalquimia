@@ -19,7 +19,7 @@ class RecompraController extends Controller
     public function index(): void
     {
         $vendedor = Auth::pode('carteira.ver_todas') && ctype_digit((string) ($_GET['vendedor'] ?? '')) ? (int) $_GET['vendedor'] : null;
-        $clientes = VendasService::recompra($vendedor);
+        $clientes = VendasService::recompra($vendedor, \App\Services\Setores::funcaoIdAtual());
         // Texto do WhatsApp: o primeiro modelo da categoria Recompra em Conteúdo › Mensagens prontas
         foreach ($clientes as &$c) {
             $modelos = \App\Services\MensagemService::daCategoria('Recompra', \App\Services\MensagemService::variaveis($c, Auth::usuario()));

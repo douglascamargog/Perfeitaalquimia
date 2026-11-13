@@ -162,7 +162,7 @@ class VendasService
      * ainda dentro da carteira ativa (antes de irem para a reativação).
      * Vendedor: só a carteira dele. Gestor: todos (pode filtrar por vendedor).
      */
-    public static function recompra(?int $vendedor = null): array
+    public static function recompra(?int $vendedor = null, ?int $setor = null): array
     {
         $tolerancia = max(0, (int) Config::get('recompra.tolerancia_dias', 3));
         $w = ["c.excluido_em IS NULL", "c.tipo = 'cliente'", 'c.intervalo_medio_dias > 0',
@@ -175,6 +175,10 @@ class VendasService
         } elseif ($vendedor) {
             $w[] = 'c.responsavel_id = ?';
             $par[] = $vendedor;
+        }
+        if ($setor) { // setor de venda escolhido no menu (só na tela Recompra)
+            $w[] = 'c.funcao_id = ?';
+            $par[] = $setor;
         }
         $clientes = Banco::todos('SELECT c.id, c.razao_social, c.nome_fantasia, c.cidade, c.uf, c.telefone, c.whatsapp, c.ultima_compra_em, c.intervalo_medio_dias,
                 DATEDIFF(CURDATE(), c.ultima_compra_em + INTERVAL c.intervalo_medio_dias DAY) AS dias_atraso, DATEDIFF(CURDATE(), c.ultima_compra_em) AS dias_desde,

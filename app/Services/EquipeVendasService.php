@@ -108,12 +108,13 @@ class EquipeVendasService
     }
 
     /** Clientes da carteira da pessoa sem comprar há mais de X dias (o mais parado primeiro) */
-    public static function semComprar(int $usuarioId, int $dias = 30, int $limite = 60): array
+    public static function semComprar(int $usuarioId, int $dias = 30, int $limite = 60, ?int $setor = null): array
     {
+        $doSetor = $setor ? ' AND c.funcao_id = ' . (int) $setor : ''; // setor de venda escolhido no menu
         return Banco::todos("SELECT c.id, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS nome, c.cidade, c.uf, c.telefone, c.whatsapp, c.ultima_compra_em,
                 DATEDIFF(CURDATE(), c.ultima_compra_em) AS dias
             FROM clientes c WHERE c.responsavel_id = ? AND c.excluido_em IS NULL AND c.tipo = 'cliente'
-              AND c.ultima_compra_em IS NOT NULL AND c.ultima_compra_em < CURDATE() - INTERVAL ? DAY
+              AND c.ultima_compra_em IS NOT NULL AND c.ultima_compra_em < CURDATE() - INTERVAL ? DAY$doSetor
             ORDER BY c.ultima_compra_em ASC LIMIT " . (int) $limite, [$usuarioId, $dias]);
     }
 }

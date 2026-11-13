@@ -107,7 +107,9 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   const prod = await nova();
   await entrar(prod, 'producao@demo.local');
   ok(await prod.locator('[data-card=rotulos]').count() === 1, 'Início da Produção mostra o cartão de rótulos');
-  ok(await prod.locator('.menu-lateral [data-pendencia="/terceirizacao"]').isVisible(), 'número no menu da Terceirização');
+  ok(await prod.locator('[data-menu-secao="Comercial"] .menu-secao-botao .menu-contador').isVisible(), 'número no menu (grupo Comercial) por causa dos rótulos');
+  await prod.click('[data-menu-secao="Comercial"] .menu-secao-botao');
+  ok(await prod.locator('.menu-lateral [data-pendencia="/terceirizacao"]').isVisible(), 'número na aba Terceirização');
 
   // 9. Ordem de produção mostra o cliente
   await prod.goto(BASE + '/producao/ordens/' + op);

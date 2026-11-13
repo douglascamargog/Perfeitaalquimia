@@ -3,13 +3,15 @@
   <p class="suave">Regras, filas e metas são ligadas às funções. As pessoas apenas são vinculadas a elas (em Usuários).
     As <strong>áreas acompanhadas</strong> definem o que aparece para a pessoa no Início, no One, no sino e nos números do menu
     (o que ela pode abrir é definido em Acessos). A <strong>frente de venda</strong> separa os números na Equipe de vendas
-    (os pedidos contam para a frente da carteira do cliente) e define quem entra na Terceirização.</p>
+    (os pedidos contam para a frente da carteira do cliente) e define quem entra na Terceirização.
+    <strong>Setor de venda</strong>: a função tem carteira própria e vira um grupo no menu lateral (Carteira, Meu mês, Agenda, Pedidos e Recompra só daquele setor);
+    cada pessoa vê os setores das funções dela.</p>
 </div>
 
 <div class="card">
   <div class="tabela-rolagem">
     <table class="tabela">
-      <thead><tr><th>Função</th><th>Descrição</th><th>Áreas acompanhadas</th><th>Frente de venda</th><th>Identificador</th><th>Pessoas</th><th>Ativa</th><th></th></tr></thead>
+      <thead><tr><th>Função</th><th>Descrição</th><th>Áreas acompanhadas</th><th>Frente de venda</th><th>Setor de venda</th><th>Identificador</th><th>Pessoas</th><th>Ativa</th><th></th></tr></thead>
       <tbody>
       <?php foreach ($funcoes as $f): $form = 'funcao-' . (int) $f['id']; ?>
         <tr class="<?= $f['ativa'] ? '' : 'inativo' ?>">
@@ -22,6 +24,7 @@
             <?php foreach (['' => '— não vende', 'externo' => 'Externos', 'televendas' => 'Televendas', 'terceirizacao' => 'Terceirização'] as $v => $nome): ?>
               <option value="<?= $v ?>" <?= (string) ($f['frente'] ?? '') === $v ? 'selected' : '' ?>><?= $nome ?></option>
             <?php endforeach; ?></select></td>
+          <td><input type="checkbox" name="setor_venda" value="1" form="<?= $form ?>" <?= !empty($f['setor_venda']) ? 'checked' : '' ?> aria-label="<?= e($f['nome']) ?> é um setor de venda"></td>
           <td><code class="pequeno"><?= e($f['slug']) ?></code></td>
           <td><?= (int) $f['pessoas'] ?></td>
           <td><input type="checkbox" name="ativa" value="1" form="<?= $form ?>" <?= $f['ativa'] ? 'checked' : '' ?> aria-label="Ativa"></td>

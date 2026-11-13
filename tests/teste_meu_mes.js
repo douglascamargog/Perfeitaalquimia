@@ -22,7 +22,7 @@ function diasTrabalho(ate) {
 
   // ---------- Gestor: lança o vendido da equipe ----------
   await entrar(p, 'gestor@demo.local');
-  ok(await p.locator('nav a', { hasText: 'Meu mês' }).count() === 1, 'gestor vê "Meu mês" no menu');
+  ok(await p.locator('nav a', { hasText: 'Meu mês' }).count() === 4, 'gestor vê "Meu mês" em cada um dos 4 setores de venda');
   await p.goto(BASE + '/meu-mes');
   ok(await p.locator('.meta-equipe').count() === 0 && await p.locator('[data-atalho-equipe]').count() === 1, 'Meu mês não tem mais o bloco da equipe, só o atalho');
   await p.goto(BASE + '/equipe'); // a meta da equipe fica em Equipe de vendas

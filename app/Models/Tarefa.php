@@ -11,17 +11,18 @@ class Tarefa
     /**
      * Tarefas abertas de um usuário (ou de todos, se $usuarioId = null), separadas em atrasadas, hoje e futuras.
      */
-    public static function agenda(?int $usuarioId): array
+    /** $funcaoId: só tarefas de clientes daquele setor de venda (as tarefas sem cliente continuam) */
+    public static function agenda(?int $usuarioId, ?int $funcaoId = null): array
     {
         $sql = 'SELECT t.*, c.razao_social, c.cidade, c.uf, c.telefone, c.whatsapp, u.nome AS usuario_nome
                   FROM tarefas t
                   JOIN usuarios u ON u.id = t.usuario_id
                   LEFT JOIN clientes c ON c.id = t.cliente_id AND c.excluido_em IS NULL
-                 WHERE t.concluida_em IS NULL' . ($usuarioId ? ' AND t.usuario_id = ?' : '') . '
+                 WHERE t.concluida_em IS NULL' . ($usuarioId ? ' AND t.usuario_id = ?' : '') . ($funcaoId ? ' AND (t.cliente_id IS NULL OR c.funcao_id = ?)' : '') . '
                  ORDER BY t.vence_em, t.id LIMIT 500';
         $grupos = ['atrasadas' => [], 'hoje' => [], 'futuras' => []];
         $hoje = date('Y-m-d');
-        foreach (Banco::todos($sql, $usuarioId ? [$usuarioId] : []) as $t) {
+        foreach (Banco::todos($sql, array_values(array_filter([$usuarioId, $funcaoId]))) as $t) {
             $grupo = $t['vence_em'] < $hoje ? 'atrasadas' : ($t['vence_em'] === $hoje ? 'hoje' : 'futuras');
             $grupos[$grupo][] = $t;
         }

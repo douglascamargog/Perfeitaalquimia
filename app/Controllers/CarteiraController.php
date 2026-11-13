@@ -15,9 +15,19 @@ use App\Models\Tarefa;
 class CarteiraController extends Controller
 {
     /** Dados comuns a todas as abas: filtros atuais e listas para os campos de filtro */
+    /** Filtros da URL + o setor de venda escolhido no menu (cada setor tem a sua carteira) */
+    private static function filtros(): array
+    {
+        $f = Cliente::filtrosDe($_GET);
+        if ($f['funcao'] === '' && ($setor = \App\Services\Setores::funcaoIdAtual())) {
+            $f['funcao'] = (string) $setor;
+        }
+        return $f;
+    }
+
     private function base(string $aba, string $titulo): array
     {
-        $filtros = Cliente::filtrosDe($_GET);
+        $filtros = self::filtros();
         return [
             'titulo'   => $titulo,
             'aba'      => $aba,
@@ -117,7 +127,7 @@ class CarteiraController extends Controller
         if (preg_match('/^-?[\d.]+,-?[\d.]+,-?[\d.]+,-?[\d.]+$/', (string) ($_GET['caixa'] ?? ''))) {
             $caixa = array_map('floatval', explode(',', $_GET['caixa']));
         }
-        $dados = Cliente::mapa(Cliente::filtrosDe($_GET), $nivel, $caixa);
+        $dados = Cliente::mapa(self::filtros(), $nivel, $caixa);
         if ($nivel === 'uf') {
             foreach ($dados as &$linha) {
                 [$linha['lat'], $linha['lng']] = \App\Models\Cidade::CENTRO_UF[$linha['uf']] ?? [null, null];
@@ -129,7 +139,7 @@ class CarteiraController extends Controller
     /** Exporta os clientes filtrados em CSV (abre no Excel). Registrado na auditoria (LGPD). */
     public function exportar(): void
     {
-        $filtros = Cliente::filtrosDe($_GET);
+        $filtros = self::filtros();
         [$where, $p] = Cliente::montarWhere($filtros);
         $sql = "SELECT c.id, c.razao_social, c.nome_fantasia, c.cnpj, c.cidade, c.uf, c.endereco, s.nome AS segmento, e.nome AS etapa,
                        c.prioridade, c.telefone, c.whatsapp, c.email, c.instagram, c.site, u.nome AS responsavel, f.nome AS funcao,

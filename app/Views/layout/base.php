@@ -18,23 +18,9 @@ $caminhoAtual = '/' . trim(substr(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_
 $online = \App\Services\Presenca::online((int) Auth::id());
 $icones = asset('img/icones.svg');
 
-// Agrupa TODOS os itens do menu (todo mundo vê todas as abas): sem acesso → cadeado; só leitura → olho.
-// Dentro de cada grupo, as abas que a pessoa pode abrir vêm primeiro.
-// Item da página atual = o endereço mais longo que combina (/configuracoes/listas destaca "Listas", não "Configurações")
-$grupos = [];
-$itemAtual = '/';
-foreach (require RAIZ . '/app/menu.php' as $item) {
-    $item['bloqueado'] = !InicioController::visivel($item);
-    $item['leitura'] = !$item['bloqueado'] && !empty($item['editar']) && !Auth::pode($item['editar']);
-    $grupos[$item['grupo']][] = $item;
-    if (!$item['bloqueado'] && $item['url'] !== '/' && str_starts_with($caminhoAtual . '/', $item['url'] . '/') && strlen($item['url']) > strlen($itemAtual)) {
-        $itemAtual = $item['url'];
-    }
-}
-foreach ($grupos as &$itensDoGrupo) {
-    usort($itensDoGrupo, fn($a, $b) => (int) $a['bloqueado'] <=> (int) $b['bloqueado']); // usort é estável no PHP 8
-}
-unset($itensDoGrupo);
+// Menu em grupos que abrem e fecham: topo (Início, Equipe), um grupo por SETOR DE VENDA da pessoa e os demais
+// (Financeiro, Gestão, Marketing...). Todos veem todas as abas que não são de setor: sem acesso → cadeado; só leitura → olho.
+$grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -76,16 +62,23 @@ unset($itensDoGrupo);
       <span><strong class="marca-nome"><?= e(config('app_nome')) ?></strong><span><?= e(config('empresa_nome', 'Perfeita Alquimia')) ?></span></span>
     </a>
     <nav>
-      <?php foreach ($grupos as $grupo => $itens): ?>
-        <?php if ($grupo !== ''): ?><div class="menu-grupo"><?= e($grupo) ?></div><?php endif; ?>
-        <?php foreach ($itens as $item):
-            $ativo = $item['url'] === '/' ? $caminhoAtual === '/' : $item['url'] === $itemAtual; ?>
+      <?php foreach ($grupos as $g): ?>
+        <?php if (!$g['topo']): ?>
+        <div class="menu-secao <?= $g['aberto'] ? 'aberta' : '' ?>" data-menu-secao="<?= e($g['chave']) ?>" <?= $g['aberto'] ? 'data-atual' : '' ?>>
+          <button type="button" class="menu-secao-botao <?= $g['bloqueado'] ? 'bloqueado' : '' ?>" aria-expanded="<?= $g['aberto'] ? 'true' : 'false' ?>">
+            <svg class="icone"><use href="<?= $icones ?>#<?= e($g['icone']) ?>"/></svg><span><?= e($g['nome']) ?></span>
+            <b class="menu-contador" <?= $g['contador'] ? '' : 'hidden' ?>><?= (int) $g['contador'] ?></b>
+            <svg class="icone menu-seta" aria-hidden="true"><use href="<?= $icones ?>#mais"/></svg>
+          </button>
+          <div class="menu-sub">
+        <?php endif; ?>
+        <?php foreach ($g['itens'] as $item): ?>
           <?php if ($item['pronto']): ?>
-            <a href="<?= url($item['url']) ?>" class="<?= trim(($ativo ? 'ativo' : '') . (!empty($item['destaque']) ? ' destaque' : '') . ($item['bloqueado'] ? ' bloqueado' : '')) ?>"
+            <a href="<?= url($item['href']) ?>" class="<?= trim(($item['ativo'] ? 'ativo' : '') . (!empty($item['destaque']) ? ' destaque' : '') . ($item['bloqueado'] ? ' bloqueado' : '')) ?>" data-url="<?= e($item['url']) ?>"
                <?= $item['bloqueado'] ? 'title="Você não tem acesso a esta aba" data-bloqueado' : ($item['leitura'] ? 'title="Você pode ver, mas não alterar"' : '') ?>>
               <svg class="icone"><use href="<?= $icones ?>#<?= e($item['icone']) ?>"/></svg><?= e($item['titulo']) ?>
               <?php if ($item['bloqueado']): ?><span class="menu-cadeado" aria-label="sem acesso">🔒</span><?php elseif ($item['leitura']): ?><span class="menu-leitura" aria-label="só leitura" title="Só leitura">👁</span><?php endif; ?>
-              <b class="menu-contador" data-pendencia="<?= e($item['url']) ?>" <?= empty($pendencias[$item['url']]) ? 'hidden' : '' ?> title="Pendente agora"><?= (int) ($pendencias[$item['url']] ?? 0) ?></b>
+              <?php if ($item['comContador'] ?? true): ?><b class="menu-contador" data-pendencia="<?= e($item['url']) ?>" <?= $item['contador'] ? '' : 'hidden' ?> title="Pendente agora"><?= (int) $item['contador'] ?></b><?php endif; ?>
             </a>
           <?php else: ?>
             <span class="item" title="Módulo em construção no protótipo">
@@ -94,6 +87,7 @@ unset($itensDoGrupo);
             </span>
           <?php endif; ?>
         <?php endforeach; ?>
+        <?php if (!$g['topo']): ?></div></div><?php endif; ?>
       <?php endforeach; ?>
     </nav>
     <div class="menu-rodape"><a href="<?= url('/novidades') ?>" title="O que mudou em cada versão"><?= e(\App\Services\Versoes::nome()) ?> · novidades</a></div>
@@ -103,6 +97,10 @@ unset($itensDoGrupo);
     <header class="topo">
       <button class="botao-icone abrir-menu" type="button" aria-label="Abrir menu"><svg class="icone"><use href="<?= $icones ?>#menu"/></svg><i class="menu-ponto" data-menu-ponto <?= array_sum($pendencias) ? '' : 'hidden' ?>></i></button>
       <h1><?= e($titulo ?? '') ?></h1>
+      <?php // Setor de venda em que a pessoa está (Carteira, Agenda, Pedidos... mostram só os clientes dele)
+      $setorAtual = !empty(\App\Core\Menu::itemDe($caminhoAtual)['setor']) ? \App\Services\Setores::atual() : null; ?>
+      <?php if ($setorAtual): ?><span class="selo-setor" data-selo-setor><svg class="icone"><use href="<?= $icones ?>#<?= e($setorAtual['icone']) ?>"/></svg><?= e($setorAtual['nome']) ?>
+        <?php if (Auth::pode('carteira.ver_todas')): ?><a href="<?= url($caminhoAtual) ?>?setor=" title="Ver todos os setores" aria-label="Ver todos os setores">✕</a><?php endif; ?></span><?php endif; ?>
       <?php // Comunicados não lidos: faixa em destaque (some ao clicar em "Li e entendi") ?>
       <div class="com-lugar" data-com-lugar><?= \App\Core\Visao::renderizar('comunicados/_faixa', ['comunicados' => \App\Services\ComunicadoService::ativosPara((int) Auth::id())]) ?></div>
       <div class="busca-rapida" data-busca-rapida>

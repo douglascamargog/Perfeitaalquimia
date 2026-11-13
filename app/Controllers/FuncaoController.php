@@ -49,6 +49,8 @@ class FuncaoController extends Controller
             // Áreas que a função acompanha (Início, One, sino e números do menu)
             'areas_foco' => implode(',', \App\Services\Foco::lista(implode(',', (array) ($_POST['areas'] ?? [])))),
             'frente' => in_array($_POST['frente'] ?? '', ['externo', 'televendas', 'terceirizacao'], true) ? $_POST['frente'] : null,
+            // Setor de venda: carteira própria e um grupo no menu lateral com as abas de venda
+            'setor_venda' => isset($_POST['setor_venda']) ? 1 : 0,
         ];
         Banco::atualizar('funcoes', (int) $id, $dados);
         Auditoria::registrar('funcao', (int) $id, 'editar', $antes, $dados);

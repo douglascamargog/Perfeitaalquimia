@@ -17,6 +17,20 @@
  */
 return [
     [
+        'versao' => '6.0', 'data' => '2026-11-13', 'titulo' => 'Menu por setores',
+        'novo' => [
+            'Cada setor de venda tem o seu espaço: Televendas, Externo, Terceirização e Prospecção e Reativação, cada um com a sua carteira.',
+            'Dentro do seu setor ficam Carteira, Meu mês, Agenda, Pedidos e Recompra só com os clientes daquele setor.',
+        ],
+        'melhoria' => [
+            'Menu lateral mais limpo: cada setor e cada área (Financeiro, Gestão, Marketing, Produtos, Produção) abre um submenu com as suas abas. O da tela em que você está já vem aberto.',
+            'Você vê no menu só o seu setor de venda. O nome do setor aparece ao lado do título da tela.',
+        ],
+        'admin' => [
+            'Administração › Funções: a coluna "Setor de venda" define quais funções têm carteira própria e grupo no menu. Gestor e Admin veem todos os setores; o ✕ ao lado do nome do setor mostra todos juntos.',
+        ],
+    ],
+    [
         'versao' => '5.0', 'data' => '2026-11-13', 'titulo' => 'Produtos completo',
         'novo' => [
             'Produtos foi refeito: cada produto tem a sua página com abas — Visão geral, Conteúdo, Composição, Ficha técnica, Embalagens, Documentos e Histórico.',

@@ -7,6 +7,23 @@ import './manter-rolagem.js';
 const menu = document.querySelector('.menu-lateral');
 document.querySelector('.abrir-menu')?.addEventListener('click', () => menu?.classList.toggle('aberto'));
 
+// Grupos do menu (setores e áreas): abrem e fecham com um clique. O grupo da página atual abre sozinho;
+// os que a pessoa abriu ficam lembrados neste navegador.
+const lerAbertos = () => { try { return JSON.parse(localStorage.getItem('menu-abertos') || '[]'); } catch { return []; } };
+const gravarAbertos = (lista) => { try { localStorage.setItem('menu-abertos', JSON.stringify(lista)); } catch { /* sem armazenamento: tudo bem */ } };
+document.querySelectorAll('[data-menu-secao]').forEach((secao) => {
+  const botao = secao.querySelector('.menu-secao-botao');
+  const marcar = (aberta) => { secao.classList.toggle('aberta', aberta); botao.setAttribute('aria-expanded', String(aberta)); };
+  if (!secao.hasAttribute('data-atual') && lerAbertos().includes(secao.dataset.menuSecao)) marcar(true);
+  botao.addEventListener('click', () => {
+    const aberta = !secao.classList.contains('aberta');
+    marcar(aberta);
+    const lista = lerAbertos().filter((c) => c !== secao.dataset.menuSecao);
+    if (aberta) lista.push(secao.dataset.menuSecao);
+    gravarAbertos(lista);
+  });
+});
+
 // Fecha o menu ao clicar fora dele (celular)
 document.addEventListener('click', (evento) => {
   if (menu?.classList.contains('aberto') && !menu.contains(evento.target) && !evento.target.closest('.abrir-menu')) {

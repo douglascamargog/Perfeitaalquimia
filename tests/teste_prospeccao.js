@@ -26,7 +26,7 @@ const aviso = async (p) => (await p.locator('.aviso').allInnerTexts()).join(' | 
   await p.goto(BASE + '/prospeccao');
   const aguardando = sql(`select count(*) from clientes where excluido_em is null and tipo='lead' and contatado=0 and responsavel_id=${vend}`);
   ok((await p.locator('[data-aguardando]').innerText()).replace('.', '') === aguardando, `fila do vendedor: ${aguardando} aguardando (só a carteira dele)`);
-  ok(await p.locator('.menu-lateral a[href$="/prospeccao"]').count() === 1 && await p.locator('.menu-lateral .em-breve').filter({ hasText: 'Prospecção' }).count() === 0, 'Prospecção no menu (pronta)');
+  ok(await p.locator('.menu-lateral a[href$="/prospeccao"]').count() === 0, 'Prospecção fica no setor Prospecção e Reativação (não no menu de Televendas)');
   const r302 = await p.request.get(BASE + '/carteira/campanha', { maxRedirects: 0 });
   ok(r302.status() === 302 && (r302.headers()['location'] || '').endsWith('/prospeccao'), 'endereço antigo /carteira/campanha leva à Prospecção');
 
