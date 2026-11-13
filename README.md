@@ -107,6 +107,19 @@ com o "Backup JSON" exportado pela V4.
 - **Recompra** (Comercial): clientes que passaram do próprio intervalo médio de compra (recalculado a cada faturamento), com os produtos
   que costumam comprar, WhatsApp com mensagem pronta, "Novo pedido (repetir)" e "Agendar retorno". O vendedor vê só a carteira dele.
 
+## Produção e matérias-primas
+
+- **Matérias-primas** (`/producao/materias`): estoque, mínimo, fornecedor e último custo. O estoque só muda por
+  **entrada de compra**, **ajuste de inventário** (com motivo) ou **consumo** de ordem de produção, e tudo fica no histórico.
+  A previsão "acaba em X dias" usa o consumo médio dos últimos 30 dias (configurável).
+- **Fichas técnicas** (`/producao/fichas`): quanto de cada matéria-prima vai em 1 unidade do produto e o custo por unidade.
+- **Ordens de produção** (`/producao/ordens`): a ordem é planejada com prévia do consumo. Ao **concluir**, o sistema baixa as matérias-primas
+  (quantidade × ficha) e soma o produto acabado, tudo junto ou nada. Se faltar matéria-prima, não conclui. Também tem a versão para imprimir em A4.
+- **Estoque acabado** (`/producao/acabados`): mínimo por produto. Abaixo do mínimo, o sistema sugere a **ordem de reabastecimento**
+  (cobre 30 dias de venda, no mínimo o dobro do mínimo). Pedido faturado baixa o estoque acabado (pode desligar em Configurações › Produção).
+- Tudo passa pelo `ProducaoService`: se o plano do Omie tiver produção, só ele muda.
+- Perfil Produção altera; Gestor só vê (`producao.ver`).
+
 ## Marketing
 
 - **Mural de posts** (Instagram): calendário do mês, arrastar para mudar o dia, prévia do feed, fluxo Ideia → Em produção →

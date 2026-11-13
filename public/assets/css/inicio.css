@@ -144,3 +144,5 @@ a.b-chip:hover { background: var(--lima); }
   .b-funil-rodape { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (prefers-reduced-motion: reduce) { a.b-card { transition: none; } }
+.b-alerta-suave { background: #fff4ec !important; }
+.b-alerta-suave .b-valor { color: #c2410c; }

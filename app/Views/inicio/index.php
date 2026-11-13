@@ -169,6 +169,19 @@ $atalhos = array_filter([
     </a>
   <?php endif; ?>
 
+  <?php if ($p['producao']): $pr = $p['producao']; ?>
+    <a class="b-card b-kpi span-3 <?= $pr['mp_abaixo'] ? 'b-alerta-suave' : '' ?>" href="<?= url('/producao/materias?situacao=alerta') ?>" data-card="producao-mp">
+      <header class="b-topo"><span>Matérias-primas</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#fabrica"/></svg></span></header>
+      <strong class="b-valor"><?= $n($pr['mp_abaixo']) ?> <small>abaixo do mínimo</small></strong>
+      <small><?= $n($pr['mp_acabando']) ?> acabando em breve · comprar antes de parar a produção</small>
+    </a>
+    <a class="b-card b-kpi span-3" href="<?= url('/producao') ?>" data-card="producao-reabastecer">
+      <header class="b-topo"><span>Reabastecimento</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#caixa"/></svg></span></header>
+      <strong class="b-valor"><?= $n($pr['reabastecer']) ?> <small>produto(s)</small></strong>
+      <small>abaixo do estoque mínimo · <?= $n($pr['planejadas']) ?> ordem(ns) planejada(s)</small>
+    </a>
+  <?php endif; ?>
+
   <?php if ($p['marketing']): $mk = $p['marketing']; ?>
     <a class="b-card b-kpi span-3" href="<?= url('/marketing') ?>">
       <header class="b-topo"><span>Posts desta semana</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#calendario"/></svg></span></header>

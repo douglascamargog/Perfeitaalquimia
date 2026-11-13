@@ -37,6 +37,7 @@ class PainelInicio
             'marketing'    => Auth::pode('marketing.ver') ? self::marketing() : null,
             'vendas'       => Auth::pode('painel.ver') ? self::vendas($mes) : null,
             'recompra'     => Auth::pode('recompra.ver') ? VendasService::qtdRecompra() : null,
+            'producao'     => Auth::pode('producao.gerenciar') || Auth::pode('producao.ver') ? ProducaoService::alertas() : null,
             'ecommerce'    => Auth::pode('ecommerce.ver') && Banco::valor('SELECT 1 FROM ecommerce_resumo_diario LIMIT 1') ? EcommerceService::painel(date('Y-m')) : null,
         ];
     }

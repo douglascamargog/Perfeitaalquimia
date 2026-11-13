@@ -55,6 +55,9 @@ class OneAssistente
         if (Auth::pode('marketing.editar')) {
             $falas[] = self::semanaQueVem();
         }
+        if (Auth::pode('producao.gerenciar')) {
+            $falas = array_merge($falas, self::producao());
+        }
         if (Auth::pode('meu_mes.usar')) {
             $falas[] = self::metaIndividual($id);
             $falas[] = self::metaEquipe();
@@ -70,6 +73,22 @@ class OneAssistente
         // Dicas da tela atual aparecem primeiro
         usort($falas, fn($a, $b) => (int) self::daPagina($b, $pagina) <=> (int) self::daPagina($a, $pagina));
         return $falas ?: [['humor' => 'feliz', 'texto' => 'Tudo em ordem por aqui. Quando houver algo importante, eu aviso!']];
+    }
+
+    /** Produção: matérias-primas para comprar e produtos para reabastecer */
+    private static function producao(): array
+    {
+        $a = ProducaoService::alertas();
+        $falas = [];
+        if ($a['mp_abaixo']) {
+            $falas[] = ['humor' => 'ops', 'texto' => "{$a['mp_abaixo']} matéria(s)-prima(s) abaixo do mínimo" . ($a['mp_acabando'] ? " e {$a['mp_acabando']} acabando" : '') . '. Vale fazer o pedido de compra hoje.', 'link' => '/producao/materias?situacao=alerta', 'acao' => 'Ver matérias-primas'];
+        } elseif ($a['mp_acabando']) {
+            $falas[] = ['humor' => 'pensando', 'texto' => "{$a['mp_acabando']} matéria(s)-prima(s) devem acabar nos próximos dias, pelo consumo médio.", 'link' => '/producao/materias?situacao=alerta', 'acao' => 'Ver previsão'];
+        }
+        if ($a['reabastecer']) {
+            $falas[] = ['humor' => 'ideia', 'texto' => "{$a['reabastecer']} produto(s) para reabastecer: o estoque acabado ficou abaixo do mínimo. Eu já calculei a quantidade da ordem.", 'link' => '/producao', 'acao' => 'Gerar ordens'];
+        }
+        return $falas;
     }
 
     /** A fala é da mesma seção da tela atual? (compara o primeiro pedaço do endereço: /carteira, /meu-mes...) */
