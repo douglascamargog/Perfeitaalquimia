@@ -55,6 +55,26 @@ $linkSeguro = function (?string $url): string {
     <a class="botao contorno pequeno" href="<?= url("/carteira/clientes/$id/editar") ?>"><svg class="icone"><use href="<?= $icones ?>#editar"/></svg>Editar cadastro</a>
   </div>
 
+  <?php if (Auth::pode('mensagens.usar') && ($modelosMsg = \App\Services\MensagemService::paraCliente($c, Auth::usuario()))): ?>
+  <!-- Mensagem pronta de WhatsApp -->
+  <section class="ficha-secao ficha-msg" data-msg-pronta data-cliente="<?= $id ?>" data-usar-url="<?= url('/mensagens/{id}/usar') ?>">
+    <h3>Mensagem pronta</h3>
+    <select data-msg-modelo aria-label="Escolha uma mensagem pronta">
+      <option value="">Escolha uma mensagem…</option>
+      <?php $grupoAtual = null; foreach ($modelosMsg as $mm): if ($mm['categoria'] !== $grupoAtual): echo $grupoAtual !== null ? '</optgroup>' : ''; $grupoAtual = $mm['categoria']; ?><optgroup label="<?= e($grupoAtual) ?>"><?php endif; ?>
+        <option value="<?= $mm['id'] ?>" data-texto="<?= e($mm['texto']) ?>"><?= e($mm['titulo']) ?></option>
+      <?php endforeach; ?></optgroup>
+    </select>
+    <textarea data-msg-texto rows="4" aria-label="Texto da mensagem (pode editar antes de enviar)" placeholder="O texto aparece aqui, já com o nome da loja. Dá para editar antes de enviar."></textarea>
+    <?php if ($whats): ?>
+      <button class="botao lima pequeno" type="button" data-msg-enviar data-whats="<?= e($whats) ?>" disabled><svg class="icone"><use href="<?= $icones ?>#conversa"/></svg>Abrir no WhatsApp</button>
+    <?php else: ?>
+      <button class="botao contorno pequeno" type="button" data-msg-enviar disabled>Copiar texto</button>
+      <small class="suave">Sem WhatsApp cadastrado: o texto é copiado para você colar onde precisar.</small>
+    <?php endif; ?>
+  </section>
+  <?php endif; ?>
+
   <!-- Dados -->
   <section class="ficha-secao">
     <h3>Dados do estabelecimento</h3>

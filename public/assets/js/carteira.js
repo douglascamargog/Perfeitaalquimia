@@ -100,6 +100,35 @@ document.addEventListener('submit', async (evento) => {
   }
 });
 
+// Mensagem pronta na ficha: escolher o modelo preenche o texto; "Abrir no WhatsApp" registra o uso e abre o wa.me
+document.addEventListener('change', (evento) => {
+  const modelo = evento.target.closest('[data-msg-modelo]');
+  if (!modelo) return;
+  const caixa = modelo.closest('[data-msg-pronta]');
+  caixa.querySelector('[data-msg-texto]').value = modelo.selectedOptions[0]?.dataset.texto || '';
+  caixa.querySelectorAll('[data-msg-enviar]').forEach((b) => (b.disabled = !modelo.value));
+});
+document.addEventListener('click', async (evento) => {
+  const botao = evento.target.closest('[data-msg-enviar]');
+  if (!botao) return;
+  const caixa = botao.closest('[data-msg-pronta]');
+  const modelo = caixa.querySelector('[data-msg-modelo]').value;
+  const texto = caixa.querySelector('[data-msg-texto]').value.trim();
+  if (!modelo || !texto) return;
+  // Abre a janela já no clique (o navegador bloqueia janelas abertas depois de uma espera)
+  const janela = botao.dataset.whats ? window.open(`https://wa.me/55${botao.dataset.whats}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener') : null;
+  if (!botao.dataset.whats) {
+    try { await navigator.clipboard.writeText(texto); } catch (e) { /* sem permissão: a pessoa copia da caixa */ }
+  }
+  const corpo = new FormData();
+  corpo.append('cliente_id', caixa.dataset.cliente);
+  const resposta = await fetch(caixa.dataset.usarUrl.replace('{id}', modelo), { method: 'POST', body: corpo, headers: { 'X-CSRF-Token': CSRF, Accept: 'application/json' } }).catch(() => null);
+  const dados = resposta ? await resposta.json().catch(() => ({})) : {};
+  avisar(dados.ok ? (botao.dataset.whats ? 'Mensagem registrada na linha do tempo.' : 'Texto copiado e registrado na linha do tempo.') : (dados.mensagem || 'Não foi possível registrar.'), dados.ok ? undefined : 'erro');
+  if (dados.ok) { alterouAlgo = true; if (clienteAberto) await abrirCliente(clienteAberto); }
+  void janela;
+});
+
 // Filtros: ao mudar um campo, já aplica (a busca por texto aplica ao apertar Enter)
 document.querySelectorAll('form[data-filtros]').forEach((form) => {
   form.addEventListener('change', (evento) => {

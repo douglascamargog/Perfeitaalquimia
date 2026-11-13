@@ -302,3 +302,8 @@ details.ficha-secao[open] > summary::before { content: '▾ '; }
 .selo.verde { background: var(--sucesso-fundo); color: var(--sucesso); }
 
 .ficha-recompra-atrasada { color: #c2410c; font-weight: 600; }
+
+/* Mensagem pronta na ficha */
+.ficha-msg { display: grid; gap: 8px; }
+.ficha-msg textarea { width: 100%; font: inherit; font-size: .88rem; border: 1px solid var(--borda); border-radius: 12px; padding: 10px; background: #f7fff0; }
+.ficha-msg .botao { justify-self: start; }
