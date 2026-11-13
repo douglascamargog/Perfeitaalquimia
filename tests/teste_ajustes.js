@@ -129,6 +129,22 @@ async function sair(p) { await p.goto(BASE + '/'); await p.click('form[action$="
   ok((await p.content()).includes('Rotina no One'), 'trilha: módulo "Rotina no One"');
   await sair(p);
 
+  // ---------- Depois de salvar, a página continua onde estava ----------
+  await entrar(p, 'producao@demo.local');
+  await p.goto(BASE + '/producao/materias');
+  const ultima = p.locator('tr[data-mp]').last();
+  await ultima.scrollIntoViewIfNeeded();
+  const yAntes = await p.evaluate(() => window.scrollY);
+  await ultima.locator('input[name=quantidade]').fill('1');
+  await Promise.all([p.waitForNavigation(), ultima.locator('button').click()]);
+  await p.waitForTimeout(300);
+  const yDepois = await p.evaluate(() => window.scrollY);
+  ok(yAntes > 300 && Math.abs(yDepois - yAntes) < 60, `depois de salvar, continua no mesmo lugar da página (${yAntes} → ${yDepois})`);
+  ok(await p.locator('.avisos-flutuantes .aviso-flut.sucesso').count() === 1, 'aviso de "salvo" aparece flutuando no canto');
+  await p.goto(BASE + '/producao/ordens');
+  ok(await p.evaluate(() => window.scrollY) === 0, 'abrir outra página começa do topo');
+  await sair(p);
+
   // ---------- Backup automático ----------
   execSync('php cron/backup.php', { cwd: RAIZ });
   const pasta = path.join(RAIZ, 'storage/backups');

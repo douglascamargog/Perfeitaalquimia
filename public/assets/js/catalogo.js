@@ -1,3 +1,4 @@
+import './manter-rolagem.js';
 // =====================================================================
 // Catálogo do cliente: + / − nas quantidades (salva sem recarregar),
 // barra do pedido mínimo e confirmação antes de cancelar.

@@ -1,3 +1,4 @@
+import './manter-rolagem.js';
 // =====================================================================
 // Comportamentos gerais do sistema interno (carregado em todas as telas).
 // =====================================================================
