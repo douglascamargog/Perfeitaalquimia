@@ -17,6 +17,26 @@
  */
 return [
     [
+        'versao' => '5.0', 'data' => '2026-11-13', 'titulo' => 'Produtos completo',
+        'novo' => [
+            'Produtos foi refeito: cada produto tem a sua página com abas — Visão geral, Conteúdo, Composição, Ficha técnica, Embalagens, Documentos e Histórico.',
+            'Documentos dos produtos (laudos, FISPQ, registros, certificados, artes do rótulo) num lugar só, para abrir ou baixar.',
+            'A parte técnica (composição, ficha técnica, embalagens e documentos) é preenchida pela Responsável Técnica e Química. Os demais consultam.',
+            'Catálogo ganhou o seu próprio item no menu: é a vitrine do cliente (o que aparece, ordem, chamada e preços).',
+        ],
+        'melhoria' => [
+            'Na lista de Produtos, selos mostram o que está faltando: sem ficha técnica, documento vencendo, oculto no catálogo, sem preço.',
+            'O texto do produto (descrição, benefícios, perguntas) muda junto na Academia e no catálogo.',
+            'Quem cuida da parte técnica recebe aviso do One quando um documento está para vencer.',
+        ],
+        'admin' => [
+            'Perfil novo "Responsável Técnica" e função "Responsável Técnica e Química": vincule a pessoa em Usuários. Em Acessos, a linha Produtos agora tem "Editar" = parte técnica; o Catálogo tem linha própria.',
+            'A ficha técnica em Produção › Fichas técnicas passou a ser editada só por quem tem a parte técnica (a Produção continua vendo).',
+            'Os documentos ficam em storage/documentos/produtos (fora da pasta pública). Inclua essa pasta no backup do site. Aviso de vencimento: Configurações › Produção.',
+            'Matérias-primas têm o campo Tipo (matéria-prima ou embalagem); potes, tampas, rótulos, lacres e caixas já foram classificados.',
+        ],
+    ],
+    [
         'versao' => '4.3', 'data' => '2026-11-13', 'titulo' => 'Equipe e aniversários',
         'novo' => [
             'Equipe (no menu): conheça os colegas. Cada um tem um perfil com foto de capa, um pouco sobre si, hobbies, favoritos, família e pets.',

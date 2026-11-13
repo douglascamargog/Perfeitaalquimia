@@ -1,130 +1,166 @@
 <?php
 namespace App\Controllers;
 
-use App\Core\Auditoria;
+use App\Core\Auth;
 use App\Core\Banco;
 use App\Core\Sessao;
-use App\Models\Produto;
-use App\Services\ErpSync;
+use App\Services\ProducaoService;
+use App\Services\ProdutoService as PS;
+use RuntimeException;
 
 /**
- * Conteúdo › Produtos: o MESMO cadastro da Academia e do catálogo.
- * Preços e estoque vêm do ERP (somente leitura aqui). Aqui se decide o que aparece no catálogo, a chamada e a ordem.
+ * Produtos: tudo sobre cada produto, para a equipe (a vitrine do cliente fica em Catálogo).
+ * Abas da página: Visão geral, Conteúdo, Composição, Ficha técnica, Embalagens, Documentos e Histórico.
+ * A parte técnica (Composição, Ficha técnica, Embalagens e Documentos) só é editada por quem tem
+ * "produtos.tecnico" (Responsável Técnica); o Conteúdo, por quem edita a Academia/catálogo (Marketing).
  */
 class ProdutoController extends Controller
 {
+    private const ESTILOS = ['carteira.css', 'academia.css', 'producao.css', 'produtos.css'];
+
+    public const ABAS = [
+        'geral'      => 'Visão geral',
+        'conteudo'   => 'Conteúdo',
+        'composicao' => 'Composição',
+        'ficha'      => 'Ficha técnica',
+        'embalagens' => 'Embalagens',
+        'documentos' => 'Documentos',
+        'historico'  => 'Histórico',
+    ];
+
     public function index(): void
     {
-        $busca = mb_substr(trim((string) ($_GET['q'] ?? '')), 0, 80);
-        $this->tela('produtos/index', ['titulo' => 'Produtos', 'busca' => $busca] + Produto::administracao($busca) + [
-            'semPreco' => (int) Banco::valor('SELECT COUNT(*) FROM produtos p WHERE p.ativo = 1 AND NOT EXISTS (SELECT 1 FROM produto_precos pp WHERE pp.produto_id = p.id)'),
-            'semCodigo' => (int) Banco::valor("SELECT COUNT(*) FROM produtos WHERE ativo = 1 AND (codigo IS NULL OR codigo = '')"),
-            'previa' => Sessao::get('codigos_previa'),
-            'estilos' => ['carteira.css', 'pedidos.css']]);
+        $f = [
+            'q'         => trim((string) ($_GET['q'] ?? '')),
+            'categoria' => (int) ($_GET['categoria'] ?? 0),
+            'situacao'  => isset(PS::SITUACOES[$_GET['situacao'] ?? '']) ? $_GET['situacao'] : '',
+        ];
+        $this->tela('produtos/index', [
+            'titulo' => 'Produtos', 'filtros' => $f, 'produtos' => PS::lista($f), 'contagens' => PS::contagens(),
+            'categorias' => Banco::todos('SELECT id, nome FROM categorias ORDER BY nome'), 'estilos' => self::ESTILOS,
+        ]);
     }
 
-    /** Código do produto: letras, números e . - / _ (até 40) */
-    public static function codigoLimpo(string $codigo): ?string
+    public function ver(string $slug): void
     {
-        $c = mb_strtoupper(trim($codigo));
-        return preg_match('#^[A-Z0-9][A-Z0-9.\-/_ ]{0,39}$#', $c) ? $c : null;
+        $p = $this->produto($slug);
+        $aba = isset(self::ABAS[$_GET['aba'] ?? '']) ? $_GET['aba'] : 'geral';
+        $this->tela('produtos/ver', [
+            'titulo' => $p['nome'], 'p' => $p, 'aba' => $aba, 'abas' => self::ABAS,
+            'tecnico' => PS::tecnico((int) $p['id']), 'ficha' => PS::fichaSeparada((int) $p['id']),
+            'precos' => $aba === 'geral' ? PS::precos((int) $p['id']) : [],
+            'documentos' => PS::documentos((int) $p['id']),
+            'historico' => $aba === 'historico' ? PS::historico((int) $p['id']) : [],
+            'materias' => $aba === 'ficha' || $aba === 'embalagens' ? PS::materiasParaFicha() : [],
+            'podeTecnico' => Auth::pode('produtos.tecnico'),
+            'podeConteudo' => Auth::pode('academia.editar') || Auth::pode('catalogo.editar'),
+            'veCusto' => PS::veCusto(), 'vePrivado' => PS::vePrivado(),
+            'estilos' => self::ESTILOS, 'scripts' => ['producao.js', 'produtos.js'],
+        ]);
     }
 
-    /** Planilha com Código + Produto: monta a prévia (nada é gravado ainda) */
-    public function importarCodigos(): void
+    public function salvarConteudo(string $slug): void
     {
-        $arquivo = $_FILES['planilha'] ?? null;
-        $ext = strtolower(pathinfo((string) ($arquivo['name'] ?? ''), PATHINFO_EXTENSION));
-        if (!$arquivo || $arquivo['error'] !== UPLOAD_ERR_OK || !in_array($ext, ['csv', 'xlsx'], true) || $arquivo['size'] > 5 * 1024 * 1024) {
-            Sessao::aviso('erro', 'Envie uma planilha CSV ou XLSX (até 5 MB) com as colunas Código e Produto.');
+        $p = $this->produto($slug);
+        PS::salvarConteudo($p, $_POST);
+        Sessao::aviso('sucesso', 'Conteúdo salvo. A Academia e o catálogo já mostram a versão nova.');
+        redirecionar('/produtos/' . $p['slug'] . '?aba=conteudo');
+    }
+
+    public function salvarComposicao(string $slug): void
+    {
+        $p = $this->produto($slug);
+        PS::salvarComposicao($p, $_POST, Auth::id());
+        Sessao::aviso('sucesso', 'Composição salva.');
+        redirecionar('/produtos/' . $p['slug'] . '?aba=composicao');
+    }
+
+    /** Ficha técnica: a mesma da Produção. Recebe mp[] e qtd[]; $_POST['voltar'] = ficha | embalagens */
+    public function salvarFicha(string $slug): void
+    {
+        $p = $this->produto($slug);
+        $aba = ($_POST['voltar'] ?? '') === 'embalagens' ? 'embalagens' : 'ficha';
+        // A aba mostra só uma parte (matérias-primas OU embalagens): a outra parte é mantida como está
+        $manter = PS::fichaSeparada((int) $p['id'])[$aba === 'embalagens' ? 'materia_prima' : 'embalagem'];
+        $linhas = [];
+        foreach ($manter as $l) {
+            $linhas[(int) $l['materia_prima_id']] = (float) $l['quantidade'];
+        }
+        $qtds = (array) ($_POST['qtd'] ?? []);
+        foreach ((array) ($_POST['mp'] ?? []) as $i => $mp) {
+            if (ctype_digit((string) $mp) && isset($qtds[$i])) {
+                $linhas[(int) $mp] = ($linhas[(int) $mp] ?? 0) + ProducaoService::numero((string) $qtds[$i]);
+            }
+        }
+        try {
+            ProducaoService::salvarFicha((int) $p['id'], $linhas);
+            Sessao::aviso('sucesso', $aba === 'embalagens' ? 'Embalagens da ficha salvas.' : 'Ficha técnica salva. A Produção já usa a ficha nova.');
+        } catch (RuntimeException $e) {
+            Sessao::aviso('erro', $e->getMessage());
+        }
+        redirecionar('/produtos/' . $p['slug'] . '?aba=' . $aba);
+    }
+
+    /** Especificações (aba Embalagens) */
+    public function salvarTecnico(string $slug): void
+    {
+        $p = $this->produto($slug);
+        try {
+            PS::salvarTecnico((int) $p['id'], $_POST, Auth::id());
+            Sessao::aviso('sucesso', 'Especificações salvas.');
+        } catch (RuntimeException $e) {
+            $this->voltarComErros('/produtos/' . $p['slug'] . '?aba=embalagens', [$e->getMessage()]);
+        }
+        redirecionar('/produtos/' . $p['slug'] . '?aba=embalagens');
+    }
+
+    public function enviarDocumento(string $slug): void
+    {
+        $p = $this->produto($slug);
+        try {
+            PS::enviarDocumento((int) $p['id'], $_FILES['arquivo'] ?? [], $_POST, Auth::id());
+            Sessao::aviso('sucesso', 'Documento guardado.');
+        } catch (RuntimeException $e) {
+            $this->voltarComErros('/produtos/' . $p['slug'] . '?aba=documentos', [$e->getMessage()]);
+        }
+        redirecionar('/produtos/' . $p['slug'] . '?aba=documentos');
+    }
+
+    /** Download pelo sistema (o arquivo nunca fica na pasta pública) */
+    public function baixar(string $id): void
+    {
+        $doc = PS::documento((int) $id);
+        if (!$doc) {
+            http_response_code(404);
+            Sessao::aviso('erro', 'Documento não encontrado ou sem acesso.');
             redirecionar('/produtos');
         }
-        $linhas = \App\Services\LeitorPlanilha::ler($arquivo['tmp_name'], $ext);
-        $colCodigo = $colNome = null;
-        foreach (array_keys($linhas[0] ?? []) as $cab) {
-            $n = \App\Services\Normalizar::semAcento(mb_strtolower($cab));
-            if ($colCodigo === null && preg_match('/cod|sku|ref/', $n)) {
-                $colCodigo = $cab;
-            } elseif ($colNome === null && preg_match('/produto|nome|descri/', $n)) {
-                $colNome = $cab;
-            }
-        }
-        if ($colCodigo === null || $colNome === null) {
-            Sessao::aviso('erro', 'Não encontrei as colunas. A primeira linha da planilha precisa ter "Código" e "Produto".');
+        $extensao = pathinfo($doc['arquivo'], PATHINFO_EXTENSION);
+        $nome = preg_replace('/[^\w\- ]+/u', '', $doc['titulo']) ?: 'documento';
+        header('Content-Type: ' . $doc['mime']);
+        header('Content-Length: ' . filesize($doc['caminho']));
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: private, no-store');
+        // PDF e imagem abrem no navegador; ?baixar=1 força o download
+        $modo = isset($_GET['baixar']) ? 'attachment' : 'inline';
+        header("Content-Disposition: $modo; filename=\"" . str_replace('"', '', $nome) . ".$extensao\"; filename*=UTF-8''" . rawurlencode($nome . '.' . $extensao));
+        readfile($doc['caminho']);
+    }
+
+    public function arquivarDocumento(string $id): void
+    {
+        $doc = PS::arquivarDocumento((int) $id);
+        Sessao::aviso($doc ? 'sucesso' : 'erro', $doc ? 'Documento removido da lista (fica guardado no histórico).' : 'Documento não encontrado.');
+        redirecionar($doc ? '/produtos/' . $doc['slug'] . '?aba=documentos' : '/produtos');
+    }
+
+    private function produto(string $slug): array
+    {
+        $p = PS::porSlug($slug);
+        if (!$p) {
+            Sessao::aviso('erro', 'Produto não encontrado.');
             redirecionar('/produtos');
         }
-        // Liga cada linha a um produto pelo nome (sem acento, maiúsculas/minúsculas tanto faz)
-        $porNome = [];
-        foreach (Banco::todos('SELECT id, nome, codigo FROM produtos') as $p) {
-            $porNome[\App\Services\Normalizar::semAcento(mb_strtolower(trim($p['nome'])))] = $p;
-        }
-        $previa = ['ok' => [], 'sem_produto' => [], 'invalidos' => []];
-        $usados = [];
-        foreach ($linhas as $l) {
-            $codigo = self::codigoLimpo((string) ($l[$colCodigo] ?? ''));
-            $nome = trim((string) ($l[$colNome] ?? ''));
-            $produto = $porNome[\App\Services\Normalizar::semAcento(mb_strtolower($nome))] ?? null;
-            if (!$codigo || isset($usados[$codigo])) {
-                $previa['invalidos'][] = ['codigo' => (string) ($l[$colCodigo] ?? ''), 'nome' => $nome, 'motivo' => $codigo ? 'código repetido na planilha' : 'código vazio ou inválido'];
-            } elseif (!$produto) {
-                $previa['sem_produto'][] = ['codigo' => $codigo, 'nome' => $nome];
-            } else {
-                $usados[$codigo] = true;
-                $previa['ok'][] = ['id' => (int) $produto['id'], 'nome' => $produto['nome'], 'codigo' => $codigo, 'antes' => $produto['codigo']];
-            }
-        }
-        Sessao::set('codigos_previa', $previa);
-        redirecionar('/produtos#importar');
-    }
-
-    public function confirmarCodigos(): void
-    {
-        $previa = Sessao::get('codigos_previa');
-        Sessao::remover('codigos_previa');
-        if (!$previa || ($_POST['acao'] ?? '') !== 'aplicar') {
-            redirecionar('/produtos');
-        }
-        $n = 0;
-        Banco::transacao(function () use ($previa, &$n) {
-            foreach ($previa['ok'] as $l) {
-                // Libera o código se outro produto estava com ele (a planilha manda)
-                Banco::executar('UPDATE produtos SET codigo = NULL WHERE codigo = ? AND id <> ?', [$l['codigo'], $l['id']]);
-                $n += Banco::executar('UPDATE produtos SET codigo = ? WHERE id = ?', [$l['codigo'], $l['id']]);
-            }
-            Auditoria::registrar('produto', null, 'importar_codigos', null, ['quantidade' => count($previa['ok'])]);
-        });
-        Sessao::aviso('sucesso', "Códigos importados: $n produto(s) atualizado(s).");
-        redirecionar('/produtos');
-    }
-
-    public function salvar(string $id): void
-    {
-        $antes = Banco::um('SELECT id, codigo, chamada, ordem, visivel_catalogo FROM produtos WHERE id = ?', [(int) $id]);
-        if ($antes) {
-            $codigo = $this->campo('codigo') === '' ? null : self::codigoLimpo($this->campo('codigo'));
-            $volta = '/produtos' . ($this->campo('q') !== '' ? '?q=' . rawurlencode($this->campo('q')) : '') . '#produto-' . (int) $id;
-            if ($this->campo('codigo') !== '' && !$codigo) {
-                Sessao::aviso('erro', 'Código inválido: use letras, números e . - / _ (até 40 caracteres).');
-                redirecionar($volta);
-            }
-            if ($codigo && Banco::valor('SELECT nome FROM produtos WHERE codigo = ? AND id <> ?', [$codigo, (int) $id])) {
-                Sessao::aviso('erro', "O código $codigo já é de outro produto: " . Banco::valor('SELECT nome FROM produtos WHERE codigo = ?', [$codigo]) . '.');
-                redirecionar($volta);
-            }
-            $dados = ['codigo' => $codigo, 'visivel_catalogo' => isset($_POST['visivel_catalogo']) ? 1 : 0, 'ordem' => (int) $this->campo('ordem', (string) $antes['ordem']),
-                'chamada' => mb_substr($this->campo('chamada'), 0, 255) ?: null];
-            Banco::atualizar('produtos', (int) $id, $dados);
-            Auditoria::registrar('produto', (int) $id, 'editar', $antes, $dados);
-            Sessao::aviso('sucesso', 'Produto atualizado.');
-        }
-        redirecionar('/produtos' . ($this->campo('q') !== '' ? '?q=' . rawurlencode($this->campo('q')) : '') . '#produto-' . (int) $id);
-    }
-
-    public function sincronizar(): void
-    {
-        $precos = ErpSync::precos();
-        $estoque = ErpSync::estoque();
-        Sessao::aviso('sucesso', "Atualizado do ERP: $precos preço(s) e $estoque estoque(s).");
-        redirecionar('/produtos');
+        return $p;
     }
 }

@@ -33,7 +33,7 @@ class FichaTecnicaController extends Controller
         $this->tela('producao/ficha', [
             'titulo' => 'Ficha técnica · ' . $produto['nome'], 'produto' => $produto, 'linhas' => ProducaoService::ficha((int) $id),
             'materias' => Banco::todos('SELECT id, nome, unidade, custo_unitario FROM materias_primas WHERE ativo = 1 ORDER BY nome'),
-            'pode' => Auth::pode('producao.gerenciar'), 'estilos' => self::ESTILOS, 'scripts' => ['producao.js'],
+            'pode' => Auth::pode('produtos.tecnico'), 'podeOrdem' => Auth::pode('producao.gerenciar'), 'estilos' => self::ESTILOS, 'scripts' => ['producao.js'],
         ]);
     }
 

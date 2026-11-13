@@ -74,6 +74,10 @@ class PendenciasService
             $a = ProducaoService::alertas();
             $r['/producao'] = $a['mp_abaixo'] + $a['reabastecer'];
         }
+        // Produtos: documentos (laudos, registros...) vencidos ou vencendo — para quem cuida da parte técnica
+        if ($pode('produtos.tecnico') && Foco::tem('producao')) {
+            $r['/produtos'] = count(ProdutoService::documentosVencendo(99));
+        }
         // Terceirização: rótulos de clientes abaixo do mínimo ou que não dão para as ordens planejadas
         if (($pode('terceirizacao.ver') || $pode('terceirizacao.editar')) && Foco::tem('terceirizacao')) {
             $r['/terceirizacao'] = count(\App\Services\TerceirizacaoService::alertas());

@@ -9,7 +9,7 @@ $total = array_sum(array_map(fn($l) => (float) $l['custo'], $linhas));
 <div class="cabecalho-secao">
   <div><div class="sobretitulo"><a href="<?= url('/producao/fichas') ?>">FICHAS TÉCNICAS</a></div>
     <h1><?= e($produto['nome']) ?></h1><p>Quantidade de cada matéria-prima para fabricar <strong>1 unidade</strong><?= $produto['embalagem'] ? ' (' . e($produto['embalagem']) . ')' : '' ?>.</p></div>
-  <?php if ($linhas && $pode): ?><div class="acoes"><a class="botao" href="<?= url('/producao/ordens/nova?produto=' . (int) $produto['id']) ?>">Nova ordem deste produto</a></div><?php endif; ?>
+  <?php if ($linhas && !empty($podeOrdem)): ?><div class="acoes"><a class="botao" href="<?= url('/producao/ordens/nova?produto=' . (int) $produto['id']) ?>">Nova ordem deste produto</a></div><?php endif; ?>
 </div>
 <?= Visao::renderizar('producao/_abas', ['atual' => '/producao/fichas']) ?>
 

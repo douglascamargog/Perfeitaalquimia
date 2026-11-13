@@ -1,0 +1,93 @@
+/* =====================================================================
+   Produtos (equipe): cartões com selos e página do produto com abas.
+   Reaproveita os cartões da Academia (.grade-produtos, .cartao-produto).
+   ===================================================================== */
+.pd-situacoes { margin: 0 0 12px; }
+.pd-situacoes .chip.alerta { border-color: var(--aviso); color: var(--aviso); background: var(--aviso-fundo); }
+.pd-cartao { --cor-produto: var(--secundaria); }
+.pd-selos { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.pd-selo { font-size: .68rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--primaria-clara); color: var(--primaria-escura); }
+.pd-selo.ok { background: var(--sucesso-fundo); color: var(--sucesso); }
+.pd-selo.falta { background: var(--aviso-fundo); color: var(--aviso); }
+.pd-selo.cinza { background: #eef0f0; color: var(--texto-suave); }
+
+/* Capa da página do produto */
+.pd-capa { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 20px; align-items: center; background: var(--card);
+  border: 1px solid var(--borda); border-radius: var(--raio); padding: 18px 20px; margin: 8px 0 16px; box-shadow: var(--sombra); }
+.pd-capa h1 { margin: 2px 0 4px; font-size: 1.5rem; color: var(--primaria-escura); }
+.pd-foto { width: 150px; height: 150px; display: grid; place-items: center; border-radius: 14px; background: linear-gradient(180deg, var(--secundaria-clara), #fff); }
+.pd-foto img { max-width: 90%; max-height: 135px; object-fit: contain; mix-blend-mode: multiply; }
+.pd-foto b { font-size: 2rem; letter-spacing: .2em; color: var(--texto-suave); }
+.pd-sub { margin: 0; color: var(--texto-suave); font-size: .85rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pd-chamada { margin: 6px 0 0; }
+.pd-num { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; font-size: .7rem;
+  background: var(--primaria-clara); color: var(--primaria-escura); }
+.pd-aba { margin-top: 14px; }
+
+/* Grade principal + lateral */
+.pd-grade { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.pd-grade > div, .pd-grade > aside { display: grid; gap: 16px; }
+.pd-grade .card, .pd-aba > .card { margin: 0 0 16px; }
+.pd-grade > div > .card, .pd-grade > aside > .card { margin: 0; }
+.pd-dados { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px 16px; margin: 0; }
+aside .pd-dados { grid-template-columns: 1fr; }
+.pd-dados div { display: grid; gap: 1px; }
+.pd-dados dt { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); }
+.pd-dados dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.pd-atalhos { display: grid; gap: 8px; justify-items: start; }
+.pd-dica { font-size: .85rem; color: var(--texto-suave); margin: 0 0 12px; }
+.pd-titulo { font-size: 1.05rem; color: var(--primaria-escura); margin: 6px 0 10px; }
+.pd-baixo { color: var(--perigo); font-weight: 600; }
+
+/* Formulários das abas */
+.pd-form { display: grid; gap: 12px; }
+.pd-form label { display: grid; gap: 4px; font-weight: 600; font-size: .85rem; }
+.pd-form label small { font-weight: 400; color: var(--texto-suave); }
+.pd-form textarea, .pd-form input[type=text], .pd-form input[type=number], .pd-form input[type=date], .pd-form select { width: 100%; }
+.pd-form .caixa-marcar { display: flex; gap: 8px; align-items: center; font-weight: 500; }
+.pd-duas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.pd-tres { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.pd-nutri { border: 1px solid var(--borda); border-radius: var(--raio-pequeno); padding: 10px 12px; display: grid; gap: 10px; }
+.pd-nutri legend { font-weight: 700; font-size: .85rem; padding: 0 4px; }
+.pd-nutri td input { width: 100%; }
+.pd-nutri .pd-curto { max-width: 110px; }
+.pd-nutri > .botao { justify-self: start; }
+
+/* Documentos */
+.pd-docs { display: grid; gap: 10px; margin-bottom: 16px; }
+.pd-doc { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 14px; align-items: center; margin: 0; padding: 14px 16px; }
+.pd-doc.vencendo { border-left: 4px solid var(--aviso); }
+.pd-doc.vencido { border-left: 4px solid var(--perigo); }
+.pd-doc small { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); }
+.pd-doc strong { display: block; color: var(--primaria-escura); }
+.pd-doc p { margin: 2px 0 0; }
+.pd-doc-icone { width: 52px; height: 52px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; font-size: .75rem;
+  background: var(--primaria-clara); color: var(--primaria-escura); }
+.pd-doc-acoes { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.pd-doc-acoes form { margin: 0; }
+.pd-interno { color: var(--perigo); }
+.pd-vence { color: var(--perigo); }
+.botao.perigo { color: var(--perigo); border-color: var(--perigo); }
+
+/* Histórico */
+.pd-historico { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.pd-historico li { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--borda); }
+.pd-historico li:last-child { border-bottom: 0; }
+.pd-historico time { font-size: .8rem; color: var(--texto-suave); }
+.pd-historico p { margin: 2px 0 0; }
+
+@media (max-width: 900px) {
+  .pd-grade { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .pd-capa { grid-template-columns: 1fr; text-align: left; }
+  .pd-foto { width: 100%; height: 160px; }
+  .pd-duas { grid-template-columns: minmax(0, 1fr); }
+  .pd-doc { grid-template-columns: 44px minmax(0, 1fr); }
+  .pd-doc-icone { width: 44px; height: 44px; }
+  .pd-doc-acoes { grid-column: 1 / -1; justify-content: flex-start; }
+  .pd-historico li { grid-template-columns: 1fr; gap: 2px; }
+}
+@media print {
+  .abas, .pd-form .acoes-form, .pd-doc-acoes, .voltar-link { display: none !important; }
+}

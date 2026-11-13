@@ -23,7 +23,7 @@ async function sair(p) { await p.goto(BASE + '/'); await p.click('form[action$="
   ok(sql("select count(*) from produtos where codigo like 'PA-%'") === sql('select count(*) from produtos where cliente_exclusivo_id is null') && sql("select count(*) from produtos where cliente_exclusivo_id is not null and codigo not like 'EX-%'") === '0', 'demonstração: todos os produtos com código (PA- do catálogo, EX- das fórmulas exclusivas)');
   await entrar(p, 'marketing@demo.local');
   const prod = sql("select id from produtos where codigo='PA-1001'");
-  await p.goto(BASE + '/produtos?q=PA-1001');
+  await p.goto(BASE + '/produtos/catalogo?q=PA-1001');
   ok(await p.locator('tbody tr').count() === 1, 'tela Produtos busca pelo código');
   await p.fill(`#produto-${prod} input[name=codigo]`, 'pa-1002');
   await Promise.all([p.waitForNavigation(), p.click(`#produto-${prod} form button`)]);

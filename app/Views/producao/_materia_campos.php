@@ -13,6 +13,13 @@ $num = fn($valor) => rtrim(rtrim(number_format((float) $valor, 4, ',', ''), '0')
       <?php endforeach; ?>
     </select>
     <?php if ($m): ?><div class="ajuda">Não muda depois do primeiro movimento.</div><?php endif; ?></div>
+  <div class="campo"><label for="tipo">Tipo</label>
+    <select id="tipo" name="tipo">
+      <?php $tipo = $m['tipo'] ?? (string) \App\Core\Sessao::antigo('tipo', 'materia_prima'); ?>
+      <option value="materia_prima" <?= $tipo !== 'embalagem' ? 'selected' : '' ?>>Matéria-prima</option>
+      <option value="embalagem" <?= $tipo === 'embalagem' ? 'selected' : '' ?>>Embalagem (pote, tampa, rótulo, lacre...)</option>
+    </select>
+    <div class="ajuda">Embalagens aparecem na aba Embalagens do produto.</div></div>
   <div class="campo"><label for="estoque_minimo">Estoque mínimo</label>
     <input type="text" id="estoque_minimo" name="estoque_minimo" inputmode="decimal" value="<?= $m ? $num($m['estoque_minimo']) : antigo('estoque_minimo', '0') ?>"></div>
   <div class="campo"><label for="custo_unitario">Custo por unidade (R$)</label>

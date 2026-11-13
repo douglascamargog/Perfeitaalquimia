@@ -71,6 +71,12 @@ const aviso = async (p) => (await p.locator('.aviso').allInnerTexts()).join(' | 
 
   // ---------- 4. ficha técnica com 3 matérias-primas ----------
   const prod = sql("select id from produtos p where ativo=1 and not exists (select 1 from ficha_tecnica f where f.produto_id=p.id) order by id limit 1");
+  // A Produção só LÊ a ficha técnica: quem edita é a Responsável Técnica
+  await p.goto(BASE + `/producao/fichas/${prod}`);
+  ok(await p.locator('[data-acrescentar]').count() === 0, 'Produção vê a ficha técnica sem poder editar');
+  await sair(p);
+  await entrar(p, 'tecnica@demo.local');
+  if (await p.locator('[data-novidades-ok]').count()) await p.click('[data-novidades-ok]');
   await p.goto(BASE + `/producao/fichas/${prod}`);
   for (const [mp, q] of [[a, '0,03'], [bId, '60'], [cId, '1']]) {
     await p.click('[data-acrescentar]');
@@ -83,6 +89,8 @@ const aviso = async (p) => (await p.locator('.aviso').allInnerTexts()).join(' | 
   ok(sql(`select count(*) from ficha_tecnica where produto_id=${prod}`) === '3', 'ficha salva com 3 matérias-primas');
   ok(Math.abs(Number(sql(`select sum(ft.quantidade*m.custo_unitario) from ficha_tecnica ft join materias_primas m on m.id=ft.materia_prima_id where produto_id=${prod}`)) - custoEsperado) < 0.0001, 'custo por unidade correto no banco');
   ok(Number(sql(`select count(*) from auditoria where entidade='ficha_tecnica' and entidade_id=${prod}`)) >= 1, 'auditoria da ficha');
+  await sair(p);
+  await entrar(p, 'producao@demo.local');
 
   // ---------- 5. ordem com estoque insuficiente ----------
   await p.goto(BASE + `/producao/ordens/nova?produto=${prod}`);

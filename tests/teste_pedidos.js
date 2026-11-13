@@ -187,7 +187,7 @@ async function qtd(p, produtoId, n) { await p.request.post(BASE + '/catalogo/car
 
   // ---------- Produtos (Marketing) e permissões ----------
   await entrarEquipe(p, 'marketing@demo.local');
-  await p.goto(BASE + '/produtos');
+  await p.goto(BASE + '/produtos/catalogo');
   ok(await p.locator('tbody tr').count() >= 150, 'Produtos lista os itens com preços das 3 tabelas');
   const linhaMg = p.locator('tr', { hasText: '8+ Magnésio' }).first();
   await linhaMg.locator('input[name=visivel_catalogo]').uncheck();
@@ -197,7 +197,7 @@ async function qtd(p, produtoId, n) { await p.request.post(BASE + '/catalogo/car
   sql("update produtos set visivel_catalogo=1 where slug='magnesio'");
   await sairEquipe(p);
   await entrarEquipe(p, 'producao@demo.local');
-  for (const u of ['/pedidos', '/aprovacao', '/produtos']) ok((await p.goto(BASE + u)).status() === 403, `Produção recebe 403 em ${u}`);
+  for (const u of ['/pedidos', '/aprovacao']) ok((await p.goto(BASE + u)).status() === 403, `Produção recebe 403 em ${u}`);
   await sairEquipe(p);
 
   ok(erros.length === 0, 'sem erros de JavaScript ' + erros.join(' | '));

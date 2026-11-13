@@ -117,6 +117,7 @@ class ProducaoService
             'nome'           => mb_substr(trim((string) ($d['nome'] ?? '')), 0, 160),
             'codigo'         => mb_substr(trim((string) ($d['codigo'] ?? '')), 0, 40) ?: null,
             'unidade'        => (string) ($d['unidade'] ?? ''),
+            'tipo'           => ($d['tipo'] ?? '') === 'embalagem' ? 'embalagem' : 'materia_prima', // embalagem: pote, tampa, rótulo, lacre...
             'estoque_minimo' => max(0, self::numero((string) ($d['estoque_minimo'] ?? '0'))),
             'fornecedor'     => mb_substr(trim((string) ($d['fornecedor'] ?? '')), 0, 160) ?: null,
             'custo_unitario' => max(0, self::numero((string) ($d['custo_unitario'] ?? '0'))),

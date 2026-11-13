@@ -67,6 +67,11 @@ class OneAssistente
         if (Auth::pode('producao.gerenciar') && Foco::tem('producao')) {
             $falas = array_merge($falas, self::producao());
         }
+        // Produtos: documentos vencidos ou vencendo (Responsável Técnica)
+        if (Auth::pode('produtos.tecnico') && Foco::tem('producao') && ($docs = ProdutoService::documentosVencendo(99))) {
+            $falas[] = ['humor' => 'ops', 'texto' => count($docs) . ' documento(s) de produto vencido(s) ou vencendo (o primeiro: ' . $docs[0]['titulo'] . ' — ' . $docs[0]['produto'] . ', ' . data_br($docs[0]['validade']) . ').',
+                'link' => '/produtos?situacao=vencendo', 'acao' => 'Ver documentos'];
+        }
         // Terceirização: rótulos de clientes que não dão para produzir
         if ((Auth::pode('terceirizacao.ver') || Auth::pode('terceirizacao.editar')) && Foco::tem('terceirizacao')
             && ($rot = \App\Services\TerceirizacaoService::alertas())) {
