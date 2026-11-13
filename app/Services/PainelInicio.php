@@ -22,30 +22,30 @@ class PainelInicio
     {
         $id = (int) Auth::id();
         $mes = date('Y-m');
-        // Admin (sócios e diretor) tem todas as permissões, mas não trabalha carteira nem tem meta individual:
-        // vê um Início de diretoria (números da empresa), sem os cartões do dia a dia do vendedor.
-        $admin = (Auth::usuario()['perfil_slug'] ?? '') === 'admin';
-        $pode = fn(string $permissao) => !$admin && Auth::pode($permissao);
-        $temCarteira = $pode('carteira.ver_propria') || $pode('carteira.ver_todas');
+        // Cada cartão aparece só se a pessoa ACOMPANHA a área (foco: funções ou Meu perfil) E TEM ACESSO a ela.
+        // Ex.: admin que é do Marketing vê os cartões de Marketing, mesmo podendo abrir tudo.
+        $ve = fn(string $permissao, string ...$areas) => Auth::pode($permissao) && Foco::tem(...$areas);
+        $temCarteira = $ve('carteira.ver_propria', 'comercial') || $ve('carteira.ver_todas', 'comercial');
+        $soDiretoria = !Foco::tem('comercial'); // resumo da empresa, sem a meta da equipe
 
         return [
-            'admin'        => $admin,
+            'focos'        => Foco::areasDe($id),
             'aniversariantes' => EquipeService::aniversariantes(),
-            'aprovacao'    => $admin ? Banco::um("SELECT COUNT(*) AS qtd, COALESCE(SUM(total), 0) AS valor FROM pedidos WHERE situacao = 'aguardando_aprovacao'") : null,
+            'aprovacao'    => $ve('pedidos.aprovar', 'aprovacao', 'diretoria') ? Banco::um("SELECT COUNT(*) AS qtd, COALESCE(SUM(total), 0) AS valor FROM pedidos WHERE situacao = 'aguardando_aprovacao'") : null,
             'data_extenso' => self::DIAS[(int) date('w')] . ', ' . (int) date('d') . ' de ' . self::MESES[(int) date('n') - 1],
             'clima'        => self::clima(),
             'agenda'       => $temCarteira ? Tarefa::agenda($id) : null,
-            'meta'         => $pode('meu_mes.usar') ? self::meta($id, $mes) : null,
-            'equipe'       => $pode('meu_mes.usar') || $pode('metas.gerenciar') ? MetaService::equipe($mes) : null,
+            'meta'         => $ve('meu_mes.usar', 'comercial') ? self::meta($id, $mes) : null,
+            'equipe'       => $ve('meu_mes.usar', 'comercial') || $ve('metas.gerenciar', 'comercial') ? MetaService::equipe($mes) : null,
             'carteira'     => $temCarteira ? self::carteira() : null,
             'funil'        => $temCarteira ? self::funil() : null,
-            'prospeccao'   => Auth::pode('prospeccao.usar') ? self::prospeccao() : null,
-            'cobranca'     => Auth::pode('cobranca.ver') ? Cobranca::resumo() : null,
-            'marketing'    => $pode('marketing.ver') ? self::marketing() : null,
-            'vendas'       => Auth::pode('painel.ver') ? self::vendas($mes, $admin) : null,
-            'recompra'     => $pode('recompra.ver') ? VendasService::qtdRecompra() : null,
-            'producao'     => Auth::pode('producao.gerenciar') || Auth::pode('producao.ver') ? ProducaoService::alertas() : null,
-            'ecommerce'    => Auth::pode('ecommerce.ver') && Banco::valor('SELECT 1 FROM ecommerce_resumo_diario LIMIT 1') ? EcommerceService::painel(date('Y-m')) : null,
+            'prospeccao'   => $ve('prospeccao.usar', 'comercial') ? self::prospeccao() : null,
+            'cobranca'     => $ve('cobranca.ver', 'cobranca', 'diretoria') ? Cobranca::resumo() : null,
+            'marketing'    => $ve('marketing.ver', 'marketing') ? self::marketing() : null,
+            'vendas'       => $ve('painel.ver', 'comercial', 'diretoria') ? self::vendas($mes, $soDiretoria) : null,
+            'recompra'     => $ve('recompra.ver', 'comercial') ? VendasService::qtdRecompra() : null,
+            'producao'     => ($ve('producao.gerenciar', 'producao', 'diretoria') || $ve('producao.ver', 'producao', 'diretoria')) ? ProducaoService::alertas() : null,
+            'ecommerce'    => $ve('ecommerce.ver', 'marketing', 'diretoria') && Banco::valor('SELECT 1 FROM ecommerce_resumo_diario LIMIT 1') ? EcommerceService::painel(date('Y-m')) : null,
         ];
     }
 

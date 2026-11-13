@@ -30,7 +30,18 @@ if ($p['carteira']) {
 $maxSemana = max(1, ...array_column($semana ?: [['total' => 1]], 'total'));
 
 // Atalhos do topo (conforme o perfil; a diretoria tem os seus)
-$atalhos = $p['admin'] ? [['Painel de vendas', '/painel', 'grafico'], ['Aprovação', '/aprovacao', 'check'], ['Usuários', '/usuarios', 'usuario']] : array_filter([
+$focos = $p['focos'];
+$atalhosFoco = [ // atalhos da área principal da pessoa (quando não é do comercial)
+    'marketing' => [['Mural de posts', '/marketing', 'calendario', 'marketing.ver'], ['Planejamento', '/marketing/planejamento', 'alvo', 'marketing.ver'], ['Leads do site', '/leads', 'pessoas', 'leads.ver']],
+    'producao'  => [['Produção', '/producao', 'fabrica', 'producao.ver'], ['Ordens de produção', '/producao/ordens', 'check', 'producao.ver'], ['Matérias-primas', '/producao/materias', 'caixa', 'producao.ver']],
+    'aprovacao' => [['Aprovação', '/aprovacao', 'check', 'pedidos.aprovar'], ['Pedidos', '/pedidos', 'carrinho', 'pedidos.ver_todos'], ['Cobrança', '/cobranca', 'alerta', 'cobranca.ver']],
+    'cobranca'  => [['Cobrança', '/cobranca', 'alerta', 'cobranca.ver'], ['Aprovação', '/aprovacao', 'check', 'pedidos.aprovar'], ['Pedidos', '/pedidos', 'carrinho', 'pedidos.ver_todos']],
+    'diretoria' => [['Painel de vendas', '/painel', 'grafico', 'painel.ver'], ['Aprovação', '/aprovacao', 'check', 'pedidos.aprovar'], ['Usuários', '/usuarios', 'usuario', 'usuarios.gerenciar']],
+];
+$principal = in_array('comercial', $focos, true) ? null : ($focos[0] ?? null);
+$atalhos = $principal && isset($atalhosFoco[$principal])
+    ? array_values(array_map(fn($a) => array_slice($a, 0, 3), array_filter($atalhosFoco[$principal], fn($a) => Auth::pode($a[3]))))
+    : array_filter([
     Auth::pode('carteira.ver_propria') || Auth::pode('carteira.ver_todas') ? ['Novo estabelecimento', '/carteira/clientes/novo', 'mais'] : null,
     Auth::pode('meu_mes.usar') ? ['Registrar venda', '/meu-mes', 'grafico'] : null,
     Auth::pode('cobranca.ver') ? ['Cobrança', '/cobranca', 'alerta'] : null,

@@ -35,41 +35,42 @@ class PendenciasService
     private static function calcular(): array
     {
         $id = (int) Auth::id();
-        $admin = (Auth::usuario()['perfil_slug'] ?? '') === 'admin';
+        // Número no menu só da área que a pessoa ACOMPANHA (foco) e à qual TEM ACESSO
         $pode = fn(string $p) => Auth::pode($p);
-        $carteira = !$admin && ($pode('carteira.ver_propria') || $pode('carteira.ver_todas'));
+        $comercial = Foco::tem('comercial');
+        $carteira = $comercial && ($pode('carteira.ver_propria') || $pode('carteira.ver_todas'));
         $r = [];
 
-        if ($pode('pedidos.aprovar')) {
+        if ($pode('pedidos.aprovar') && Foco::tem('aprovacao', 'diretoria')) {
             $r['/aprovacao'] = (int) Banco::valor("SELECT COUNT(*) FROM pedidos WHERE situacao = 'aguardando_aprovacao'");
         }
         if ($carteira) {
             $r['/agenda'] = (int) Banco::valor('SELECT COUNT(*) FROM tarefas t LEFT JOIN clientes c ON c.id = t.cliente_id
                 WHERE t.concluida_em IS NULL AND t.usuario_id = ? AND t.vence_em <= CURDATE() AND (t.cliente_id IS NULL OR c.excluido_em IS NULL)', [$id]);
         }
-        if (!$admin && $pode('pedidos.criar')) {
+        if ($comercial && $pode('pedidos.criar')) {
             // Meus pedidos recusados com aviso ainda não lido
             $r['/pedidos'] = (int) Banco::valor("SELECT COUNT(*) FROM notificacoes WHERE usuario_id = ? AND tipo = 'pedido_recusado' AND lida_em IS NULL", [$id]);
         }
-        if ($pode('cobranca.ver')) {
+        if ($pode('cobranca.ver') && Foco::tem('cobranca')) {
             $r['/cobranca'] = (int) Banco::valor("SELECT COUNT(*) FROM cobrancas cb LEFT JOIN cobranca_etapas e ON e.id = cb.etapa_id
                 WHERE cb.situacao = 'aberta' AND (cb.promessa_em = CURDATE() OR e.tipo = 'sem_contato')");
         }
-        if (!$admin && $pode('recompra.ver')) {
+        if ($comercial && $pode('recompra.ver')) {
             $r['/recompra'] = VendasService::qtdRecompra();
         }
-        if (!$admin && $pode('prospeccao.usar')) {
+        if ($comercial && $pode('prospeccao.usar')) {
             [$where, $par] = Cliente::montarWhere(Cliente::filtrosDe(['tipo' => 'lead']));
             $r['/prospeccao'] = (int) Banco::valor("SELECT COUNT(*) FROM clientes c WHERE $where AND c.contatado = 0 AND c.criado_em >= NOW() - INTERVAL 48 HOUR", $par);
         }
-        if ($pode('leads.ver')) {
+        if ($pode('leads.ver') && Foco::tem('marketing')) {
             $r['/leads'] = (int) Banco::valor("SELECT COUNT(*) FROM leads_recebidos WHERE resultado = 'criado' AND criado_em >= CURDATE()");
         }
-        if ($pode('marketing.aprovar') || $pode('marketing.editar')) {
-            $tipo = $pode('marketing.aprovar') && !$admin ? 'aprovacao' : 'ajuste';
+        if (($pode('marketing.aprovar') || $pode('marketing.editar')) && Foco::tem('marketing')) {
+            $tipo = $pode('marketing.aprovar') ? 'aprovacao' : 'ajuste';
             $r['/marketing'] = (int) Banco::valor('SELECT COUNT(*) FROM mkt_posts p JOIN mkt_post_etapas e ON e.id = p.etapa_id WHERE e.tipo = ?', [$tipo]);
         }
-        if ($pode('producao.gerenciar') && !$admin) {
+        if ($pode('producao.gerenciar') && Foco::tem('producao')) {
             $a = ProducaoService::alertas();
             $r['/producao'] = $a['mp_abaixo'] + $a['reabastecer'];
         }

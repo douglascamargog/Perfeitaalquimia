@@ -28,6 +28,7 @@ class FuncaoController extends Controller
             'slug'      => Funcao::gerarSlug($nome),
             'descricao' => $this->campo('descricao') ?: null,
             'ordem'     => (int) Banco::valor('SELECT COALESCE(MAX(ordem), 0) + 1 FROM funcoes'),
+            'areas_foco' => 'comercial',
         ];
         $id = Banco::inserir('funcoes', $dados);
         Auditoria::registrar('funcao', $id, 'criar', null, $dados);
@@ -45,6 +46,8 @@ class FuncaoController extends Controller
             'nome'      => $this->campo('nome') ?: $antes['nome'],
             'descricao' => $this->campo('descricao') ?: null,
             'ativa'     => isset($_POST['ativa']) ? 1 : 0,
+            // Áreas que a função acompanha (Início, One, sino e números do menu)
+            'areas_foco' => implode(',', \App\Services\Foco::lista(implode(',', (array) ($_POST['areas'] ?? [])))),
         ];
         Banco::atualizar('funcoes', (int) $id, $dados);
         Auditoria::registrar('funcao', (int) $id, 'editar', $antes, $dados);

@@ -41,11 +41,20 @@ class NotificacaoService
         return $n;
     }
 
-    /** Pessoas ativas cujo perfil tem a permissão (o admin não entra: ele vê tudo pelo Início e pelo menu) */
-    public static function comPermissao(string $permissao): array
+    /**
+     * Pessoas ativas que TÊM a permissão (perfil + exceções; o Admin tem todas) E ACOMPANHAM a área (foco).
+     * Ex.: "pedido para aprovar" vai para quem aprova pedidos e acompanha Aprovação — não para o admin do Marketing.
+     */
+    public static function destinatarios(string $permissao, string ...$areas): array
     {
-        return array_map('intval', array_column(Banco::todos('SELECT u.id FROM usuarios u JOIN perfil_permissoes pp ON pp.perfil_id = u.perfil_id
-            WHERE u.ativo = 1 AND pp.permissao = ?', [$permissao]), 'id'));
+        $ids = [];
+        foreach (Banco::todos('SELECT id, perfil_id FROM usuarios WHERE ativo = 1') as $u) {
+            $perms = \App\Models\Usuario::permissoes((int) $u['perfil_id'], (int) $u['id']);
+            if ((in_array('*', $perms, true) || in_array($permissao, $perms, true)) && array_intersect($areas, Foco::areasDe((int) $u['id']))) {
+                $ids[] = (int) $u['id'];
+            }
+        }
+        return $ids;
     }
 
     private static function nomeCliente(int $clienteId): string
@@ -71,7 +80,7 @@ class NotificacaoService
         }
         $loja = self::nomeCliente((int) $p['cliente_id']);
         $extra = ['pedido_id' => $pedidoId, 'cliente_id' => (int) $p['cliente_id']];
-        self::avisar(self::comPermissao('pedidos.aprovar'), 'pedido_aprovar', "Novo pedido #$pedidoId para aprovar", '/aprovacao',
+        self::avisar(self::destinatarios('pedidos.aprovar', 'aprovacao'), 'pedido_aprovar', "Novo pedido #$pedidoId para aprovar", '/aprovacao',
             $extra + ['texto' => $loja . ' · ' . dinheiro((float) $p['total'])], $quemFez);
         if ($p['origem'] === 'catalogo' && $p['vendedor_id']) {
             self::avisar([(int) $p['vendedor_id']], 'pedido_catalogo', "$loja fez um pedido pelo catálogo", '/pedidos/' . $pedidoId,
@@ -137,7 +146,7 @@ class NotificacaoService
     /** Post do mural: foi para aprovação → quem aprova; pediram ajuste → quem criou */
     public static function postParaAprovar(array $post, ?int $quemFez): void
     {
-        self::avisar(self::comPermissao('marketing.aprovar'), 'post_aprovar', 'Post para aprovar: ' . $post['titulo'], '/marketing?post=' . (int) $post['id'], [], $quemFez);
+        self::avisar(self::destinatarios('marketing.aprovar', 'marketing'), 'post_aprovar', 'Post para aprovar: ' . $post['titulo'], '/marketing?post=' . (int) $post['id'], [], $quemFez);
     }
 
     public static function postAjuste(array $post, string $motivo, ?int $quemFez): void

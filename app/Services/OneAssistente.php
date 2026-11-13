@@ -36,45 +36,45 @@ class OneAssistente
         $falas = [];
         $id = (int) Auth::id();
         $falas[] = self::aniversario($id);
-        // A diretoria (admin) não trabalha carteira, metas individuais nem posts: recebe só os avisos da empresa
-        $admin = (Auth::usuario()['perfil_slug'] ?? '') === 'admin';
+        // Cada dica aparece só para quem ACOMPANHA a área (foco: funções ou Meu perfil) E TEM ACESSO a ela
+        $comercial = Foco::tem('comercial');
 
-        if (!$admin && (Auth::pode('carteira.ver_propria') || Auth::pode('carteira.ver_todas'))) {
+        if ($comercial && (Auth::pode('carteira.ver_propria') || Auth::pode('carteira.ver_todas'))) {
             $falas[] = self::tarefas($id);
             $falas[] = self::recompra();
             $falas[] = self::prospeccao();
             $semRetorno = LeadService::semRetorno($id);
             $falas[] = $semRetorno ? ['humor' => 'ops', 'texto' => "$semRetorno lead(s) do site ou de anúncio esperando seu retorno. Quem responde no mesmo dia vende mais!", 'link' => '/agenda', 'acao' => 'Ver retornos'] : null;
         }
-        if (Auth::pode('pedidos.aprovar')) {
+        if (Auth::pode('pedidos.aprovar') && Foco::tem('aprovacao', 'diretoria')) {
             $qtd = (int) Banco::valor("SELECT COUNT(*) FROM pedidos WHERE situacao = 'aguardando_aprovacao'");
             $falas[] = $qtd ? ['humor' => 'ideia', 'texto' => "$qtd pedido(s) aguardam a sua aprovação. O cliente está esperando!", 'link' => '/aprovacao', 'acao' => 'Aprovar pedidos'] : null;
         }
-        if (Auth::pode('cobranca.ver')) {
+        if (Auth::pode('cobranca.ver') && Foco::tem('cobranca')) {
             $falas[] = self::promessasHoje();
             $falas[] = self::semContato();
         }
-        if (!$admin && Auth::pode('marketing.aprovar')) {
+        if (Auth::pode('marketing.aprovar') && Foco::tem('marketing')) {
             $falas[] = self::postsParaAprovar();
         }
-        if (!$admin && Auth::pode('leads.ver') && !Auth::pode('carteira.ver_todas')) {
+        if (Auth::pode('leads.ver') && Foco::tem('marketing')) {
             $semana = (int) Banco::valor("SELECT COUNT(*) FROM leads_recebidos WHERE resultado IN ('criado', 'existente') AND criado_em >= CURDATE() - INTERVAL 6 DAY");
             $falas[] = $semana ? ['humor' => 'feliz', 'texto' => "$semana lead(s) chegaram pelo site e pelos anúncios nos últimos 7 dias. Veja quais campanhas convertem mais.", 'link' => '/leads', 'acao' => 'Leads do site'] : null;
         }
-        if (!$admin && Auth::pode('marketing.editar')) {
+        if (Auth::pode('marketing.editar') && Foco::tem('marketing')) {
             $falas[] = self::semanaQueVem();
         }
-        if (Auth::pode('producao.gerenciar') && !$admin) {
+        if (Auth::pode('producao.gerenciar') && Foco::tem('producao')) {
             $falas = array_merge($falas, self::producao());
         }
-        if (!$admin && Auth::pode('meu_mes.usar')) {
+        if ($comercial && Auth::pode('meu_mes.usar')) {
             $falas[] = self::metaIndividual($id);
             $falas[] = self::metaEquipe();
         }
-        if (!$admin && Auth::pode('academia.ver')) {
+        if ($comercial && Auth::pode('academia.ver')) {
             $falas[] = self::academia($id);
         }
-        if (Auth::pode('usuarios.gerenciar')) {
+        if (Auth::pode('usuarios.gerenciar') && Foco::tem('diretoria')) {
             $falas[] = ['humor' => 'piscando', 'texto' => 'Gente nova na equipe? Crie o login em Usuários e marque a função da pessoa: as filas e regras seguem a função.', 'link' => '/usuarios', 'acao' => 'Usuários'];
         }
 
