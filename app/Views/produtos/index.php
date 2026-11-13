@@ -47,9 +47,9 @@ $icones = asset('img/icones.svg');
   </form><?php endif; ?>
 </div>
 <section class="card sem-espaco">
-  <div class="tabela-rolagem">
-    <table class="tabela">
-      <thead><tr><th>Produto</th><?php foreach ($tabelas as $t): ?><th class="direita"><?= e($t['nome']) ?></th><?php endforeach; ?><th class="direita">Estoque</th><th>Catálogo</th><th>Chamada e ordem</th></tr></thead>
+  <div class="tabela-rolagem tabela-tela">
+    <table class="tabela prod-tabela">
+      <thead><tr><th>Código</th><th>Produto</th><?php foreach ($tabelas as $t): ?><th class="direita"><?= e($t['nome']) ?></th><?php endforeach; ?><th class="direita">Estoque</th><th>Catálogo</th><th>Chamada e ordem</th></tr></thead>
       <tbody>
       <?php foreach ($produtos as $p): $form = 'prod-' . (int) $p['id']; ?>
         <tr id="produto-<?= (int) $p['id'] ?>" class="<?= $p['visivel_catalogo'] ? '' : 'inativo' ?>">

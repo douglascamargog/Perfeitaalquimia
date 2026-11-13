@@ -17,6 +17,13 @@
  */
 return [
     [
+        'versao' => '2.4', 'data' => '2026-11-13', 'titulo' => 'Pedido no app e tabela de produtos',
+        'correcao' => [
+            'App do externo: a parte do pagamento não fica mais na frente dos produtos. Uma barra fina mostra o total e o botão "Pagamento" leva até as formas de pagamento.',
+            'Produtos: os títulos das colunas estavam desalinhados e o botão Salvar ficava cortado. A tabela agora cabe na tela e os títulos ficam parados no alto ao rolar.',
+        ],
+    ],
+    [
         'versao' => '2.3', 'data' => '2026-11-13', 'titulo' => 'Meu perfil',
         'novo' => [
             'Em Meu perfil você pode mudar o seu nome, além da foto, do aniversário e dos contatos.',

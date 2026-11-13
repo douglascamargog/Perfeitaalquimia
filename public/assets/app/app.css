@@ -43,8 +43,15 @@ body.ap { background: var(--fundo); min-height: 100vh; padding-bottom: calc(70px
 .ap-qtd button { height: 40px; border-radius: 10px; border: 1px solid var(--borda); background: #f3f6f0; font-size: 1.2rem; font-weight: 700; color: var(--verde-escuro); }
 .ap-qtd button[data-mais] { background: var(--lima); border-color: var(--lima); }
 .ap-qtd input { height: 40px; text-align: center; padding: 0; min-width: 0; font-weight: 700; font-size: 1rem; }
-.ap-resumo { position: sticky; bottom: calc(60px + env(safe-area-inset-bottom)); margin-top: 12px; background: #fff; border: 1px solid var(--borda); border-radius: 18px; padding: 12px;
-  display: grid; gap: 8px; box-shadow: 0 -8px 24px rgba(20, 32, 23, .08); max-height: 60vh; overflow-y: auto; }
+.ap-barra { position: sticky; bottom: calc(60px + env(safe-area-inset-bottom)); z-index: 5; margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--verde-escuro); color: #fff; border-radius: 16px; padding: 10px 12px 10px 16px; box-shadow: 0 -6px 20px rgba(20, 32, 23, .12); }
+.ap-barra strong { display: block; font-size: 1.15rem; }
+.ap-barra small { font-size: .78rem; opacity: .9; }
+.ap-barra small.falta { color: #ffd59a; }
+.ap-barra .botao { white-space: nowrap; }
+.ap-resumo { margin-top: 12px; margin-bottom: 16px; background: #fff; border: 1px solid var(--borda); border-radius: 18px; padding: 12px;
+  display: grid; gap: 8px; scroll-margin-top: 70px; }
+.ap-resumo-titulo { margin: 0; font-size: 1.05rem; }
 .ap-total { display: flex; justify-content: space-between; align-items: baseline; }
 .ap-total strong { font-size: 1.4rem; color: var(--verde-escuro); }
 .ap-minimo { border-radius: 10px; padding: 8px 10px; font-size: .84rem; font-weight: 600; }

@@ -115,7 +115,15 @@ function telaPedido() {
           <div class="ap-qtd" data-produto="${p.id}"><button type="button" data-menos aria-label="Menos">−</button><input type="number" inputmode="numeric" min="0" value="${q || ''}" placeholder="0" aria-label="Quantidade de ${esc(p.nome)}"><button type="button" data-mais aria-label="Mais">+</button></div>
         </li>`; }).join('')}
     </ul>
-    <section class="ap-resumo" data-resumo>${resumoHtml({ c, subtotal, qtd, minimo, falta })}</section>`;
+    <div class="ap-barra" data-barra>${barraHtml({ subtotal, qtd, minimo, falta })}</div>
+    <section class="ap-resumo" id="ap-pagamento" data-resumo>${resumoHtml({ c, subtotal, qtd, minimo, falta })}</section>`;
+}
+
+// Barra fina que acompanha a rolagem (total + mínimo): não cobre os produtos.
+// O pagamento fica numa seção própria, depois da lista (o botão "Pagamento" leva até ela).
+function barraHtml({ subtotal, qtd, minimo, falta }) {
+  return `<div><strong>${real(subtotal)}</strong><small class="${falta > 0 ? 'falta' : 'ok'}">${qtd} item(ns) · ${falta > 0 ? `faltam ${real(falta)} p/ o mínimo` : 'mínimo atingido ✓'}</small></div>
+    <button type="button" class="botao lima" data-ir-pagamento ${!qtd ? 'disabled' : ''}>Pagamento ↓</button>`;
 }
 
 function resumoHtml({ c, subtotal, qtd, minimo, falta }) {
@@ -130,6 +138,7 @@ function resumoHtml({ c, subtotal, qtd, minimo, falta }) {
       }).join('')}</fieldset>`;
   }).join('');
   return `
+    <h2 class="ap-resumo-titulo">Pagamento</h2>
     <div class="ap-total"><span>${qtd} item(ns)</span><strong>${real(subtotal)}</strong></div>
     <div class="ap-minimo ${falta > 0 ? 'falta' : 'ok'}">${falta > 0 ? `Faltam ${real(falta)} para o mínimo (${real(minimo)})` : 'Pedido mínimo atingido ✓'}</div>
     ${opcoes}
@@ -278,6 +287,10 @@ document.addEventListener('click', async (e) => {
     input.dispatchEvent(new Event('input', { bubbles: true }));
     return;
   }
+  if (alvo.matches('[data-ir-pagamento]')) {
+    document.getElementById('ap-pagamento')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
   if (alvo.matches('[data-salvar]')) {
     const t = totais();
     if (!rascunho.pagamento) { toast('Escolha a forma de pagamento.', 'erro'); return; }
@@ -315,6 +328,7 @@ document.addEventListener('input', (e) => {
     rascunho.itens[caixa.dataset.produto] = Math.max(0, Math.min(9999, Number(e.target.value) || 0));
     caixa.closest('li').classList.toggle('escolhido', rascunho.itens[caixa.dataset.produto] > 0);
     tela.querySelector('[data-resumo]').innerHTML = resumoHtml(totais());
+    tela.querySelector('[data-barra]').innerHTML = barraHtml(totais());
     return;
   }
   if (e.target.matches('[data-obs]') && rascunho) rascunho.observacoes = e.target.value;
