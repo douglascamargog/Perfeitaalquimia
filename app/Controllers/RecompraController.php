@@ -20,13 +20,10 @@ class RecompraController extends Controller
     {
         $vendedor = Auth::pode('carteira.ver_todas') && ctype_digit((string) ($_GET['vendedor'] ?? '')) ? (int) $_GET['vendedor'] : null;
         $clientes = VendasService::recompra($vendedor);
-        $base = (isset($_SERVER['HTTP_HOST']) ? 'https://' . $_SERVER['HTTP_HOST'] : '') . url('/catalogo');
-        $codigo = \App\Core\Banco::valor('SELECT codigo_vendedor FROM usuarios WHERE id = ?', [Auth::id()]);
+        // Texto do WhatsApp: o primeiro modelo da categoria Recompra em Conteúdo › Mensagens prontas
         foreach ($clientes as &$c) {
-            $c['mensagem'] = strtr((string) Config::get('recompra.mensagem', ''), [
-                '{nome}' => $c['nome_fantasia'] ?: $c['razao_social'], '{dias}' => (string) $c['dias_desde'],
-                '{link_catalogo}' => $codigo ? "$base/v/$codigo" : $base,
-            ]);
+            $modelos = \App\Services\MensagemService::daCategoria('Recompra', \App\Services\MensagemService::variaveis($c, Auth::usuario()));
+            $c['mensagem'] = (string) (reset($modelos) ?: '');
         }
         $this->tela('recompra/index', [
             'titulo' => 'Recompra', 'clientes' => $clientes, 'vendedor' => $vendedor,

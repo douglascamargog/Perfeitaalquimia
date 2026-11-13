@@ -17,6 +17,8 @@ class MensagemService
         '{vendedor}' => 'Seu primeiro nome', '{link_vendedor}' => 'Seu link do catálogo (pedidos ficam com você)',
         '{link_catalogo}' => 'Link geral do catálogo', '{empresa}' => 'Nome da nossa empresa',
         '{dias_sem_compra}' => 'Dias desde a última compra', '{ultima_compra}' => 'Data da última compra',
+        '{valor}' => 'Cobrança: valor em atraso', '{vencimento}' => 'Cobrança: vencimento mais antigo',
+        '{dias_atraso}' => 'Cobrança: dias de atraso', '{link_pix}' => 'Cobrança: link ou chave Pix (Configurações)',
     ];
 
     public static function categorias(): array
@@ -33,8 +35,8 @@ class MensagemService
         return $lista;
     }
 
-    /** Valores das variáveis para um cliente e a pessoa logada */
-    public static function variaveis(?array $cliente, ?array $usuario): array
+    /** Valores das variáveis para um cliente e a pessoa logada. $caso = caso de cobrança (valor, vencimento, atraso) */
+    public static function variaveis(?array $cliente, ?array $usuario, ?array $caso = null): array
     {
         $base = (isset($_SERVER['HTTP_HOST']) ? ((($_SERVER['HTTPS'] ?? '') === 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST']) : '') . url('/catalogo');
         $codigo = $usuario ? Banco::valor('SELECT codigo_vendedor FROM usuarios WHERE id = ?', [$usuario['id']]) : null;
@@ -47,7 +49,23 @@ class MensagemService
             '{link_catalogo}' => $base, '{empresa}' => (string) Config::get('empresa.nome', 'Perfeita Alquimia'),
             '{dias_sem_compra}' => $ultima ? (string) (int) floor((time() - strtotime($ultima)) / 86400) : '',
             '{ultima_compra}' => $ultima ? data_br($ultima) : '',
+            '{valor}' => $caso ? dinheiro((float) $caso['valor_total']) : '',
+            '{vencimento}' => !empty($caso['vencimento_mais_antigo']) ? data_br($caso['vencimento_mais_antigo']) : '',
+            '{dias_atraso}' => !empty($caso['vencimento_mais_antigo']) ? (string) max(0, (int) ((strtotime('today') - strtotime($caso['vencimento_mais_antigo'])) / 86400)) : '',
+            '{link_pix}' => $caso ? (string) Config::get('cobranca.link_pix', '') : '',
         ];
+    }
+
+    /** Modelos ativos de uma categoria já preenchidos: ['Título' => 'texto', ...] (na ordem da lista) */
+    public static function daCategoria(string $categoria, array $variaveis): array
+    {
+        $saida = [];
+        foreach (self::modelos() as $m) {
+            if ($m['categoria'] === $categoria && ($texto = self::aplicar($m['texto'], $variaveis)) !== '') {
+                $saida[$m['titulo']] = $texto;
+            }
+        }
+        return $saida;
     }
 
     /** Troca as variáveis; as que não têm valor somem (sem deixar "{...}" nem espaço duplo) */
@@ -63,8 +81,13 @@ class MensagemService
     /** Modelos ativos já preenchidos para o cliente (para a ficha) */
     public static function paraCliente(array $cliente, array $usuario): array
     {
-        $v = self::variaveis($cliente, $usuario);
-        return array_map(fn($m) => ['id' => (int) $m['id'], 'titulo' => $m['titulo'], 'categoria' => $m['categoria'], 'texto' => self::aplicar($m['texto'], $v)], self::modelos());
+        // Com caso de cobrança aberto, as variáveis de cobrança ({valor}, {dias_atraso}...) são preenchidas;
+        // sem caso, os modelos que dependem delas não aparecem (o texto ficaria sem o valor).
+        $caso = CobrancaService::casoAberto((int) $cliente['id']);
+        $v = self::variaveis($cliente, $usuario, $caso);
+        $deCobranca = '/\{(valor|vencimento|dias_atraso|link_pix)\}/';
+        $lista = array_filter(self::modelos(), fn($m) => $caso || !preg_match($deCobranca, $m['texto']));
+        return array_values(array_map(fn($m) => ['id' => (int) $m['id'], 'titulo' => $m['titulo'], 'categoria' => $m['categoria'], 'texto' => self::aplicar($m['texto'], $v)], $lista));
     }
 
     public static function salvar(?int $id, array $d, ?int $usuarioId): int

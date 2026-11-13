@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Core\Auditoria;
+use App\Core\Auth;
 use App\Core\Banco;
 use App\Core\Config;
 use App\Integrations\Integracoes;
@@ -366,9 +367,15 @@ class CobrancaService
     // Mensagens prontas
     // ------------------------------------------------------------------
 
-    /** Modelos de WhatsApp da cobrança (Configurações), já com as variáveis trocadas */
+    /** Modelos de WhatsApp da cobrança: categoria Cobrança de Conteúdo › Mensagens prontas, já preenchidos */
     public static function mensagens(array $caso): array
     {
+        $cliente = Banco::um('SELECT * FROM clientes WHERE id = ?', [(int) $caso['cliente_id']]) ?: $caso;
+        $modelos = MensagemService::daCategoria('Cobrança', MensagemService::variaveis($cliente, Auth::usuario(), $caso));
+        if ($modelos) {
+            return $modelos;
+        }
+        // Sem modelo cadastrado: usa os textos antigos das Configurações
         $dias = $caso['vencimento_mais_antigo'] ? max(0, (int) ((strtotime('today') - strtotime($caso['vencimento_mais_antigo'])) / 86400)) : 0;
         $troca = [
             '{nome}' => $caso['nome_fantasia'] ?: $caso['razao_social'], '{valor}' => dinheiro((float) $caso['valor_total']),

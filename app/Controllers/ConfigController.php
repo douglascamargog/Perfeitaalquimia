@@ -11,7 +11,9 @@ use App\Core\Sessao;
 class ConfigController extends Controller
 {
     /** Configurações que não são mais usadas (ficam no banco, mas não aparecem na tela) */
-    public const OBSOLETAS = ['carteira.campanha_origem', 'carteira.campanha_titulo', 'carteira.campanha_chamada'];
+    public const OBSOLETAS = ['carteira.campanha_origem', 'carteira.campanha_titulo', 'carteira.campanha_chamada',
+        // Textos que viraram Mensagens prontas (Conteúdo › Mensagens prontas, categorias Recompra e Cobrança)
+        'recompra.mensagem', 'cobranca.msg_lembrete', 'cobranca.msg_segunda_via', 'cobranca.msg_acordo'];
 
     public function index(): void
     {

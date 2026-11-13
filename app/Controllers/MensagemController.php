@@ -44,7 +44,9 @@ class MensagemController extends Controller
         $exemplo = $exemploId ? Cliente::buscar((int) $exemploId) : ['razao_social' => 'Loja Exemplo Ltda', 'nome_fantasia' => 'Loja Exemplo', 'cidade' => 'Porto Alegre', 'ultima_compra_em' => date('Y-m-d', strtotime('-45 days'))];
         $this->tela('mensagens/form', [
             'titulo' => $m ? 'Editar mensagem' : 'Nova mensagem', 'm' => $m, 'categorias' => MensagemService::categorias(),
-            'variaveis' => MensagemService::VARIAVEIS, 'valores' => MensagemService::variaveis($exemplo, Auth::usuario()),
+            'variaveis' => MensagemService::VARIAVEIS,
+            // Prévia com um caso de cobrança de exemplo, para as variáveis {valor}, {dias_atraso}... aparecerem preenchidas
+            'valores' => MensagemService::variaveis($exemplo, Auth::usuario(), ['valor_total' => 1234.56, 'vencimento_mais_antigo' => date('Y-m-d', strtotime('-20 days'))]),
             'estilos' => self::ESTILOS, 'scripts' => ['mensagens.js'],
         ]);
     }
