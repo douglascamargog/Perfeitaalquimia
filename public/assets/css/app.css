@@ -270,3 +270,6 @@ input[type=color] { width: 44px; height: 38px; padding: 2px; border: 1px solid v
 @media print { .nov-fundo { display: none; } }
 .nov-tipo.admin { color: var(--texto-suave); border-top: 1px dashed var(--borda); padding-top: 8px; }
 .nov-tipo.admin + ul { color: var(--texto-suave); font-size: .86rem; }
+.mp-foco-areas { display: grid; gap: 6px; padding: 6px 0 4px 28px; }
+[data-foco-admin]:has(input[value="funcoes"]:checked) .mp-foco-areas { opacity: .55; pointer-events: none; }
+input:disabled, select:disabled, textarea:disabled { background: var(--fundo); color: var(--texto-suave); cursor: not-allowed; }

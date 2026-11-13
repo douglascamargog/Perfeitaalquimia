@@ -69,6 +69,17 @@ class Foco
         return array_values(array_intersect(array_map('trim', explode(',', $texto)), array_keys(self::AREAS)));
     }
 
+    /**
+     * Admin (Administração › Usuários) define o que aparece para a pessoa:
+     * $seguirFuncoes = true → NULL (acompanha as funções, mesmo que elas mudem depois); senão grava as áreas marcadas.
+     */
+    public static function salvarEscolha(int $usuarioId, bool $seguirFuncoes, array $areas): void
+    {
+        $valor = $seguirFuncoes ? null : implode(',', self::lista(implode(',', $areas)));
+        Banco::executar('UPDATE usuarios SET areas_foco = ? WHERE id = ?', [$valor, $usuarioId]);
+        self::limparCache();
+    }
+
     public static function limparCache(): void
     {
         self::$cache = [];

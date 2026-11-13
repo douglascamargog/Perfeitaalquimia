@@ -90,11 +90,15 @@ async function sair(p) { await p.goto(BASE + '/'); await p.click('form[action$="
   await p.goto(BASE + '/meu-perfil');
   await p.setInputFiles('#foto', RECURSOS + '/foto_teste.jpg');
   await p.fill('#apelido', 'Tati');
+  const nomeAntes = sql(`select nome from usuarios where id=${vend}`);
+  await p.fill('#nome', nomeAntes + ' Silva');
   const hoje = sql("select date_format(curdate(), '%m-%d')");
   await p.fill('#data_nascimento', '1990-' + hoje);
   await Promise.all([p.waitForNavigation(), p.click('form[action$="/meu-perfil"] button[type=submit]')]);
   const foto = sql(`select foto from usuarios where id=${vend}`);
   ok(foto.startsWith('media/equipe/') && fs.existsSync(path.join(RAIZ, 'public', foto)), 'foto salva em media/equipe');
+  ok(sql(`select nome from usuarios where id=${vend}`) === nomeAntes + ' Silva', 'Meu perfil: a pessoa muda o próprio nome');
+  ok(await p.locator('input[type=email][disabled]').count() === 1, 'Meu perfil: e-mail de acesso só para consulta');
   const dims = execSync(`python3 -c "from PIL import Image; im=Image.open('${path.join(RAIZ, 'public', foto)}'); print(im.size, im.format)"`).toString().trim();
   ok(dims.includes('(400, 400) WEBP'), 'foto reduzida para 400×400 WebP (' + dims + ')');
   await p.setInputFiles('#foto', RECURSOS + '/falsa.jpg');

@@ -47,13 +47,23 @@ class EquipeService
         if (!in_array($tipo, self::TIPOS, true)) {
             throw new RuntimeException('Envie a foto em JPG, PNG ou WebP.');
         }
+        if (!function_exists('imagecreatetruecolor')) {
+            throw new RuntimeException('O servidor está sem a extensão de imagens (GD) do PHP. Peça para ativar no painel da hospedagem.');
+        }
         $origem = match ($tipo) {
             'image/png' => @imagecreatefrompng($arquivo['tmp_name']),
-            'image/webp' => @imagecreatefromwebp($arquivo['tmp_name']),
+            'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($arquivo['tmp_name']) : false,
             default => @imagecreatefromjpeg($arquivo['tmp_name']),
         };
         if (!$origem) {
             throw new RuntimeException('Não consegui abrir essa imagem. Tente outra foto.');
+        }
+        // Foto de celular vem "deitada" com a informação de giro (EXIF): endireita antes de recortar
+        if ($tipo === 'image/jpeg' && function_exists('exif_read_data')) {
+            $giro = [3 => 180, 6 => -90, 8 => 90][(int) (@exif_read_data($arquivo['tmp_name'])['Orientation'] ?? 1)] ?? 0;
+            if ($giro) {
+                $origem = imagerotate($origem, $giro, 0) ?: $origem;
+            }
         }
         // Recorte quadrado no centro → 400×400
         $w = imagesx($origem);
@@ -62,11 +72,14 @@ class EquipeService
         $foto = imagecreatetruecolor(400, 400);
         imagecopyresampled($foto, $origem, 0, 0, (int) (($w - $lado) / 2), (int) (($h - $lado) / 2), 400, 400, $lado, $lado);
         $pasta = RAIZ . '/public/' . self::PASTA;
-        if (!is_dir($pasta)) {
-            mkdir($pasta, 0755, true);
+        if ((!is_dir($pasta) && !@mkdir($pasta, 0755, true)) || !is_writable($pasta)) {
+            throw new RuntimeException('A pasta das fotos (public/media/equipe) está sem permissão de gravação no servidor.');
         }
-        $caminho = self::PASTA . '/' . $usuarioId . '-' . bin2hex(random_bytes(6)) . '.webp';
-        if (!imagewebp($foto, RAIZ . '/public/' . $caminho, 82)) {
+        // WebP (menor); se o servidor não tiver suporte a WebP, grava em JPG
+        $webp = function_exists('imagewebp');
+        $caminho = self::PASTA . '/' . $usuarioId . '-' . bin2hex(random_bytes(6)) . ($webp ? '.webp' : '.jpg');
+        $gravou = $webp ? @imagewebp($foto, RAIZ . '/public/' . $caminho, 82) : @imagejpeg($foto, RAIZ . '/public/' . $caminho, 85);
+        if (!$gravou) {
             throw new RuntimeException('Não consegui salvar a foto no servidor.');
         }
         imagedestroy($foto);

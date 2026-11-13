@@ -48,6 +48,19 @@ $ativo = $novo || $usuario['ativo'];
     <?php endforeach; ?>
   </div>
 
+  <h2>O que aparece para esta pessoa</h2>
+  <p class="suave pequeno">Define os cartões do Início, as dicas do One, o sino e os números do menu. Não muda o que a pessoa pode abrir (isso é em Acessos).</p>
+  <?php $focoProprio = $usuario && $usuario['areas_foco'] !== null; $focoMarcado = $usuario ? \App\Services\Foco::areasDe((int) $usuario['id']) : []; ?>
+  <div class="mp-foco" data-foco-admin>
+    <label class="opcao"><input type="radio" name="foco_modo" value="funcoes" <?= $focoProprio ? '' : 'checked' ?>> <strong>Seguir as funções</strong> <span class="suave pequeno">(recomendado: muda junto se as funções mudarem)</span></label>
+    <label class="opcao"><input type="radio" name="foco_modo" value="escolher" <?= $focoProprio ? 'checked' : '' ?>> <strong>Escolher as áreas</strong></label>
+    <div class="mp-foco-areas">
+      <?php foreach (\App\Services\Foco::AREAS as $area => $rotulo): ?>
+        <label class="opcao"><input type="checkbox" name="foco[]" value="<?= $area ?>" <?= in_array($area, $focoMarcado, true) ? 'checked' : '' ?>> <?= e($rotulo) ?></label>
+      <?php endforeach; ?>
+    </div>
+  </div>
+
   <details class="ac-excecoes" <?= $excecoes ? 'open' : '' ?>>
     <summary><strong>Acessos desta pessoa</strong> <span class="suave pequeno">— <?= $excecoes ? count($excecoes) . ' exceção(ões) sobre o perfil' : 'segue o perfil' ?></span></summary>
     <p class="suave pequeno">Normalmente a pessoa segue o perfil (Administração › Acessos). Aqui você dá ou tira algo <strong>só desta pessoa</strong>.

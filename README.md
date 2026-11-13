@@ -226,7 +226,8 @@ Rode antes de publicar qualquer mudança. Eles apagam e recriam o banco: use só
   O histórico fica em /novidades (link no rodapé do menu).
 - **Foco pela função**: o Início, as dicas do One, o sino e os contadores mostram só as áreas da pessoa
   (Comercial, Aprovação, Cobrança, Marketing, Produção, Diretoria). Cada função tem as suas áreas (Administração › Funções)
-  e cada pessoa pode ajustar em Meu perfil › "O que aparece para mim". Ex.: admin da função Marketing vê só o Marketing.
+  e o admin pode ajustar para uma pessoa em Administração › Usuários › "O que aparece para esta pessoa".
+  Ex.: admin da função Marketing vê só o Marketing. Em Meu perfil cada um muda o próprio nome, foto e contatos.
 - **Academia › Como usar o One** no lugar das aulas do Leads2b.
 - **Mensagens num lugar só**: a Recompra e a Cobrança usam os modelos de Conteúdo › Mensagens prontas.
 - **Notificações**: contador vermelho no menu com o que está pendente (Aprovação, Agenda, Cobrança, Recompra, Prospecção,

@@ -47,13 +47,25 @@ const MURAL = 'Mural de posts e Planejamento';
   await entrar(fin, 'financeiro@demo.local');
   ok(await card(fin, 'Pedidos para aprovar').count() === 1 || await card(fin, 'Aguardando aprovação').count() === 1, 'Financeiro vê a aprovação no Início');
 
-  // 2. Ligando "Diretoria" no Meu perfil, o resumo da empresa volta
+  // 2. O que aparece para cada um é definido pelo admin (Usuários), não no Meu perfil
   await adm.goto(BASE + '/meu-perfil');
+  ok(await adm.locator('input[name="foco[]"]').count() === 0, 'Meu perfil não tem mais a escolha das áreas');
+  await adm.goto(BASE + `/usuarios/${admId}/editar`);
+  await adm.check('input[name=foco_modo][value=escolher]');
+  await adm.check('input[name="foco[]"][value="marketing"]');
   await adm.check('input[name="foco[]"][value="diretoria"]');
-  await Promise.all([adm.waitForNavigation(), adm.click('form:has(input[name=foco_enviado]) button[type=submit]')]);
-  ok(sql(`select areas_foco from usuarios where id=${admId}`).includes('diretoria'), 'Meu perfil grava a escolha pessoal de foco');
+  await Promise.all([adm.waitForNavigation(), adm.click('button:has-text("Salvar alterações")')]);
+  ok(sql(`select areas_foco from usuarios where id=${admId}`).includes('diretoria'), 'admin define o que aparece para a pessoa (Usuários)');
   await adm.goto(BASE + '/');
   ok(await card(adm, 'Faturado no mês').count() === 1 && await card(adm, 'Posts desta semana').count() === 1, 'com Diretoria ligada: faturamento + Marketing no Início');
+  await adm.goto(BASE + `/usuarios/${admId}/editar`);
+  await adm.check('input[name=foco_modo][value=funcoes]');
+  await Promise.all([adm.waitForNavigation(), adm.click('button:has-text("Salvar alterações")')]);
+  ok(sql(`select ifnull(areas_foco,'NULL') from usuarios where id=${admId}`) === 'NULL', '"Seguir as funções" volta ao padrão da função');
+  await adm.goto(BASE + `/usuarios/${admId}/editar`);
+  await adm.check('input[name=foco_modo][value=escolher]');
+  await adm.check('input[name="foco[]"][value="diretoria"]');
+  await Promise.all([adm.waitForNavigation(), adm.click('button:has-text("Salvar alterações")')]);
 
   // 6. A grade não mostra o perfil Admin (ele sempre tem tudo)
   await adm.goto(BASE + '/acessos');

@@ -64,6 +64,7 @@ class UsuarioController extends Controller
             Usuario::definirFuncoes($id, (array) ($_POST['funcoes'] ?? []));
             return $id;
         });
+        \App\Services\Foco::salvarEscolha($id, ($_POST['foco_modo'] ?? 'funcoes') !== 'escolher', (array) ($_POST['foco'] ?? []));
         Auditoria::registrar('usuario', $id, 'criar', null, $dados);
         \App\Services\AcessoService::salvarExcecoes($id, (int) $dados['perfil_id'], (array) ($_POST['excecao'] ?? []), (array) ($_POST['excecao_especial'] ?? []));
         if ($erroFoto = $this->tratarFoto($id)) {
@@ -104,6 +105,12 @@ class UsuarioController extends Controller
             Usuario::definirFuncoes($id, (array) ($_POST['funcoes'] ?? []));
         });
         $funcoesDepois = array_column(Usuario::funcoesDe($id), 'nome');
+        $focoAntes = $antes['areas_foco'];
+        \App\Services\Foco::salvarEscolha($id, ($_POST['foco_modo'] ?? 'funcoes') !== 'escolher', (array) ($_POST['foco'] ?? []));
+        $focoDepois = \App\Core\Banco::valor('SELECT areas_foco FROM usuarios WHERE id = ?', [$id]);
+        if ($focoAntes !== $focoDepois) {
+            Auditoria::registrar('usuario', $id, 'foco', ['areas_foco' => $focoAntes ?? 'segue as funções'], ['areas_foco' => $focoDepois ?? 'segue as funções']);
+        }
         \App\Services\AcessoService::salvarExcecoes($id, (int) $dados['perfil_id'], (array) ($_POST['excecao'] ?? []), (array) ($_POST['excecao_especial'] ?? []));
         if ($erroFoto = $this->tratarFoto($id)) {
             Sessao::aviso('erro', "Dados salvos, mas a foto não: $erroFoto");

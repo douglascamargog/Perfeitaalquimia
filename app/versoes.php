@@ -17,6 +17,19 @@
  */
 return [
     [
+        'versao' => '2.3', 'data' => '2026-11-13', 'titulo' => 'Meu perfil',
+        'novo' => [
+            'Em Meu perfil você pode mudar o seu nome, além da foto, do aniversário e dos contatos.',
+        ],
+        'correcao' => [
+            'Fotos tiradas no celular ficam na posição certa.',
+        ],
+        'admin' => [
+            'O que aparece para cada pessoa (Início, sino, dicas) agora é definido só pelo administrador, em Administração › Usuários › "O que aparece para esta pessoa". Saiu do Meu perfil.',
+            'Se o servidor não tiver suporte a WebP, a foto é gravada em JPG. Se faltar permissão na pasta public/media/equipe, a mensagem diz isso.',
+        ],
+    ],
+    [
         'versao' => '2.2', 'data' => '2026-11-13', 'titulo' => 'Novidades mais fáceis de ler',
         'admin' => [
             'As novidades de cada versão agora mostram para a equipe só o que muda no dia a dia dela.',
@@ -37,7 +50,7 @@ return [
         'versao' => '2.0', 'data' => '2026-11-13', 'titulo' => 'Menu completo e Início do seu jeito',
         'novo' => [
             'Todas as abas aparecem no menu. O cadeado 🔒 indica que você não tem acesso; o olho 👁 indica que você pode ver, mas não alterar.',
-            'O Início, o sino e as dicas do One mostram o que é da sua função. Você pode ajustar em Meu perfil › "O que aparece para mim".',
+            'O Início, o sino e as dicas do One mostram o que é da sua função.',
             'Novidades: depois de cada atualização, esta janela mostra o que mudou. Todas as versões ficam no link do rodapé do menu.',
         ],
         'melhoria' => [
