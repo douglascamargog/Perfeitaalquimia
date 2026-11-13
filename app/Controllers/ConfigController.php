@@ -10,10 +10,16 @@ use App\Core\Sessao;
  */
 class ConfigController extends Controller
 {
+    /** Configurações que não são mais usadas (ficam no banco, mas não aparecem na tela) */
+    public const OBSOLETAS = ['carteira.campanha_origem', 'carteira.campanha_titulo', 'carteira.campanha_chamada'];
+
     public function index(): void
     {
         $grupos = [];
         foreach (Config::todas() as $item) {
+            if (in_array($item['chave'], self::OBSOLETAS, true)) {
+                continue;
+            }
             $grupos[$item['grupo']][] = $item;
         }
         $this->tela('config/index', ['titulo' => 'Configurações', 'grupos' => $grupos]);

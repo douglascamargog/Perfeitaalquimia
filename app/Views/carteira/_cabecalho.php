@@ -1,7 +1,7 @@
 <?php
 /**
  * Cabeçalho das abas da Carteira (título, abas e botões).
- * Variáveis: $aba ('visao'|'lista'|'funil'|'mapa'), $filtros, $campanha (null ou [titulo, chamada])
+ * Variáveis: $aba ('visao'|'lista'|'funil'|'mapa'), $filtros
  */
 use App\Core\Auth;
 
@@ -29,22 +29,6 @@ $textos = [
     <?php endif; ?>
   </div>
 </div>
-
-<?php if (!empty($campanha)):
-    // "Black Friday 2026" → ano à parte, última palavra em destaque (como na Carteira V4)
-    preg_match('/^(.*?)\s*(\d{4})?$/u', trim($campanha['titulo']), $partes);
-    $palavras = explode(' ', mb_strtoupper($partes[1]));
-    $ultima = count($palavras) > 1 ? array_pop($palavras) : '';
-    $semCampanha = array_diff_key(array_filter($filtros), ['origem' => 1]); ?>
-  <section class="faixa-campanha" aria-label="Campanha em destaque">
-    <div>
-      <span class="faixa-campanha-sobre">CAMPANHA<?= !empty($partes[2]) ? ' ' . e($partes[2]) : '' ?></span>
-      <strong><?= e(implode(' ', $palavras)) ?> <em><?= e($ultima) ?></em></strong>
-      <?php if ($campanha['chamada'] !== ''): ?><small><?= e(mb_strtoupper($campanha['chamada'])) ?></small><?php endif; ?>
-    </div>
-    <a class="botao contorno pequeno" href="<?= url($abas[$aba][1]) . ($semCampanha ? '?' . e(http_build_query($semCampanha)) : '') ?>">Ver toda a carteira</a>
-  </section>
-<?php endif; ?>
 
 <nav class="abas" aria-label="Visões da carteira">
   <?php foreach ($abas as $chave => [$nome, $link]): ?>

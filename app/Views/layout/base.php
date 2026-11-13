@@ -23,10 +23,6 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
         }
     }
 }
-// Carteira filtrada pela campanha em destaque → acende o item da campanha (ex.: Black Friday 2026)
-if (str_starts_with($caminhoAtual, '/carteira') && ($_GET['origem'] ?? '') !== '' && (string) \App\Controllers\CarteiraController::campanhaOrigemId() === (string) $_GET['origem']) {
-    $itemAtual = '/carteira/campanha';
-}
 ?>
 <!doctype html>
 <html lang="pt-BR">

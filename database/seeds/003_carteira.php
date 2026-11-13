@@ -2,7 +2,7 @@
 /**
  * Dados da CARTEIRA para a demonstração.
  *
- * 1. Configurações novas da carteira e a origem "Carteira Black Friday 2026".
+ * 1. Configurações novas da carteira e a origem "Lista de prospecção — Grande Porto Alegre" (as lojas da Carteira V4).
  * 2. Cidades com coordenadas (Grande Porto Alegre + cidades da amostra).
  * 3. As 499 lojas reais da Carteira V4 (lidas de referencias/dashboard.html — o arquivo NÃO vai para o git).
  *    Ficam na fila da função Prospecção e Reativação.
@@ -26,7 +26,7 @@ $novasConfiguracoes = [
 foreach ($novasConfiguracoes as [$chave, $valor, $tipo, $grupo, $rotulo, $descricao, $ordem]) {
     Banco::inserir('configuracoes', compact('chave', 'valor', 'tipo', 'grupo', 'rotulo', 'descricao', 'ordem'));
 }
-Banco::inserir('origens', ['nome' => 'Carteira Black Friday 2026']);
+Banco::inserir('origens', ['nome' => 'Lista de prospecção — Grande Porto Alegre']);
 
 // ---------- 2. Cidades ----------
 $cidades = [
@@ -80,7 +80,7 @@ $lojasIds = [];
 if (is_file($arquivoV4)) {
     foreach (CarteiraV4::lojasDoHtml($arquivoV4) as $loja) {
         $c = CarteiraV4::paraCliente($loja);
-        $c['origem'] = 'Carteira Black Friday 2026';
+        $c['origem'] = 'Lista de prospecção — Grande Porto Alegre';
         $c['criado_em'] = '2026-11-09 08:00:00';
         $lojasIds[] = CarteiraService::criar($c, null, 'Importado da Carteira Comercial V4');
     }

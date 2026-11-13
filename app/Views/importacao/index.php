@@ -3,7 +3,7 @@ $status = ['previa' => ['Aguardando confirmação', 'lima'], 'concluida' => ['Co
 ?>
 <div class="cabecalho-secao">
   <div><div class="sobretitulo">CARTEIRA</div><h1>Importar carteira</h1>
-    <p>Planilhas por vendedor, a carteira da Black Friday ou o Backup JSON da Carteira V4. Nada entra antes de você conferir.</p></div>
+    <p>Planilhas por vendedor, listas de prospecção ou o Backup JSON da Carteira V4. Nada entra antes de você conferir.</p></div>
   <div class="acoes"><a class="botao contorno" href="<?= url('/carteira/lista') ?>">Voltar para a carteira</a></div>
 </div>
 

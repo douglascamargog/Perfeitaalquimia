@@ -32,7 +32,7 @@ class PainelInicio
             'equipe'       => Auth::pode('meu_mes.usar') || Auth::pode('metas.gerenciar') ? MetaService::equipe($mes) : null,
             'carteira'     => $temCarteira ? self::carteira() : null,
             'funil'        => $temCarteira ? self::funil() : null,
-            'campanha'     => $temCarteira ? self::campanha() : null,
+            'prospeccao'   => Auth::pode('prospeccao.usar') ? self::prospeccao() : null,
             'cobranca'     => Auth::pode('cobranca.ver') ? Cobranca::resumo() : null,
             'marketing'    => Auth::pode('marketing.ver') ? self::marketing() : null,
             'vendas'       => Auth::pode('painel.ver') ? self::vendas($mes) : null,
@@ -113,22 +113,11 @@ class PainelInicio
         return $etapas;
     }
 
-    /** Campanha em destaque (ex.: Black Friday): lojas que ainda aguardam o primeiro contato */
-    private static function campanha(): ?array
+    /** Prospecção: leads que aguardam o primeiro contato (na carteira de cada um) e abordados na semana */
+    private static function prospeccao(): ?array
     {
-        $origem = trim((string) Config::get('carteira.campanha_origem', ''));
-        if ($origem === '') {
-            return null;
-        }
-        $f = Cliente::filtrosDe(['origem' => (string) (Listas::idPorNome(Listas::origens(), $origem) ?? '')]);
-        if ($f['origem'] === '') {
-            return null;
-        }
-        $r = Cliente::resumo($f);
-        if (!$r['total']) {
-            return null; // ninguém da campanha nesta carteira
-        }
-        return ['titulo' => (string) Config::get('carteira.campanha_titulo', $origem), 'total' => $r['total'],
-            'aguardando' => $r['nao_abordados'], 'contatados' => $r['contatados']];
+        [$where, $par] = Cliente::montarWhere(Cliente::filtrosDe(['tipo' => 'lead']));
+        $r = Banco::um("SELECT COUNT(*) AS leads, SUM(c.contatado = 0) AS aguardando FROM clientes c WHERE $where", $par);
+        return (int) $r['leads'] ? ['leads' => (int) $r['leads'], 'aguardando' => (int) $r['aguardando']] : null;
     }
 }

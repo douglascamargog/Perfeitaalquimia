@@ -8,7 +8,7 @@ $parametros = array_filter($filtros) + ($ordem !== 'nome' ? ['ordem' => $ordem] 
 $linkPagina = fn(int $p) => url('/carteira/lista') . '?' . e(http_build_query($parametros + ['pagina' => $p]));
 $primeiro = $r['total'] ? ($r['pagina'] - 1) * $r['por_pagina'] + 1 : 0;
 ?>
-<?= Visao::renderizar('carteira/_cabecalho', ['aba' => 'lista', 'filtros' => $filtros, 'campanha' => $campanha]) ?>
+<?= Visao::renderizar('carteira/_cabecalho', ['aba' => 'lista', 'filtros' => $filtros]) ?>
 <?= Visao::renderizar('carteira/_filtros', ['filtros' => $filtros, 'opcoes' => $opcoes, 'acao' => '/carteira/lista', 'ordem' => $ordem]) ?>
 
 <section class="card sem-espaco">

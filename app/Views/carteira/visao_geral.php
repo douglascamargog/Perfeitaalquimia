@@ -28,7 +28,7 @@ foreach (array_slice($segmentos, 0, 4) as $i => $s) {
 $query = http_build_query(array_filter($filtros));
 $linkLista = fn(array $extra = []) => url('/carteira/lista') . '?' . e(http_build_query(array_filter($filtros) + $extra));
 ?>
-<?= Visao::renderizar('carteira/_cabecalho', ['aba' => 'visao', 'filtros' => $filtros, 'campanha' => $campanha]) ?>
+<?= Visao::renderizar('carteira/_cabecalho', ['aba' => 'visao', 'filtros' => $filtros]) ?>
 
 <div class="painel-v4">
   <div class="v4-topo">

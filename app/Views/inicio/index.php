@@ -134,12 +134,12 @@ $atalhos = array_filter([
     </a>
   <?php endif; ?>
 
-  <?php if ($p['campanha']): $cp = $p['campanha']; ?>
-    <a class="b-card b-kpi b-lima span-3" href="<?= url('/carteira/campanha') ?>">
-      <header class="b-topo"><span><?= e($cp['titulo']) ?></span><span class="b-icone-redondo escuro"><svg class="icone"><use href="<?= $icones ?>#alvo"/></svg></span></header>
-      <strong class="b-valor"><?= $n($cp['aguardando']) ?> <small>lojas</small></strong>
-      <div class="b-barra"><i style="width: <?= $cp['total'] ? $pct($cp['contatados'] / $cp['total'] * 100) : 0 ?>%"></i></div>
-      <small>aguardam o primeiro contato · <?= $n($cp['contatados']) ?> de <?= $n($cp['total']) ?> abordadas</small>
+  <?php if ($p['prospeccao']): $ps = $p['prospeccao']; ?>
+    <a class="b-card b-kpi b-lima span-3" href="<?= url('/prospeccao') ?>" data-card="prospeccao">
+      <header class="b-topo"><span>Prospecção</span><span class="b-icone-redondo escuro"><svg class="icone"><use href="<?= $icones ?>#alvo"/></svg></span></header>
+      <strong class="b-valor"><?= $n($ps['aguardando']) ?> <small>leads</small></strong>
+      <div class="b-barra"><i style="width: <?= $pct(($ps['leads'] - $ps['aguardando']) / $ps['leads'] * 100) ?>%"></i></div>
+      <small>aguardam o primeiro contato · <?= $n($ps['leads'] - $ps['aguardando']) ?> de <?= $n($ps['leads']) ?> abordados</small>
     </a>
   <?php endif; ?>
 
