@@ -225,6 +225,13 @@ class ProspeccaoService
             $ids[] = $id;
             $criados++;
         }
+        // Avisa quem recebeu os leads (quando não foi a própria pessoa que enviou)
+        if ($ids) {
+            foreach (Banco::todos('SELECT responsavel_id, COUNT(*) AS qtd FROM clientes WHERE id IN (' . implode(',', array_map('intval', $ids)) . ') GROUP BY responsavel_id') as $r) {
+                NotificacaoService::avisar([(int) $r['responsavel_id']], 'cliente_recebido', $r['qtd'] . ' empresa(s) da Prospecção chegaram para você', '/prospeccao',
+                    ['texto' => 'Leads novos aguardando o primeiro contato.'], $usuarioId);
+            }
+        }
         if ($criados) {
             Auditoria::registrar('prospeccao', null, 'enviar_funil', null, ['criados' => $criados, 'existentes' => $existentes,
                 'responsavel_id' => $responsavelId]);

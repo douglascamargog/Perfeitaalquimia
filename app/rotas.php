@@ -203,6 +203,12 @@ return [
     ['POST', '/producao/ordens/{id}/concluir',   'OrdemProducaoController@concluir',     'producao.gerenciar'],
     ['POST', '/producao/ordens/{id}/cancelar',   'OrdemProducaoController@cancelar',     'producao.gerenciar'],
 
+    // ---------- Notificações (sino do topo) ----------
+    ['GET',  '/notificacoes',                   'NotificacaoController@index',       'logado'],
+    ['GET',  '/notificacoes/resumo',            'NotificacaoController@resumo',      'logado'],
+    ['POST', '/notificacoes/marcar-todas',      'NotificacaoController@marcarTodas', 'logado'],
+    ['GET',  '/notificacoes/{id}',              'NotificacaoController@abrir',       'logado'],
+
     // ---------- Busca rápida do topo ----------
     ['GET',  '/busca',                          'BuscaController@rapida',     'logado'],
 

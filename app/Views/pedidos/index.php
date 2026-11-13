@@ -47,7 +47,7 @@ $origens = ['catalogo' => 'Catálogo', 'sistema' => 'Sistema', 'app' => 'App ext
       <tbody>
       <?php foreach ($r['itens'] as $p): [$rotulo, $cor] = PedidoService::SITUACOES[$p['situacao']] ?? [$p['situacao'], 'cinza']; ?>
         <tr>
-          <td><a href="<?= url('/pedidos/' . (int) $p['id']) ?>"><strong>#<?= (int) $p['id'] ?></strong></a><small class="suave"><?= data_br($p['criado_em'], true) ?></small></td>
+          <td><a href="<?= url('/pedidos/' . (int) $p['id']) ?>"><strong>#<?= (int) $p['id'] ?></strong></a><?= \App\Services\NotificacaoService::marcaPedido((int) $p['id']) ?><small class="suave"><?= data_br($p['criado_em'], true) ?></small></td>
           <td><?= e($p['nome_fantasia'] ?: $p['razao_social']) ?><small class="suave"><?= e($p['cidade']) ?>/<?= e($p['uf']) ?></small></td>
           <td class="pequeno"><?= $origens[$p['origem']] ?? e($p['origem']) ?></td>
           <td class="pequeno"><?= e($p['vendedor'] ?? '—') ?></td>

@@ -8,6 +8,10 @@ use App\Core\Auth;
 use App\Core\Sessao;
 
 $usuario = Auth::usuario();
+// Contador vermelho do menu (o que está pendente) e notificações não lidas do sino
+$pendencias = \App\Services\PendenciasService::doUsuario();
+$naoLidas = \App\Services\NotificacaoService::naoLidas((int) $usuario['id']);
+$totalAtencao = array_sum($pendencias) + $naoLidas;
 $caminhoAtual = '/' . trim(substr(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), strlen(url_base())), '/');
 $icones = asset('img/icones.svg');
 
@@ -29,7 +33,7 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= e($titulo ?? '') ?> · <?= e(config('app_nome')) ?> · <?= e(config('empresa_nome', 'Perfeita Alquimia')) ?></title>
+  <title><?= $totalAtencao ? '(' . $totalAtencao . ') ' : '' ?><?= e($titulo ?? '') ?> · <?= e(config('app_nome')) ?> · <?= e(config('empresa_nome', 'Perfeita Alquimia')) ?></title>
   <link rel="icon" type="image/svg+xml" href="<?= asset('img/one/one-ola-padrao.svg') ?>">
   <link rel="stylesheet" href="<?= asset('css/base.css') ?>">
   <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
@@ -59,6 +63,7 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
           <?php if ($item['pronto']): ?>
             <a href="<?= url($item['url']) ?>" class="<?= trim(($ativo ? 'ativo' : '') . (!empty($item['destaque']) ? ' destaque' : '')) ?>">
               <svg class="icone"><use href="<?= $icones ?>#<?= e($item['icone']) ?>"/></svg><?= e($item['titulo']) ?>
+              <b class="menu-contador" data-pendencia="<?= e($item['url']) ?>" <?= empty($pendencias[$item['url']]) ? 'hidden' : '' ?> title="Pendente agora"><?= (int) ($pendencias[$item['url']] ?? 0) ?></b>
             </a>
           <?php else: ?>
             <span class="item" title="Módulo em construção no protótipo">
@@ -74,7 +79,7 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
 
   <div class="principal">
     <header class="topo">
-      <button class="botao-icone abrir-menu" type="button" aria-label="Abrir menu"><svg class="icone"><use href="<?= $icones ?>#menu"/></svg></button>
+      <button class="botao-icone abrir-menu" type="button" aria-label="Abrir menu"><svg class="icone"><use href="<?= $icones ?>#menu"/></svg><i class="menu-ponto" data-menu-ponto <?= array_sum($pendencias) ? '' : 'hidden' ?>></i></button>
       <h1><?= e($titulo ?? '') ?></h1>
       <div class="busca-rapida" data-busca-rapida>
         <svg class="icone" aria-hidden="true"><use href="<?= $icones ?>#lupa"/></svg>
@@ -84,6 +89,19 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
         <div class="busca-resultados" data-busca-resultados hidden role="listbox"></div>
       </div>
       <div class="usuario">
+        <div class="sino" data-sino>
+          <button class="botao-icone" type="button" aria-label="Notificações" aria-haspopup="true" aria-expanded="false" data-sino-botao>
+            <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            <b class="sino-contador" data-sino-contador <?= $naoLidas ? '' : 'hidden' ?>><?= $naoLidas > 99 ? '99+' : $naoLidas ?></b>
+          </button>
+          <div class="sino-painel" data-sino-painel hidden role="dialog" aria-label="Notificações">
+            <header><strong>Notificações</strong>
+              <form method="post" action="<?= url('/notificacoes/marcar-todas') ?>" data-sino-marcar><?= csrf_campo() ?><button type="submit" class="botao contorno pequeno">Marcar todas como lidas</button></form></header>
+            <div class="sino-lista" data-sino-lista><p class="suave pequeno">Carregando…</p></div>
+            <footer><a href="<?= url('/notificacoes') ?>">Ver todas</a>
+              <button type="button" class="sino-pc" data-ativar-avisos hidden>Avisar no computador</button></footer>
+          </div>
+        </div>
         <a class="usuario-perfil" href="<?= url('/meu-perfil') ?>" title="Meu perfil">
           <span class="usuario-nome">
             <strong><?= e($usuario['nome']) ?></strong>
@@ -118,6 +136,7 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
 </section>
 <script type="module" src="<?= asset('js/app.js') ?>"></script>
 <script type="module" src="<?= asset('js/busca.js') ?>"></script>
+<script type="module" src="<?= asset('js/notificacoes.js') ?>"></script>
 <?php // JS extras da tela: $scripts = ['carteira.js'] (módulos) ou bibliotecas externas (https://...) ?>
 <?php foreach ($scripts ?? [] as $js): ?>
   <?php if (str_starts_with($js, 'https://')): ?>

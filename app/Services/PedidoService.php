@@ -172,6 +172,7 @@ class PedidoService
             return $id;
         });
         self::enviarAoErp($id);
+        NotificacaoService::pedidoCriado((int) $id, $d['usuario_id'] ?? null); // sino do Financeiro (e do vendedor, se veio do catálogo)
         return [$id, []];
     }
 
@@ -220,6 +221,7 @@ class PedidoService
         self::historico((int) $pedido['id'], 'aprovado', 'Aprovado pelo Financeiro.', $usuarioId);
         ClienteEvento::registrar((int) $pedido['cliente_id'], 'pedido', 'Pedido #' . $pedido['id'] . ' aprovado pelo Financeiro', $usuarioId, null, ['pedido_id' => (int) $pedido['id']]);
         Auditoria::registrar('pedido', (int) $pedido['id'], 'aprovar', ['situacao' => $pedido['situacao']], ['situacao' => 'aprovado']);
+        NotificacaoService::pedidoMudou((int) $pedido['id'], 'aprovado', $usuarioId);
         return null;
     }
 
@@ -232,6 +234,7 @@ class PedidoService
         self::historico((int) $pedido['id'], 'recusado', 'Recusado: ' . $motivo, $usuarioId);
         ClienteEvento::registrar((int) $pedido['cliente_id'], 'pedido', 'Pedido #' . $pedido['id'] . ' recusado: ' . $motivo, $usuarioId, null, ['pedido_id' => (int) $pedido['id']]);
         Auditoria::registrar('pedido', (int) $pedido['id'], 'recusar', ['situacao' => $pedido['situacao']], ['situacao' => 'recusado', 'motivo' => $motivo]);
+        NotificacaoService::pedidoMudou((int) $pedido['id'], 'recusado', $usuarioId, 'Motivo: ' . $motivo);
         return null;
     }
 
@@ -244,6 +247,7 @@ class PedidoService
         self::historico((int) $pedido['id'], 'cancelado', "Cancelado $quem.", $usuarioId);
         ClienteEvento::registrar((int) $pedido['cliente_id'], 'pedido', 'Pedido #' . $pedido['id'] . " cancelado $quem", $usuarioId, null, ['pedido_id' => (int) $pedido['id']]);
         Auditoria::registrar('pedido', (int) $pedido['id'], 'cancelar', ['situacao' => $pedido['situacao']], ['situacao' => 'cancelado']);
+        NotificacaoService::pedidoMudou((int) $pedido['id'], 'cancelado', $usuarioId); // tira o "para aprovar" do sino do Financeiro
         return null;
     }
 
@@ -259,6 +263,9 @@ class PedidoService
         ClienteEvento::registrar((int) $pedido['cliente_id'], 'pedido', 'Pedido #' . $pedido['id'] . ' faturado · NF ' . $numeroNf . ' · ' . dinheiro((float) $pedido['total']), null, 'ERP', ['pedido_id' => (int) $pedido['id']], $quando);
         self::atualizarCompras((int) $pedido['cliente_id']);
         ProducaoService::baixarVenda((int) $pedido['id'], $quando); // estoque acabado da fábrica (se configurado)
+        if (strtotime($quando) >= strtotime('-1 day')) { // faturamento de agora (não o histórico da importação)
+            NotificacaoService::pedidoMudou((int) $pedido['id'], 'faturado', null, 'NF ' . $numeroNf);
+        }
     }
 
     /** Recalcula última compra e intervalo médio entre compras (base do alerta de recompra) */

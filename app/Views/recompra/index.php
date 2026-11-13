@@ -28,7 +28,7 @@ $amanha = date('Y-m-d', strtotime('+1 weekday'));
   <?php foreach ($clientes as $c): $whats = $c['whatsapp'] ?: (strlen((string) $c['telefone']) === 11 ? $c['telefone'] : ''); $pct = min(100, round($c['dias_desde'] / max(1, $c['intervalo_medio_dias']) * 50)); ?>
     <article class="card rc-item" data-recompra="<?= (int) $c['id'] ?>">
       <div class="rc-principal">
-        <button class="nome-cliente" type="button" data-abrir-cliente="<?= (int) $c['id'] ?>"><?= e($c['nome_fantasia'] ?: $c['razao_social']) ?></button>
+        <button class="nome-cliente" type="button" data-abrir-cliente="<?= (int) $c['id'] ?>"><?= e($c['nome_fantasia'] ?: $c['razao_social']) ?></button><?= \App\Services\NotificacaoService::marca((int) $c['id']) ?>
         <small class="suave"><?= e($c['cidade']) ?>/<?= e($c['uf']) ?><?= Auth::pode('carteira.ver_todas') ? ' · ' . e($c['responsavel']) : '' ?></small>
         <?php if ($c['produtos']): ?><small>Costuma comprar: <?= e(implode(', ', $c['produtos'])) ?></small><?php endif; ?>
       </div>

@@ -87,7 +87,7 @@ async function sair(page) { await page.click('form[action$="/sair"] button'); }
   ok(await page.locator('nav a', { hasText: 'Produção' }).count() === 0, 'financeiro não vê Produção');
   await sair(page);
   await entrar(page, 'producao@demo.local');
-  ok(await page.locator('nav a', { hasText: /^\s*Produção\s*$/ }).count() === 1, 'produção vê Produção');
+  ok(await page.locator('nav a[href$="/producao"]').count() === 1, 'produção vê Produção');
   await sair(page);
 
   // Celular

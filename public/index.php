@@ -20,6 +20,10 @@ header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: same-origin');
 
 Sessao::iniciar();
+// Toda ação (POST) pode mudar o que está pendente: o contador do menu é recalculado na próxima página
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    Sessao::remover('pendencias');
+}
 
 // Caminho pedido, sem a pasta base e sem a "?query"
 $caminho = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';

@@ -40,6 +40,7 @@ class ClienteController extends Controller
     public function ficha(string $id): void
     {
         $cliente = $this->clienteOuErro($id);
+        \App\Services\NotificacaoService::marcarDoCliente((int) Auth::id(), (int) $cliente['id']); // abriu a ficha: novidades vistas
         echo Visao::renderizar('carteira/_ficha', [
             'c'           => $cliente,
             'eventos'     => ClienteEvento::doCliente((int) $cliente['id'], 40),

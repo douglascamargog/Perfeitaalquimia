@@ -225,7 +225,13 @@ class CarteiraService
             $novo = self::responsavelDaFuncao($funcaoId);
             Banco::atualizar('clientes', (int) $c['id'], ['funcao_id' => $funcaoId, 'responsavel_id' => $novo]);
             self::eventoResponsavel((int) $c['id'], (int) $c['responsavel_id'], (int) $novo, $usuarioId,
-                "Sem compra há {$c['dias']} dias: enviado para a fila de reativação");
+                "Sem compra há {$c['dias']} dias: enviado para a fila de reativação", false);
+            $recebidos[(int) $novo] = ($recebidos[(int) $novo] ?? 0) + 1;
+        }
+        // Um aviso por pessoa (e não um por cliente): "N clientes entraram na sua fila de reativação"
+        foreach ($recebidos ?? [] as $pessoa => $qtd) {
+            NotificacaoService::avisar([$pessoa], 'cliente_recebido', "$qtd cliente(s) entraram na sua fila de reativação", '/reativacao',
+                ['texto' => "Sem compra há mais de $dias dias."], $usuarioId);
         }
         if ($clientes) {
             Auditoria::registrar('carteira', null, 'processar_inatividade', null, ['clientes_movidos' => count($clientes), 'dias' => $dias]);
@@ -252,8 +258,11 @@ class CarteiraService
         ClienteEvento::registrar($id, 'etapa', ($nomes[$de] ?? '—') . ' → ' . ($nomes[$para] ?? '—'), $usuarioId, null, ['de' => $de, 'para' => $para]);
     }
 
-    private static function eventoResponsavel(int $id, int $de, int $para, ?int $usuarioId, string $motivo): void
+    private static function eventoResponsavel(int $id, int $de, int $para, ?int $usuarioId, string $motivo, bool $avisar = true): void
     {
+        if ($avisar && $para && $para !== $de) {
+            NotificacaoService::clienteRecebido($id, $para, $motivo, $usuarioId);
+        }
         $nomes = array_column(Banco::todos('SELECT id, nome FROM usuarios WHERE id IN (?, ?)', [$de, $para]), 'nome', 'id');
         ClienteEvento::registrar($id, 'responsavel', $motivo . ': ' . ($nomes[$de] ?? '—') . ' → ' . ($nomes[$para] ?? '—'), $usuarioId, null, ['de' => $de, 'para' => $para]);
     }

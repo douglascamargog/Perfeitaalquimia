@@ -18,6 +18,10 @@ class ClienteEvento
 
     public static function registrar(int $clienteId, string $tipo, ?string $descricao, ?int $usuarioId, ?string $canal = null, ?array $dados = null, ?string $ocorridoEm = null): int
     {
+        // Avisa o responsável quando OUTRA pessoa mexeu no cliente dele (não roda em cron/instalação)
+        if (PHP_SAPI !== 'cli') {
+            \App\Services\NotificacaoService::clienteAtualizado($clienteId, $tipo, $descricao, $usuarioId, $ocorridoEm);
+        }
         return Banco::inserir('cliente_eventos', array_filter([
             'cliente_id'  => $clienteId,
             'usuario_id'  => $usuarioId,

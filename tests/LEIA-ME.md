@@ -48,4 +48,5 @@ continuam com o mesmo número de registros.
 | `producao` | Matérias-primas, fichas técnicas, ordens e reabastecimento |
 | `prospeccao` | Prospecção, mensagens prontas e leads do site |
 | `ajustes` | Código do produto, busca rápida, ficha do funcionário, aniversariantes, Início do admin, backup |
+| `notificacoes` | Contador do menu, sino, aviso flutuante, "novidade" nos clientes, um aviso por hora, privacidade |
 | `revisao` | Abre todas as telas de todos os perfis no computador e no celular (erros, avisos e rolagem lateral) |

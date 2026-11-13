@@ -221,6 +221,11 @@ Rode antes de publicar qualquer mudança. Eles apagam e recriam o banco: use só
 - **Início da diretoria** para o perfil Admin: pedidos para aprovar, faturado, cobrança, prospecção, produção, e-commerce.
 - **Academia › Como usar o One** no lugar das aulas do Leads2b.
 - **Mensagens num lugar só**: a Recompra e a Cobrança usam os modelos de Conteúdo › Mensagens prontas.
+- **Notificações**: contador vermelho no menu com o que está pendente (Aprovação, Agenda, Cobrança, Recompra, Prospecção,
+  Leads, Mural, Produção), **sino** no topo com o que aconteceu (pedido para aprovar, aprovado/recusado/faturado, lead novo,
+  cliente que passou para você, atualização no seu cliente feita por outra pessoa) e etiqueta **novidade** nos clientes.
+  Atualiza sozinho a cada minuto e mostra um aviso flutuante quando chega algo novo.
+- **Depois de salvar, a página continua onde você estava** (o aviso de salvo aparece flutuando no canto).
 - **Backup automático** diário (`cron/backup.php`), com a data do último em Administração › Atualização.
 
 ## Regras do projeto

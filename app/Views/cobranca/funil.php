@@ -17,7 +17,7 @@ $podeMover = Auth::pode('cobranca.gerenciar');
       <div class="funil-cards" data-soltar>
         <?php foreach ($col['cards'] as $c): $dias = (int) $c['dias_atraso']; ?>
           <article class="funil-card cob-card" <?= $podeMover ? 'draggable="true"' : '' ?> data-cliente="<?= (int) $c['id'] ?>">
-            <button type="button" class="nome-cliente" data-abrir-cliente="<?= (int) $c['id'] ?>"><?= e($c['nome_fantasia'] ?: $c['razao_social']) ?></button>
+            <button type="button" class="nome-cliente" data-abrir-cliente="<?= (int) $c['id'] ?>"><?= e($c['nome_fantasia'] ?: $c['razao_social']) ?></button><?= \App\Services\NotificacaoService::marca((int) ($c['cliente_id'] ?? 0)) ?>
             <small><?= e($c['cidade']) ?> / <?= e($c['uf']) ?></small>
             <div class="cob-card-valor">
               <strong><?= dinheiro((float) $c['valor_total']) ?></strong>

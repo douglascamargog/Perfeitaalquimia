@@ -26,8 +26,9 @@ if (caixa) {
     if (q === ultima && !lista.hidden) return;
     ultima = q;
     const r = await fetch(`${BASE}/busca?q=${encodeURIComponent(q)}`, { headers: { Accept: 'application/json' } }).catch(() => null);
-    if (!r || !r.ok || campo.value.trim() !== q) return;
-    const d = await r.json();
+    if (!r || !r.ok || campo.value.trim() !== q || !(r.headers.get('content-type') || '').includes('json')) return;
+    const d = await r.json().catch(() => null);
+    if (!d) return;
     const partes = [];
     if (d.clientes.length) {
       partes.push('<small class="busca-grupo">Clientes</small>');

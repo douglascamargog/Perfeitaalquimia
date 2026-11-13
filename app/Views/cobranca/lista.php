@@ -18,7 +18,7 @@ $primeiro = $r['total'] ? ($r['pagina'] - 1) * $r['por_pagina'] + 1 : 0;
       <?php foreach ($r['itens'] as $c): $dias = (int) $c['dias_atraso']; ?>
         <tr>
           <td>
-            <button class="nome-cliente" type="button" data-abrir-cliente="<?= (int) $c['id'] ?>"><?= e($c['nome_fantasia'] ?: $c['razao_social']) ?></button>
+            <button class="nome-cliente" type="button" data-abrir-cliente="<?= (int) $c['id'] ?>"><?= e($c['nome_fantasia'] ?: $c['razao_social']) ?></button><?= \App\Services\NotificacaoService::marca((int) ($c['cliente_id'] ?? 0)) ?>
             <small class="suave"><?= $c['cnpj'] ? e(cnpj_formatado($c['cnpj'])) : 'Sem CNPJ' ?></small>
           </td>
           <td><?= e($c['cidade']) ?> / <?= e($c['uf']) ?></td>

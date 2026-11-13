@@ -81,6 +81,9 @@ class LeadService
             ClienteEvento::registrar((int) $existente['id'], 'contato', 'Novo contato pelo ' . $resumo, null, $pago ? 'Anúncio' : 'Site', null, $quando);
             self::tarefa((int) $existente['id'], (int) $existente['responsavel_id'], $quando);
             self::registrar($registro, 'existente', null, (int) $existente['id'], $quando);
+            if ($quando === null) {
+                NotificacaoService::leadRecebido((int) $existente['id'], false);
+            }
             return ['ok' => true, 'resultado' => 'existente', 'status' => 200, 'mensagem' => self::obrigado(), 'cliente_id' => (int) $existente['id']];
         }
 
@@ -98,6 +101,9 @@ class LeadService
             self::registrar($registro, 'criado', null, $id, $quando);
             return $id;
         });
+        if ($quando === null) {
+            NotificacaoService::leadRecebido((int) $id, true);
+        }
         return ['ok' => true, 'resultado' => 'criado', 'status' => 200, 'mensagem' => self::obrigado(), 'cliente_id' => $id];
     }
 

@@ -180,3 +180,44 @@ input[type=color] { width: 44px; height: 38px; padding: 2px; border: 1px solid v
 .busca-vazio { margin: 0; padding: 10px; color: var(--texto-suave); font-size: .86rem; }
 .topo .usuario { margin-left: 12px; }
 @media (max-width: 900px) { .busca-rapida kbd { display: none; } .busca-rapida { flex: 1 1 auto; } .topo h1 { display: none; } }
+
+/* Contador vermelho do menu (o que está pendente) */
+.menu-lateral nav a { position: relative; }
+.menu-contador { margin-left: auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 99px; background: #e5484d; color: #fff;
+  font-size: .72rem; font-weight: 800; display: inline-grid; place-items: center; font-variant-numeric: tabular-nums; box-shadow: 0 0 0 3px rgba(229, 72, 77, .18); }
+.menu-contador[hidden] { display: none; }
+.abrir-menu { position: relative; }
+.menu-ponto { position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: #e5484d; border: 2px solid #fff; }
+
+/* Sino */
+.sino { position: relative; }
+.sino .botao-icone { position: relative; }
+.sino-contador { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 99px; background: #e5484d; color: #fff;
+  font-size: .7rem; font-weight: 800; display: grid; place-items: center; border: 2px solid #fff; animation: sino-pulsar 2s ease-in-out 3; }
+.sino-contador[hidden] { display: none; }
+@keyframes sino-pulsar { 50% { transform: scale(1.18); } }
+.sino-painel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: min(380px, calc(100vw - 24px)); background: #fff; border: 1px solid var(--borda);
+  border-radius: 16px; box-shadow: 0 18px 44px rgba(0, 0, 0, .16); overflow: hidden; }
+.sino-painel header, .sino-painel footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 14px; background: #f7f9f5; }
+.sino-painel footer a { font-size: .85rem; font-weight: 600; }
+.sino-lista { max-height: 380px; overflow: auto; display: grid; }
+.sino-lista a { display: grid; gap: 2px; padding: 10px 14px; border-top: 1px solid #eef1ec; text-decoration: none; color: var(--texto); }
+.sino-lista a:hover { background: #f3f9ea; }
+.sino-lista a.nao-lida { background: #f3ffd6; box-shadow: inset 4px 0 0 #6cbf2a; }
+.sino-lista a span { font-size: .82rem; color: var(--texto-suave); }
+.sino-lista a small { font-size: .72rem; color: var(--texto-suave); }
+.sino-lista p { padding: 14px; margin: 0; }
+.sino-pc { font: inherit; font-size: .8rem; border: 1px solid var(--borda); background: #fff; border-radius: 99px; padding: 4px 10px; cursor: pointer; }
+.notif-nova { display: block; text-decoration: none; }
+@media (prefers-reduced-motion: reduce) { .sino-contador { animation: none; } }
+
+/* Marca de novidade em clientes e pedidos */
+.novidade { display: inline-flex; align-items: center; gap: 5px; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+  color: #b42318; background: #fde8e4; border-radius: 99px; padding: 2px 8px 2px 6px; vertical-align: middle; white-space: nowrap; }
+.novidade::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #e5484d; animation: novidade-pulsar 1.6s ease-in-out infinite; }
+@keyframes novidade-pulsar { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .novidade::before { animation: none; } }
+.notif-pagina a strong .selo { margin-right: 6px; }
+@media (max-width: 640px) {
+  .sino-painel { position: fixed; left: 12px; right: 12px; width: auto; top: calc(env(safe-area-inset-top, 0px) + 96px); }
+}

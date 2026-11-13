@@ -146,6 +146,9 @@ class MarketingService
         Banco::atualizar('mkt_posts', (int) $post['id'], $dados);
         Auditoria::registrar('post', (int) $post['id'], 'etapa', ['etapa_id' => $post['etapa_id']], $dados);
         self::comentar((int) $post['id'], $usuarioId, $post['etapa'] . ' → ' . $etapa['nome'], $etapa['tipo'] === 'aprovado' ? 'aprovacao' : 'etapa');
+        if ($etapa['tipo'] === 'aprovacao') {
+            NotificacaoService::postParaAprovar($post, $usuarioId);
+        }
         return null;
     }
 
@@ -162,6 +165,7 @@ class MarketingService
         Banco::atualizar('mkt_posts', (int) $post['id'], $dados);
         Auditoria::registrar('post', (int) $post['id'], 'ajuste', ['etapa_id' => $post['etapa_id']], $dados);
         self::comentar((int) $post['id'], $usuarioId, 'Pediu ajuste: ' . $motivo, 'ajuste');
+        NotificacaoService::postAjuste($post, $motivo, $usuarioId);
     }
 
     public static function publicar(array $post, string $link, int $usuarioId): ?string

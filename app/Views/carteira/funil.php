@@ -13,7 +13,7 @@ use App\Services\Normalizar;
       <div class="funil-cards" data-soltar>
         <?php foreach ($col['cards'] as $c): ?>
           <article class="funil-card" draggable="true" data-cliente="<?= (int) $c['id'] ?>">
-            <button type="button" class="nome-cliente" data-abrir-cliente="<?= (int) $c['id'] ?>"><?= e($c['nome_fantasia'] ?: $c['razao_social']) ?></button>
+            <button type="button" class="nome-cliente" data-abrir-cliente="<?= (int) $c['id'] ?>"><?= e($c['nome_fantasia'] ?: $c['razao_social']) ?></button><?= \App\Services\NotificacaoService::marca((int) $c['id']) ?>
             <small><?= e($c['cidade']) ?> / <?= e($c['uf']) ?> · <?= e($c['segmento']) ?></small>
             <div class="funil-card-rodape">
               <span class="selo prioridade-<?= e(Normalizar::semAcento($c['prioridade'])) ?>"><?= e($c['prioridade']) ?></span>

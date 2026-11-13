@@ -77,7 +77,7 @@ $maxFunil = max(1, ...array_column($p['funil'], 'total') ?: [1]);
     <ul class="pr-alertas ps-proximos">
       <?php foreach ($p['proximos'] as $l): ?>
         <li data-lead="<?= (int) $l['id'] ?>">
-          <div class="ps-lead-nome"><button class="nome-cliente" type="button" data-abrir-cliente="<?= (int) $l['id'] ?>"><strong><?= e($l['nome_fantasia'] ?: $l['razao_social']) ?></strong></button>
+          <div class="ps-lead-nome"><button class="nome-cliente" type="button" data-abrir-cliente="<?= (int) $l['id'] ?>"><strong><?= e($l['nome_fantasia'] ?: $l['razao_social']) ?></strong></button><?= \App\Services\NotificacaoService::marca((int) $l['id']) ?>
           <small class="suave ps-proximo-info"><?= e(trim(($l['bairro'] ? $l['bairro'] . ' · ' : '') . $l['cidade'] . '/' . $l['uf'])) ?> · <?= e($l['origem'] ?? 'sem origem') ?><?= Auth::pode('carteira.ver_todas') && $l['responsavel'] ? ' · ' . e($l['responsavel']) : '' ?></small></div>
           <span class="selo <?= $l['prioridade'] === ($prioridades[0] ?? 'Alta') ? 'vermelho' : 'cinza' ?>"><?= e($l['prioridade']) ?></span>
           <?php if ($l['telefone']): ?><a class="botao contorno pequeno" href="tel:+55<?= e($l['telefone']) ?>"><svg class="icone"><use href="<?= $icones ?>#telefone"/></svg><?= e(Normalizar::telefoneFormatado($l['telefone'])) ?></a><?php else: ?><span></span><?php endif; ?>
