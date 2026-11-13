@@ -57,10 +57,9 @@ class AtualizacaoController extends Controller
         unlink($arquivo); // não fica cópia no servidor
     }
 
-    /** Versão instalada: arquivo VERSAO na raiz (gerado pelo pacote) */
+    /** Versão instalada, ex.: ONE_V2.0 (a lista das versões fica em app/versoes.php) */
     public static function versao(): string
     {
-        $arquivo = RAIZ . '/VERSAO';
-        return is_file($arquivo) ? trim((string) file_get_contents($arquivo)) : 'desenvolvimento';
+        return \App\Services\Versoes::nome();
     }
 }

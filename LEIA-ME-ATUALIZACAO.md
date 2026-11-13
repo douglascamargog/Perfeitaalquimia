@@ -14,7 +14,8 @@ Peça: *"gere o pacote de atualização"*, ou rode:
 bash ferramentas/gerar_pacote.sh --atualizacao
 ```
 
-Sai o arquivo `pacote/one-atualizacao-AAAA.MM.DD-xxxxxxx.zip`. Ele **não** contém:
+Antes, acrescente a versão nova no topo de `app/versoes.php` (o Claude Code faz isso): pequena muda a decimal
+(V2.0 → V2.1), grande muda o número (V3.0). Sai o arquivo `pacote/ONE_V2.1.zip` (o nome é a versão). Ele **não** contém:
 `config/config.php` (suas senhas), `referencias/` (dados de clientes) nem as mídias da Academia.
 
 ## Na hospedagem — 5 minutos
@@ -29,7 +30,8 @@ Faça de preferência fora do horário de uso da equipe.
 4. **Aplicar** — volte ao One › **Administração › Atualização**.
    - Se aparecer "atualização(ões) pendente(s)", clique em **Aplicar atualização**.
    - Se aparecer "Banco em dia ✓", não há nada a fazer.
-5. **Conferir** — o número da versão aparece no rodapé do menu. Abra a Carteira e o Meu mês para conferir.
+5. **Conferir** — o número da versão (ex.: ONE_V2.1) aparece no rodapé do menu. Abra a Carteira e o Meu mês para conferir.
+   A equipe é avisada sozinha: cada pessoa recebe "One atualizado" no sino e vê a janela de **Novidades** uma vez.
 
 ## Se algo der errado (voltar atrás)
 

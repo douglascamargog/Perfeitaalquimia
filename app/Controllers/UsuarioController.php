@@ -58,6 +58,7 @@ class UsuarioController extends Controller
 
         $dados['senha_hash'] = password_hash((string) $_POST['senha'], PASSWORD_DEFAULT);
         $dados['trocar_senha'] = 1; // a pessoa cria a própria senha no primeiro acesso
+        $dados['versao_vista'] = \App\Services\Versoes::atual(); // quem chega agora não precisa das novidades antigas
         $id = Banco::transacao(function () use ($dados) {
             $id = Banco::inserir('usuarios', $dados);
             Usuario::definirFuncoes($id, (array) ($_POST['funcoes'] ?? []));

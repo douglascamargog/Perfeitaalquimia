@@ -21,7 +21,8 @@ TIPO=instalacao
 if [ "${1:-}" = "--atualizacao" ]; then TIPO=atualizacao; shift; fi
 SAIDA="${1:-$(pwd)/pacote}"
 DATA=$(date +%Y-%m-%d)
-VERSAO="$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)"
+# Nome da versão = a primeira de app/versoes.php (ex.: ONE_V2.1). Antes de gerar, acrescente a versão nova lá.
+VERSAO="ONE_V$(php -r 'define("RAIZ", getcwd()); echo (require "app/versoes.php")[0]["versao"];')"
 TMP=$(mktemp -d)
 DESTINO="$TMP/one"
 mkdir -p "$DESTINO"
@@ -46,7 +47,7 @@ echo "$VERSAO" > "$DESTINO/VERSAO"
 if [ "$TIPO" = "atualizacao" ]; then
   rm -f "$DESTINO/config/config.php"   # nunca sobrescrever as senhas da hospedagem
   mkdir -p "$SAIDA"
-  ARQUIVO="$SAIDA/one-atualizacao-$VERSAO.zip"
+  ARQUIVO="$SAIDA/$VERSAO.zip"
   rm -f "$ARQUIVO"
   (cd "$TMP" && zip -qr "$ARQUIVO" one)
   echo "Pacote de ATUALIZAÇÃO: $ARQUIVO ($(du -h "$ARQUIVO" | cut -f1)) · versão $VERSAO"
@@ -68,7 +69,7 @@ echo "$TOKEN" > "$TMP/token.txt"
 
 # 4. Zip
 mkdir -p "$SAIDA"
-ARQUIVO="$SAIDA/one-instalacao-$VERSAO.zip"
+ARQUIVO="$SAIDA/${VERSAO}_instalacao.zip"
 rm -f "$ARQUIVO"
 (cd "$TMP" && zip -qr "$ARQUIVO" one)
 echo "Pacote de INSTALAÇÃO: $ARQUIVO ($(du -h "$ARQUIVO" | cut -f1)) · versão $VERSAO"

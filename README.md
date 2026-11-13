@@ -221,6 +221,9 @@ Rode antes de publicar qualquer mudança. Eles apagam e recriam o banco: use só
 - **Acessos por aba** (Administração › Acessos): para cada perfil, cada aba fica *Sem acesso*, *Ver* ou *Ver e editar*,
   mais as ações especiais (ver todas as carteiras, aprovar posts...). Exceções por pessoa no cadastro do usuário
   ("Acessos desta pessoa"). Todas as abas aparecem no menu: 🔒 = sem acesso, 👁 = só leitura. O Admin sempre tem tudo.
+- **Versões e novidades**: o One tem número de versão (ONE_V2.0, ONE_V2.1...; lista em `app/versoes.php`). Depois de cada
+  atualização, todos recebem o aviso no sino e veem uma vez a janela com as novidades, melhorias e correções.
+  O histórico fica em /novidades (link no rodapé do menu).
 - **Foco pela função**: o Início, as dicas do One, o sino e os contadores mostram só as áreas da pessoa
   (Comercial, Aprovação, Cobrança, Marketing, Produção, Diretoria). Cada função tem as suas áreas (Administração › Funções)
   e cada pessoa pode ajustar em Meu perfil › "O que aparece para mim". Ex.: admin da função Marketing vê só o Marketing.

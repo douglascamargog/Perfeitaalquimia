@@ -81,7 +81,7 @@ unset($itensDoGrupo);
         <?php endforeach; ?>
       <?php endforeach; ?>
     </nav>
-    <div class="menu-rodape"><?= e(config('app_nome')) ?> · versão <?= e(\App\Controllers\AtualizacaoController::versao()) ?></div>
+    <div class="menu-rodape"><a href="<?= url('/novidades') ?>" title="O que mudou em cada versão"><?= e(\App\Services\Versoes::nome()) ?> · novidades</a></div>
   </aside>
 
   <div class="principal">
@@ -141,6 +141,27 @@ unset($itensDoGrupo);
     <button type="button" class="botao-icone escuro" data-one-fechar aria-label="Fechar">✕</button></header>
   <div class="one-painel-corpo" data-one-corpo><p class="one-carregando"><img src="<?= asset('img/one/one-pensando-padrao.svg') ?>" alt="" width="40">Um instante, estou olhando seus dados…</p></div>
 </section>
+<?php // Novidades da versão: aparece uma vez para quem ainda não viu a versão atual
+$usuarioNov = Auth::usuario();
+\App\Services\Versoes::avisarSeNova(); // versão nova? avisa a equipe no sino (uma vez)
+if ($usuarioNov && array_key_exists('versao_vista', $usuarioNov) && empty($usuarioNov['trocar_senha']) && $caminhoAtual !== '/novidades' && ($novasVersoes = \App\Services\Versoes::naoVistas($usuarioNov['versao_vista'] ?? null))): ?>
+  <div class="nov-fundo" data-novidades>
+    <section class="nov-janela" role="dialog" aria-modal="true" aria-labelledby="nov-titulo">
+      <header class="nov-topo">
+        <img src="<?= asset('img/one/one-ola-padrao.svg') ?>" alt="" width="54" height="60">
+        <div><span class="nov-rotulo">O One foi atualizado</span><h2 id="nov-titulo">Novidades da <?= e(\App\Services\Versoes::nome()) ?></h2></div>
+      </header>
+      <div class="nov-corpo">
+        <?php foreach ($novasVersoes as $versao): ?><?= \App\Core\Visao::renderizar('novidades/_versao', ['versao' => $versao]) ?><?php endforeach; ?>
+      </div>
+      <form method="post" action="<?= url('/novidades/vista') ?>" class="nov-acoes">
+        <?= csrf_campo() ?>
+        <a href="<?= url('/novidades') ?>">Ver todas as versões</a>
+        <button class="botao" type="submit" data-novidades-ok>Entendi</button>
+      </form>
+    </section>
+  </div>
+<?php endif; ?>
 <script type="module" src="<?= asset('js/app.js') ?>"></script>
 <script type="module" src="<?= asset('js/busca.js') ?>"></script>
 <script type="module" src="<?= asset('js/notificacoes.js') ?>"></script>

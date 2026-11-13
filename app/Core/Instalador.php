@@ -26,10 +26,25 @@ class Instalador
     public function executar(bool $incluirDemo = true): void
     {
         $this->criarControle();
+        $instalacaoNova = !Banco::valor('SELECT COUNT(*) FROM migracoes');
         $this->migrar();
         $this->semear($incluirDemo);
+        $this->avisarVersao($instalacaoNova);
         if (!$this->log) {
             $this->log[] = 'Nada a fazer: o banco já está atualizado.';
+        }
+    }
+
+    /**
+     * Novidades da versão (app/versoes.php), uma vez por versão:
+     *  - instalação nova: ninguém precisa ver as novidades (marca a versão atual como vista);
+     *  - atualização: todos os usuários ativos recebem um aviso no sino, e a janela aparece no próximo acesso.
+     */
+    private function avisarVersao(bool $instalacaoNova): void
+    {
+        $n = \App\Services\Versoes::avisarSeNova($instalacaoNova);
+        if ($n) {
+            $this->log[] = 'Novidades da ' . \App\Services\Versoes::nome() . " avisadas para $n pessoa(s).";
         }
     }
 

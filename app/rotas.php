@@ -213,6 +213,8 @@ return [
     ['GET',  '/busca',                          'BuscaController@rapida',     'logado'],
 
     // ---------- Meu perfil (foto, aniversário, contatos) ----------
+    ['GET',  '/novidades',                      'NovidadesController@index',  'logado'],
+    ['POST', '/novidades/vista',                'NovidadesController@vista',  'logado'],
     ['GET',  '/meu-perfil',                     'MeuPerfilController@index',  'logado'],
     ['POST', '/meu-perfil',                     'MeuPerfilController@salvar', 'logado'],
 
