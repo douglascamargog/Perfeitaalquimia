@@ -67,6 +67,12 @@ class OneAssistente
         if (Auth::pode('producao.gerenciar') && Foco::tem('producao')) {
             $falas = array_merge($falas, self::producao());
         }
+        // Terceirização: rótulos de clientes que não dão para produzir
+        if ((Auth::pode('terceirizacao.ver') || Auth::pode('terceirizacao.editar')) && Foco::tem('terceirizacao')
+            && ($rot = \App\Services\TerceirizacaoService::alertas())) {
+            $falas[] = ['humor' => 'ops', 'texto' => count($rot) . ' produto(s) de clientes com rótulos abaixo do mínimo ou sem rótulo para as ordens planejadas. Avise o cliente para enviar.',
+                'link' => '/terceirizacao/rotulos?situacao=alerta', 'acao' => 'Ver rótulos'];
+        }
         if ($comercial && Auth::pode('meu_mes.usar')) {
             $falas[] = self::metaIndividual($id);
             $falas[] = self::metaEquipe();

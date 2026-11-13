@@ -48,6 +48,7 @@ class FuncaoController extends Controller
             'ativa'     => isset($_POST['ativa']) ? 1 : 0,
             // Áreas que a função acompanha (Início, One, sino e números do menu)
             'areas_foco' => implode(',', \App\Services\Foco::lista(implode(',', (array) ($_POST['areas'] ?? [])))),
+            'frente' => in_array($_POST['frente'] ?? '', ['externo', 'televendas', 'terceirizacao'], true) ? $_POST['frente'] : null,
         ];
         Banco::atualizar('funcoes', (int) $id, $dados);
         Auditoria::registrar('funcao', (int) $id, 'editar', $antes, $dados);

@@ -74,6 +74,10 @@ class PendenciasService
             $a = ProducaoService::alertas();
             $r['/producao'] = $a['mp_abaixo'] + $a['reabastecer'];
         }
+        // Terceirização: rótulos de clientes abaixo do mínimo ou que não dão para as ordens planejadas
+        if (($pode('terceirizacao.ver') || $pode('terceirizacao.editar')) && Foco::tem('terceirizacao')) {
+            $r['/terceirizacao'] = count(\App\Services\TerceirizacaoService::alertas());
+        }
         return $r;
     }
 }

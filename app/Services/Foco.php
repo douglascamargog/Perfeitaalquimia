@@ -19,6 +19,7 @@ class Foco
         'cobranca'  => 'Cobrança',
         'marketing' => 'Marketing (posts, campanhas, e-commerce, leads)',
         'producao'  => 'Produção',
+        'terceirizacao' => 'Terceirização (produtos dos clientes e rótulos)',
         'diretoria' => 'Diretoria (resumo da empresa: faturado, aprovação, cobrança, produção)',
     ];
 

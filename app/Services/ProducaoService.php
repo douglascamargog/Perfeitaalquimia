@@ -326,9 +326,14 @@ class ProducaoService
         if (!Banco::valor('SELECT 1 FROM ficha_tecnica WHERE produto_id = ? LIMIT 1', [$produtoId])) {
             throw new RuntimeException('Este produto ainda não tem ficha técnica. Cadastre a ficha (o que vai em cada unidade) antes de produzir.');
         }
+        // Terceirização: ordem para um cliente que faz este produto com a marca dele (usa os rótulos dele)
+        $clienteId = (int) ($d['cliente_id'] ?? 0) ?: null;
+        if ($clienteId && !Banco::valor('SELECT 1 FROM terceirizacao_produtos WHERE cliente_id = ? AND produto_id = ? AND ativo = 1', [$clienteId, $produtoId])) {
+            throw new RuntimeException('Este cliente não tem esse produto cadastrado na Terceirização.');
+        }
         $data = fn($v) => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $v) ? $v : null;
         $dados = array_filter([
-            'produto_id' => $produtoId, 'quantidade' => $qtd, 'origem' => $origem === 'reabastecimento' ? 'reabastecimento' : 'manual',
+            'produto_id' => $produtoId, 'quantidade' => $qtd, 'cliente_id' => $clienteId, 'origem' => $origem === 'reabastecimento' ? 'reabastecimento' : 'manual',
             'lote' => mb_substr(trim((string) ($d['lote'] ?? '')), 0, 40) ?: null, 'validade' => $data($d['validade'] ?? null),
             'previsto_para' => $data($d['previsto_para'] ?? null), 'observacoes' => trim((string) ($d['observacoes'] ?? '')) ?: null,
             'criado_por' => $usuarioId, 'criado_em' => $quando,
@@ -368,6 +373,16 @@ class ProducaoService
                 $faltas = array_map(fn($l) => $l['nome'] . ': faltam ' . self::qtd($l['falta'], $l['unidade']), array_filter($previa['linhas'], fn($l) => $l['falta'] > 0));
                 throw new RuntimeException('Estoque insuficiente para concluir. ' . implode(' · ', $faltas) . '.');
             }
+            // Terceirização: precisa de 1 rótulo do cliente por unidade (sem rótulo, não conclui)
+            $terc = \App\Services\TerceirizacaoService::daOrdem($op);
+            if ($terc) {
+                $saldo = (int) Banco::valor('SELECT rotulos_estoque FROM terceirizacao_produtos WHERE id = ? FOR UPDATE', [$terc['id']]);
+                if ($saldo < $qtd) {
+                    $cliente = (string) Banco::valor('SELECT COALESCE(NULLIF(nome_fantasia, ""), razao_social) FROM clientes WHERE id = ?', [$op['cliente_id']]);
+                    throw new RuntimeException('Faltam ' . ($qtd - $saldo) . " rótulo(s) de \"{$terc['nome_rotulo']}\" do cliente $cliente (tem $saldo, precisa de $qtd). Registre a chegada dos rótulos na Terceirização.");
+                }
+                \App\Services\TerceirizacaoService::movimentarRotulos((int) $terc['id'], 'consumo', -$qtd, "OP $id", $usuarioId, $id, $quando);
+            }
             foreach ($previa['linhas'] as $l) {
                 self::movimentarMp($l['materia_prima_id'], 'consumo', -$l['precisa'], ['referencia' => "OP $id", 'ordem_id' => $id, 'usuario_id' => $usuarioId], $quando);
             }
@@ -395,8 +410,11 @@ class ProducaoService
 
     public static function ordem(int $id): ?array
     {
-        return Banco::um('SELECT o.*, p.codigo, p.nome AS produto, p.embalagem, uc.nome AS criador, uf.nome AS concluidor FROM ordens_producao o
+        return Banco::um('SELECT o.*, p.codigo, p.nome AS produto, p.embalagem, uc.nome AS criador, uf.nome AS concluidor,
+                COALESCE(NULLIF(cl.nome_fantasia, ""), cl.razao_social) AS cliente_nome, tp.nome_rotulo, tp.rotulos_estoque
+            FROM ordens_producao o
             JOIN produtos p ON p.id = o.produto_id LEFT JOIN usuarios uc ON uc.id = o.criado_por LEFT JOIN usuarios uf ON uf.id = o.concluida_por
+            LEFT JOIN clientes cl ON cl.id = o.cliente_id LEFT JOIN terceirizacao_produtos tp ON tp.cliente_id = o.cliente_id AND tp.produto_id = o.produto_id
             WHERE o.id = ?', [$id]);
     }
 

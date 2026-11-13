@@ -207,6 +207,14 @@ $atalhos = $principal && isset($atalhosFoco[$principal])
     </a>
   <?php endif; ?>
 
+  <?php if ($p['rotulos'] !== null && $p['rotulos'] !== false): $rot = $p['rotulos']; ?>
+    <a class="b-card b-kpi span-3 <?= $rot ? 'b-alerta-suave' : '' ?>" href="<?= url('/terceirizacao/rotulos' . ($rot ? '?situacao=alerta' : '')) ?>" data-card="rotulos">
+      <header class="b-topo"><span>Rótulos dos clientes</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#etiqueta"/></svg></span></header>
+      <strong class="b-valor"><?= $n(count($rot)) ?> <small>em alerta</small></strong>
+      <small><?= $rot ? 'abaixo do mínimo ou sem rótulo para as ordens · peça ao cliente' : 'todos os rótulos em dia' ?></small>
+    </a>
+  <?php endif; ?>
+
   <?php if ($p['producao']): $pr = $p['producao']; ?>
     <a class="b-card b-kpi span-3 <?= $pr['mp_abaixo'] ? 'b-alerta-suave' : '' ?>" href="<?= url('/producao/materias?situacao=alerta') ?>" data-card="producao-mp">
       <header class="b-topo"><span>Matérias-primas</span><span class="b-icone-redondo"><svg class="icone"><use href="<?= $icones ?>#fabrica"/></svg></span></header>

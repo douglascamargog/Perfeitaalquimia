@@ -19,6 +19,8 @@ return [
             ['App do externo', null, 'app.usar', ''],
             ['Pedidos', 'pedidos.ver_todos', 'pedidos.criar', 'Ver: todos os pedidos · Editar: criar pedidos (vê os próprios)'],
             ['Aprovação de pedidos', null, 'pedidos.aprovar', ''],
+            ['Equipe de vendas', null, 'equipe.ver', 'Meta da equipe, números das frentes e ranking'],
+            ['Terceirização', 'terceirizacao.ver', 'terceirizacao.editar', 'Editar: produtos dos clientes e registro de rótulos'],
             ['Cobrança', 'cobranca.ver', 'cobranca.gerenciar', ''],
         ],
         'Gestão' => [

@@ -28,6 +28,8 @@ class OrdemProducaoController extends Controller
     {
         $this->tela('producao/ordem_form', [
             'titulo' => 'Nova ordem de produção', 'produtos' => self::produtosComFicha(),
+            // Terceirização: clientes que fazem cada produto com a marca deles (a ordem usa os rótulos do cliente)
+            'terc' => \App\Services\TerceirizacaoService::produtos(),
             'produtoId' => (int) ($_GET['produto'] ?? Sessao::antigo('produto_id', 0)), 'estilos' => self::ESTILOS, 'scripts' => ['producao.js'],
         ]);
     }

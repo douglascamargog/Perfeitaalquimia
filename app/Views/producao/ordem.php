@@ -9,6 +9,8 @@ $icones = asset('img/icones.svg');
 <div class="cabecalho-secao">
   <div><div class="sobretitulo"><a href="<?= url('/producao/ordens') ?>">ORDENS DE PRODUÇÃO</a> · <?= $o['origem'] === 'reabastecimento' ? 'REABASTECIMENTO' : 'MANUAL' ?></div>
     <h1>OP <?= (int) $o['id'] ?> · <?= e($o['produto']) ?> <span class="selo <?= $cor ?>" data-situacao><?= $rotulo ?></span></h1>
+    <?php if (!empty($o['cliente_nome'])): ?><p><span class="selo verde">Terceirização</span> para <strong><?= e($o['cliente_nome']) ?></strong> · rótulo "<?= e($o['nome_rotulo']) ?>"
+      <?php if ($o['situacao'] === 'planejada'): ?>· <span class="<?= (int) $o['rotulos_estoque'] < (int) $o['quantidade'] ? 'pn-vermelho' : '' ?>"><?= (int) $o['rotulos_estoque'] ?> rótulos em estoque</span><?php endif; ?></p><?php endif; ?>
     <p><?= number_format((int) $o['quantidade'], 0, ',', '.') ?> unidade(s)<?= $o['lote'] ? ' · lote ' . e($o['lote']) : '' ?><?= $o['validade'] ? ' · validade ' . data_br($o['validade']) : '' ?>
       · criada por <?= e($o['criador'] ?? '—') ?> em <?= data_br($o['criado_em'], true) ?></p></div>
   <div class="acoes"><a class="botao contorno" href="<?= url('/producao/ordens/' . (int) $o['id'] . '/imprimir') ?>" target="_blank" rel="noopener"><svg class="icone"><use href="<?= $icones ?>#imprimir"/></svg>Imprimir ordem</a></div>

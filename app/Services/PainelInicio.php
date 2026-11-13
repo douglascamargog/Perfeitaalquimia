@@ -44,6 +44,7 @@ class PainelInicio
             'marketing'    => $ve('marketing.ver', 'marketing') ? self::marketing() : null,
             'vendas'       => $ve('painel.ver', 'comercial', 'diretoria') ? self::vendas($mes, $soDiretoria) : null,
             'recompra'     => $ve('recompra.ver', 'comercial') ? VendasService::qtdRecompra() : null,
+            'rotulos'      => ($ve('terceirizacao.ver', 'terceirizacao') || $ve('terceirizacao.editar', 'terceirizacao')) ? TerceirizacaoService::alertas() : null,
             'producao'     => ($ve('producao.gerenciar', 'producao', 'diretoria') || $ve('producao.ver', 'producao', 'diretoria')) ? ProducaoService::alertas() : null,
             'ecommerce'    => $ve('ecommerce.ver', 'marketing', 'diretoria') && Banco::valor('SELECT 1 FROM ecommerce_resumo_diario LIMIT 1') ? EcommerceService::painel(date('Y-m')) : null,
         ];
