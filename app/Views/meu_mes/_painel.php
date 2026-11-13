@@ -1,5 +1,5 @@
 <?php
-/** Visão do mês (individual). Variáveis: $mes, $eu, $equipe, $tarefas, $participacao, $nomeMes, $pct, $ou, $link */
+/** Visão do mês (individual). Variáveis: $mes, $eu, $equipe, $tarefas, $participacao, $nomeMes, $pct, $ou, $link, $clientes */
 use App\Services\MetaService;
 
 $c = $eu['config'];
@@ -56,6 +56,10 @@ $pendentes = array_slice(array_filter($tarefas, fn($t) => !$t['concluida_em']), 
   <?php if (!empty($faturadoSistema)): ?>
     <div class="kpi"><span>Faturado no sistema</span><strong><?= dinheiro($faturadoSistema['valor']) ?></strong><small><?= (int) $faturadoSistema['pedidos'] ?> pedido(s) faturado(s) com você como vendedor(a)</small></div>
   <?php endif; ?>
+  <div class="kpi mm-top-clientes" data-top-mes><span>Seus melhores clientes do mês</span>
+    <?php if (!empty($clientes['do_mes'])): ?><ol><?php foreach ($clientes['do_mes'] as $c): ?><li><?= e($c['nome']) ?> <b><?= dinheiro($c['valor']) ?></b></li><?php endforeach; ?></ol>
+    <?php else: ?><small>sem pedidos faturados ainda</small><?php endif; ?>
+    <a class="pequeno" href="<?= $link(['aba' => 'clientes']) ?>">Ver meus clientes →</a></div>
   <div class="kpi"><span>Minha participação na equipe</span><strong><?= $participacao === null ? '—' : $pct($participacao) ?></strong><small><?= $equipe ? 'do vendido pela equipe' : 'meta da equipe não cadastrada' ?></small></div>
 </div>
 

@@ -19,7 +19,7 @@ $nome = explode(' ', Auth::usuario()['nome'])[0];
   <div>
     <div class="sobretitulo">SEU ESPAÇO DE TRABALHO</div>
     <h1>Meu mês <span class="suave-titulo">· <?= e($nome) ?></span></h1>
-    <p>Organize a rotina e acompanhe cada passo até a sua meta e a meta da equipe.</p>
+    <p>Suas vendas, seus melhores clientes, quem está parado e a sua rotina até a meta.</p>
   </div>
   <div class="acoes seletor-mes">
     <a class="botao-icone" href="<?= $link(['mes' => $anterior, 'aba' => $aba]) ?>" aria-label="Mês anterior">←</a>
@@ -29,13 +29,20 @@ $nome = explode(' ', Auth::usuario()['nome'])[0];
   </div>
 </div>
 
-<?= Visao::renderizar('meu_mes/_equipe', compact('mes', 'equipe', 'podeEquipe', 'nomeMes', 'pct', 'ou')) ?>
+<?php // A meta da equipe fica em Equipe de vendas; aqui só um atalho ?>
+<?php if ($equipe && \App\Core\Auth::pode('equipe.ver')): ?>
+  <a class="mm-equipe-atalho" href="<?= url('/equipe?mes=' . e($mes)) ?>" data-atalho-equipe>
+    <span>Equipe: <strong><?= $pct($equipe['percentual']) ?></strong> da meta de <?= e($nomeMes($mes)) ?></span>
+    <span class="mm-equipe-barra"><i style="width: <?= min(100, $equipe['percentual']) ?>%"></i></span>
+    <span>Ver equipe de vendas →</span>
+  </a>
+<?php endif; ?>
 
 <nav class="abas" aria-label="Meu mês">
-  <?php foreach (['painel' => 'Visão do mês', 'vendas' => 'Minhas vendas', 'calendario' => 'Calendário', 'tarefas' => 'Tarefas'] as $chave => $rotulo):
+  <?php foreach (['painel' => 'Visão do mês', 'vendas' => 'Minhas vendas', 'clientes' => 'Meus clientes', 'calendario' => 'Calendário', 'tarefas' => 'Tarefas'] as $chave => $rotulo):
       $pendentes = $chave === 'tarefas' ? count(array_filter($tarefas, fn($t) => !$t['concluida_em'])) : 0; ?>
     <a href="<?= $link(['aba' => $chave]) ?>" class="<?= $chave === $aba ? 'ativa' : '' ?>"><?= $rotulo ?><?= $pendentes ? " <b class=\"contador\">$pendentes</b>" : '' ?></a>
   <?php endforeach; ?>
 </nav>
 
-<?= Visao::renderizar('meu_mes/_' . $aba, compact('mes', 'dia', 'eu', 'equipe', 'tarefas', 'participacao', 'faturadoSistema', 'nomeMes', 'pct', 'ou', 'link')) ?>
+<?= Visao::renderizar('meu_mes/_' . $aba, compact('mes', 'dia', 'eu', 'equipe', 'tarefas', 'participacao', 'faturadoSistema', 'nomeMes', 'pct', 'ou', 'link', 'clientes')) ?>

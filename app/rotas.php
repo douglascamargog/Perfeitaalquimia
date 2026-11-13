@@ -215,6 +215,15 @@ return [
     // ---------- Meu perfil (foto, aniversário, contatos) ----------
     ['GET',  '/novidades',                      'NovidadesController@index',  'logado'],
     ['POST', '/novidades/vista',                'NovidadesController@vista',  'logado'],
+    ['GET',  '/equipe',                         'EquipeController@index',                'equipe.ver'],
+    // Terceirização (marca própria do cliente)
+    ['GET',  '/terceirizacao',                  'TerceirizacaoController@clientes',      'terceirizacao.ver|terceirizacao.editar'],
+    ['GET',  '/terceirizacao/pedidos',          'TerceirizacaoController@pedidos',       'terceirizacao.ver|terceirizacao.editar'],
+    ['GET',  '/terceirizacao/produtos',         'TerceirizacaoController@produtos',      'terceirizacao.ver|terceirizacao.editar'],
+    ['POST', '/terceirizacao/produtos',         'TerceirizacaoController@salvarProduto', 'terceirizacao.editar'],
+    ['POST', '/terceirizacao/produtos/{id}',    'TerceirizacaoController@salvarProduto', 'terceirizacao.editar'],
+    ['GET',  '/terceirizacao/rotulos',          'TerceirizacaoController@rotulos',       'terceirizacao.ver|terceirizacao.editar'],
+    ['POST', '/terceirizacao/rotulos/{id}',     'TerceirizacaoController@movimentar',    'terceirizacao.editar'],
     ['GET',  '/meu-perfil',                     'MeuPerfilController@index',  'logado'],
     ['POST', '/meu-perfil',                     'MeuPerfilController@salvar', 'logado'],
     ['POST', '/meu-perfil/aparencia',           'MeuPerfilController@aparencia', 'logado'],

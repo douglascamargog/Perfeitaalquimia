@@ -18,7 +18,7 @@ class MeuMesController extends Controller
     public function index(): void
     {
         $mes = MetaService::mesValido($_GET['mes'] ?? null);
-        $aba = in_array($_GET['aba'] ?? '', ['painel', 'vendas', 'calendario', 'tarefas'], true) ? $_GET['aba'] : 'painel';
+        $aba = in_array($_GET['aba'] ?? '', ['painel', 'vendas', 'clientes', 'calendario', 'tarefas'], true) ? $_GET['aba'] : 'painel';
         $dia = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($_GET['dia'] ?? '')) && str_starts_with($_GET['dia'], $mes) ? $_GET['dia'] : (str_starts_with(date('Y-m-d'), $mes) ? date('Y-m-d') : "$mes-01");
         $eu = MetaService::indicadores(Auth::id(), $mes);
         $equipe = MetaService::equipe($mes);
@@ -40,7 +40,15 @@ class MeuMesController extends Controller
             'participacao' => $equipe && $equipe['vendido'] > 0 ? $eu['vendido'] / $equipe['vendido'] * 100 : null,
             // Pedidos faturados no sistema (catálogo, sistema, app) em que a pessoa é a vendedora
             'faturadoSistema' => \App\Services\VendasService::faturadoNoMes($mes, 'vendedor', (int) Auth::id()),
+            // Meus clientes: melhores (12 meses e do mês) e os que estão sem comprar (só a carteira da pessoa)
+            'clientes' => [
+                'melhores' => $aba === 'clientes' ? \App\Services\EquipeVendasService::melhores((int) Auth::id(), 10) : [],
+                'do_mes' => $aba === 'painel' ? \App\Services\EquipeVendasService::melhores((int) Auth::id(), 3, $mes) : [],
+                'faixas' => $aba === 'clientes' ? \App\Services\VendasService::semCompra(['vendedor' => (int) Auth::id()]) : [],
+                'parados' => $aba === 'clientes' ? \App\Services\EquipeVendasService::semComprar((int) Auth::id(), (int) (\App\Core\Config::get('carteira.faixas_sem_compra', [30])[0] ?? 30)) : [],
+            ],
             'estilos'  => ['carteira.css', 'meu_mes.css'],
+            'scripts'  => $aba === 'clientes' ? ['carteira.js'] : [], // ficha do cliente na lateral
         ]);
     }
 
@@ -197,7 +205,7 @@ class MeuMesController extends Controller
             $erros[] = 'A data de referência do vendido deve ser deste mês e até hoje.';
         }
         if ($erros) {
-            $this->voltarComErros("/meu-mes?mes=$mes", $erros);
+            $this->voltarComErros("/equipe?mes=$mes", $erros);
         }
         $antes = Banco::um('SELECT meta, vendido FROM metas_equipe WHERE mes = ?', [$mes]);
         Banco::transacao(function () use ($mes, $meta, $vendido, $dias, $folgas, $data, $antes) {
@@ -212,6 +220,6 @@ class MeuMesController extends Controller
         });
         Auditoria::registrar('meta_equipe', null, 'salvar', $antes ?: null, ['mes' => $mes, 'meta' => $meta, 'vendido' => $vendido, 'referencia' => $data]);
         Sessao::aviso('sucesso', 'Meta da equipe atualizada. As projeções já foram recalculadas.');
-        $this->voltar($mes);
+        redirecionar('/equipe?mes=' . $mes); // a meta da equipe fica em Equipe de vendas
     }
 }

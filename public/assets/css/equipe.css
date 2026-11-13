@@ -1,0 +1,21 @@
+/* Equipe de vendas: cartões das frentes, ranking e gráfico */
+.eq-frentes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 20px 0; }
+.eq-frente { margin: 0; display: grid; gap: 8px; align-content: start; }
+.eq-frente header { display: flex; justify-content: space-between; align-items: center; }
+.eq-pct { background: var(--secundaria); color: var(--secundaria-texto); border-radius: 99px; padding: 2px 10px; font-size: .8rem; }
+.eq-valor { font-size: 1.6rem; color: var(--primaria-escura); letter-spacing: -.02em; }
+.eq-frente dl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; margin: 6px 0 0; padding-top: 10px; border-top: 1px solid var(--borda); }
+.eq-frente dt { font-size: .72rem; color: var(--texto-suave); font-weight: 600; }
+.eq-frente dd { margin: 0; font-weight: 700; color: var(--primaria-escura); }
+.eq-frente dd small { display: block; font-weight: 500; color: var(--texto-suave); font-size: .72rem; }
+.eq-grade { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); gap: 18px; align-items: start; }
+.eq-abas { padding: 14px 14px 0; margin-bottom: 0; }
+.eq-pessoa { display: flex; align-items: center; gap: 10px; }
+.eq-posicao { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--primaria-clara); color: var(--primaria-escura); font-size: .78rem; }
+.eq-posicao.top { background: var(--secundaria); color: var(--secundaria-texto); }
+.eq-meta-ind { display: grid; gap: 3px; min-width: 130px; }
+.eq-meta-ind small { font-size: .72rem; color: var(--texto-suave); }
+.eq-grafico { position: relative; height: 300px; }
+@media (max-width: 1100px) { .eq-frentes, .eq-grade { grid-template-columns: 1fr; } }
+.eq-frente .barra-meta, .eq-meta-ind .barra-meta { margin: 4px 0; height: 9px; }
+.eq-grade td.direita { white-space: nowrap; }

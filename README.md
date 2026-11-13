@@ -221,6 +221,11 @@ Rode antes de publicar qualquer mudança. Eles apagam e recriam o banco: use só
 - **Acessos por aba** (Administração › Acessos): para cada perfil, cada aba fica *Sem acesso*, *Ver* ou *Ver e editar*,
   mais as ações especiais (ver todas as carteiras, aprovar posts...). Exceções por pessoa no cadastro do usuário
   ("Acessos desta pessoa"). Todas as abas aparecem no menu: 🔒 = sem acesso, 👁 = só leitura. O Admin sempre tem tudo.
+- **Equipe de vendas** (`/equipe`): meta da equipe, as 3 frentes (Externos, Televendas, Terceirização — `funcoes.frente`,
+  em Administração › Funções) e o ranking. **Meu mês** ficou só do vendedor, com a aba **Meus clientes**.
+- **Terceirização** (`/terceirizacao`): clientes de qualquer carteira que fazem produtos com a marca deles, pedidos,
+  produtos por cliente (nosso produto com a marca do cliente ou fórmula própria exclusiva) e estoque de rótulos,
+  que baixa ao concluir a ordem de produção para o cliente. No pedido, esses produtos são linhas próprias (`t{id}`).
 - **Versões e novidades**: o One tem número de versão (ONE_V2.0, ONE_V2.1...; lista em `app/versoes.php`). Depois de cada
   atualização, todos recebem o aviso no sino e veem uma vez a janela com as novidades, melhorias e correções.
   O histórico fica em /novidades (link no rodapé do menu).

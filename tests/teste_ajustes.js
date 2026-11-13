@@ -20,7 +20,7 @@ async function sair(p) { await p.goto(BASE + '/'); await p.click('form[action$="
   await p.route(/open-meteo|cdn\.jsdelivr/, r => r.fulfill({ body: '{}' }));
 
   // ---------- Código do produto ----------
-  ok(sql("select count(*) from produtos where codigo like 'PA-%'") === sql('select count(*) from produtos'), 'demonstração: todos os produtos com código');
+  ok(sql("select count(*) from produtos where codigo like 'PA-%'") === sql('select count(*) from produtos where cliente_exclusivo_id is null') && sql("select count(*) from produtos where cliente_exclusivo_id is not null and codigo not like 'EX-%'") === '0', 'demonstração: todos os produtos com código (PA- do catálogo, EX- das fórmulas exclusivas)');
   await entrar(p, 'marketing@demo.local');
   const prod = sql("select id from produtos where codigo='PA-1001'");
   await p.goto(BASE + '/produtos?q=PA-1001');

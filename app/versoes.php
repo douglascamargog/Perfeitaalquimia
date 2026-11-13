@@ -17,6 +17,24 @@
  */
 return [
     [
+        'versao' => '4.0', 'data' => '2026-11-13', 'titulo' => 'Equipe de vendas, Meu mês do vendedor e Terceirização',
+        'novo' => [
+            'Equipe de vendas (menu Comercial): a meta da equipe e os números de cada frente (Externos, Televendas e Terceirização), com o ranking do mês.',
+            'Meu mês › Meus clientes: seus melhores clientes e quem está há tempo sem comprar, com WhatsApp e a ficha a um clique.',
+            'Terceirização (menu Comercial): clientes, pedidos, produtos com a marca de cada cliente e o estoque de rótulos.',
+            'No pedido, os produtos com a marca do cliente aparecem junto com os nossos produtos, mesmo para clientes de Televendas ou Externo.',
+        ],
+        'melhoria' => [
+            'Meu mês ficou só seu: suas vendas, sua meta e seus clientes. A meta da equipe está em Equipe de vendas.',
+            'Produção: a ordem pode ser para um cliente de terceirização e usa os rótulos dele.',
+        ],
+        'admin' => [
+            'Administração › Funções: cada função tem a frente de venda (Externos, Televendas, Terceirização). Os números da Equipe seguem a carteira do cliente.',
+            'Acessos novos: Equipe de vendas e Terceirização (Ver / Ver e editar).',
+            'Fórmula própria do cliente: cadastre a ficha técnica em Produção › Fichas técnicas e o preço na tabela Terceirização (ou no próprio produto do cliente).',
+        ],
+    ],
+    [
         'versao' => '3.0', 'data' => '2026-11-13', 'titulo' => 'Visual novo nas cores da Perfeita Alquimia',
         'novo' => [
             'Visual novo, com o verde-petróleo e a menta da Perfeita Alquimia e a fonte da marca.',

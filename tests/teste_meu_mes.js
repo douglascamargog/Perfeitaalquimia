@@ -24,7 +24,9 @@ function diasTrabalho(ate) {
   await entrar(p, 'gestor@demo.local');
   ok(await p.locator('nav a', { hasText: 'Meu mês' }).count() === 1, 'gestor vê "Meu mês" no menu');
   await p.goto(BASE + '/meu-mes');
-  ok((await p.locator('.meta-equipe h2').innerText()).includes('450.000,00'), 'meta da equipe aparece (R$ 450.000,00)');
+  ok(await p.locator('.meta-equipe').count() === 0 && await p.locator('[data-atalho-equipe]').count() === 1, 'Meu mês não tem mais o bloco da equipe, só o atalho');
+  await p.goto(BASE + '/equipe'); // a meta da equipe fica em Equipe de vendas
+  ok((await p.locator('.meta-equipe h2').innerText()).includes('450.000,00'), 'meta da equipe aparece em Equipe de vendas (R$ 450.000,00)');
   await p.click('.form-equipe summary');
   await p.fill('#eq-vendido', '200.000,00');
   const hoje = new Date().getDate();
@@ -43,9 +45,10 @@ function diasTrabalho(ate) {
 
   // ---------- Vendedor: vê a equipe sem poder alterar; usa a meta individual ----------
   await entrar(p, 'televendas1@demo.local');
-  await p.goto(BASE + '/meu-mes');
+  await p.goto(BASE + '/equipe');
   ok(await p.locator('.form-equipe').count() === 0, 'vendedor NÃO vê o formulário da meta da equipe');
   ok((await p.locator('.meta-equipe-numeros').innerText()).includes('200.000,00'), 'vendedor vê o vendido da equipe atualizado pelo gestor');
+  await p.goto(BASE + '/meu-mes');
   const csrf = await p.locator('meta[name=csrf]').getAttribute('content');
   const r = await p.request.post(BASE + '/meu-mes/equipe', { form: { _csrf: csrf, mes: '2026-11', meta: '1', vendido: '1', 'dias_semana[]': '1' } });
   ok(r.status() === 403, 'vendedor recebe 403 ao tentar alterar a meta da equipe');

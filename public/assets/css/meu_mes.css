@@ -109,3 +109,25 @@
   .calendario-grade a { min-height: 54px; padding: 4px; }
   .calendario-grade .valor-dia { display: none; }
 }
+
+/* Atalho para a Equipe de vendas (a meta da equipe mudou para lá) */
+.mm-equipe-atalho { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 12px 18px; margin-bottom: 18px;
+  background: var(--card); border: 1px solid var(--borda); border-radius: var(--raio); text-decoration: none; color: var(--texto); font-size: .88rem; }
+.mm-equipe-atalho:hover { border-color: var(--secundaria); }
+.mm-equipe-barra { height: 8px; border-radius: 99px; background: var(--primaria-clara); overflow: hidden; }
+.mm-equipe-barra i { display: block; height: 100%; background: var(--secundaria); border-radius: 99px; }
+.mm-equipe-atalho span:last-child { color: var(--primaria); font-weight: 700; }
+/* Meus clientes */
+.mm-clientes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.mm-clientes .card { margin: 0; }
+.mm-faixas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 6px 0 12px; }
+.mm-faixas div { background: var(--primaria-clara); border-radius: 12px; padding: 10px; text-align: center; }
+.mm-faixas strong { display: block; font-size: 1.3rem; color: var(--primaria-escura); }
+.mm-faixas span { font-size: .75rem; color: var(--texto-suave); }
+.eq-posicao { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--primaria-clara); color: var(--primaria-escura); font-size: .78rem; }
+.eq-posicao.top { background: var(--secundaria); color: var(--secundaria-texto); }
+.link-cliente { background: none; border: 0; padding: 0; font: inherit; color: var(--primaria-escura); cursor: pointer; text-align: left; display: block; }
+@media (max-width: 1000px) { .mm-clientes { grid-template-columns: 1fr; } .mm-equipe-atalho { grid-template-columns: 1fr; } }
+.mm-top-clientes ol { margin: 4px 0 6px; padding-left: 18px; font-size: .84rem; display: grid; gap: 2px; }
+.mm-top-clientes b { color: var(--primaria-escura); font-weight: 700; }
+.mm-clientes td.direita, .eq-grade td.direita { white-space: nowrap; }
