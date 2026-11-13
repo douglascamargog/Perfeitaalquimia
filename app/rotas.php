@@ -154,6 +154,27 @@ return [
     ['POST', '/meu-mes/tarefas/{id}/excluir',   'MeuMesController@excluirTarefa',  'meu_mes.usar'],
     ['POST', '/meu-mes/equipe',                 'MeuMesController@salvarEquipe',   'metas.gerenciar'],
 
+    // ---------- Prospecção (fila "Para abordar" + base de CNPJs) ----------
+    ['GET',  '/prospeccao',                      'ProspeccaoController@index',           'prospeccao.usar'],
+    ['GET',  '/prospeccao/empresas',             'ProspeccaoController@empresas',        'prospeccao.usar'],
+    ['POST', '/prospeccao/enviar',               'ProspeccaoController@enviar',          'prospeccao.usar'],
+
+    // ---------- Captura de leads (site e anúncios) ----------
+    ['POST',    '/leads/receber',                'LeadController@receber',               'api-publica'],
+    ['OPTIONS', '/leads/receber',                'LeadController@preflight',             'api-publica'],
+    ['GET',     '/seja-revendedor',              'LeadController@pagina',                'publico'],
+    ['POST',    '/seja-revendedor',              'LeadController@enviarPagina',          'publico'],
+    ['GET',     '/leads',                        'LeadController@index',                 'leads.ver'],
+    ['GET',     '/leads/instalar',               'LeadController@instalar',              'leads.ver'],
+
+    // ---------- Mensagens prontas de WhatsApp ----------
+    ['GET',  '/mensagens',                       'MensagemController@index',             'mensagens.gerenciar'],
+    ['GET',  '/mensagens/nova',                  'MensagemController@nova',              'mensagens.gerenciar'],
+    ['POST', '/mensagens',                       'MensagemController@criar',             'mensagens.gerenciar'],
+    ['GET',  '/mensagens/{id}',                  'MensagemController@editar',            'mensagens.gerenciar'],
+    ['POST', '/mensagens/{id}',                  'MensagemController@atualizar',         'mensagens.gerenciar'],
+    ['POST', '/mensagens/{id}/usar',             'MensagemController@usar',              'mensagens.usar'],
+
     // ---------- Produção e matérias-primas (ver: producao.ver · mexer: producao.gerenciar) ----------
     ['GET',  '/producao',                        'ProducaoController@painel',            'producao.gerenciar|producao.ver'],
     ['GET',  '/producao/acabados',               'ProducaoController@acabados',          'producao.gerenciar|producao.ver'],

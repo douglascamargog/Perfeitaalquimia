@@ -34,13 +34,16 @@ class Roteador
             }
             $parametros = array_filter($partes, 'is_string', ARRAY_FILTER_USE_KEY);
 
-            if ($metodo === 'POST' && !Csrf::valido() && self::querJson()) {
+            // 'api-publica' = endereço que outros sites chamam (formulário de leads): sem sessão e sem token CSRF,
+            // protegido pelas próprias regras (anti-robô e limite por hora) no LeadService
+            $apiPublica = $permissao === 'api-publica';
+            if ($metodo === 'POST' && !$apiPublica && !Csrf::valido() && self::querJson()) {
                 http_response_code(419);
                 header('Content-Type: application/json; charset=utf-8');
                 echo json_encode(['ok' => false, 'login' => true, 'mensagem' => 'A sessão mudou. Abra o app de novo com internet.']);
                 return;
             }
-            if ($metodo === 'POST' && !Csrf::valido()) {
+            if ($metodo === 'POST' && !$apiPublica && !Csrf::valido()) {
                 $this->erro(419, 'A página expirou. Volte, recarregue e tente de novo.');
                 return;
             }
@@ -59,7 +62,7 @@ class Roteador
 
     private function autorizado(string $permissao): bool
     {
-        if ($permissao === 'publico') {
+        if ($permissao === 'publico' || $permissao === 'api-publica') {
             return true;
         }
         if (!Auth::logado()) {

@@ -107,6 +107,25 @@ com o "Backup JSON" exportado pela V4.
 - **Recompra** (Comercial): clientes que passaram do próprio intervalo médio de compra (recalculado a cada faturamento), com os produtos
   que costumam comprar, WhatsApp com mensagem pronta, "Novo pedido (repetir)" e "Agendar retorno". O vendedor vê só a carteira dele.
 
+## Prospecção, mensagens prontas e leads do site
+
+- **Prospecção** (`/prospeccao`, Comercial): tudo o que ainda não compra num lugar só.
+  - **Para abordar**: fila única dos leads (listas importadas, base de CNPJs, site, anúncios, indicação), "qual origem funciona melhor"
+    (conversão por origem), funil dos leads e as abordagens da equipe na semana. Vendedor vê só a carteira dele.
+  - **Encontrar empresas**: base pública de CNPJs filtrada pelos CNAEs do nosso público (Configurações › Prospecção), por cidade,
+    bairro, atividade e data de abertura, com a cobertura de cada cidade. Marque e envie para o funil (não duplica CNPJ).
+    No protótipo é uma **amostra simulada do RS**; a base real da Receita entra na mesma tabela numa fase posterior.
+  - A antiga "campanha em destaque" virou parte da Prospecção. As 499 lojas da Carteira V4 estão na origem
+    "Lista de prospecção — Grande Porto Alegre".
+- **Mensagens prontas** (`/mensagens`, Conteúdo): modelos de WhatsApp com variáveis (`{nome}`, `{link_vendedor}`, `{dias_sem_compra}`...).
+  Na ficha do cliente, escolha o modelo: o texto vem preenchido e "Abrir no WhatsApp" registra o contato na linha do tempo.
+- **Leads do site** (`/leads`, Marketing): formulários do site e dos anúncios entram sozinhos no funil, com as UTMs, para a função de
+  novos leads, com tarefa de retorno para hoje. Tabela por campanha (leads → clientes → faturado).
+  - Página pronta para anúncios: `/seja-revendedor?utm_source=instagram&utm_medium=cpc&utm_campaign=...`
+  - Formulário no site da empresa: código em **Leads do site › Instalar no site** (envia para `/leads/receber`).
+  - Proteções: campo escondido anti-robô, limite por hora e, se quiser, só os sites autorizados (Configurações › Captura de leads).
+    O IP nunca é gravado (só uma impressão digital).
+
 ## Produção e matérias-primas
 
 - **Matérias-primas** (`/producao/materias`): estoque, mínimo, fornecedor e último custo. O estoque só muda por

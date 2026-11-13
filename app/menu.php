@@ -6,20 +6,16 @@
  * - 'pronto': false = módulo ainda em construção no protótipo (aparece com o selo "em breve")
  * - 'icone': nome de um ícone do arquivo public/assets/img/icones.svg
  */
-// Campanha em destaque (ex.: Black Friday 2026), configurável em Configurações › Campanha
-$campanha = trim((string) \App\Core\Config::get('carteira.campanha_titulo', ''));
-$temCampanha = $campanha !== '' && trim((string) \App\Core\Config::get('carteira.campanha_origem', '')) !== '';
 
 return array_values(array_filter([
     ['titulo' => 'Início',          'url' => '/',              'icone' => 'casa',      'grupo' => '',               'permissao' => 'logado',                                  'pronto' => true,  'descricao' => 'Resumo do dia'],
     ['titulo' => 'Carteira',        'url' => '/carteira',      'icone' => 'pessoas',   'grupo' => 'Comercial',      'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Clientes, funil, mapa e linha do tempo'],
-    $temCampanha ? ['titulo' => $campanha, 'url' => '/carteira/campanha', 'icone' => 'alvo', 'grupo' => 'Comercial', 'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true, 'destaque' => true, 'descricao' => 'Prospecção da campanha: lojas, funil e mapa'] : null,
     ['titulo' => 'Meu mês',         'url' => '/meu-mes',       'icone' => 'grafico',   'grupo' => 'Comercial',      'permissao' => 'meu_mes.usar',                            'pronto' => true,  'descricao' => 'Minha meta, meta da equipe, vendas e tarefas'],
     ['titulo' => 'Agenda',          'url' => '/agenda',        'icone' => 'calendario', 'grupo' => 'Comercial',     'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Retornos atrasados, de hoje e futuros'],
     ['titulo' => 'Recompra',        'url' => '/recompra',      'icone' => 'relogio',   'grupo' => 'Comercial',      'permissao' => 'recompra.ver',                            'pronto' => true,  'descricao' => 'Clientes que passaram do tempo de recompra'],
     ['titulo' => 'Reativação',      'url' => '/reativacao',    'icone' => 'relogio',   'grupo' => 'Comercial',      'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Clientes sem compra há X dias'],
     ['titulo' => 'Cobrança',        'url' => '/cobranca',      'icone' => 'alerta',    'grupo' => 'Comercial',      'permissao' => 'cobranca.ver',                            'pronto' => true,  'descricao' => 'Títulos em atraso: funil próprio, promessas e busca de contatos'],
-    ['titulo' => 'Prospecção',      'url' => '/prospeccao',    'icone' => 'lupa',      'grupo' => 'Comercial',      'permissao' => 'prospeccao.usar',                         'pronto' => false, 'descricao' => 'Empresas ativas por cidade (base da Receita)'],
+    ['titulo' => 'Prospecção',      'url' => '/prospeccao',    'icone' => 'lupa',      'grupo' => 'Comercial',      'permissao' => 'prospeccao.usar',                         'pronto' => true,  'descricao' => 'Leads para abordar, base de CNPJs e leads do site'],
     ['titulo' => 'App do externo',  'url' => '/app',          'icone' => 'telefone',  'grupo' => 'Comercial',      'permissao' => 'app.usar',                                'pronto' => true,  'descricao' => 'Pedidos no celular, mesmo sem internet'],
     ['titulo' => 'Pedidos',         'url' => '/pedidos',       'icone' => 'carrinho',  'grupo' => 'Comercial',      'permissao' => ['pedidos.criar', 'pedidos.ver_todos', 'pedidos.aprovar'], 'pronto' => true, 'descricao' => 'Pedidos do catálogo, do sistema e do app'],
     ['titulo' => 'Aprovação',       'url' => '/aprovacao',     'icone' => 'check',     'grupo' => 'Comercial',      'permissao' => 'pedidos.aprovar',                         'pronto' => true, 'descricao' => 'Financeiro aprova pedidos e confere crédito'],
@@ -28,9 +24,10 @@ return array_values(array_filter([
     ['titulo' => 'Mural de posts',  'url' => '/marketing',     'icone' => 'calendario', 'grupo' => 'Marketing',     'permissao' => 'marketing.ver',                           'pronto' => true,  'descricao' => 'Calendário do Instagram com aprovação'],
     ['titulo' => 'Planejamento',    'url' => '/marketing/planejamento', 'icone' => 'alvo', 'grupo' => 'Marketing',      'permissao' => 'marketing.ver',                           'pronto' => true,  'descricao' => 'Campanhas e datas comemorativas'],
     ['titulo' => 'E-commerce',      'url' => '/marketing/ecommerce', 'icone' => 'carrinho', 'grupo' => 'Marketing',     'permissao' => 'ecommerce.ver',                           'pronto' => true,  'descricao' => 'Desempenho da loja virtual (Tray)'],
+    ['titulo' => 'Leads do site',   'url' => '/leads',         'icone' => 'pessoas',   'grupo' => 'Marketing',      'permissao' => 'leads.ver',                               'pronto' => true,  'descricao' => 'Formulários do site e dos anúncios, por campanha'],
     ['titulo' => 'Produtos',        'url' => '/produtos',      'icone' => 'caixa',     'grupo' => 'Conteúdo',       'permissao' => 'catalogo.editar',                         'pronto' => true, 'descricao' => 'Fotos, descrições e fichas (mesmo cadastro da Academia)'],
     ['titulo' => 'Academia',        'url' => '/academia',      'icone' => 'livro',     'grupo' => 'Conteúdo',       'permissao' => 'academia.ver',                            'pronto' => true,  'descricao' => 'Central de Televendas: trilha, fichas dos produtos, falas e objeções'],
-    ['titulo' => 'Mensagens prontas', 'url' => '/mensagens',   'icone' => 'conversa',  'grupo' => 'Conteúdo',       'permissao' => 'mensagens.gerenciar',                     'pronto' => false, 'descricao' => 'Modelos de WhatsApp'],
+    ['titulo' => 'Mensagens prontas', 'url' => '/mensagens',   'icone' => 'conversa',  'grupo' => 'Conteúdo',       'permissao' => 'mensagens.gerenciar',                     'pronto' => true , 'descricao' => 'Modelos de WhatsApp com variáveis ({nome}, {link_vendedor}...)'],
     ['titulo' => 'Produção',        'url' => '/producao',      'icone' => 'fabrica',   'grupo' => 'Produção',       'permissao' => ['producao.gerenciar', 'producao.ver'],    'pronto' => true,  'descricao' => 'Alertas, ordens planejadas e produção do mês'],
     ['titulo' => 'Matérias-primas', 'url' => '/producao/materias', 'icone' => 'caixa', 'grupo' => 'Produção',       'permissao' => ['producao.gerenciar', 'producao.ver'],    'pronto' => true,  'descricao' => 'Estoque, compras, inventário e previsão'],
     ['titulo' => 'Fichas técnicas', 'url' => '/producao/fichas', 'icone' => 'livro',   'grupo' => 'Produção',       'permissao' => ['producao.gerenciar', 'producao.ver'],    'pronto' => true,  'descricao' => 'O que vai em cada unidade e o custo'],

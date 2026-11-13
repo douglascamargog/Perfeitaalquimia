@@ -11,7 +11,7 @@ use App\Models\Tarefa;
  * One — o ajudante do sistema.
  *
  * Monta as "falas" do One com base nos dados da pessoa logada: tarefas do dia, meta do mês,
- * meta da equipe, clientes que passaram do prazo de recompra, campanha em andamento e Academia.
+ * meta da equipe, clientes que passaram do prazo de recompra, leads para prospectar e Academia.
  * Respeita as permissões: cada pessoa só recebe dicas do que pode ver.
  *
  * Cada fala: ['humor' => ola|pensando|feliz|ops|ideia|piscando, 'texto' => '...', 'link' => '/...', 'acao' => 'Abrir']
@@ -39,7 +39,9 @@ class OneAssistente
         if (Auth::pode('carteira.ver_propria') || Auth::pode('carteira.ver_todas')) {
             $falas[] = self::tarefas($id);
             $falas[] = self::recompra();
-            $falas[] = self::campanha();
+            $falas[] = self::prospeccao();
+            $semRetorno = LeadService::semRetorno($id);
+            $falas[] = $semRetorno ? ['humor' => 'ops', 'texto' => "$semRetorno lead(s) do site ou de anúncio esperando seu retorno. Quem responde no mesmo dia vende mais!", 'link' => '/agenda', 'acao' => 'Ver retornos'] : null;
         }
         if (Auth::pode('pedidos.aprovar')) {
             $qtd = (int) Banco::valor("SELECT COUNT(*) FROM pedidos WHERE situacao = 'aguardando_aprovacao'");
@@ -51,6 +53,10 @@ class OneAssistente
         }
         if (Auth::pode('marketing.aprovar')) {
             $falas[] = self::postsParaAprovar();
+        }
+        if (Auth::pode('leads.ver') && !Auth::pode('carteira.ver_todas')) {
+            $semana = (int) Banco::valor("SELECT COUNT(*) FROM leads_recebidos WHERE resultado IN ('criado', 'existente') AND criado_em >= CURDATE() - INTERVAL 6 DAY");
+            $falas[] = $semana ? ['humor' => 'feliz', 'texto' => "$semana lead(s) chegaram pelo site e pelos anúncios nos últimos 7 dias. Veja quais campanhas convertem mais.", 'link' => '/leads', 'acao' => 'Leads do site'] : null;
         }
         if (Auth::pode('marketing.editar')) {
             $falas[] = self::semanaQueVem();
@@ -156,17 +162,14 @@ class OneAssistente
     }
 
 
-    /** Lojas da campanha (ex.: Black Friday) ainda não abordadas */
-    private static function campanha(): ?array
+    /** Leads da carteira da pessoa que ainda aguardam o primeiro contato (Prospecção) */
+    private static function prospeccao(): ?array
     {
-        $origem = CarteiraController::campanhaOrigemId();
-        if (!$origem) {
+        if (!Auth::pode('prospeccao.usar')) {
             return null;
         }
-        $escopo = Auth::pode('carteira.ver_todas') ? '' : ' AND responsavel_id = ' . (int) Auth::id();
-        $qtd = (int) Banco::valor("SELECT COUNT(*) FROM clientes WHERE excluido_em IS NULL AND origem_id = ? AND contatado = 0$escopo", [$origem]);
-        $titulo = (string) Config::get('carteira.campanha_titulo', 'campanha');
-        return $qtd ? ['humor' => 'ideia', 'texto' => "$titulo: $qtd loja(s) ainda aguardam o primeiro contato.", 'link' => '/carteira/campanha', 'acao' => 'Prospectar'] : null;
+        $qtd = ProspeccaoService::qtdAguardando();
+        return $qtd ? ['humor' => 'ideia', 'texto' => "$qtd lead(s) ainda aguardam o primeiro contato. Comece pelos de prioridade alta!", 'link' => '/prospeccao', 'acao' => 'Prospectar'] : null;
     }
 
     private static function metaIndividual(int $id): ?array
