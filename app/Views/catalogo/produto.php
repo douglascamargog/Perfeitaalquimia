@@ -7,7 +7,7 @@ $lista = fn($v) => array_values(array_filter(is_array($v) ? array_map(fn($x) => 
 <article class="cat-produto">
   <div class="cat-produto-foto"><?php if ($p['imagem']): ?><img src="<?= url('/' . $p['imagem']) ?>" alt="<?= e($p['nome']) ?>"><?php endif; ?></div>
   <div class="cat-produto-info">
-    <small><?= e($p['categoria']) ?></small>
+    <small><?= !empty($p['codigo']) ? '<span class="cod-produto">' . e($p['codigo']) . '</span> ' : '' ?><?= e($p['categoria']) ?></small>
     <h1><?= e($p['nome']) ?></h1>
     <p class="cat-embalagem"><?= e($p['embalagem']) ?></p>
     <?php if ($p['chamada']): ?><p class="cat-chamada"><?= e($p['chamada']) ?></p><?php endif; ?>

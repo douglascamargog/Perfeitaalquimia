@@ -17,7 +17,7 @@
       </header>
       <div class="ped-fila-corpo">
         <ul class="ped-fila-itens">
-          <?php foreach (array_slice($itens[$p['id']], 0, 6) as $i): ?><li><?= (int) $i['quantidade'] ?>× <?= e($i['nome']) ?></li><?php endforeach; ?>
+          <?php foreach (array_slice($itens[$p['id']], 0, 6) as $i): ?><li><?= (int) $i['quantidade'] ?>× <?= !empty($i['codigo']) ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><?= e($i['nome']) ?></li><?php endforeach; ?>
           <?php if (count($itens[$p['id']]) > 6): ?><li class="suave">+ <?= count($itens[$p['id']]) - 6 ?> produto(s)</li><?php endif; ?>
         </ul>
         <?= \App\Core\Visao::renderizar('aprovacao/_credito', ['cr' => $cr]) ?>

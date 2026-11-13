@@ -94,3 +94,10 @@ tr.inativo td { opacity: .6; }
 }
 
 .ped-tabela td.direita, .ped-itens td.direita, table.tabela td.direita { white-space: nowrap; }
+
+/* Produtos: código e importação */
+.prod-ferramentas { display: flex; gap: 16px 28px; flex-wrap: wrap; align-items: flex-end; }
+.prod-busca { display: flex; gap: 8px; flex: 1 1 280px; }
+.prod-importar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex: 1 1 360px; }
+.prod-importar label { width: 100%; font-weight: 600; font-size: .85rem; }
+.prod-codigo { width: 110px; font-family: ui-monospace, Consolas, monospace; text-transform: uppercase; }

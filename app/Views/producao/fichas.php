@@ -24,7 +24,7 @@ $icones = asset('img/icones.svg');
       <tbody>
       <?php foreach ($itens as $p): ?>
         <tr>
-          <td><a href="<?= url('/producao/fichas/' . (int) $p['id']) ?>"><strong><?= e($p['nome']) ?></strong></a><small class="suave"><?= e($p['embalagem'] ?? '') ?></small></td>
+          <td><a href="<?= url('/producao/fichas/' . (int) $p['id']) ?>"><strong><?= !empty($p['codigo']) ? '<span class="cod-produto">' . e($p['codigo']) . '</span> ' : '' ?><?= e($p['nome']) ?></strong></a><small class="suave"><?= e($p['embalagem'] ?? '') ?></small></td>
           <td class="pequeno"><?= e($p['categoria'] ?? '—') ?></td>
           <td class="direita"><?= (int) $p['itens'] ?: '<span class="selo cinza">sem ficha</span>' ?></td>
           <td class="direita"><?= $p['itens'] ? dinheiro((float) $p['custo']) : '—' ?></td>

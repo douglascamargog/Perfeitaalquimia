@@ -69,7 +69,7 @@ class AcademiaService
             foreach ($linhas as $p) {
                 $ficha = json_decode($p['ficha_json'], true) ?: [];
                 self::$cache['produtos'][$p['slug']] = [
-                    'slug' => $p['slug'], 'nome' => $p['nome'], 'embalagem' => $p['embalagem'], 'categoria' => $p['categoria'],
+                    'slug' => $p['slug'], 'codigo' => $p['codigo'] ?? null, 'nome' => $p['nome'], 'embalagem' => $p['embalagem'], 'categoria' => $p['categoria'],
                     'chamada' => $p['chamada'], 'imagem' => $p['imagem'] ? url('/' . $p['imagem']) : null,
                 ] + $ficha;
             }
@@ -123,7 +123,7 @@ class AcademiaService
             if ($q === '') {
                 return true;
             }
-            $onde = Normalizar::semAcento(implode(' ', [$p['nome'], $p['embalagem'], $p['categoria'], $p['chamada'], $p['ingredients'] ?? '', implode(' ', $p['benefits'] ?? [])]));
+            $onde = Normalizar::semAcento(implode(' ', [$p['codigo'] ?? '', $p['nome'], $p['embalagem'], $p['categoria'], $p['chamada'], $p['ingredients'] ?? '', implode(' ', $p['benefits'] ?? [])]));
             foreach (explode(' ', $q) as $palavra) {
                 if (!str_contains($onde, $palavra)) {
                     return false;

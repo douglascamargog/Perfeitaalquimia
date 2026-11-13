@@ -81,7 +81,7 @@ class PedidoService
         $semPreco = [];
         if ($quantidades) {
             $ids = implode(',', array_map('intval', array_keys($quantidades)));
-            $linhas = Banco::todos("SELECT p.id, p.nome, p.slug, p.embalagem, m.arquivo AS imagem, pp.preco
+            $linhas = Banco::todos("SELECT p.id, p.codigo, p.nome, p.slug, p.embalagem, m.arquivo AS imagem, pp.preco
                 FROM produtos p LEFT JOIN midias m ON m.id = p.imagem_id
                 LEFT JOIN produto_precos pp ON pp.produto_id = p.id AND pp.tabela_preco_id = ?
                 WHERE p.id IN ($ids) AND p.ativo = 1 AND p.visivel_catalogo = 1", [$tabela['id']]);
@@ -161,7 +161,7 @@ class PedidoService
                 'criado_por_usuario' => $d['usuario_id'] ?? null, 'criado_por_cliente' => $origem === 'catalogo' ? 1 : 0,
             ]);
             foreach ($carrinho['itens'] as $i) {
-                Banco::inserir('pedido_itens', ['pedido_id' => $id, 'produto_id' => $i['id'], 'nome' => $i['nome'],
+                Banco::inserir('pedido_itens', ['pedido_id' => $id, 'produto_id' => $i['id'], 'codigo' => $i['codigo'] ?? null, 'nome' => $i['nome'],
                     'quantidade' => $i['quantidade'], 'preco_unitario' => $i['preco'], 'total' => $i['total']]);
             }
             $quem = ['catalogo' => 'pelo cliente no catálogo', 'sistema' => 'pela equipe', 'app' => 'pelo app do vendedor externo'][$origem];

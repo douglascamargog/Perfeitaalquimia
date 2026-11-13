@@ -39,7 +39,7 @@ $origens = ['catalogo' => 'Catálogo (cliente)', 'sistema' => 'Sistema (equipe)'
     <table class="tabela ped-itens">
       <thead><tr><th>Produto</th><th class="direita">Qtd.</th><th class="direita">Preço</th><th class="direita">Total</th></tr></thead>
       <tbody>
-      <?php foreach ($itens as $i): ?><tr><td><?= e($i['nome']) ?></td><td class="direita"><?= (int) $i['quantidade'] ?></td><td class="direita"><?= dinheiro((float) $i['preco_unitario']) ?></td><td class="direita"><?= dinheiro((float) $i['total']) ?></td></tr><?php endforeach; ?>
+      <?php foreach ($itens as $i): ?><tr><td><?= !empty($i['codigo']) ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><?= e($i['nome']) ?></td><td class="direita"><?= (int) $i['quantidade'] ?></td><td class="direita"><?= dinheiro((float) $i['preco_unitario']) ?></td><td class="direita"><?= dinheiro((float) $i['total']) ?></td></tr><?php endforeach; ?>
       </tbody>
       <tfoot>
         <tr><td colspan="3" class="direita">Subtotal</td><td class="direita"><?= dinheiro((float) $p['subtotal']) ?></td></tr>

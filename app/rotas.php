@@ -123,6 +123,8 @@ return [
     ['POST', '/aprovacao/{id}/recusar',         'AprovacaoController@recusar', 'pedidos.aprovar'],
     ['GET',  '/produtos',                       'ProdutoController@index',     'catalogo.editar'],
     ['POST', '/produtos/sincronizar',           'ProdutoController@sincronizar', 'catalogo.editar'],
+    ['POST', '/produtos/codigos',               'ProdutoController@importarCodigos', 'catalogo.editar'],
+    ['POST', '/produtos/codigos/confirmar',     'ProdutoController@confirmarCodigos', 'catalogo.editar'],
     ['POST', '/produtos/{id}',                  'ProdutoController@salvar',    'catalogo.editar'],
     ['POST', '/carteira/clientes/{id}/acesso-catalogo', 'ClienteController@acessoCatalogo', 'catalogo.acessos'],
 

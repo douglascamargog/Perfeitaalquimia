@@ -160,3 +160,7 @@ table.tabela { width: 100%; border-collapse: collapse; }
   .conteudo { margin: 0 !important; padding: 0 !important; }
   .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
 }
+
+/* Código do produto (aparece antes do nome em catálogo, pedidos, app, Academia e Produção) */
+.cod-produto { display: inline-block; font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: .78em; font-weight: 700; letter-spacing: .02em;
+  background: #eef3e8; color: #24412b; border-radius: 6px; padding: 1px 6px; margin-right: 2px; vertical-align: 1px; white-space: nowrap; }

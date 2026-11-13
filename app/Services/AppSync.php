@@ -44,7 +44,7 @@ class AppSync
         foreach (Banco::todos('SELECT produto_id, tabela_preco_id, preco FROM produto_precos WHERE tabela_preco_id IN (' . implode(',', array_map('intval', $tabelas)) . ')') as $p) {
             $precos[$p['tabela_preco_id']][$p['produto_id']] = (float) $p['preco'];
         }
-        $produtos = Banco::todos('SELECT p.id, p.nome, p.embalagem, c.nome AS categoria, m.arquivo AS imagem FROM produtos p
+        $produtos = Banco::todos('SELECT p.id, p.codigo, p.nome, p.embalagem, c.nome AS categoria, m.arquivo AS imagem FROM produtos p
             LEFT JOIN categorias c ON c.id = p.categoria_id LEFT JOIN midias m ON m.id = p.imagem_id
             WHERE p.ativo = 1 AND p.visivel_catalogo = 1 ORDER BY p.nome');
         foreach ($produtos as &$p) {

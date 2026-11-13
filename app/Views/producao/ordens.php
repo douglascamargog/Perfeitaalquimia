@@ -30,7 +30,7 @@ $link = fn(int $p) => url('/producao/ordens') . '?' . e(http_build_query(array_f
       <?php foreach ($r['itens'] as $o): [$rotulo, $cor] = P::SITUACOES[$o['situacao']]; ?>
         <tr data-ordem="<?= (int) $o['id'] ?>">
           <td><a href="<?= url('/producao/ordens/' . (int) $o['id']) ?>"><strong>OP <?= (int) $o['id'] ?></strong></a><?= $o['origem'] === 'reabastecimento' ? '<small class="suave">reabastecimento</small>' : '' ?></td>
-          <td><?= e($o['produto']) ?></td>
+          <td><?= !empty($o['codigo']) ? '<span class="cod-produto">' . e($o['codigo']) . '</span> ' : '' ?><?= e($o['produto']) ?></td>
           <td class="direita"><?= number_format((int) $o['quantidade'], 0, ',', '.') ?> un</td>
           <td class="pequeno"><?= e($o['lote'] ?? '—') ?></td>
           <td class="pequeno"><?= $o['situacao'] === 'concluida' ? data_br($o['concluida_em']) : ($o['previsto_para'] ? 'para ' . data_br($o['previsto_para']) : data_br($o['criado_em'])) ?></td>

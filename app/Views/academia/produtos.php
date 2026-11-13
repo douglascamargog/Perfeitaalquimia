@@ -36,7 +36,7 @@ $link = fn(array $extra) => url('/academia/produtos') . '?' . e(http_build_query
     <a class="cartao-produto" href="<?= url('/academia/produtos/' . e($p['slug'])) ?>" style="--cor-produto: <?= e($p['color'] ?? '#9bd344') ?>">
       <span class="foto"><?php if ($p['imagem']): ?><img src="<?= e($p['imagem']) ?>" alt="Embalagem de <?= e($p['nome']) ?>" loading="lazy"><?php else: ?><b>PA</b><?php endif; ?></span>
       <span class="corpo">
-        <small><?= e($p['categoria']) ?> · <?= e($p['embalagem']) ?></small>
+        <small><?= !empty($p['codigo']) ? '<span class="cod-produto">' . e($p['codigo']) . '</span> ' : '' ?><?= e($p['categoria']) ?> · <?= e($p['embalagem']) ?></small>
         <strong><?= e($p['nome']) ?></strong>
         <span class="chamada"><?= e($tema && !empty($p['topics'][$tema['id']]) ? $p['topics'][$tema['id']] : $p['chamada']) ?></span>
       </span>

@@ -65,3 +65,4 @@ body.ap { background: var(--fundo); min-height: 100vh; padding-bottom: calc(70px
   background: #14251b; color: #eaffc0; padding: 12px 20px; border-radius: 12px; font-weight: 650; font-size: .88rem; transition: .2s; box-shadow: 0 10px 30px #0003; }
 .aviso-flutuante.visivel { opacity: 1; transform: translate(-50%, 0); }
 .aviso-flutuante.erro { background: var(--perigo); color: #fff; }
+.cod-produto { display: inline-block; font-family: ui-monospace, Consolas, monospace; font-size: .78em; font-weight: 700; background: #eef3e8; color: #24412b; border-radius: 6px; padding: 1px 6px; margin-right: 2px; }

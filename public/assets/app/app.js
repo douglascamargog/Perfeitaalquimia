@@ -98,7 +98,7 @@ function totais() {
 function telaPedido() {
   const { c, subtotal, qtd, minimo, falta } = totais();
   const termo = sem(buscaProdutos);
-  const produtos = pacote.produtos.filter((p) => precoDe(c, p.id) !== null && (!termo || sem(p.nome + ' ' + (p.categoria || '')).includes(termo)));
+  const produtos = pacote.produtos.filter((p) => precoDe(c, p.id) !== null && (!termo || sem((p.codigo || '') + ' ' + p.nome + ' ' + (p.categoria || '')).includes(termo)));
   const tabela = pacote.tabelas.find((t) => Number(t.id) === c.tabela_preco_id)?.nome || '';
   tela.innerHTML = `
     <div class="ap-pedido-topo">
@@ -106,12 +106,12 @@ function telaPedido() {
       <h1>${esc(nomeCliente(c))}</h1>
       <small>${esc(c.cidade || '')}/${esc(c.uf || '')} · tabela ${esc(tabela)}${rascunho.corrigindo ? ' · <b>corrigindo pedido com erro</b>' : ''}</small>
     </div>
-    <div class="ap-busca"><input type="search" placeholder="Buscar produto…" value="${esc(buscaProdutos)}" data-busca-produtos aria-label="Buscar produto"></div>
+    <div class="ap-busca"><input type="search" placeholder="Buscar produto ou código…" value="${esc(buscaProdutos)}" data-busca-produtos aria-label="Buscar produto"></div>
     <ul class="ap-produtos">
       ${produtos.map((p) => { const q = rascunho.itens[p.id] || 0; return `
         <li class="${q ? 'escolhido' : ''}">
           ${p.imagem ? `<img src="${esc(p.imagem)}" alt="" loading="lazy" width="52" height="52">` : '<span class="ap-sem-foto"></span>'}
-          <div><strong>${esc(p.nome)}</strong><small>${esc(p.embalagem || '')}</small><b>${real(precoDe(c, p.id))}</b></div>
+          <div><strong>${p.codigo ? `<span class="cod-produto">${esc(p.codigo)}</span> ` : ''}${esc(p.nome)}</strong><small>${esc(p.embalagem || '')}</small><b>${real(precoDe(c, p.id))}</b></div>
           <div class="ap-qtd" data-produto="${p.id}"><button type="button" data-menos aria-label="Menos">−</button><input type="number" inputmode="numeric" min="0" value="${q || ''}" placeholder="0" aria-label="Quantidade de ${esc(p.nome)}"><button type="button" data-mais aria-label="Mais">+</button></div>
         </li>`; }).join('')}
     </ul>

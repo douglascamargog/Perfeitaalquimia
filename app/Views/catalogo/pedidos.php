@@ -19,7 +19,7 @@ use App\Services\PedidoService;
       <?php if ($p['situacao'] === 'recusado' && $p['motivo_recusa']): ?><p class="aviso erro">Motivo: <?= e($p['motivo_recusa']) ?></p><?php endif; ?>
       <?php if ($p['numero_nf']): ?><p class="pequeno">Nota fiscal nº <?= e($p['numero_nf']) ?> · faturado em <?= data_br($p['faturado_em']) ?></p><?php endif; ?>
       <ul class="cat-itens compacto">
-        <?php foreach ($itens[$p['id']] as $i): ?><li><span><?= (int) $i['quantidade'] ?>×</span><span><?= e($i['nome']) ?></span><b><?= dinheiro((float) $i['total']) ?></b></li><?php endforeach; ?>
+        <?php foreach ($itens[$p['id']] as $i): ?><li><span><?= (int) $i['quantidade'] ?>×</span><span><?= !empty($i['codigo']) ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><?= e($i['nome']) ?></span><b><?= dinheiro((float) $i['total']) ?></b></li><?php endforeach; ?>
       </ul>
       <?php if ((float) $p['desconto'] > 0): ?><p class="pequeno">Desconto: −<?= dinheiro((float) $p['desconto']) ?></p><?php endif; ?>
       <div class="ficha-acoes">

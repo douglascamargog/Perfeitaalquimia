@@ -21,7 +21,7 @@ $empresa = config('empresa_nome', 'Perfeita Alquimia');
     <div class="pr-imp-numero">OP <?= (int) $o['id'] ?><br><small><?= P::SITUACOES[$o['situacao']][0] ?></small></div>
   </header>
   <table class="pr-imp-dados">
-    <tr><th>Produto</th><td colspan="3"><?= e($o['produto']) ?><?= $o['embalagem'] ? ' — ' . e($o['embalagem']) : '' ?></td></tr>
+    <tr><th>Produto</th><td colspan="3"><?= !empty($o['codigo']) ? e($o['codigo']) . ' · ' : '' ?><?= e($o['produto']) ?><?= $o['embalagem'] ? ' — ' . e($o['embalagem']) : '' ?></td></tr>
     <tr><th>Quantidade</th><td><?= number_format((int) $o['quantidade'], 0, ',', '.') ?> unidades</td><th>Lote</th><td><?= e($o['lote'] ?? '') ?></td></tr>
     <tr><th>Previsto para</th><td><?= data_br($o['previsto_para']) ?: '—' ?></td><th>Validade</th><td><?= data_br($o['validade']) ?: '—' ?></td></tr>
     <tr><th>Emitida</th><td><?= data_br($o['criado_em'], true) ?></td><th>Concluída</th><td><?= $o['concluida_em'] ? data_br($o['concluida_em'], true) : '' ?></td></tr>

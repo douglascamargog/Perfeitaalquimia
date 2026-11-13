@@ -230,15 +230,15 @@ class ProducaoService
         $w = ['p.ativo = 1'];
         $par = [];
         if ($busca !== '') {
-            $w[] = 'p.nome LIKE ?';
-            $par[] = "%$busca%";
+            $w[] = '(p.nome LIKE ? OR p.codigo LIKE ?)';
+            array_push($par, "%$busca%", "$busca%");
         }
         if ($filtro === 'com') {
             $w[] = 'f.itens > 0';
         } elseif ($filtro === 'sem') {
             $w[] = 'f.itens IS NULL';
         }
-        return Banco::todos('SELECT p.id, p.nome, p.embalagem, c.nome AS categoria, COALESCE(f.itens, 0) AS itens, COALESCE(f.custo, 0) AS custo
+        return Banco::todos('SELECT p.id, p.codigo, p.nome, p.embalagem, c.nome AS categoria, COALESCE(f.itens, 0) AS itens, COALESCE(f.custo, 0) AS custo
             FROM produtos p LEFT JOIN categorias c ON c.id = p.categoria_id
             LEFT JOIN (SELECT ft.produto_id, COUNT(*) AS itens, SUM(ft.quantidade * m.custo_unitario) AS custo
                        FROM ficha_tecnica ft JOIN materias_primas m ON m.id = ft.materia_prima_id GROUP BY ft.produto_id) f ON f.produto_id = p.id
@@ -395,7 +395,7 @@ class ProducaoService
 
     public static function ordem(int $id): ?array
     {
-        return Banco::um('SELECT o.*, p.nome AS produto, p.embalagem, uc.nome AS criador, uf.nome AS concluidor FROM ordens_producao o
+        return Banco::um('SELECT o.*, p.codigo, p.nome AS produto, p.embalagem, uc.nome AS criador, uf.nome AS concluidor FROM ordens_producao o
             JOIN produtos p ON p.id = o.produto_id LEFT JOIN usuarios uc ON uc.id = o.criado_por LEFT JOIN usuarios uf ON uf.id = o.concluida_por
             WHERE o.id = ?', [$id]);
     }
@@ -421,14 +421,14 @@ class ProducaoService
             $par[] = (int) $f['produto'];
         }
         if (($f['q'] ?? '') !== '') {
-            $w[] = '(o.lote LIKE ? OR o.id = ? OR p.nome LIKE ?)';
-            array_push($par, "%{$f['q']}%", (int) $f['q'], "%{$f['q']}%");
+            $w[] = '(o.lote LIKE ? OR o.id = ? OR p.nome LIKE ? OR p.codigo LIKE ?)';
+            array_push($par, "%{$f['q']}%", (int) $f['q'], "%{$f['q']}%", "{$f['q']}%");
         }
         $where = implode(' AND ', $w);
         $total = (int) Banco::valor("SELECT COUNT(*) FROM ordens_producao o JOIN produtos p ON p.id = o.produto_id WHERE $where", $par);
         $paginas = max(1, (int) ceil($total / $porPagina));
         $pagina = min(max(1, $pagina), $paginas);
-        $itens = Banco::todos("SELECT o.*, p.nome AS produto FROM ordens_producao o JOIN produtos p ON p.id = o.produto_id WHERE $where
+        $itens = Banco::todos("SELECT o.*, p.codigo, p.nome AS produto FROM ordens_producao o JOIN produtos p ON p.id = o.produto_id WHERE $where
             ORDER BY o.situacao = 'planejada' DESC, COALESCE(o.concluida_em, o.criado_em) DESC, o.id DESC LIMIT $porPagina OFFSET " . (($pagina - 1) * $porPagina), $par);
         return compact('itens', 'total', 'pagina', 'paginas');
     }
@@ -447,10 +447,10 @@ class ProducaoService
         $par = [$dias];
         $w = ['p.ativo = 1', '(e.produto_id IS NOT NULL OR EXISTS (SELECT 1 FROM ficha_tecnica ft WHERE ft.produto_id = p.id))'];
         if ($busca !== '') {
-            $w[] = 'p.nome LIKE ?';
-            $par[] = "%$busca%";
+            $w[] = '(p.nome LIKE ? OR p.codigo LIKE ?)';
+            array_push($par, "%$busca%", "$busca%");
         }
-        $lista = Banco::todos('SELECT p.id, p.nome, p.embalagem, COALESCE(e.quantidade, 0) AS quantidade, COALESCE(e.minimo, 0) AS minimo,
+        $lista = Banco::todos('SELECT p.id, p.codigo, p.nome, p.embalagem, COALESCE(e.quantidade, 0) AS quantidade, COALESCE(e.minimo, 0) AS minimo,
                 COALESCE(v.vendido, 0) AS vendido_periodo, COALESCE(pl.planejado, 0) AS planejado,
                 EXISTS (SELECT 1 FROM ficha_tecnica ft WHERE ft.produto_id = p.id) AS tem_ficha
             FROM produtos p LEFT JOIN estoque_acabado e ON e.produto_id = p.id

@@ -16,6 +16,7 @@ $lista = fn(array $itens, string $classe = 'lista-aula') => '<ul class="' . $cla
     <a class="ficha-foto" href="<?= e($p['imagem']) ?>" target="_blank" rel="noopener"><img src="<?= e($p['imagem']) ?>" alt="Embalagem de <?= e($p['nome']) ?>"><span>Ampliar foto ↗</span></a>
   <?php endif; ?>
   <div>
+    <?php if (!empty($p['codigo'])): ?><p class="ficha-codigo">Código do produto: <span class="cod-produto"><?= e($p['codigo']) ?></span></p><?php endif; ?>
     <p class="ficha-chamada"><?= e($p['chamada']) ?></p>
     <?php if (!empty($p['features'])): ?><div class="chips"><?php foreach ($p['features'] as $f): ?><span class="chip"><?= e($f) ?></span><?php endforeach; ?></div><?php endif; ?>
     <?php if (!empty($p['metrics'])): ?>

@@ -94,7 +94,7 @@ class Pedido
 
     public static function itens(int $pedidoId): array
     {
-        return Banco::todos('SELECT i.*, pr.slug, m.arquivo AS imagem FROM pedido_itens i LEFT JOIN produtos pr ON pr.id = i.produto_id
+        return Banco::todos('SELECT i.*, COALESCE(i.codigo, pr.codigo) AS codigo, pr.slug, m.arquivo AS imagem FROM pedido_itens i LEFT JOIN produtos pr ON pr.id = i.produto_id
             LEFT JOIN midias m ON m.id = pr.imagem_id WHERE i.pedido_id = ? ORDER BY i.nome', [$pedidoId]);
     }
 

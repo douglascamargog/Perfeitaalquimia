@@ -25,6 +25,27 @@ class ErpSync
         return $mapa;
     }
 
+    /**
+     * Código dos produtos vindo do ERP (campo "codigo" do Omie). Só preenche quem ainda não tem código:
+     * o código digitado na tela Produtos não é sobrescrito. O ERP simulado não manda código (para não confundir com o real).
+     */
+    public static function codigos(): int
+    {
+        if (Integracoes::erpSimulado()) {
+            return 0;
+        }
+        $produtos = self::mapaProdutos();
+        $n = 0;
+        foreach (Integracoes::erp()->listarProdutos() as $p) {
+            $id = $produtos[$p['omie_codigo'] ?? ''] ?? null;
+            $codigo = trim((string) ($p['codigo'] ?? ''));
+            if ($id && $codigo !== '' && !Banco::valor('SELECT 1 FROM produtos WHERE codigo = ?', [$codigo])) {
+                $n += Banco::executar("UPDATE produtos SET codigo = ? WHERE id = ? AND (codigo IS NULL OR codigo = '')", [mb_substr($codigo, 0, 40), $id]);
+            }
+        }
+        return $n;
+    }
+
     public static function precos(): int
     {
         $produtos = self::mapaProdutos();
@@ -83,7 +104,7 @@ class ErpSync
     public static function tudo(): array
     {
         [$enviados, $faturados] = self::pedidos();
-        $r = ['precos' => self::precos(), 'estoque' => self::estoque(), 'enviados' => $enviados, 'faturados' => $faturados];
+        $r = ['codigos' => self::codigos(), 'precos' => self::precos(), 'estoque' => self::estoque(), 'enviados' => $enviados, 'faturados' => $faturados];
         // Guarda a última sincronização para a tela Administração › Integração Omie
         @file_put_contents(self::ARQUIVO_ULTIMA, json_encode($r + ['em' => date('Y-m-d H:i:s')]));
         return $r;

@@ -23,7 +23,7 @@ $n = fn($v) => number_format((float) $v, 0, ',', '.');
       <tbody>
       <?php foreach ($itens as $a): ?>
         <tr data-acabado="<?= (int) $a['id'] ?>">
-          <td><a href="<?= url('/producao/acabados/' . (int) $a['id']) ?>"><strong><?= e($a['nome']) ?></strong></a><?= $a['tem_ficha'] ? '' : '<small class="suave">sem ficha técnica</small>' ?></td>
+          <td><a href="<?= url('/producao/acabados/' . (int) $a['id']) ?>"><strong><?= !empty($a['codigo']) ? '<span class="cod-produto">' . e($a['codigo']) . '</span> ' : '' ?><?= e($a['nome']) ?></strong></a><?= $a['tem_ficha'] ? '' : '<small class="suave">sem ficha técnica</small>' ?></td>
           <td class="direita"><strong class="<?= $a['abaixo'] || $a['quantidade'] < 0 ? 'pn-vermelho' : '' ?>" data-quantidade><?= $n($a['quantidade']) ?></strong></td>
           <td class="direita">
             <?php if ($pode): ?>

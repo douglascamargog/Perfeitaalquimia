@@ -17,8 +17,8 @@ class Produto
         $w = ['p.ativo = 1', 'p.visivel_catalogo = 1'];
         $par = [$tabelaId ?? 0];
         if ($busca !== '') {
-            $w[] = '(p.nome LIKE ? OR p.chamada LIKE ?)';
-            array_push($par, "%$busca%", "%$busca%");
+            $w[] = '(p.nome LIKE ? OR p.chamada LIKE ? OR p.codigo LIKE ?)';
+            array_push($par, "%$busca%", "%$busca%", "$busca%");
         }
         if ($categoriaId) {
             $w[] = 'p.categoria_id = ?';
@@ -27,7 +27,7 @@ class Produto
         if ($tabelaId && !$mostrarSemPreco) {
             $w[] = 'pp.preco IS NOT NULL';
         }
-        return Banco::todos('SELECT p.id, p.slug, p.nome, p.embalagem, p.chamada, c.nome AS categoria, m.arquivo AS imagem, pp.preco
+        return Banco::todos('SELECT p.id, p.slug, p.codigo, p.nome, p.embalagem, p.chamada, c.nome AS categoria, m.arquivo AS imagem, pp.preco
             FROM produtos p LEFT JOIN categorias c ON c.id = p.categoria_id LEFT JOIN midias m ON m.id = p.imagem_id
             LEFT JOIN produto_precos pp ON pp.produto_id = p.id AND pp.tabela_preco_id = ?
             WHERE ' . implode(' AND ', $w) . ' ORDER BY p.ordem, p.nome', $par);
@@ -58,10 +58,10 @@ class Produto
         $par = [];
         $w = '1 = 1';
         if ($busca !== '') {
-            $w = 'p.nome LIKE ?';
-            $par[] = "%$busca%";
+            $w = '(p.nome LIKE ? OR p.codigo LIKE ?)';
+            array_push($par, "%$busca%", "$busca%");
         }
-        $produtos = Banco::todos("SELECT p.id, p.slug, p.nome, p.embalagem, p.chamada, p.ordem, p.ativo, p.visivel_catalogo, c.nome AS categoria, m.arquivo AS imagem,
+        $produtos = Banco::todos("SELECT p.id, p.slug, p.codigo, p.nome, p.embalagem, p.chamada, p.ordem, p.ativo, p.visivel_catalogo, c.nome AS categoria, m.arquivo AS imagem,
                 e.quantidade AS estoque FROM produtos p LEFT JOIN categorias c ON c.id = p.categoria_id LEFT JOIN midias m ON m.id = p.imagem_id
                 LEFT JOIN produto_estoque e ON e.produto_id = p.id WHERE $w ORDER BY p.ordem, p.nome", $par);
         $precos = [];

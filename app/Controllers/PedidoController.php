@@ -42,7 +42,7 @@ class PedidoController extends Controller
             return;
         }
         $tabela = PedidoService::tabelaDoCliente($cliente);
-        $produtos = Banco::todos('SELECT p.id, p.nome, p.embalagem, c.nome AS categoria, m.arquivo AS imagem, pp.preco, e.quantidade AS estoque
+        $produtos = Banco::todos('SELECT p.id, p.codigo, p.nome, p.embalagem, c.nome AS categoria, m.arquivo AS imagem, pp.preco, e.quantidade AS estoque
             FROM produtos p JOIN produto_precos pp ON pp.produto_id = p.id AND pp.tabela_preco_id = ?
             LEFT JOIN categorias c ON c.id = p.categoria_id LEFT JOIN midias m ON m.id = p.imagem_id LEFT JOIN produto_estoque e ON e.produto_id = p.id
             WHERE p.ativo = 1 AND p.visivel_catalogo = 1 ORDER BY p.nome', [$tabela['id']]);
