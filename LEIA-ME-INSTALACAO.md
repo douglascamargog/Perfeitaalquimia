@@ -99,6 +99,16 @@ para "Tentativa de contato" as promessas de pagamento que venceram):
 php /home/doug9130/public_html/one/cron/cobranca.php
 ```
 
+E o **backup automático** do banco, todo dia de madrugada (ex.: 3h15). Ele guarda os arquivos em `storage/backups/`
+(fora da web) e apaga os mais antigos que o número de dias de Configurações › Backup (padrão 14).
+A data do último backup aparece em Administração › Atualização:
+
+```
+15 3 * * * php /home/doug9130/public_html/one/cron/backup.php
+```
+
+O backup tem todos os dados dos clientes (LGPD): de vez em quando, baixe uma cópia para fora do servidor.
+
 ## 9a. HTTPS (obrigatório para o app do externo)
 
 O app do vendedor externo (`/app`) só funciona offline com **HTTPS**. No cPanel › **SSL/TLS Status** › marque o subdomínio › **Run AutoSSL**

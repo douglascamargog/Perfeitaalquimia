@@ -24,6 +24,7 @@ class AtualizacaoController extends Controller
             'pendentes'  => $instalador->pendentes(false),
             'historico'  => array_slice($instalador->historico(), 0, 30),
             'log'        => Sessao::get('log_atualizacao', []),
+            'ultimoBackup' => \App\Services\BackupBanco::ultimo(),
         ]);
         Sessao::remover('log_atualizacao');
     }

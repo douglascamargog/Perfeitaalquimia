@@ -15,6 +15,9 @@ $total = count($pendentes['migrations']) + count($pendentes['seeds']);
     <h2>Baixar backup do banco</h2>
     <p>Gera um arquivo com <strong>todos os dados</strong> (clientes, contatos, metas, usuários). Guarde em local seguro: ele contém dados de clientes (LGPD).</p>
     <form method="post" action="<?= url('/sistema/atualizacao/backup') ?>"><?= csrf_campo() ?><button class="botao contorno" type="submit">Baixar backup (.sql.gz)</button></form>
+    <p class="pequeno <?= $ultimoBackup && strtotime($ultimoBackup['data']) > strtotime('-2 days') ? 'suave' : 'pn-vermelho' ?>" data-ultimo-backup>
+      <?= $ultimoBackup ? 'Backup automático: o último foi em ' . data_br($ultimoBackup['data'], true) . ' (' . number_format($ultimoBackup['tamanho_kb'], 0, ',', '.') . ' KB · ' . $ultimoBackup['quantidade'] . ' guardado(s) no servidor).'
+        : 'O backup automático ainda não rodou. Configure o cron cron/backup.php no cPanel (veja o LEIA-ME de instalação).' ?></p>
     <p class="pequeno suave" style="margin-top:12px">Para restaurar: cPanel › phpMyAdmin › banco do sistema › Importar › envie este arquivo.</p>
   </section>
 

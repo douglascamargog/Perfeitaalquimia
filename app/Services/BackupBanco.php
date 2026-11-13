@@ -46,4 +46,38 @@ class BackupBanco
         gzclose($gz);
         return $arquivo;
     }
+
+    private const PASTA = RAIZ . '/storage/backups';
+
+    /**
+     * Backup automático do dia (cron/backup.php): guarda em storage/backups (fora da web)
+     * e apaga os mais antigos que "backup.dias" (Configurações › Backup). Devolve o caminho do arquivo.
+     */
+    public static function automatico(): string
+    {
+        if (!is_dir(self::PASTA)) {
+            mkdir(self::PASTA, 0750, true);
+        }
+        $destino = self::PASTA . '/one-backup-' . date('Y-m-d-His') . '.sql.gz';
+        rename(self::gerar(), $destino);
+        @chmod($destino, 0640);
+        $limite = time() - max(1, (int) \App\Core\Config::get('backup.dias', 14)) * 86400;
+        foreach (glob(self::PASTA . '/one-backup-*.sql.gz') ?: [] as $arquivo) {
+            if (filemtime($arquivo) < $limite) {
+                @unlink($arquivo);
+            }
+        }
+        return $destino;
+    }
+
+    /** Último backup automático: ['data' => 'Y-m-d H:i:s', 'tamanho_kb' => n, 'quantidade' => n] ou null */
+    public static function ultimo(): ?array
+    {
+        $arquivos = glob(self::PASTA . '/one-backup-*.sql.gz') ?: [];
+        if (!$arquivos) {
+            return null;
+        }
+        usort($arquivos, fn($a, $b) => filemtime($b) <=> filemtime($a));
+        return ['data' => date('Y-m-d H:i:s', filemtime($arquivos[0])), 'tamanho_kb' => (int) round(filesize($arquivos[0]) / 1024), 'quantidade' => count($arquivos)];
+    }
 }
