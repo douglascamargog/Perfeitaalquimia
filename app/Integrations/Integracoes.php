@@ -73,6 +73,12 @@ class Integracoes
         };
     }
 
+    /** Base pública de CNPJs da prospecção (hoje no próprio banco; a base da Receita entra na mesma tabela) */
+    public static function baseCnpj(): \App\Integrations\BaseCnpj\BaseCnpjInterface
+    {
+        return new \App\Integrations\BaseCnpj\BaseCnpjLocal();
+    }
+
     /** true quando o ERP é o simulado (usado para mostrar avisos na tela) */
     public static function erpSimulado(): bool
     {

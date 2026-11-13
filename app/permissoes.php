@@ -38,6 +38,7 @@ return [
     'academia.editar'         => ['Editar conteúdo da Academia', ['marketing']],
     'midia.gerenciar'         => ['Biblioteca de mídia', ['marketing']],
     'mensagens.gerenciar'     => ['Editar mensagens prontas de WhatsApp', ['gestor', 'marketing']],
+    'mensagens.usar'          => ['Usar mensagens prontas na ficha do cliente', ['gestor', 'vendedor', 'financeiro']],
     'producao.gerenciar'      => ['Matérias-primas, fichas técnicas e ordens de produção', ['producao']],
     'producao.ver'            => ['Ver a Produção (estoques, ordens e alertas) sem editar', ['gestor']],
     'usuarios.gerenciar'      => ['Cadastrar usuários e funções', []],
