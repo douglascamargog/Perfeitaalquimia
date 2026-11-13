@@ -1,0 +1,72 @@
+/* =====================================================================
+   Produção e matérias-primas (usa também carteira.css, inicio.css e painel.css)
+   ===================================================================== */
+.selo.laranja { background: #fff1e0; color: #b45309; }
+.selo.verde { background: #dcf5e3; color: #15803d; }
+
+/* Abas do módulo */
+.pr-abas { display: flex; gap: 6px; flex-wrap: wrap; margin: -4px 0 16px; }
+.pr-abas a { padding: 7px 14px; border-radius: 99px; text-decoration: none; font-weight: 600; font-size: .85rem; color: var(--verde-escuro); background: #fff; border: 1px solid var(--borda); }
+.pr-abas a:hover { background: var(--verde-claro); }
+.pr-abas a.ativo { background: #191f18; color: var(--lima); border-color: #191f18; }
+
+/* Listas de alerta do painel */
+.pr-alertas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.pr-alertas li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: #f7f9f5; border-radius: 14px; padding: 9px 12px; }
+.pr-alertas li > a { flex: 1 1 220px; min-width: 0; text-decoration: none; color: var(--texto); display: grid; }
+.pr-alertas li > a strong { font-size: .9rem; }
+.pr-alertas li > a small { color: var(--texto-suave); font-size: .78rem; }
+.pr-alertas form { margin: 0; }
+.pr-compacta li { padding: 6px 10px; }
+.pr-sub { font-size: .85rem; margin: 14px 0 8px; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .04em; }
+.pr-kpi-alerta { background: #fff4ec !important; }
+.pr-kpi-alerta .b-valor { color: #c2410c; }
+.pr-dica p { margin: 0; }
+
+/* Tabelas e formulários */
+.pr-tabela td small { display: block; }
+.pr-num { width: 110px; text-align: right; }
+.pr-entrada-rapida { display: flex; gap: 6px; align-items: center; }
+.pr-entrada-rapida input { width: 92px; padding: 6px 8px; font-size: .82rem; }
+.pr-minimo { margin: 0; display: inline; }
+.pr-minimo .pr-num { width: 80px; padding: 5px 8px; }
+.so-impressao { display: none; }
+.pr-form { max-width: 860px; }
+.pr-linha-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.pr-falta td { background: #fff1ee; }
+.pr-duas { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.pr-acoes-ordem { display: flex; gap: 12px 24px; flex-wrap: wrap; align-items: flex-end; margin-top: 12px; }
+.pr-acoes-ordem form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pr-acoes-ordem label { font-weight: 600; font-size: .85rem; }
+.pr-ficha select { min-width: 240px; }
+details summary { cursor: pointer; }
+details[open] summary { margin-bottom: 14px; }
+
+@media (max-width: 900px) {
+  .pr-duas { grid-template-columns: 1fr; }
+  .pr-entrada-rapida input { width: 74px; }
+}
+@media print {
+  .so-impressao { display: inline; }
+  .pr-abas { display: none; }
+}
+
+/* ---------- Ordem para imprimir (A4) ---------- */
+.pr-impressao { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #111; background: #fff; max-width: 780px; margin: 24px auto; padding: 0 16px; font-size: 11pt; }
+.pr-impressao header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #111; padding-bottom: 10px; margin-bottom: 14px; }
+.pr-impressao header strong { font-size: 14pt; }
+.pr-imp-numero { text-align: right; font-size: 20pt; font-weight: 800; }
+.pr-imp-numero small { font-size: 10pt; font-weight: 600; }
+.pr-impressao h2 { font-size: 12pt; margin: 18px 0 6px; text-transform: uppercase; letter-spacing: .04em; }
+.pr-imp-dados, .pr-imp-tabela { width: 100%; border-collapse: collapse; }
+.pr-imp-dados th, .pr-imp-dados td, .pr-imp-tabela th, .pr-imp-tabela td { border: 1px solid #999; padding: 7px 8px; text-align: left; vertical-align: top; }
+.pr-imp-dados th { width: 18%; background: #f2f2f2; font-weight: 600; }
+.pr-imp-tabela th { background: #f2f2f2; }
+.pr-imp-tabela td:nth-child(3) { width: 22%; }
+.pr-imp-tabela td:nth-child(4) { width: 12%; text-align: center; }
+.pr-assinaturas { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 56px; }
+.pr-assinaturas div { border-top: 1px solid #111; padding-top: 6px; text-align: center; font-size: 10pt; }
+.pr-demo { background: #fff3c4; padding: 6px 10px; font-size: 9pt; text-align: center; }
+@media print { @page { size: A4; margin: 14mm; } .pr-impressao { margin: 0; max-width: none; padding: 0; } }
+.pr-tabela td.direita { white-space: nowrap; }
+.pr-entrada-rapida .botao { white-space: nowrap; }
