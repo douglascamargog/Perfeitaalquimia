@@ -1,7 +1,7 @@
 <?php
 /**
  * DEMONSTRAÇÃO do Marketing (só na instalação nova; "_demo" no nome = nunca roda em atualização).
- * - 3 campanhas (mês atual, Black Friday e próximo mês)
+ * - 3 campanhas (mês atual, ofertas de novembro e próximo mês)
  * - ~22 posts no mês atual em todas as etapas, com as fotos dos produtos da Academia
  * - 13 meses de e-commerce simulado (TrayFake)
  */
@@ -30,7 +30,7 @@ $topo = fn(string $mesRef, int $pos) => Banco::valor('SELECT p.id FROM ecommerce
 // ---------- Campanhas ----------
 $campanhas = [
     ['Imunidade em alta', 'Aumentar a venda da linha de imunidade no site', "$mes-01", "$mes-20", '#38bdf8', 'Vender 60 un do produto destaque no site', 1500, $topo($mes, 0), 'ativa'],
-    ['Black Friday ' . date('Y'), 'Maior campanha do ano: site e lojistas', date('Y-m-d', strtotime("$bf -10 days")), date('Y-m-d', strtotime("$bf +3 days")), '#14251b', 'R$ 120 mil no e-commerce na semana', 6000, $topo($mes, 1), 'planejada'],
+    ['Ofertas de Novembro', 'Maior campanha do ano: site e lojistas', date('Y-m-d', strtotime("$bf -10 days")), date('Y-m-d', strtotime("$bf +3 days")), '#14251b', 'R$ 120 mil no e-commerce na semana', 6000, $topo($mes, 1), 'planejada'],
     ['Verão com energia', 'Reposição e energia para o calor', "$proximoMes-05", date('Y-m-t', strtotime("$proximoMes-01")), '#f59e0b', 'Crescer 15% no ticket médio', 2500, null, 'planejada'],
 ];
 $idsCampanha = [];

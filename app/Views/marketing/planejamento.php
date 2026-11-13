@@ -72,7 +72,7 @@ $form = fn(string $campo, $padrao = '') => antigo($campo) !== '' ? antigo($campo
     <form method="post" action="<?= url('/marketing/campanhas' . ($editar ? '/' . (int) $editar['id'] : '')) ?>">
       <?= csrf_campo() ?>
       <div class="grade-campos">
-        <div class="campo"><label for="cp-nome">Nome</label><input type="text" id="cp-nome" name="nome" maxlength="120" required value="<?= $form('nome') ?>" placeholder="Ex.: Black Friday 2026"></div>
+        <div class="campo"><label for="cp-nome">Nome</label><input type="text" id="cp-nome" name="nome" maxlength="120" required value="<?= $form('nome') ?>" placeholder="Ex.: Dia das Mães"></div>
         <div class="campo"><label for="cp-obj">Objetivo</label><input type="text" id="cp-obj" name="objetivo" maxlength="255" value="<?= $form('objetivo') ?>" placeholder="Ex.: vender no site e gerar leads de lojistas"></div>
       </div>
       <div class="grade-campos">

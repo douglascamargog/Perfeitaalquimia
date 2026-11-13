@@ -198,6 +198,13 @@ Senha de todos: `Demo@2026` — usuários fictícios, um por perfil e por funç�
 
 Em `config/config.php`: `'integracoes' => ['erp' => 'omie', 'omie' => ['app_key' => '...', 'app_secret' => '...']]`.
 O resto do sistema não muda. O esqueleto da API real está em `app/Integrations/Omie/OmieClient.php`.
+A tela **Administração › Integração Omie** mostra o que vem e vai para o ERP, testa a conexão e tem o botão
+"Sincronizar agora" (o mesmo que o cron `cron/sincronizar_erp.php` faz a cada 30 minutos).
+
+## Apresentação da Fase 0
+
+O roteiro da demonstração para a diretoria (ordem das telas, logins, falas, perguntas prováveis e decisões)
+foi publicado como página à parte. Logins de demonstração: veja a tabela acima (senha `Demo@2026`).
 
 ## Regras do projeto
 

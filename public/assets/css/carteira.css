@@ -251,18 +251,6 @@ form.devolver select { padding: 5px 8px; font-size: .8rem; min-width: 150px; }
 .agenda-resumo a.card.ativo { outline: 2px solid var(--lima-escuro); }
 @media (max-width: 900px) { .grade-importacao, .agenda-resumo.quatro { grid-template-columns: 1fr; } }
 
-/* ---------- Campanha em destaque (Black Friday), como na Carteira V4 ---------- */
-.faixa-campanha { position: relative; overflow: hidden; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
-  margin-bottom: 18px; padding: 22px 26px; border-radius: 18px; border: 1px solid #3b5734; color: #fbfff0;
-  background: radial-gradient(circle at 93% 10%, #befe4280, transparent 34%), linear-gradient(130deg, #263527, #172019 72%); }
-.faixa-campanha::after { content: ""; position: absolute; width: 190px; height: 20px; background: var(--lima); transform: rotate(-38deg); right: -60px; top: 22px; opacity: .85; }
-.faixa-campanha > div { position: relative; z-index: 1; display: grid; gap: 4px; }
-.faixa-campanha-sobre { font-size: .62rem; font-weight: 850; letter-spacing: .2em; color: #a6d793; }
-.faixa-campanha strong { font-size: clamp(26px, 3vw, 38px); font-weight: 980; letter-spacing: -.05em; line-height: 1; }
-.faixa-campanha em { font-style: normal; color: var(--lima); }
-.faixa-campanha small { font-size: .66rem; letter-spacing: .12em; color: #bed0b9; font-weight: 760; }
-.faixa-campanha .botao { position: relative; z-index: 1; margin-right: 70px; background: #fff; }
-
 /* ---------- Buscar contatos com IA (ficha do cliente e caso de cobrança) ---------- */
 .busca-ia { border: 1px dashed #cfd9c9; border-radius: var(--raio-pequeno); padding: 12px; margin-top: 12px; background: #fafcf7; }
 .busca-ia.destaque { border: 1px solid var(--lima-escuro); background: var(--verde-claro); }
