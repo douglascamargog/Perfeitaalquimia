@@ -1,5 +1,5 @@
 <?php
-/** Formulário de usuário. Variáveis: $usuario (null = novo), $perfis, $funcoes, $funcoesMarcadas */
+/** Formulário de usuário. Variáveis: $usuario (null = novo), $perfis, $funcoes, $funcoesMarcadas, $acessos, $permPerfis, $excecoes */
 $novo = $usuario === null;
 $valor = fn(string $campo) => antigo($campo, $usuario[$campo] ?? '');
 $perfilAtual = (int) \App\Core\Sessao::antigo('perfil_id', $usuario['perfil_id'] ?? 0);
@@ -47,6 +47,13 @@ $ativo = $novo || $usuario['ativo'];
       </label>
     <?php endforeach; ?>
   </div>
+
+  <details class="ac-excecoes" <?= $excecoes ? 'open' : '' ?>>
+    <summary><strong>Acessos desta pessoa</strong> <span class="suave pequeno">— <?= $excecoes ? count($excecoes) . ' exceção(ões) sobre o perfil' : 'segue o perfil' ?></span></summary>
+    <p class="suave pequeno">Normalmente a pessoa segue o perfil (Administração › Acessos). Aqui você dá ou tira algo <strong>só desta pessoa</strong>.
+      Ex.: um vendedor que também edita o Mural. O perfil Admin tem tudo e ignora as exceções.</p>
+    <?= \App\Core\Visao::renderizar('usuarios/_excecoes', ['acessos' => $acessos, 'permPerfis' => $permPerfis, 'excecoes' => $excecoes, 'perfilAtual' => $perfilAtual]) ?>
+  </details>
 
   <h2 style="margin-top:16px"><?= $novo ? 'Senha provisória' : 'Redefinir senha' ?></h2>
   <p class="suave pequeno"><?= $novo ? 'A pessoa troca no primeiro acesso.' : 'Deixe em branco para manter a senha atual. Se preencher, a pessoa troca no próximo acesso.' ?></p>

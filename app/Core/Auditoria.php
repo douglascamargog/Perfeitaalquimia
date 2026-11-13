@@ -46,7 +46,9 @@ class Auditoria
     {
         $a = $d = [];
         foreach ($depois as $campo => $valor) {
-            if (!array_key_exists($campo, $antes) || (string) $antes[$campo] !== (string) $valor) {
+            // listas (ex.: permissões) são comparadas como texto JSON
+            $txt = fn($v) => is_array($v) ? json_encode($v, JSON_UNESCAPED_UNICODE) : (string) $v;
+            if (!array_key_exists($campo, $antes) || $txt($antes[$campo]) !== $txt($valor)) {
                 $a[$campo] = $antes[$campo] ?? null;
                 $d[$campo] = $valor;
             }

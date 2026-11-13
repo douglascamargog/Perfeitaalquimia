@@ -40,6 +40,10 @@ class UsuarioController extends Controller
             'perfis'        => Usuario::perfis(),
             'funcoes'       => Funcao::listar(true),
             'funcoesMarcadas' => $usuario ? array_column(Usuario::funcoesDe((int) $usuario['id']), 'id') : [],
+            'acessos'       => \App\Services\AcessoService::definicao(),
+            'permPerfis'    => array_map(fn($p) => array_column(Banco::todos('SELECT permissao FROM perfil_permissoes WHERE perfil_id = ?', [$p['id']]), 'permissao'),
+                                   array_column(Usuario::perfis(), null, 'id')),
+            'excecoes'      => $usuario ? \App\Services\AcessoService::excecoes((int) $usuario['id']) : [],
         ]);
     }
 
@@ -60,6 +64,7 @@ class UsuarioController extends Controller
             return $id;
         });
         Auditoria::registrar('usuario', $id, 'criar', null, $dados);
+        \App\Services\AcessoService::salvarExcecoes($id, (int) $dados['perfil_id'], (array) ($_POST['excecao'] ?? []), (array) ($_POST['excecao_especial'] ?? []));
         if ($erroFoto = $this->tratarFoto($id)) {
             Sessao::aviso('erro', "Usuário criado, mas a foto não foi salva: $erroFoto");
             redirecionar("/usuarios/$id/editar");
@@ -98,6 +103,7 @@ class UsuarioController extends Controller
             Usuario::definirFuncoes($id, (array) ($_POST['funcoes'] ?? []));
         });
         $funcoesDepois = array_column(Usuario::funcoesDe($id), 'nome');
+        \App\Services\AcessoService::salvarExcecoes($id, (int) $dados['perfil_id'], (array) ($_POST['excecao'] ?? []), (array) ($_POST['excecao_especial'] ?? []));
         if ($erroFoto = $this->tratarFoto($id)) {
             Sessao::aviso('erro', "Dados salvos, mas a foto não: $erroFoto");
             redirecionar("/usuarios/$id/editar");

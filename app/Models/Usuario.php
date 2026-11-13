@@ -39,9 +39,17 @@ class Usuario
     }
 
     /** Lista de permissões (slugs) do perfil */
-    public static function permissoes(int $perfilId): array
+    public static function permissoes(int $perfilId, ?int $usuarioId = null): array
     {
-        return array_column(Banco::todos('SELECT permissao FROM perfil_permissoes WHERE perfil_id = ?', [$perfilId]), 'permissao');
+        $lista = array_column(Banco::todos('SELECT permissao FROM perfil_permissoes WHERE perfil_id = ?', [$perfilId]), 'permissao');
+        if ($usuarioId === null || in_array('*', $lista, true)) {
+            return $lista; // o Admin tem tudo (exceções não tiram nada dele)
+        }
+        // Exceções desta pessoa (Administração › Usuários): concedida = 1 dá, 0 tira
+        foreach (Banco::todos('SELECT permissao, concedida FROM usuario_permissoes WHERE usuario_id = ?', [$usuarioId]) as $e) {
+            $lista = $e['concedida'] ? array_values(array_unique([...$lista, $e['permissao']])) : array_values(array_diff($lista, [$e['permissao']]));
+        }
+        return $lista;
     }
 
     /** Funções às quais a pessoa está vinculada */

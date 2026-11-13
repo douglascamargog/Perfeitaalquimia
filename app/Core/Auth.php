@@ -90,7 +90,7 @@ class Auth
             Sessao::destruir();
             return null;
         }
-        $usuario['permissoes'] = Usuario::permissoes((int) $usuario['perfil_id']);
+        $usuario['permissoes'] = Usuario::permissoes((int) $usuario['perfil_id'], (int) $usuario['id']);
         $usuario['funcoes'] = Usuario::funcoesDe((int) $usuario['id']);
         return self::$usuario = $usuario;
     }
