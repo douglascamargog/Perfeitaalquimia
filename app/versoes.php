@@ -17,6 +17,17 @@
  */
 return [
     [
+        'versao' => '4.3', 'data' => '2026-11-13', 'titulo' => 'Equipe e aniversários',
+        'novo' => [
+            'Equipe (no menu): conheça os colegas. Cada um tem um perfil com foto de capa, um pouco sobre si, hobbies, favoritos, família e pets.',
+            'Monte o seu em Meu perfil › Meu perfil público.',
+            'No seu aniversário, o One fica todo decorado para você. No Início de todos aparece o mural para deixar os parabéns.',
+        ],
+        'melhoria' => [
+            'Clique na foto de um colega (aniversariantes, quem está online, ranking) para abrir o perfil dele.',
+        ],
+    ],
+    [
         'versao' => '4.2', 'data' => '2026-11-13', 'titulo' => 'Comunicados e o seu apelido',
         'novo' => [
             'Comunicados da administração aparecem em destaque no alto da tela. Clique para ler e em "Li e entendi" para tirar da faixa. Todos ficam em Comunicados.',

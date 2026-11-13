@@ -40,12 +40,24 @@ class EquipeService
         if (!$arquivo || ($arquivo['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
             return null;
         }
-        if ($arquivo['error'] !== UPLOAD_ERR_OK || $arquivo['size'] > 5 * 1024 * 1024) {
-            throw new RuntimeException('A foto precisa ter até 5 MB.');
+        $caminho = self::gravarImagem($arquivo, 400, 400, (string) $usuarioId);
+        self::apagarFotoAntiga($usuarioId);
+        Banco::executar('UPDATE usuarios SET foto = ? WHERE id = ?', [$caminho, $usuarioId]);
+        return $caminho;
+    }
+
+    /**
+     * Confere, endireita (celular), recorta no centro na proporção $largura × $altura, reduz e grava em public/media/equipe.
+     * Usada na foto (400×400), na capa do perfil (1200×360) e na foto do pet (400×400). Devolve o caminho a partir de public/.
+     */
+    public static function gravarImagem(array $arquivo, int $largura, int $altura, string $prefixo): string
+    {
+        if (($arquivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || $arquivo['size'] > 5 * 1024 * 1024) {
+            throw new RuntimeException('A imagem precisa ter até 5 MB.');
         }
         $tipo = (new \finfo(FILEINFO_MIME_TYPE))->file($arquivo['tmp_name']);
         if (!in_array($tipo, self::TIPOS, true)) {
-            throw new RuntimeException('Envie a foto em JPG, PNG ou WebP.');
+            throw new RuntimeException('Envie a imagem em JPG, PNG ou WebP.');
         }
         if (!function_exists('imagecreatetruecolor')) {
             throw new RuntimeException('O servidor está sem a extensão de imagens (GD) do PHP. Peça para ativar no painel da hospedagem.');
@@ -56,7 +68,7 @@ class EquipeService
             default => @imagecreatefromjpeg($arquivo['tmp_name']),
         };
         if (!$origem) {
-            throw new RuntimeException('Não consegui abrir essa imagem. Tente outra foto.');
+            throw new RuntimeException('Não consegui abrir essa imagem. Tente outra.');
         }
         // Foto de celular vem "deitada" com a informação de giro (EXIF): endireita antes de recortar
         if ($tipo === 'image/jpeg' && function_exists('exif_read_data')) {
@@ -65,28 +77,37 @@ class EquipeService
                 $origem = imagerotate($origem, $giro, 0) ?: $origem;
             }
         }
-        // Recorte quadrado no centro → 400×400
+        // Recorte no centro na proporção pedida e redução
         $w = imagesx($origem);
         $h = imagesy($origem);
-        $lado = min($w, $h);
-        $foto = imagecreatetruecolor(400, 400);
-        imagecopyresampled($foto, $origem, 0, 0, (int) (($w - $lado) / 2), (int) (($h - $lado) / 2), 400, 400, $lado, $lado);
+        $escala = min($w / $largura, $h / $altura);
+        $cw = (int) ($largura * $escala);
+        $ch = (int) ($altura * $escala);
+        $img = imagecreatetruecolor($largura, $altura);
+        imagecopyresampled($img, $origem, 0, 0, (int) (($w - $cw) / 2), (int) (($h - $ch) / 2), $largura, $altura, $cw, $ch);
         $pasta = RAIZ . '/public/' . self::PASTA;
         if ((!is_dir($pasta) && !@mkdir($pasta, 0755, true)) || !is_writable($pasta)) {
             throw new RuntimeException('A pasta das fotos (public/media/equipe) está sem permissão de gravação no servidor.');
         }
         // WebP (menor); se o servidor não tiver suporte a WebP, grava em JPG
         $webp = function_exists('imagewebp');
-        $caminho = self::PASTA . '/' . $usuarioId . '-' . bin2hex(random_bytes(6)) . ($webp ? '.webp' : '.jpg');
-        $gravou = $webp ? @imagewebp($foto, RAIZ . '/public/' . $caminho, 82) : @imagejpeg($foto, RAIZ . '/public/' . $caminho, 85);
-        if (!$gravou) {
-            throw new RuntimeException('Não consegui salvar a foto no servidor.');
-        }
-        imagedestroy($foto);
+        $caminho = self::PASTA . '/' . preg_replace('/[^a-z0-9-]/', '', $prefixo) . '-' . bin2hex(random_bytes(6)) . ($webp ? '.webp' : '.jpg');
+        $gravou = $webp ? @imagewebp($img, RAIZ . '/public/' . $caminho, 82) : @imagejpeg($img, RAIZ . '/public/' . $caminho, 85);
+        imagedestroy($img);
         imagedestroy($origem);
-        self::apagarFotoAntiga($usuarioId);
-        Banco::executar('UPDATE usuarios SET foto = ? WHERE id = ?', [$caminho, $usuarioId]);
+        if (!$gravou) {
+            throw new RuntimeException('Não consegui salvar a imagem no servidor.');
+        }
         return $caminho;
+    }
+
+    /** Apaga um arquivo antigo da pasta das fotos (só se for de lá) */
+    public static function apagarArquivo(?string $caminho): void
+    {
+        $caminho = (string) $caminho;
+        if ($caminho !== '' && str_starts_with($caminho, self::PASTA . '/') && !str_contains($caminho, '..') && is_file(RAIZ . '/public/' . $caminho)) {
+            @unlink(RAIZ . '/public/' . $caminho);
+        }
     }
 
     public static function removerFoto(int $usuarioId): void

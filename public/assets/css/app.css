@@ -402,3 +402,30 @@ input:disabled, select:disabled, textarea:disabled { background: var(--fundo); c
   .com-lugar .com-faixa { width: 100%; justify-content: flex-start; }
   .com-grade input[type=datetime-local] { min-width: 0; }
 }
+
+/* ===== Aniversário (só no sistema do aniversariante) ===== */
+.aniv-faixa { background: linear-gradient(90deg, #fde68a, #fbcfe8, var(--secundaria-clara)); color: #5b2a00; border-radius: 14px; padding: 12px 18px; margin-bottom: 18px; }
+.aniv-faixa a { margin-left: 8px; font-weight: 700; color: var(--primaria-escura); }
+.aniv-baloes { position: fixed; right: 18px; bottom: 90px; z-index: 30; display: flex; gap: 4px; pointer-events: none; }
+.aniv-balao { width: 42px; height: 84px; animation: aniv-flutua 4s ease-in-out infinite; }
+.aniv-balao.b2 { animation-delay: .6s; margin-top: -18px; }
+.aniv-balao.b3 { animation-delay: 1.2s; }
+@keyframes aniv-flutua { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
+.aniv-confete { position: fixed; inset: 0; z-index: 1200; pointer-events: none; }
+body.aniversario .principal { background-image: radial-gradient(circle at 12% 8%, rgba(244, 114, 182, .10), transparent 30%), radial-gradient(circle at 88% 4%, rgba(250, 204, 21, .12), transparent 28%); }
+@media (prefers-reduced-motion: reduce) { .aniv-balao { animation: none; } }
+@media print { .aniv-baloes, .aniv-faixa, .aniv-confete { display: none; } }
+/* Mural de parabéns (Início e perfil) */
+.b-mural { background: linear-gradient(160deg, #fff7ed, var(--card) 60%); }
+.b-mural .b-topo a { color: var(--primaria-escura); }
+.mural { display: grid; gap: 10px; }
+.mural-form { display: grid; gap: 8px; justify-items: start; }
+.mural-form textarea { min-height: 60px; }
+.mural-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 320px; overflow: auto; }
+.mural-lista li { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; background: var(--card); border: 1px solid var(--borda); border-radius: 12px; padding: 10px; }
+.mural-lista p { margin: 2px 0; }
+.mural-lista small { color: var(--texto-suave); font-size: .72rem; }
+.b-aniver-link { display: inline-grid; }
+.b-aniver-lista a { color: inherit; text-decoration: none; }
+a.online-item { color: inherit; text-decoration: none; }
+a.eq-pessoa { color: inherit; text-decoration: none; }

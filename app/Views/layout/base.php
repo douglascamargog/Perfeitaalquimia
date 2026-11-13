@@ -55,7 +55,16 @@ unset($itensDoGrupo);
   <meta name="csrf" content="<?= e(\App\Core\Csrf::token()) ?>">
   <meta name="base" content="<?= e(url_base()) ?>">
 </head>
-<body>
+<?php $meuAniversario = \App\Services\AniversarioService::eHoje(Auth::usuario()); // só o sistema do aniversariante fica decorado ?>
+<body class="<?= $meuAniversario ? 'aniversario' : '' ?>">
+<?php if ($meuAniversario): ?>
+  <div class="aniv-baloes" aria-hidden="true">
+    <svg viewBox="0 0 60 120" class="aniv-balao b1"><ellipse cx="30" cy="34" rx="24" ry="30" fill="#f472b6"/><path d="M30 64l-4 6h8z" fill="#f472b6"/><path d="M30 70c-6 14 6 26 0 46" stroke="#94a3b8" fill="none"/></svg>
+    <svg viewBox="0 0 60 120" class="aniv-balao b2"><ellipse cx="30" cy="34" rx="24" ry="30" fill="#facc15"/><path d="M30 64l-4 6h8z" fill="#facc15"/><path d="M30 70c-6 14 6 26 0 46" stroke="#94a3b8" fill="none"/></svg>
+    <svg viewBox="0 0 60 120" class="aniv-balao b3"><ellipse cx="30" cy="34" rx="24" ry="30" fill="#5cd4b6"/><path d="M30 64l-4 6h8z" fill="#5cd4b6"/><path d="M30 70c-6 14 6 26 0 46" stroke="#94a3b8" fill="none"/></svg>
+  </div>
+  <canvas class="aniv-confete" data-confete aria-hidden="true"></canvas>
+<?php endif; ?>
 <?php if (config('modo_demo')): ?>
   <div class="faixa-demo">Ambiente de demonstração — dados simulados</div>
 <?php endif; ?>
@@ -134,6 +143,10 @@ unset($itensDoGrupo);
     </header>
 
     <main class="conteudo">
+      <?php if ($meuAniversario): ?>
+        <div class="aniv-faixa" role="status">🎉 <strong>Feliz aniversário, <?= e(\App\Services\EquipeService::comoChamar($usuario)) ?>!</strong> A equipe toda está torcendo por você hoje.
+          <a href="<?= url('/') ?>#mural-aniversario">Ver os parabéns</a></div>
+      <?php endif; ?>
       <?php foreach (Sessao::avisos() as $aviso): ?>
         <div class="aviso <?= e($aviso['tipo']) ?>" role="status"><?= e($aviso['mensagem']) ?></div>
       <?php endforeach; ?>
@@ -179,6 +192,7 @@ if ($usuarioNov && array_key_exists('versao_vista', $usuarioNov) && empty($usuar
   </div>
 </div>
 <script type="module" src="<?= asset('js/comunicados.js') ?>"></script>
+<?php if ($meuAniversario): ?><script type="module" src="<?= asset('js/aniversario.js') ?>"></script><?php endif; ?>
 <script type="module" src="<?= asset('js/app.js') ?>"></script>
 <script type="module" src="<?= asset('js/busca.js') ?>"></script>
 <script type="module" src="<?= asset('js/notificacoes.js') ?>"></script>

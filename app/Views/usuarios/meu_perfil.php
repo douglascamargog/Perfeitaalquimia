@@ -17,6 +17,41 @@ use App\Core\Visao;
   <div class="acoes-form"><button class="botao" type="submit">Salvar</button></div>
 </form>
 
+<?php // Meu perfil público: o que os colegas veem em Equipe (tipo rede social)
+$pp = $publico ?? [];
+$v = fn(string $c) => e((string) ($pp[$c] ?? ''));
+?>
+<form method="post" action="<?= url('/meu-perfil/publico') ?>" class="card" style="max-width:820px" enctype="multipart/form-data" id="perfil-publico" data-perfil-publico>
+  <?= csrf_campo() ?>
+  <h2>Meu perfil público</h2>
+  <p class="suave pequeno">O que os colegas veem quando abrem o seu perfil em <a href="<?= url('/pessoas/' . (int) $u['id']) ?>">Equipe</a>. Tudo é opcional. O ano do seu aniversário nunca aparece.</p>
+  <div class="campo"><label for="pp-sobre">Sobre mim</label><textarea id="pp-sobre" name="sobre_mim" rows="3" maxlength="600" placeholder="Ex.: Sou de São Leopoldo, trabalho com vendas há 8 anos e adoro conversar com os clientes."><?= $v('sobre_mim') ?></textarea></div>
+  <div class="campo"><label for="pp-hobbies">Nas horas vagas (hobbies)</label><input type="text" id="pp-hobbies" name="hobbies" maxlength="300" value="<?= $v('hobbies') ?>" placeholder="Ex.: corrida, churrasco com a família, crochê"></div>
+  <h3>Favoritos</h3>
+  <div class="grade-campos">
+    <div class="campo"><label for="pp-comida">🍽 Comida</label><input type="text" id="pp-comida" name="comida" maxlength="120" value="<?= $v('comida') ?>"></div>
+    <div class="campo"><label for="pp-musica">🎵 Música</label><input type="text" id="pp-musica" name="musica" maxlength="120" value="<?= $v('musica') ?>"></div>
+    <div class="campo"><label for="pp-filme">🎬 Filme ou série</label><input type="text" id="pp-filme" name="filme_serie" maxlength="120" value="<?= $v('filme_serie') ?>"></div>
+    <div class="campo"><label for="pp-time">⚽ Time</label><input type="text" id="pp-time" name="time_futebol" maxlength="80" value="<?= $v('time_futebol') ?>"></div>
+    <div class="campo"><label for="pp-lugar">📍 Lugar favorito</label><input type="text" id="pp-lugar" name="lugar_favorito" maxlength="120" value="<?= $v('lugar_favorito') ?>"></div>
+  </div>
+  <h3>Família e pets</h3>
+  <div class="grade-campos">
+    <div class="campo"><label for="pp-familia">Família</label><input type="text" id="pp-familia" name="familia" maxlength="300" value="<?= $v('familia') ?>" placeholder="Ex.: casada, mãe da Júlia (6 anos)"></div>
+    <div class="campo"><label for="pp-pets">Pets</label><input type="text" id="pp-pets" name="pets" maxlength="200" value="<?= $v('pets') ?>" placeholder="Ex.: o Thor, um vira-lata muito folgado"></div>
+    <div class="campo"><label for="pp-pet-foto">Foto do pet</label><input type="file" id="pp-pet-foto" name="pet_foto" accept="image/jpeg,image/png,image/webp">
+      <?php if (!empty($pp['pet_foto'])): ?><label class="opcao pequeno"><input type="checkbox" name="remover_pet_foto" value="1"> Remover a foto do pet</label><?php endif; ?></div>
+  </div>
+  <h3>Capa e redes</h3>
+  <div class="grade-campos">
+    <div class="campo"><label for="pp-capa">Imagem de capa</label><input type="file" id="pp-capa" name="capa" accept="image/jpeg,image/png,image/webp"><div class="ajuda">Uma imagem larga (paisagem). Até 5 MB.</div>
+      <?php if (!empty($pp['capa'])): ?><label class="opcao pequeno"><input type="checkbox" name="remover_capa" value="1"> Remover a capa</label><?php endif; ?></div>
+    <div class="campo"><label for="pp-insta">Instagram</label><input type="text" id="pp-insta" name="instagram" maxlength="160" value="<?= $v('instagram') ?>" placeholder="@seuusuario"></div>
+    <div class="campo"><label for="pp-linkedin">LinkedIn</label><input type="text" id="pp-linkedin" name="linkedin" maxlength="200" value="<?= $v('linkedin') ?>" placeholder="linkedin.com/in/..."></div>
+  </div>
+  <div class="acoes-form"><button class="botao" type="submit">Salvar perfil público</button><a class="botao contorno" href="<?= url('/pessoas/' . (int) $u['id']) ?>">Ver como os colegas veem</a></div>
+</form>
+
 <?php // Aparência: cores do sistema só para esta pessoa (a prévia muda na hora; salva com o botão)
 [$corP, $corS] = \App\Services\Aparencia::daPessoa($u);
 $propria = !empty($u['cor_primaria']) || !empty($u['cor_secundaria']);

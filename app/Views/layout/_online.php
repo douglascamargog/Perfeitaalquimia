@@ -17,10 +17,10 @@ $resto = count($online) - count($mostrar);
 <div class="online-painel" role="dialog" aria-label="Quem está online">
   <header><strong>Online agora</strong><span class="suave pequeno"><?= count($online) ?> pessoa(s)</span></header>
   <?php foreach ($online as $u): ?>
-    <div class="online-item">
+    <a class="online-item" href="<?= url('/pessoas/' . (int) $u['id']) ?>">
       <span class="online-foto"><?= EquipeService::avatar($u, 34) ?><i aria-hidden="true"></i></span>
       <span><strong><?= e($u['nome']) ?></strong><small><?= e($u['funcoes'] ?: '') ?></small></span>
       <span class="online-onde"><b><?= e($u['visto_onde']) ?></b><small><?= e($u['ha']) ?></small></span>
-    </div>
+    </a>
   <?php endforeach; ?>
 </div>

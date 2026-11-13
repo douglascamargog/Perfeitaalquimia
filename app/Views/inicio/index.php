@@ -123,6 +123,15 @@ $atalhos = $principal && isset($atalhosFoco[$principal])
   <?php endif; ?>
 
   <!-- ===== Indicadores ===== -->
+  <!-- ===== Mural de parabéns: quem faz aniversário hoje ===== -->
+  <?php foreach (\App\Services\AniversarioService::deHoje() as $aniv): ?>
+    <section class="b-card span-6 b-mural" id="mural-aniversario" data-card="mural-aniversario">
+      <header class="b-topo"><span>🎉 Hoje é aniversário de <a href="<?= url('/pessoas/' . (int) $aniv['id']) ?>"><?= e((int) $aniv['id'] === (int) $usuario['id'] ? 'você' : $aniv['nome']) ?></a></span>
+        <a href="<?= url('/pessoas/' . (int) $aniv['id']) ?>"><?= \App\Services\EquipeService::avatar($aniv, 40) ?></a></header>
+      <?= \App\Core\Visao::renderizar('pessoas/_mural', ['a' => $aniv, 'mensagens' => \App\Services\AniversarioService::mensagens((int) $aniv['id']), 'voltar' => 'inicio']) ?>
+    </section>
+  <?php endforeach; ?>
+
   <!-- ===== Aniversariantes do mês (só dia e mês, nunca o ano) ===== -->
   <?php if ($p['aniversariantes']): ?>
     <section class="b-card span-3 b-aniver" data-card="aniversariantes">
@@ -130,8 +139,8 @@ $atalhos = $principal && isset($atalhosFoco[$principal])
       <ul class="b-aniver-lista">
         <?php foreach (array_slice($p['aniversariantes'], 0, 6) as $a): ?>
           <li class="<?= $a['hoje'] ? 'hoje' : ($a['passou'] ? 'passou' : '') ?>">
-            <?= \App\Services\EquipeService::avatar($a, 34) ?>
-            <span><strong><?= e($a['nome']) ?></strong><small><?= $a['hoje'] ? 'faz aniversário hoje' : 'aniversário' ?></small></span>
+            <a href="<?= url('/pessoas/' . (int) $a['id']) ?>" class="b-aniver-link" aria-label="Ver o perfil de <?= e($a['nome']) ?>"><?= \App\Services\EquipeService::avatar($a, 34) ?></a>
+            <span><a href="<?= url('/pessoas/' . (int) $a['id']) ?>"><strong><?= e($a['nome']) ?></strong></a><small><?= $a['hoje'] ? 'faz aniversário hoje' : 'aniversário' ?></small></span>
             <b><?= $a['hoje'] ? 'Hoje! 🎉' : str_pad((string) $a['dia'], 2, '0', STR_PAD_LEFT) . '/' . date('m') ?></b>
           </li>
         <?php endforeach; ?>

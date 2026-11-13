@@ -216,6 +216,12 @@ return [
     // ---------- Meu perfil (foto, aniversário, contatos) ----------
     ['GET',  '/novidades',                      'NovidadesController@index',  'logado'],
     ['POST', '/novidades/vista',                'NovidadesController@vista',  'logado'],
+    // Equipe: perfil das pessoas e mural de aniversário
+    ['GET',  '/pessoas',                        'PessoaController@index',                'logado'],
+    ['GET',  '/pessoas/{id}',                   'PessoaController@ver',                  'logado'],
+    ['POST', '/meu-perfil/publico',             'PessoaController@salvarPerfil',         'logado'],
+    ['POST', '/aniversario/{id}/mensagens',     'PessoaController@parabens',             'logado'],
+    ['POST', '/aniversario/mensagens/{id}/apagar', 'PessoaController@apagarParabens',    'logado'],
     ['GET',  '/comunicados',                    'ComunicadoController@index',            'logado'],
     ['POST', '/comunicados',                    'ComunicadoController@emitir',           'comunicados.emitir'],
     ['POST', '/comunicados/{id}/ler',           'ComunicadoController@ler',              'logado'],

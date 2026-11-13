@@ -11,6 +11,7 @@
 
 return array_values(array_filter([
     ['titulo' => 'Início',          'url' => '/',              'icone' => 'casa',      'grupo' => '',               'permissao' => 'logado',                                  'pronto' => true,  'descricao' => 'Resumo do dia'],
+    ['titulo' => 'Equipe',          'url' => '/pessoas',       'icone' => 'pessoas',   'grupo' => '',               'permissao' => 'logado',                                  'pronto' => true,  'descricao' => 'Conheça os colegas: perfis, gostos e aniversários'],
     ['titulo' => 'Carteira',        'url' => '/carteira',      'icone' => 'pessoas',   'grupo' => 'Comercial',      'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Clientes, funil, mapa e linha do tempo'],
     ['titulo' => 'Meu mês',         'url' => '/meu-mes',       'icone' => 'grafico',   'grupo' => 'Comercial',      'permissao' => 'meu_mes.usar',                            'pronto' => true,  'descricao' => 'Minha meta, meta da equipe, vendas e tarefas'],
     ['titulo' => 'Agenda',          'url' => '/agenda',        'icone' => 'calendario', 'grupo' => 'Comercial',     'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Retornos atrasados, de hoje e futuros'],

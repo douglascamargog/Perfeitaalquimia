@@ -1,0 +1,33 @@
+/* Equipe: diretório e perfil "tipo rede social" */
+.pe-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.pe-cartao { position: relative; display: grid; justify-items: center; text-align: center; gap: 4px; padding: 0 16px 16px; background: var(--card);
+  border: 1px solid var(--borda); border-radius: var(--raio); text-decoration: none; color: var(--texto); overflow: hidden; box-shadow: var(--sombra); }
+.pe-cartao:hover { border-color: var(--secundaria); }
+.pe-cartao-capa { width: calc(100% + 32px); height: 70px; background: linear-gradient(120deg, var(--primaria), var(--secundaria)); background-size: cover; background-position: center; }
+.pe-cartao-foto { margin-top: -36px; border-radius: 50%; border: 4px solid var(--card); display: inline-grid; }
+.pe-cartao strong { font-size: .98rem; color: var(--primaria-escura); }
+.pe-cartao small { color: var(--texto-suave); font-size: .78rem; }
+.pe-cartao-sobre { font-size: .8rem; color: var(--texto); }
+.pe-cartao-aniver { font-size: .78rem; color: var(--texto-suave); }
+.pe-perfil { display: grid; gap: 18px; }
+.pe-topo { background: var(--card); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; box-shadow: var(--sombra); }
+.pe-capa { height: 200px; background: linear-gradient(120deg, var(--primaria), var(--secundaria)); background-size: cover; background-position: center; }
+.pe-id { display: flex; gap: 20px; align-items: flex-end; padding: 0 24px 20px; flex-wrap: wrap; }
+.pe-foto { margin-top: -64px; border-radius: 50%; border: 5px solid var(--card); display: inline-grid; background: var(--card); }
+.pe-id h1 { margin: 10px 0 2px; }
+.pe-id p { margin: 0; color: var(--texto-suave); }
+.pe-festa { font-size: .8rem; background: #fde68a; color: #5b2a00; border-radius: 99px; padding: 3px 10px; vertical-align: middle; }
+.pe-redes { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; font-size: .86rem; }
+.pe-redes a { font-weight: 700; }
+.pe-editar { margin-left: auto; }
+.pe-corpo { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; align-items: start; }
+.pe-corpo .card, .pe-mural { margin: 0; }
+.pe-sobre { font-size: 1rem; line-height: 1.6; }
+.pe-gostos { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.pe-gosto { background: var(--primaria-clara); border-radius: 14px; padding: 12px; display: grid; gap: 2px; }
+.pe-gosto span { font-size: 1.4rem; }
+.pe-gosto small { color: var(--texto-suave); font-size: .72rem; }
+.pe-gosto strong { color: var(--primaria-escura); }
+.pe-pet { display: flex; gap: 12px; align-items: center; }
+.pe-pet img { border-radius: 16px; object-fit: cover; }
+@media (max-width: 700px) { .pe-capa { height: 130px; } .pe-foto { margin-top: -48px; } .pe-editar { margin-left: 0; } }
