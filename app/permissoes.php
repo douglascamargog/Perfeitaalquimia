@@ -39,6 +39,7 @@ return [
     'midia.gerenciar'         => ['Biblioteca de mídia', ['marketing']],
     'mensagens.gerenciar'     => ['Editar mensagens prontas de WhatsApp', ['gestor', 'marketing']],
     'producao.gerenciar'      => ['Matérias-primas, fichas técnicas e ordens de produção', ['producao']],
+    'producao.ver'            => ['Ver a Produção (estoques, ordens e alertas) sem editar', ['gestor']],
     'usuarios.gerenciar'      => ['Cadastrar usuários e funções', []],
     'config.gerenciar'        => ['Alterar configurações e regras comerciais', []],
     'auditoria.ver'           => ['Ver o log de auditoria', []],

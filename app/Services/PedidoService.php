@@ -258,6 +258,7 @@ class PedidoService
         self::historico((int) $pedido['id'], 'faturado', "Faturado · NF $numeroNf.", null);
         ClienteEvento::registrar((int) $pedido['cliente_id'], 'pedido', 'Pedido #' . $pedido['id'] . ' faturado · NF ' . $numeroNf . ' · ' . dinheiro((float) $pedido['total']), null, 'ERP', ['pedido_id' => (int) $pedido['id']], $quando);
         self::atualizarCompras((int) $pedido['cliente_id']);
+        ProducaoService::baixarVenda((int) $pedido['id'], $quando); // estoque acabado da fábrica (se configurado)
     }
 
     /** Recalcula última compra e intervalo médio entre compras (base do alerta de recompra) */
