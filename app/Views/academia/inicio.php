@@ -5,7 +5,7 @@ use App\Core\Visao;
 use App\Services\AcademiaService;
 
 $icones = asset('img/icones.svg');
-$nome = explode(' ', Auth::usuario()['nome'])[0];
+$nome = \App\Services\EquipeService::comoChamar(Auth::usuario());
 ?>
 <?= Visao::renderizar('academia/_cabecalho', get_defined_vars() + ['sobretitulo' => 'Academia Perfeita Alquimia', 'titulo_pagina' => 'Boas-vindas ao televendas.', 'chamada' => 'Aprenda no seu ritmo. Consulte sempre que precisar.']) ?>
 

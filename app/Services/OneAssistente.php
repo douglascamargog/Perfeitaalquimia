@@ -24,7 +24,7 @@ class OneAssistente
     {
         $hora = (int) date('G');
         $periodo = $hora < 12 ? 'Bom dia' : ($hora < 18 ? 'Boa tarde' : 'Boa noite');
-        $nome = explode(' ', (string) (Auth::usuario()['nome'] ?? ''))[0];
+        $nome = EquipeService::comoChamar(Auth::usuario()); // o apelido da própria pessoa
         return ['humor' => 'ola', 'texto' => "$periodo, $nome! Eu sou o One. Separei o que merece sua atenção hoje."];
     }
 
@@ -101,7 +101,7 @@ class OneAssistente
         if ($eu) {
             return ['humor' => 'feliz', 'texto' => 'Feliz aniversário! 🎉 A equipe toda torce por você hoje.'];
         }
-        $nomes = array_map(fn($a) => $a['apelido'] ?: explode(' ', $a['nome'])[0], $hoje);
+        $nomes = array_map(fn($a) => $a['nome'], $hoje); // para os colegas: o nome do funcionário
         return ['humor' => 'feliz', 'texto' => 'Hoje é aniversário de ' . implode(' e ', $nomes) . '! 🎉 Que tal mandar os parabéns?'];
     }
 

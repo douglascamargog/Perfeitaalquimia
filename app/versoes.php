@@ -17,6 +17,21 @@
  */
 return [
     [
+        'versao' => '4.2', 'data' => '2026-11-13', 'titulo' => 'Comunicados e o seu apelido',
+        'novo' => [
+            'Comunicados da administração aparecem em destaque no alto da tela. Clique para ler e em "Li e entendi" para tirar da faixa. Todos ficam em Comunicados.',
+        ],
+        'melhoria' => [
+            'O seu apelido ("Como prefere ser chamado(a)") aparece só para você. Para os colegas, nos aniversariantes, no ranking e em quem está online, aparece o seu nome.',
+            'A previsão do tempo do Início agora é de São Leopoldo e mostra a hora em que foi atualizada.',
+        ],
+        'admin' => [
+            'Administração › Comunicados: escolha os setores (funções) ou toda a empresa, a prioridade e até quando fica no topo. Acompanhe quem já leu.',
+            'Quem pode emitir: Administração › Acessos › "Comunicados (emitir)" (padrão: só o admin).',
+            'A cidade da previsão continua em Configurações › Início (latitude e longitude).',
+        ],
+    ],
+    [
         'versao' => '4.1', 'data' => '2026-11-13', 'titulo' => 'Página do cliente',
         'novo' => [
             'Cada cliente tem a sua página com tudo da empresa: quanto comprou em 12 meses, ticket médio, próxima compra prevista, todos os pedidos, o que mais compra, retornos abertos e a linha do tempo completa.',

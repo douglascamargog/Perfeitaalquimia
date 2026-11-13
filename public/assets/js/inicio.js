@@ -1,6 +1,6 @@
 // =====================================================================
 // Início: previsão do tempo (Open-Meteo — grátis, sem chave, sem dados pessoais).
-// A cidade vem de Configurações › Início. Guarda a previsão por 30 min no navegador.
+// A cidade vem de Configurações › Início. Guarda a previsão por 10 min no navegador e mostra a hora da leitura.
 // =====================================================================
 const card = document.querySelector('[data-clima]');
 
@@ -32,7 +32,7 @@ async function previsao(lat, lng) {
   const chave = `one-clima-${lat},${lng}`;
   try {
     const guardado = JSON.parse(localStorage.getItem(chave) || 'null');
-    if (guardado && Date.now() - guardado.quando < 30 * 60 * 1000) return guardado.dados;
+    if (guardado && Date.now() - guardado.quando < 10 * 60 * 1000) return guardado.dados;
   } catch { /* navegador sem armazenamento: busca de novo */ }
   const url = 'https://api.open-meteo.com/v1/forecast?' + new URLSearchParams({
     latitude: lat, longitude: lng, timezone: 'America/Sao_Paulo', forecast_days: '5',
@@ -54,7 +54,9 @@ async function mostrarClima() {
     const [texto, nome] = TEMPO[d.current.weather_code] || ['—', 'nuvem'];
     $('[data-clima-temp]').textContent = Math.round(d.current.temperature_2m) + '°';
     $('[data-clima-texto]').textContent = texto;
-    $('[data-clima-extra]').textContent = `Sensação ${Math.round(d.current.apparent_temperature)}° · umidade ${d.current.relative_humidity_2m}% · vento ${Math.round(d.current.wind_speed_10m)} km/h`;
+    // hora da leitura (o serviço atualiza a cada 15 min): deixa claro de quando é o dado
+    const hora = String(d.current.time || '').slice(11, 16);
+    $('[data-clima-extra]').textContent = `Sensação ${Math.round(d.current.apparent_temperature)}° · umidade ${d.current.relative_humidity_2m}% · vento ${Math.round(d.current.wind_speed_10m)} km/h${hora ? ` · atualizado às ${hora}` : ''}`;
     $('[data-clima-icone]').innerHTML = icone(nome);
 
     // Próximos 4 dias (o primeiro é hoje)

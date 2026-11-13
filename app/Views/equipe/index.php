@@ -60,7 +60,7 @@ $link = fn(array $p) => url('/equipe') . '?' . e(http_build_query($p + ['mes' =>
         <?php foreach ($ranking as $i => $r): ?>
           <tr>
             <td><b class="eq-posicao <?= $i < 3 && $r['faturado'] > 0 ? 'top' : '' ?>"><?= $i + 1 ?></b></td>
-            <td><div class="eq-pessoa"><?= EquipeService::avatar($r, 30) ?><strong><?= e($r['apelido'] ?: $r['nome']) ?></strong></div></td>
+            <td><div class="eq-pessoa"><?= EquipeService::avatar($r, 30) ?><strong><?= e($r['nome']) ?></strong></div></td>
             <td class="pequeno"><?= e(E::FRENTES[$r['frente']] ?? '—') ?></td>
             <td class="direita"><strong><?= dinheiro($r['faturado']) ?></strong></td>
             <td class="direita"><?= (int) $r['pedidos'] ?></td>

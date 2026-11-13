@@ -13,7 +13,7 @@ $seguinte = date('Y-m', strtotime("$mes-01 +1 month"));
 $pct = fn(float $v) => number_format($v, 1, ',', '.') . '%';
 $ou = fn($v) => $v === null ? '—' : dinheiro($v);
 $link = fn(array $p) => url('/meu-mes') . '?' . e(http_build_query($p + ['mes' => $mes]));
-$nome = explode(' ', Auth::usuario()['nome'])[0];
+$nome = \App\Services\EquipeService::comoChamar(Auth::usuario());
 ?>
 <div class="cabecalho-secao">
   <div>

@@ -24,7 +24,7 @@ async function sair(page) { await page.click('form[action$="/sair"] button'); }
   const rotas = async (c) => {
     await c.route('https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/**', (rota) => {
       const arquivo = rota.request().url().endsWith('.css') ? 'maplibre-gl.css' : 'maplibre-gl.js';
-      rota.fulfill({ path: '/tmp/claude-0/npm/package/dist/' + arquivo });
+      rota.fulfill({ path: require('path').join(__dirname, 'recursos', arquivo) }); // cópia local do MapLibre 4.7.1
     });
     await c.route('https://tiles.openfreemap.org/**', (rota) => rota.abort());
   };

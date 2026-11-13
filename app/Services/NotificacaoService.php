@@ -137,7 +137,7 @@ class NotificacaoService
                 AND criado_em >= NOW() - INTERVAL 1 HOUR", [$resp, $clienteId])) {
             return;
         }
-        $quem = explode(' ', (string) Banco::valor('SELECT COALESCE(NULLIF(apelido, \'\'), nome) FROM usuarios WHERE id = ?', [$quemFez]))[0];
+        $quem = (string) Banco::valor('SELECT nome FROM usuarios WHERE id = ?', [$quemFez]); // nome do funcionário (o apelido é só para a própria pessoa)
         $oque = \App\Models\ClienteEvento::TIPOS[$tipo] ?? 'Atualização';
         self::avisar([$resp], 'cliente_atualizado', self::nomeCliente($clienteId) . ": $oque por $quem", self::linkCliente($clienteId),
             ['cliente_id' => $clienteId, 'texto' => $descricao ? mb_strimwidth($descricao, 0, 140, '…') : null]);

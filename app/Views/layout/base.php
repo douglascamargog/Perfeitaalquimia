@@ -94,6 +94,8 @@ unset($itensDoGrupo);
     <header class="topo">
       <button class="botao-icone abrir-menu" type="button" aria-label="Abrir menu"><svg class="icone"><use href="<?= $icones ?>#menu"/></svg><i class="menu-ponto" data-menu-ponto <?= array_sum($pendencias) ? '' : 'hidden' ?>></i></button>
       <h1><?= e($titulo ?? '') ?></h1>
+      <?php // Comunicados não lidos: faixa em destaque (some ao clicar em "Li e entendi") ?>
+      <div class="com-lugar" data-com-lugar><?= \App\Core\Visao::renderizar('comunicados/_faixa', ['comunicados' => \App\Services\ComunicadoService::ativosPara((int) Auth::id())]) ?></div>
       <div class="busca-rapida" data-busca-rapida>
         <svg class="icone" aria-hidden="true"><use href="<?= $icones ?>#lupa"/></svg>
         <input type="search" placeholder="<?= Auth::pode('carteira.ver_propria') || Auth::pode('carteira.ver_todas') ? 'Buscar cliente, CNPJ, telefone ou código…' : 'Buscar produto ou código…' ?>"
@@ -118,7 +120,7 @@ unset($itensDoGrupo);
         </div>
         <a class="usuario-perfil" href="<?= url('/meu-perfil') ?>" title="Meu perfil">
           <span class="usuario-nome">
-            <strong><?= e($usuario['nome']) ?></strong>
+            <strong title="<?= e($usuario['nome']) ?>"><?= e(\App\Services\EquipeService::comoChamar($usuario)) ?></strong>
             <span><?= e($usuario['perfil_nome']) ?><?= $usuario['funcoes'] ? ' · ' . e(implode(', ', array_column($usuario['funcoes'], 'nome'))) : '' ?></span>
           </span>
           <?= \App\Services\EquipeService::avatar($usuario, 38) ?>
@@ -169,6 +171,14 @@ if ($usuarioNov && array_key_exists('versao_vista', $usuarioNov) && empty($usuar
     </section>
   </div>
 <?php endif; ?>
+<div class="com-janela-fundo" data-com-janela hidden role="dialog" aria-modal="true" aria-label="Comunicado">
+  <div class="com-janela">
+    <div data-com-conteudo></div>
+    <div class="com-janela-acoes"><a href="<?= url('/comunicados') ?>">Ver todos os comunicados</a>
+      <button type="button" class="botao contorno" data-com-fechar>Depois</button><button type="button" class="botao" data-com-ok>Li e entendi</button></div>
+  </div>
+</div>
+<script type="module" src="<?= asset('js/comunicados.js') ?>"></script>
 <script type="module" src="<?= asset('js/app.js') ?>"></script>
 <script type="module" src="<?= asset('js/busca.js') ?>"></script>
 <script type="module" src="<?= asset('js/notificacoes.js') ?>"></script>

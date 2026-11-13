@@ -106,7 +106,7 @@ async function sair(p) { await p.goto(BASE + '/'); await p.click('form[action$="
   ok((await aviso(p)).includes('JPG, PNG ou WebP') && sql(`select foto from usuarios where id=${vend}`) === foto, 'arquivo que não é imagem é recusado');
   await p.goto(BASE + '/');
   const card = p.locator('[data-card=aniversariantes]');
-  ok(await card.locator('li.hoje', { hasText: 'Tati' }).count() === 1, 'card de aniversariantes mostra quem faz aniversário hoje');
+  ok(await card.locator('li.hoje', { hasText: nomeAntes + ' Silva' }).count() === 1, 'card de aniversariantes mostra quem faz aniversário hoje (pelo nome, não pelo apelido)');
   ok(!(await card.innerText()).includes('1990'), 'o ano de nascimento não aparece');
   ok(await p.locator('.topo img.avatar').count() === 1, 'foto no topo');
   await sair(p);

@@ -7,7 +7,7 @@
 use App\Core\Auth;
 
 $icones = asset('img/icones.svg');
-$primeiroNome = explode(' ', $usuario['nome'])[0];
+$primeiroNome = \App\Services\EquipeService::comoChamar($usuario); // o apelido da própria pessoa
 $p = $painel;
 $n = fn($v) => number_format((float) $v, 0, ',', '.');
 $pct = fn($v) => number_format(min(100, max(0, (float) $v)), 0, ',', '.');
@@ -131,7 +131,7 @@ $atalhos = $principal && isset($atalhosFoco[$principal])
         <?php foreach (array_slice($p['aniversariantes'], 0, 6) as $a): ?>
           <li class="<?= $a['hoje'] ? 'hoje' : ($a['passou'] ? 'passou' : '') ?>">
             <?= \App\Services\EquipeService::avatar($a, 34) ?>
-            <span><strong><?= e($a['apelido'] ?: explode(' ', $a['nome'])[0]) ?></strong><small><?= e($a['nome']) ?></small></span>
+            <span><strong><?= e($a['nome']) ?></strong><small><?= $a['hoje'] ? 'faz aniversário hoje' : 'aniversário' ?></small></span>
             <b><?= $a['hoje'] ? 'Hoje! 🎉' : str_pad((string) $a['dia'], 2, '0', STR_PAD_LEFT) . '/' . date('m') ?></b>
           </li>
         <?php endforeach; ?>

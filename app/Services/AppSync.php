@@ -77,7 +77,7 @@ class AppSync
         $u = Auth::usuario();
         return [
             'marca' => $marca,
-            'gerado_em' => date('c'), 'vendedor' => ['id' => (int) $u['id'], 'nome' => $u['nome']], 'csrf' => Csrf::token(),
+            'gerado_em' => date('c'), 'vendedor' => ['id' => (int) $u['id'], 'nome' => EquipeService::comoChamar($u)], 'csrf' => Csrf::token(),
             'dias_cache' => (int) Config::get('app.dias_cache', 7), 'clientes' => $clientes, 'produtos' => $produtos, 'precos' => $precos,
             'tabelas' => Banco::todos('SELECT id, nome FROM tabelas_preco WHERE ativa = 1'), 'formas' => $formas, 'minimos' => $minimos,
             'whatsapp_empresa' => preg_replace('/\D/', '', (string) Config::get('empresa.whatsapp', '')),

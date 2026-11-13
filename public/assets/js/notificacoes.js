@@ -24,6 +24,8 @@ if (sino) {
   };
 
   const aplicar = (d) => {
+    // Comunicado novo aparece na faixa do topo sem recarregar
+    if (window.__oneFaixaComunicados) window.__oneFaixaComunicados(d.comunicados);
     // Quem está online (fotinhas do topo)
     const online = document.querySelector('[data-online]');
     if (online && typeof d.online_html === 'string') {

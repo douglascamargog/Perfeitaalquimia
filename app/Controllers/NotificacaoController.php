@@ -27,6 +27,7 @@ class NotificacaoController extends Controller
         \App\Services\Presenca::registrar($id, (string) ($_GET['onde'] ?? '/'));
         $online = \App\Services\Presenca::online($id);
         $this->json([
+            'comunicados' => \App\Core\Visao::renderizar('comunicados/_faixa', ['comunicados' => \App\Services\ComunicadoService::ativosPara($id)]),
             'online_qtd' => count($online),
             'online_html' => \App\Core\Visao::renderizar('layout/_online', ['online' => $online]),
             'nao_lidas' => NotificacaoService::naoLidas($id),

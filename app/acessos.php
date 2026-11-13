@@ -42,6 +42,7 @@ return [
         ],
         'Administração' => [
             ['Usuários, Funções e Acessos', null, 'usuarios.gerenciar', 'Cuidado: quem tem isto pode mudar os acessos de todos'],
+            ['Comunicados (emitir)', null, 'comunicados.emitir', 'Todos recebem; aqui é quem pode enviar'],
             ['Configurações e Listas', null, 'config.gerenciar', ''],
             ['Integração Omie', null, 'integracao.gerenciar', ''],
             ['Atualização e backup', null, 'sistema.atualizar', ''],

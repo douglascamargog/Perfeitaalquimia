@@ -111,10 +111,19 @@ class EquipeService
         return mb_strtoupper($ini);
     }
 
-    /** HTML do avatar (foto ou iniciais). $tamanho em px */
+    /**
+     * Como chamar a PRÓPRIA pessoa (topo, saudações): o apelido dela ("Como prefere ser chamado(a)") ou o primeiro nome.
+     * Para os OUTROS (aniversariantes, online, ranking, avisos) aparece sempre o nome do funcionário.
+     */
+    public static function comoChamar(?array $u): string
+    {
+        return trim((string) ($u['apelido'] ?? '')) ?: explode(' ', trim((string) ($u['nome'] ?? '')))[0];
+    }
+
+    /** HTML do avatar (foto ou iniciais do nome). $tamanho em px */
     public static function avatar(array $u, int $tamanho = 36): string
     {
-        $nome = (string) ($u['apelido'] ?? '') ?: (string) ($u['nome'] ?? '');
+        $nome = (string) ($u['nome'] ?? '');
         if (!empty($u['foto'])) {
             return '<img class="avatar" src="' . e(url('/' . $u['foto'])) . '" alt="' . e($nome) . '" width="' . $tamanho . '" height="' . $tamanho . '" loading="lazy">';
         }

@@ -41,6 +41,7 @@ return [
     'mensagens.usar'          => ['Usar mensagens prontas na ficha do cliente', ['gestor', 'vendedor', 'financeiro']],
     'producao.gerenciar'      => ['Matérias-primas, fichas técnicas e ordens de produção', ['producao']],
     'producao.ver'            => ['Ver a Produção (estoques, ordens e alertas) sem editar', ['gestor']],
+    'comunicados.emitir'      => ['Emitir comunicados em destaque para os setores', []],
     'equipe.ver'              => ['Ver a Equipe de vendas (meta da equipe, frentes e ranking)', ['gestor', 'vendedor', 'financeiro']],
     'terceirizacao.ver'       => ['Ver a Terceirização (clientes, pedidos, produtos e rótulos)', ['gestor', 'vendedor', 'financeiro', 'producao']],
     'terceirizacao.editar'    => ['Cadastrar produtos dos clientes de terceirização e registrar rótulos', ['gestor', 'vendedor', 'producao']],

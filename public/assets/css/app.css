@@ -352,3 +352,53 @@ input:disabled, select:disabled, textarea:disabled { background: var(--fundo); c
   .so-tela-grande { display: none; }
   .online-pilha .online-foto:nth-child(n+2) { display: none; }
 }
+
+/* ===== Comunicados: faixa em destaque no topo e janela ===== */
+.com-lugar { flex: 1 1 auto; min-width: 0; display: flex; justify-content: center; }
+.com-faixa { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; min-width: 0; padding: 8px 8px 8px 14px; border-radius: 99px; cursor: pointer;
+  border: 1px solid var(--secundaria); background: var(--secundaria-clara); color: var(--primaria-escura); font: inherit; font-size: .86rem; font-weight: 600; }
+.com-faixa:hover { background: var(--secundaria); color: var(--secundaria-texto); }
+.com-faixa .icone { flex: none; color: var(--primaria); }
+.com-titulo { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.com-mais { flex: none; background: var(--primaria); color: var(--primaria-texto); border-radius: 99px; padding: 1px 8px; font-size: .72rem; }
+.com-ver { flex: none; background: var(--card); border-radius: 99px; padding: 3px 10px; font-size: .74rem; color: var(--primaria); }
+.com-faixa.importante { background: #fff1e0; border-color: #f59e0b; color: #7a3b00; animation: com-pulso 2.4s ease-in-out infinite; }
+.com-faixa.importante .icone { color: #c2410c; }
+@keyframes com-pulso { 0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, .35); } 50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); } }
+@media (prefers-reduced-motion: reduce) { .com-faixa.importante { animation: none; } }
+.com-janela-fundo { position: fixed; inset: 0; z-index: 1100; background: #0b120ccc; display: grid; place-items: center; padding: 16px; }
+.com-janela-fundo[hidden] { display: none; }
+.com-janela { background: var(--card); border-radius: 20px; width: min(600px, 100%); max-height: calc(100vh - 32px); overflow: auto; box-shadow: 0 24px 60px #0007; }
+.com-janela-conteudo { padding: 24px 26px 8px; border-top: 6px solid var(--secundaria); }
+.com-janela-conteudo.importante { border-top-color: #f59e0b; }
+.com-janela-conteudo h2 { margin: 6px 0 4px; font-size: 1.35rem; }
+.com-quem { color: var(--texto-suave); font-size: .82rem; margin: 0 0 14px; }
+.com-texto { line-height: 1.6; }
+.com-janela-acoes { display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap; padding: 14px 26px 22px; }
+.com-janela-acoes a { margin-right: auto; font-size: .86rem; }
+/* tela Comunicados */
+.com-grade { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(0, 1.3fr); gap: 18px; align-items: start; }
+.com-grade .card { margin: 0; }
+.com-h2 { padding: 18px 20px 4px; margin: 0; }
+.com-setores { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0 12px; padding: 4px 0 0 26px; }
+.com-setores.desligado { opacity: .45; pointer-events: none; }
+.rotulo-campo { display: block; font-weight: 600; font-size: .85rem; margin-bottom: 6px; color: var(--verde-escuro); }
+.com-leitura { min-width: 150px; display: grid; gap: 2px; }
+.com-leitura .barra-meta { margin: 2px 0; height: 8px; }
+.com-lista { display: grid; gap: 12px; }
+.com-item { border: 1px solid var(--borda); border-left: 4px solid var(--secundaria); border-radius: 12px; padding: 12px 16px; display: grid; gap: 6px; justify-items: start; }
+.com-item.importante { border-left-color: #f59e0b; }
+.com-item.lido { opacity: .7; }
+.com-item header { display: flex; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+@media (max-width: 1100px) { .com-grade { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .com-titulo, .com-ver { display: none; } .com-lugar { flex: 0 0 auto; } .com-faixa { padding: 8px 10px; } }
+@media print { .com-lugar { display: none; } }
+/* Celular: o comunicado ganha uma linha só dele, abaixo do topo (com o título, bem visível) */
+@media (max-width: 1100px) { .com-grade { grid-template-columns: minmax(0, 1fr); } .com-grade > * { min-width: 0; } }
+@media (max-width: 600px) {
+  .topo { flex-wrap: wrap; }
+  .com-lugar:not(:empty) { order: 10; flex: 1 1 100%; }
+  .com-lugar .com-titulo { display: inline; }
+  .com-lugar .com-faixa { width: 100%; justify-content: flex-start; }
+  .com-grade input[type=datetime-local] { min-width: 0; }
+}

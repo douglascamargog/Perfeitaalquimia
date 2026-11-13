@@ -216,6 +216,10 @@ return [
     // ---------- Meu perfil (foto, aniversário, contatos) ----------
     ['GET',  '/novidades',                      'NovidadesController@index',  'logado'],
     ['POST', '/novidades/vista',                'NovidadesController@vista',  'logado'],
+    ['GET',  '/comunicados',                    'ComunicadoController@index',            'logado'],
+    ['POST', '/comunicados',                    'ComunicadoController@emitir',           'comunicados.emitir'],
+    ['POST', '/comunicados/{id}/ler',           'ComunicadoController@ler',              'logado'],
+    ['POST', '/comunicados/{id}/encerrar',      'ComunicadoController@encerrar',         'comunicados.emitir'],
     ['GET',  '/equipe',                         'EquipeController@index',                'equipe.ver'],
     // Terceirização (marca própria do cliente)
     ['GET',  '/terceirizacao',                  'TerceirizacaoController@clientes',      'terceirizacao.ver|terceirizacao.editar'],
