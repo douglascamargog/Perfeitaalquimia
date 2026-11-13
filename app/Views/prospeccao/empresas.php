@@ -8,6 +8,7 @@ use App\Services\Normalizar;
 use App\Services\ProspeccaoService as P;
 
 $icones = asset('img/icones.svg');
+$podeEnviar = \App\Core\Auth::pode('prospeccao.usar'); // só "Ver": consulta a base, sem enviar para o funil
 $n = fn($v) => number_format((float) $v, 0, ',', '.');
 $query = fn(array $extra = []) => '?' . http_build_query(array_filter(['uf' => $f['uf'], 'cidade' => $f['cidade'], 'bairro' => $f['bairro'], 'cnae' => $f['cnae'],
     'meses' => $f['meses'] ?: '', 'q' => $f['q'], 'esconder' => $f['esconder_carteira'] ? '1' : ''] + $extra, fn($v) => $v !== '' && $v !== null));
@@ -68,12 +69,12 @@ $query = fn(array $extra = []) => '?' . http_build_query(array_filter(['uf' => $
       <section class="card sem-espaco">
         <div class="tabela-rolagem">
           <table class="tabela tabela-carteira ps-tabela">
-            <thead><tr><th class="ps-marcar"><input type="checkbox" aria-label="Marcar todas desta página" data-marcar-todas></th>
+            <thead><tr><th class="ps-marcar"><?php if ($podeEnviar): ?><input type="checkbox" aria-label="Marcar todas desta página" data-marcar-todas><?php endif; ?></th>
               <th>Empresa</th><th>Atividade</th><th>Local</th><th>Abertura</th><th>Contato</th><th>Situação</th></tr></thead>
             <tbody>
             <?php foreach ($r['itens'] as $e): $livre = !$e['cliente']; ?>
               <tr data-empresa="<?= e($e['cnpj']) ?>" class="<?= $livre ? '' : 'ps-na-carteira' ?>">
-                <td class="ps-marcar"><?php if ($livre): ?><input type="checkbox" name="cnpjs[]" value="<?= e($e['cnpj']) ?>" aria-label="Marcar <?= e($e['nome_fantasia'] ?: $e['razao_social']) ?>" data-marcar><?php endif; ?></td>
+                <td class="ps-marcar"><?php if ($livre && $podeEnviar): ?><input type="checkbox" name="cnpjs[]" value="<?= e($e['cnpj']) ?>" aria-label="Marcar <?= e($e['nome_fantasia'] ?: $e['razao_social']) ?>" data-marcar><?php endif; ?></td>
                 <td><strong><?= e($e['nome_fantasia'] ?: $e['razao_social']) ?></strong><small class="suave"><?= e($e['razao_social']) ?></small>
                   <small class="suave"><?= e(substr($e['cnpj'], 0, 2) . '.' . substr($e['cnpj'], 2, 3) . '.' . substr($e['cnpj'], 5, 3) . '/' . substr($e['cnpj'], 8, 4) . '-' . substr($e['cnpj'], 12)) ?> · <?= e($e['porte'] ?? '') ?></small></td>
                 <td class="pequeno"><?= e(P::cnaeFormatado($e['cnae'])) ?><small class="suave"><?= e($cnaes[$e['cnae']] ?? '') ?></small></td>
@@ -104,7 +105,7 @@ $query = fn(array $extra = []) => '?' . http_build_query(array_filter(['uf' => $
         </div>
       </section>
 
-      <div class="ps-barra-envio" data-barra-envio hidden>
+      <?php if ($podeEnviar): ?><div class="ps-barra-envio" data-barra-envio hidden>
         <strong><span data-qtd-marcadas>0</span> empresa(s) marcada(s)</strong>
         <?php if ($podeEscolher): ?>
           <label>Responsável <select name="responsavel" aria-label="Responsável">
@@ -112,7 +113,7 @@ $query = fn(array $extra = []) => '?' . http_build_query(array_filter(['uf' => $
             <?php foreach ($vendedores as $v): ?><option value="<?= (int) $v['id'] ?>"><?= e($v['nome']) ?></option><?php endforeach; ?></select></label>
         <?php else: ?><span class="pequeno">Os leads ficam na sua carteira.</span><?php endif; ?>
         <button class="botao lima" type="submit">Enviar para o funil</button>
-      </div>
+      </div><?php endif; ?>
     </form>
   </div>
 </div>

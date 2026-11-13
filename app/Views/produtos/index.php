@@ -1,4 +1,5 @@
 <?php
+$podeEditar = \App\Core\Auth::pode('catalogo.editar'); // só "Ver" (Acessos): tabela sem campos nem botões
 /** Produtos (catálogo). Variáveis: $busca, $tabelas, $produtos, $semPreco, $semCodigo, $previa (importação de códigos) */
 $icones = asset('img/icones.svg');
 ?>
@@ -6,7 +7,7 @@ $icones = asset('img/icones.svg');
   <div><div class="sobretitulo">CONTEÚDO · PRODUTOS</div><h1>Produtos</h1>
     <p>Mesmo cadastro da Academia e do catálogo. Preços e estoque vêm do ERP (somente leitura). Aqui você escolhe o que aparece no catálogo.</p></div>
   <div class="acoes">
-    <form method="post" action="<?= url('/produtos/sincronizar') ?>"><?= csrf_campo() ?><button class="botao contorno" type="submit"><svg class="icone"><use href="<?= $icones ?>#nuvem"/></svg>Atualizar preços do ERP</button></form>
+    <?php if ($podeEditar): ?><form method="post" action="<?= url('/produtos/sincronizar') ?>"><?= csrf_campo() ?><button class="botao contorno" type="submit"><svg class="icone"><use href="<?= $icones ?>#nuvem"/></svg>Atualizar preços do ERP</button></form><?php endif; ?>
     <a class="botao contorno" href="<?= url('/catalogo') ?>" target="_blank" rel="noopener">Ver catálogo</a>
   </div>
 </div>
@@ -38,12 +39,12 @@ $icones = asset('img/icones.svg');
   <form method="get" action="<?= url('/produtos') ?>" class="prod-busca">
     <input type="search" name="q" value="<?= e($busca) ?>" placeholder="Buscar produto ou código…" aria-label="Buscar produto"><button class="botao" type="submit">Buscar</button>
   </form>
-  <form method="post" action="<?= url('/produtos/codigos') ?>" enctype="multipart/form-data" class="prod-importar">
+  <?php if ($podeEditar): ?><form method="post" action="<?= url('/produtos/codigos') ?>" enctype="multipart/form-data" class="prod-importar">
     <?= csrf_campo() ?>
     <label for="planilha-codigos">Importar códigos <small class="suave">(planilha com as colunas Código e Produto<?= $semCodigo ? " · $semCodigo sem código" : '' ?>)</small></label>
     <input type="file" id="planilha-codigos" name="planilha" accept=".csv,.xlsx" required>
     <button class="botao contorno" type="submit">Conferir planilha</button>
-  </form>
+  </form><?php endif; ?>
 </div>
 <section class="card sem-espaco">
   <div class="tabela-rolagem">
@@ -52,10 +53,13 @@ $icones = asset('img/icones.svg');
       <tbody>
       <?php foreach ($produtos as $p): $form = 'prod-' . (int) $p['id']; ?>
         <tr id="produto-<?= (int) $p['id'] ?>" class="<?= $p['visivel_catalogo'] ? '' : 'inativo' ?>">
-          <td><input type="text" name="codigo" value="<?= e($p['codigo'] ?? '') ?>" maxlength="40" form="<?= $form ?>" class="prod-codigo" placeholder="código" aria-label="Código de <?= e($p['nome']) ?>"></td>
+          <td><?php if ($podeEditar): ?><input type="text" name="codigo" value="<?= e($p['codigo'] ?? '') ?>" maxlength="40" form="<?= $form ?>" class="prod-codigo" placeholder="código" aria-label="Código de <?= e($p['nome']) ?>"><?php else: ?><?= $p['codigo'] ? '<span class="cod-produto">' . e($p['codigo']) . '</span>' : '—' ?><?php endif; ?></td>
           <td><div class="ped-produto"><?php if ($p['imagem']): ?><img src="<?= url('/' . $p['imagem']) ?>" alt="" width="40" height="40" loading="lazy"><?php endif; ?><span><strong><?= e($p['nome']) ?></strong><small><?= e($p['categoria']) ?> · <?= e($p['embalagem']) ?></small></span></div></td>
           <?php foreach ($tabelas as $t): ?><td class="direita"><?= isset($p['precos'][$t['id']]) ? dinheiro($p['precos'][$t['id']]) : '<span class="selo laranja">sem preço</span>' ?></td><?php endforeach; ?>
           <td class="direita"><?= $p['estoque'] !== null ? (int) $p['estoque'] : '—' ?></td>
+          <?php if (!$podeEditar): ?>
+          <td><?= $p['visivel_catalogo'] ? 'Visível' : '<span class="suave">Oculto</span>' ?></td><td class="pequeno"><?= e($p['chamada'] ?? '') ?></td>
+          <?php else: ?>
           <td><label class="opcao"><input type="checkbox" name="visivel_catalogo" value="1" form="<?= $form ?>" <?= $p['visivel_catalogo'] ? 'checked' : '' ?>> Visível</label></td>
           <td>
             <form id="<?= $form ?>" method="post" action="<?= url('/produtos/' . (int) $p['id']) ?>" class="ped-produto-form">
@@ -65,6 +69,7 @@ $icones = asset('img/icones.svg');
               <button class="botao contorno pequeno" type="submit">Salvar</button>
             </form>
           </td>
+          <?php endif; ?>
         </tr>
       <?php endforeach; ?>
       </tbody>

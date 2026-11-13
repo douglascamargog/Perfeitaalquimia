@@ -218,7 +218,12 @@ Rode antes de publicar qualquer mudança. Eles apagam e recriam o banco: use só
 - **Busca rápida** no topo (tecla `/`): cliente por nome, CNPJ ou telefone, e produto pelo código.
 - **Ficha do funcionário** (Administração › Usuários) e **Meu perfil** (clique no seu nome): foto, aniversário, contatos.
   O Início mostra os **aniversariantes do mês** (só dia e mês).
-- **Início da diretoria** para o perfil Admin: pedidos para aprovar, faturado, cobrança, prospecção, produção, e-commerce.
+- **Acessos por aba** (Administração › Acessos): para cada perfil, cada aba fica *Sem acesso*, *Ver* ou *Ver e editar*,
+  mais as ações especiais (ver todas as carteiras, aprovar posts...). Exceções por pessoa no cadastro do usuário
+  ("Acessos desta pessoa"). Todas as abas aparecem no menu: 🔒 = sem acesso, 👁 = só leitura. O Admin sempre tem tudo.
+- **Foco pela função**: o Início, as dicas do One, o sino e os contadores mostram só as áreas da pessoa
+  (Comercial, Aprovação, Cobrança, Marketing, Produção, Diretoria). Cada função tem as suas áreas (Administração › Funções)
+  e cada pessoa pode ajustar em Meu perfil › "O que aparece para mim". Ex.: admin da função Marketing vê só o Marketing.
 - **Academia › Como usar o One** no lugar das aulas do Leads2b.
 - **Mensagens num lugar só**: a Recompra e a Cobrança usam os modelos de Conteúdo › Mensagens prontas.
 - **Notificações**: contador vermelho no menu com o que está pendente (Aprovação, Agenda, Cobrança, Recompra, Prospecção,

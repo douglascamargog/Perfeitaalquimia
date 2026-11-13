@@ -15,18 +15,23 @@ $totalAtencao = array_sum($pendencias) + $naoLidas;
 $caminhoAtual = '/' . trim(substr(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), strlen(url_base())), '/');
 $icones = asset('img/icones.svg');
 
-// Agrupa os itens do menu que este usuário pode ver e acha o item da página atual
-// (o endereço mais longo que combina: /configuracoes/listas destaca "Listas", não "Configurações")
+// Agrupa TODOS os itens do menu (todo mundo vê todas as abas): sem acesso → cadeado; só leitura → olho.
+// Dentro de cada grupo, as abas que a pessoa pode abrir vêm primeiro.
+// Item da página atual = o endereço mais longo que combina (/configuracoes/listas destaca "Listas", não "Configurações")
 $grupos = [];
 $itemAtual = '/';
 foreach (require RAIZ . '/app/menu.php' as $item) {
-    if (InicioController::visivel($item)) {
-        $grupos[$item['grupo']][] = $item;
-        if ($item['url'] !== '/' && str_starts_with($caminhoAtual . '/', $item['url'] . '/') && strlen($item['url']) > strlen($itemAtual)) {
-            $itemAtual = $item['url'];
-        }
+    $item['bloqueado'] = !InicioController::visivel($item);
+    $item['leitura'] = !$item['bloqueado'] && !empty($item['editar']) && !Auth::pode($item['editar']);
+    $grupos[$item['grupo']][] = $item;
+    if (!$item['bloqueado'] && $item['url'] !== '/' && str_starts_with($caminhoAtual . '/', $item['url'] . '/') && strlen($item['url']) > strlen($itemAtual)) {
+        $itemAtual = $item['url'];
     }
 }
+foreach ($grupos as &$itensDoGrupo) {
+    usort($itensDoGrupo, fn($a, $b) => (int) $a['bloqueado'] <=> (int) $b['bloqueado']); // usort é estável no PHP 8
+}
+unset($itensDoGrupo);
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -61,8 +66,10 @@ foreach (require RAIZ . '/app/menu.php' as $item) {
         <?php foreach ($itens as $item):
             $ativo = $item['url'] === '/' ? $caminhoAtual === '/' : $item['url'] === $itemAtual; ?>
           <?php if ($item['pronto']): ?>
-            <a href="<?= url($item['url']) ?>" class="<?= trim(($ativo ? 'ativo' : '') . (!empty($item['destaque']) ? ' destaque' : '')) ?>">
+            <a href="<?= url($item['url']) ?>" class="<?= trim(($ativo ? 'ativo' : '') . (!empty($item['destaque']) ? ' destaque' : '') . ($item['bloqueado'] ? ' bloqueado' : '')) ?>"
+               <?= $item['bloqueado'] ? 'title="Você não tem acesso a esta aba" data-bloqueado' : ($item['leitura'] ? 'title="Você pode ver, mas não alterar"' : '') ?>>
               <svg class="icone"><use href="<?= $icones ?>#<?= e($item['icone']) ?>"/></svg><?= e($item['titulo']) ?>
+              <?php if ($item['bloqueado']): ?><span class="menu-cadeado" aria-label="sem acesso">🔒</span><?php elseif ($item['leitura']): ?><span class="menu-leitura" aria-label="só leitura" title="Só leitura">👁</span><?php endif; ?>
               <b class="menu-contador" data-pendencia="<?= e($item['url']) ?>" <?= empty($pendencias[$item['url']]) ? 'hidden' : '' ?> title="Pendente agora"><?= (int) ($pendencias[$item['url']] ?? 0) ?></b>
             </a>
           <?php else: ?>

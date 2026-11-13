@@ -2,7 +2,7 @@
 // Prospecção › Encontrar empresas: marcar empresas e mostrar a barra "Enviar para o funil".
 // =====================================================================
 const form = document.querySelector('[data-form-envio]');
-if (form) {
+if (form && form.querySelector('[data-barra-envio]')) { // sem a barra = acesso só de leitura
   const barra = form.querySelector('[data-barra-envio]');
   const qtd = form.querySelector('[data-qtd-marcadas]');
   const todas = form.querySelector('[data-marcar-todas]');

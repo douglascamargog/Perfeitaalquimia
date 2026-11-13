@@ -121,7 +121,7 @@ return [
     ['GET',  '/aprovacao',                      'AprovacaoController@index',   'pedidos.aprovar'],
     ['POST', '/aprovacao/{id}/aprovar',         'AprovacaoController@aprovar', 'pedidos.aprovar'],
     ['POST', '/aprovacao/{id}/recusar',         'AprovacaoController@recusar', 'pedidos.aprovar'],
-    ['GET',  '/produtos',                       'ProdutoController@index',     'catalogo.editar'],
+    ['GET',  '/produtos',                       'ProdutoController@index',     'produtos.ver|catalogo.editar'],
     ['POST', '/produtos/sincronizar',           'ProdutoController@sincronizar', 'catalogo.editar'],
     ['POST', '/produtos/codigos',               'ProdutoController@importarCodigos', 'catalogo.editar'],
     ['POST', '/produtos/codigos/confirmar',     'ProdutoController@confirmarCodigos', 'catalogo.editar'],
@@ -131,7 +131,7 @@ return [
     // ---------- Painel de vendas, metas e recompra ----------
     ['GET',  '/painel',                 'PainelController@index',    'painel.ver'],
     ['GET',  '/painel/exportar.csv',    'PainelController@exportar', 'painel.ver'],
-    ['GET',  '/metas',                  'MetasController@index',     'metas.gerenciar'],
+    ['GET',  '/metas',                  'MetasController@index',     'metas.ver|metas.gerenciar'],
     ['POST', '/metas',                  'MetasController@salvar',    'metas.gerenciar'],
     ['POST', '/metas/copiar',           'MetasController@copiar',    'metas.gerenciar'],
     ['GET',  '/recompra',               'RecompraController@index',  'recompra.ver'],
@@ -157,8 +157,8 @@ return [
     ['POST', '/meu-mes/equipe',                 'MeuMesController@salvarEquipe',   'metas.gerenciar'],
 
     // ---------- Prospecção (fila "Para abordar" + base de CNPJs) ----------
-    ['GET',  '/prospeccao',                      'ProspeccaoController@index',           'prospeccao.usar'],
-    ['GET',  '/prospeccao/empresas',             'ProspeccaoController@empresas',        'prospeccao.usar'],
+    ['GET',  '/prospeccao',                      'ProspeccaoController@index',           'prospeccao.ver|prospeccao.usar'],
+    ['GET',  '/prospeccao/empresas',             'ProspeccaoController@empresas',        'prospeccao.ver|prospeccao.usar'],
     ['POST', '/prospeccao/enviar',               'ProspeccaoController@enviar',          'prospeccao.usar'],
 
     // ---------- Captura de leads (site e anúncios) ----------
@@ -170,7 +170,7 @@ return [
     ['GET',     '/leads/instalar',               'LeadController@instalar',              'leads.ver'],
 
     // ---------- Mensagens prontas de WhatsApp ----------
-    ['GET',  '/mensagens',                       'MensagemController@index',             'mensagens.gerenciar'],
+    ['GET',  '/mensagens',                       'MensagemController@index',             'mensagens.ver|mensagens.gerenciar'],
     ['GET',  '/mensagens/nova',                  'MensagemController@nova',              'mensagens.gerenciar'],
     ['POST', '/mensagens',                       'MensagemController@criar',             'mensagens.gerenciar'],
     ['GET',  '/mensagens/{id}',                  'MensagemController@editar',            'mensagens.gerenciar'],
@@ -235,6 +235,9 @@ return [
     ['POST', '/usuarios',               'UsuarioController@criar',    'usuarios.gerenciar'],
     ['GET',  '/usuarios/{id}/editar',   'UsuarioController@editar',   'usuarios.gerenciar'],
     ['POST', '/usuarios/{id}',          'UsuarioController@atualizar', 'usuarios.gerenciar'],
+
+    ['GET',  '/acessos',                'AcessoController@index',     'usuarios.gerenciar'],
+    ['POST', '/acessos',                'AcessoController@salvar',    'usuarios.gerenciar'],
 
     ['GET',  '/funcoes',                'FuncaoController@index',     'usuarios.gerenciar'],
     ['POST', '/funcoes',                'FuncaoController@criar',     'usuarios.gerenciar'],

@@ -221,3 +221,24 @@ input[type=color] { width: 44px; height: 38px; padding: 2px; border: 1px solid v
 @media (max-width: 640px) {
   .sino-painel { position: fixed; left: 12px; right: 12px; width: auto; top: calc(env(safe-area-inset-top, 0px) + 96px); }
 }
+
+/* Grade de acessos */
+.ac-grade th, .ac-grade td { white-space: nowrap; vertical-align: middle; }
+.ac-grade td:first-child { white-space: normal; min-width: 220px; }
+.ac-grade td small { display: block; font-size: .74rem; }
+.ac-grupo th { background: #f0f3ee; text-transform: uppercase; letter-spacing: .06em; font-size: .72rem; color: var(--texto-suave); }
+.ac-nivel { width: auto; min-width: 128px; font-size: .84rem; padding: 6px 8px; border-radius: 10px; font-weight: 600; }
+.ac-nivel.n0 { background: #f6f6f4; color: #8a948c; }
+.ac-nivel.n1 { background: #eef5ff; color: #1d4ed8; }
+.ac-nivel.n2 { background: #e8f7dc; color: #2f6b0f; }
+.ac-caixa { justify-content: center; margin: 0; }
+.ac-excecoes { margin: 16px 0; } .ac-excecoes summary { cursor: pointer; padding: 8px 0; }
+.fn-areas { min-width: 220px; } .fn-areas .opcao { display: inline-flex; margin: 0 10px 4px 0; }
+.mp-foco { display: grid; gap: 4px; margin-bottom: 12px; }
+
+/* Menu: abas sem acesso (cadeado) e só leitura (olho) */
+.menu-lateral nav a.bloqueado { opacity: .45; }
+.menu-lateral nav a.bloqueado:hover { opacity: .7; }
+.menu-cadeado, .menu-leitura { margin-left: auto; font-size: .78rem; opacity: .8; }
+.menu-contador + .menu-cadeado, .menu-contador + .menu-leitura { margin-left: 6px; }
+.menu-leitura + .menu-contador { margin-left: 6px; }

@@ -92,7 +92,20 @@ class Roteador
             $temAlguma = $temAlguma || $p === 'logado' || Auth::pode($p);
         }
         if (!$temAlguma) {
-            $this->erro(403, 'Seu perfil não tem acesso a esta área.');
+            if (self::querJson() || ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+                $this->erro(403, 'Você pode ver esta tela, mas não alterar. Peça ao administrador (Administração › Acessos).');
+                return false;
+            }
+            // Aba sem acesso: página amigável dizendo qual aba é e a quem pedir
+            $caminho = '/' . trim(substr((string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), strlen(url_base())), '/');
+            $aba = null;
+            foreach (require RAIZ . '/app/menu.php' as $item) {
+                if ($item['url'] !== '/' && str_starts_with($caminho . '/', $item['url'] . '/') && strlen($item['url']) > strlen((string) ($aba['url'] ?? ''))) {
+                    $aba = $item;
+                }
+            }
+            http_response_code(403);
+            Visao::mostrar('erros/sem_acesso', ['titulo' => 'Sem acesso', 'aba' => $aba['titulo'] ?? 'esta tela'], 'base');
             return false;
         }
         return true;
