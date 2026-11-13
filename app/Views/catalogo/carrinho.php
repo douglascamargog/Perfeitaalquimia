@@ -18,9 +18,9 @@ $pct = $c['minimo'] > 0 ? min(100, round($c['subtotal'] / $c['minimo'] * 100)) :
       <li>
         <?php if ($i['imagem']): ?><img src="<?= url('/' . $i['imagem']) ?>" alt="" width="64" height="64"><?php endif; ?>
         <div><strong><?= !empty($i['codigo']) ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><?= e($i['nome']) ?></strong><small><?= dinheiro($i['preco']) ?> / un</small></div>
-        <div class="cat-qtd" data-produto="<?= (int) $i['id'] ?>" data-recarregar>
+        <div class="cat-qtd" data-produto="<?= e((string) ($i['chave'] ?? $i['id'])) ?>" data-recarregar>
           <button type="button" data-menos aria-label="Diminuir">−</button>
-          <input type="number" min="0" max="9999" value="<?= (int) $i['quantidade'] ?>" aria-label="Quantidade de <?= e($i['nome']) ?>">
+          <input type="number" min="0" max="99999" value="<?= (int) $i['quantidade'] ?>" aria-label="Quantidade de <?= e($i['nome']) ?>">
           <button type="button" data-mais aria-label="Aumentar">+</button>
         </div>
         <b class="cat-item-total"><?= dinheiro($i['total']) ?></b>

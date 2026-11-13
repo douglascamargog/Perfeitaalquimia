@@ -28,6 +28,24 @@ $icones = asset('img/icones.svg');
   <div class="cat-vazio cat-aviso-preco" role="status"><strong>Ainda não há produtos com preço na sua tabela (<?= e($tabelaNome) ?>).</strong>
     Os preços chegam do nosso sistema de faturamento. Fale com seu vendedor: ele faz o pedido para você enquanto isso.</div>
 <?php elseif (!$produtos): ?><p class="cat-vazio">Nenhum produto encontrado.</p><?php endif; ?>
+<?php if (!empty($meusProdutos)): ?>
+  <section class="cat-marca" aria-label="Seus produtos com a sua marca">
+    <h2>Seus produtos <small>com a sua marca</small></h2>
+    <div class="cat-marca-lista">
+      <?php foreach ($meusProdutos as $chave => $t): $qtd = $carrinho[$chave] ?? 0; ?>
+        <div class="cat-marca-item">
+          <div><strong><?= $t['codigo_cliente'] ? '<span class="cod-produto">' . e($t['codigo_cliente']) . '</span> ' : '' ?><?= e($t['nome_rotulo']) ?></strong>
+            <small><?= e($t['embalagem'] ?? '') ?> · <?= dinheiro((float) $t['preco_final']) ?> / un</small></div>
+          <div class="cat-qtd" data-produto="<?= e($chave) ?>">
+            <button type="button" data-menos aria-label="Diminuir">−</button>
+            <input type="number" min="0" max="99999" value="<?= (int) $qtd ?>" aria-label="Quantidade de <?= e($t['nome_rotulo']) ?>">
+            <button type="button" data-mais aria-label="Aumentar">+</button>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </section>
+<?php endif; ?>
 <div class="cat-grade">
   <?php foreach ($produtos as $p): $qtd = $carrinho[$p['id']] ?? 0; ?>
     <article class="cat-card">

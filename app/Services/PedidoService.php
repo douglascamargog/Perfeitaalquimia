@@ -71,7 +71,8 @@ class PedidoService
 
     /**
      * Monta o carrinho: preços da tabela do cliente, totais, mínimo e o que falta.
-     * $quantidades: [produto_id => quantidade]
+     * $quantidades: [produto_id => quantidade], e para os produtos com a marca do cliente (Terceirização)
+     * a chave "t{id}" (ex.: "t12" => 300) — linha própria, com o preço do produto terceirizado.
      */
     public static function calcular(array $cliente, array $quantidades): array
     {
@@ -79,6 +80,22 @@ class PedidoService
         $quantidades = array_filter(array_map('intval', $quantidades), fn($q) => $q > 0);
         $itens = [];
         $semPreco = [];
+        // Produtos terceirizados do cliente (linhas "t{id}"): só os dele, com preço definido
+        $terc = array_filter($quantidades, fn($k) => is_string($k) && str_starts_with($k, 't'), ARRAY_FILTER_USE_KEY);
+        $quantidades = array_diff_key($quantidades, $terc);
+        if ($terc) {
+            $linhasTerc = TerceirizacaoService::linhasDoPedido((int) $cliente['id']);
+            foreach ($terc as $chave => $q) {
+                if (!isset($linhasTerc[$chave])) {
+                    continue; // não é deste cliente (ou está sem preço): ignora
+                }
+                $l = $linhasTerc[$chave];
+                $q = min(99999, $q);
+                $itens[] = ['id' => (int) $l['produto_id'], 'chave' => $chave, 'terceirizacao_produto_id' => (int) $l['id'], 'codigo' => $l['codigo_cliente'] ?: $l['produto_codigo'],
+                    'nome' => $l['nome_rotulo'], 'slug' => null, 'embalagem' => $l['embalagem'], 'imagem' => null,
+                    'quantidade' => $q, 'preco' => (float) $l['preco_final'], 'total' => round($q * (float) $l['preco_final'], 2)];
+            }
+        }
         if ($quantidades) {
             $ids = implode(',', array_map('intval', array_keys($quantidades)));
             $linhas = Banco::todos("SELECT p.id, p.codigo, p.nome, p.slug, p.embalagem, m.arquivo AS imagem, pp.preco
@@ -162,7 +179,8 @@ class PedidoService
             ]);
             foreach ($carrinho['itens'] as $i) {
                 Banco::inserir('pedido_itens', ['pedido_id' => $id, 'produto_id' => $i['id'], 'codigo' => $i['codigo'] ?? null, 'nome' => $i['nome'],
-                    'quantidade' => $i['quantidade'], 'preco_unitario' => $i['preco'], 'total' => $i['total']]);
+                    'quantidade' => $i['quantidade'], 'preco_unitario' => $i['preco'], 'total' => $i['total'],
+                    'terceirizacao_produto_id' => $i['terceirizacao_produto_id'] ?? null]);
             }
             $quem = ['catalogo' => 'pelo cliente no catálogo', 'sistema' => 'pela equipe', 'app' => 'pelo app do vendedor externo'][$origem];
             self::historico($id, 'aguardando_aprovacao', "Pedido criado $quem.", $d['usuario_id'] ?? null);

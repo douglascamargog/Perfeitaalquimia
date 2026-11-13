@@ -104,3 +104,7 @@ tr.inativo td { opacity: .6; }
 .prod-importar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex: 1 1 360px; }
 .prod-importar label { width: 100%; font-weight: 600; font-size: .85rem; }
 .prod-codigo { width: 110px; font-family: ui-monospace, Consolas, monospace; text-transform: uppercase; }
+/* Produto com a marca do cliente (Terceirização) no pedido */
+.selo-marca { display: inline-block; font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; padding: 1px 7px; border-radius: 99px;
+  background: var(--secundaria-clara); color: var(--primaria-escura); }
+.ped-linha-marca td:first-child { box-shadow: inset 3px 0 0 var(--secundaria); }

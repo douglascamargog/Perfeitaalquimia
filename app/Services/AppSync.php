@@ -60,8 +60,23 @@ class AppSync
         foreach (Banco::todos('SELECT ru.uf, COALESCE(ru.pedido_minimo, r.pedido_minimo) AS minimo FROM regiao_ufs ru JOIN regioes r ON r.id = ru.regiao_id') as $m) {
             $minimos[$m['uf']] = (float) $m['minimo'];
         }
+        // Produtos com a marca do cliente (Terceirização), só dos clientes desta carteira: {cliente_id: [{chave, nome, ...}]}
+        $marca = [];
+        $ids = array_column($clientes, 'id');
+        if ($ids) {
+            foreach (Banco::todos('SELECT tp.id, tp.cliente_id, tp.nome_rotulo, tp.codigo_cliente, pr.codigo, pr.embalagem, COALESCE(tp.preco, pp.preco) AS preco
+                    FROM terceirizacao_produtos tp JOIN produtos pr ON pr.id = tp.produto_id
+                    LEFT JOIN produto_precos pp ON pp.produto_id = tp.produto_id AND pp.tabela_preco_id = ?
+                    WHERE tp.ativo = 1 AND tp.cliente_id IN (' . implode(',', array_map('intval', $ids)) . ')', [\App\Services\TerceirizacaoService::tabelaId()]) as $t) {
+                if ($t['preco'] !== null) {
+                    $marca[$t['cliente_id']][] = ['chave' => 't' . $t['id'], 'nome' => $t['nome_rotulo'], 'codigo' => $t['codigo_cliente'] ?: $t['codigo'],
+                        'embalagem' => $t['embalagem'], 'preco' => (float) $t['preco']];
+                }
+            }
+        }
         $u = Auth::usuario();
         return [
+            'marca' => $marca,
             'gerado_em' => date('c'), 'vendedor' => ['id' => (int) $u['id'], 'nome' => $u['nome']], 'csrf' => Csrf::token(),
             'dias_cache' => (int) Config::get('app.dias_cache', 7), 'clientes' => $clientes, 'produtos' => $produtos, 'precos' => $precos,
             'tabelas' => Banco::todos('SELECT id, nome FROM tabelas_preco WHERE ativa = 1'), 'formas' => $formas, 'minimos' => $minimos,

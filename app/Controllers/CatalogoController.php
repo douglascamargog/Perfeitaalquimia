@@ -52,6 +52,8 @@ class CatalogoController extends Controller
             'titulo' => 'Produtos', 'busca' => $busca, 'categoria' => $categoria, 'categorias' => Produto::categorias(),
             'produtos' => Produto::vitrine($busca, $categoria, $tabela ? (int) $tabela['id'] : null, (bool) Config::get('catalogo.mostrar_sem_preco', false)),
             'carrinho' => CatalogoAcesso::carrinho(), 'logado' => (bool) $cliente,
+            // Produtos com a marca do cliente (Terceirização): só ele vê, no alto da vitrine
+            'meusProdutos' => $cliente && $busca === '' && !$categoria ? \App\Services\TerceirizacaoService::linhasDoPedido((int) $cliente['id']) : [],
             'minimo' => $cliente ? PedidoService::pedidoMinimo($cliente['uf']) : null,
             'tabelaNome' => $tabela['nome'] ?? '',
             // Cliente logado e nenhum produto com preço na tabela dele (preços ainda não vieram do ERP)
@@ -93,10 +95,16 @@ class CatalogoController extends Controller
             $this->json(['ok' => false, 'mensagem' => 'Entre com o CNPJ para comprar.'], 401);
             return;
         }
-        $produtoId = (int) $this->campo('produto_id');
-        $quantidade = max(0, min(9999, (int) $this->campo('quantidade')));
+        $chave = $this->campo('produto_id');
+        $marca = preg_match('/^t\d+$/', $chave) === 1; // produto com a marca do cliente (Terceirização)
+        $produtoId = $marca ? $chave : (int) $chave;
+        $quantidade = max(0, min($marca ? 99999 : 9999, (int) $this->campo('quantidade')));
         $tabela = PedidoService::tabelaDoCliente($cliente);
-        if ($quantidade > 0 && !Banco::valor('SELECT 1 FROM produtos p JOIN produto_precos pp ON pp.produto_id = p.id AND pp.tabela_preco_id = ?
+        if ($marca && $quantidade > 0 && !isset(\App\Services\TerceirizacaoService::linhasDoPedido((int) $cliente['id'])[$chave])) {
+            $this->json(['ok' => false, 'mensagem' => 'Produto não encontrado.'], 422);
+            return;
+        }
+        if (!$marca && $quantidade > 0 && !Banco::valor('SELECT 1 FROM produtos p JOIN produto_precos pp ON pp.produto_id = p.id AND pp.tabela_preco_id = ?
                 WHERE p.id = ? AND p.ativo = 1 AND p.visivel_catalogo = 1', [$tabela['id'], $produtoId])) {
             $this->json(['ok' => false, 'mensagem' => 'Este produto está sem preço na sua tabela. Fale com o seu vendedor.'], 422);
             return;
@@ -155,7 +163,9 @@ class CatalogoController extends Controller
             redirecionar('/catalogo/pedidos');
         }
         foreach (Pedido::itens((int) $pedido['id']) as $i) {
-            if ($i['produto_id']) {
+            if ($i['terceirizacao_produto_id']) {
+                CatalogoAcesso::definirQuantidade('t' . $i['terceirizacao_produto_id'], (int) $i['quantidade']);
+            } elseif ($i['produto_id']) {
                 CatalogoAcesso::definirQuantidade((int) $i['produto_id'], (int) $i['quantidade']);
             }
         }

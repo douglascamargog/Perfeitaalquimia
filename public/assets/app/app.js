@@ -38,7 +38,12 @@ function aviso(html) {
 }
 
 function cliente(id) { return pacote?.clientes.find((c) => c.id === Number(id)); }
-function precoDe(c, produtoId) { return pacote.precos?.[c.tabela_preco_id]?.[produtoId] ?? null; }
+// Produtos com a marca do cliente (Terceirização): chave "t{id}", preço próprio
+function marcaDe(c) { return pacote.marca?.[c.id] || []; }
+function precoDe(c, produtoId) {
+  if (String(produtoId).startsWith('t')) return marcaDe(c).find((m) => m.chave === String(produtoId))?.preco ?? null;
+  return pacote.precos?.[c.tabela_preco_id]?.[produtoId] ?? null;
+}
 
 // ---------------- topo: rede e pendentes ----------------
 async function atualizarTopo() {
@@ -98,7 +103,8 @@ function totais() {
 function telaPedido() {
   const { c, subtotal, qtd, minimo, falta } = totais();
   const termo = sem(buscaProdutos);
-  const produtos = pacote.produtos.filter((p) => precoDe(c, p.id) !== null && (!termo || sem((p.codigo || '') + ' ' + p.nome + ' ' + (p.categoria || '')).includes(termo)));
+  const daMarca = marcaDe(c).map((m) => ({ id: m.chave, codigo: m.codigo, nome: m.nome, embalagem: m.embalagem, imagem: null, categoria: 'marca do cliente', marca: true }));
+  const produtos = [...daMarca, ...pacote.produtos].filter((p) => precoDe(c, p.id) !== null && (!termo || sem((p.codigo || '') + ' ' + p.nome + ' ' + (p.categoria || '')).includes(termo)));
   const tabela = pacote.tabelas.find((t) => Number(t.id) === c.tabela_preco_id)?.nome || '';
   tela.innerHTML = `
     <div class="ap-pedido-topo">
@@ -111,7 +117,7 @@ function telaPedido() {
       ${produtos.map((p) => { const q = rascunho.itens[p.id] || 0; return `
         <li class="${q ? 'escolhido' : ''}">
           ${p.imagem ? `<img src="${esc(p.imagem)}" alt="" loading="lazy" width="52" height="52">` : '<span class="ap-sem-foto"></span>'}
-          <div><strong>${p.codigo ? `<span class="cod-produto">${esc(p.codigo)}</span> ` : ''}${esc(p.nome)}</strong><small>${esc(p.embalagem || '')}</small><b>${real(precoDe(c, p.id))}</b></div>
+          <div><strong>${p.codigo ? `<span class="cod-produto">${esc(p.codigo)}</span> ` : ''}${esc(p.nome)}</strong><small>${p.marca ? '<span class="ap-marca">marca do cliente</span> ' : ''}${esc(p.embalagem || '')}</small><b>${real(precoDe(c, p.id))}</b></div>
           <div class="ap-qtd" data-produto="${p.id}"><button type="button" data-menos aria-label="Menos">−</button><input type="number" inputmode="numeric" min="0" value="${q || ''}" placeholder="0" aria-label="Quantidade de ${esc(p.nome)}"><button type="button" data-mais aria-label="Mais">+</button></div>
         </li>`; }).join('')}
     </ul>
@@ -325,7 +331,7 @@ document.addEventListener('input', (e) => {
   if (e.target.matches('[data-busca-produtos]')) { buscaProdutos = e.target.value; const pos = e.target.selectionStart; telaPedido(); const n = tela.querySelector('[data-busca-produtos]'); n.focus(); n.setSelectionRange(pos, pos); return; }
   const caixa = e.target.closest('[data-produto]');
   if (caixa && rascunho) {
-    rascunho.itens[caixa.dataset.produto] = Math.max(0, Math.min(9999, Number(e.target.value) || 0));
+    rascunho.itens[caixa.dataset.produto] = Math.max(0, Math.min(String(caixa.dataset.produto).startsWith("t") ? 99999 : 9999, Number(e.target.value) || 0));
     caixa.closest('li').classList.toggle('escolhido', rascunho.itens[caixa.dataset.produto] > 0);
     tela.querySelector('[data-resumo]').innerHTML = resumoHtml(totais());
     tela.querySelector('[data-barra]').innerHTML = barraHtml(totais());

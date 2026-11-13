@@ -73,3 +73,4 @@ body.ap { background: var(--fundo); min-height: 100vh; padding-bottom: calc(70px
 .aviso-flutuante.visivel { opacity: 1; transform: translate(-50%, 0); }
 .aviso-flutuante.erro { background: var(--perigo); color: #fff; }
 .cod-produto { display: inline-block; font-family: ui-monospace, Consolas, monospace; font-size: .78em; font-weight: 700; background: var(--primaria-clara); color: var(--primaria-escura); border-radius: 6px; padding: 1px 6px; margin-right: 2px; }
+.ap-marca { display: inline-block; font-size: .64rem; font-weight: 800; text-transform: uppercase; padding: 1px 6px; border-radius: 99px; background: var(--secundaria-clara); color: var(--primaria-escura); }

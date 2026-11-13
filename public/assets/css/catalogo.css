@@ -125,3 +125,12 @@ body.cat { background: var(--fundo); min-height: 100vh; display: flex; flex-dire
   .cat-nav { gap: 10px; }
 }
 .cat-aviso-preco { background: #fff8db; border: 1px solid #f3e3a1; color: #6b5300; border-radius: 14px; padding: 14px 16px; text-align: left; }
+
+/* Produtos com a marca do cliente (Terceirização), no alto da vitrine */
+.cat-marca { background: var(--secundaria-clara); border-radius: 16px; padding: 16px 18px; margin-bottom: 18px; }
+.cat-marca h2 { margin: 0 0 10px; font-size: 1.05rem; }
+.cat-marca h2 small { font-weight: 500; color: var(--texto-suave); font-size: .82rem; }
+.cat-marca-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.cat-marca-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #fff; border-radius: 12px; padding: 10px 12px; }
+.cat-marca-item strong { display: block; font-size: .9rem; }
+.cat-marca-item small { color: var(--texto-suave); font-size: .78rem; }

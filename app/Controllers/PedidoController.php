@@ -46,11 +46,19 @@ class PedidoController extends Controller
             FROM produtos p JOIN produto_precos pp ON pp.produto_id = p.id AND pp.tabela_preco_id = ?
             LEFT JOIN categorias c ON c.id = p.categoria_id LEFT JOIN midias m ON m.id = p.imagem_id LEFT JOIN produto_estoque e ON e.produto_id = p.id
             WHERE p.ativo = 1 AND p.visivel_catalogo = 1 ORDER BY p.nome', [$tabela['id']]);
+        // Produtos com a marca do cliente (Terceirização) vêm primeiro, como linhas próprias ("t{id}")
+        $marca = [];
+        foreach (\App\Services\TerceirizacaoService::linhasDoPedido((int) $cliente['id']) as $chave => $t) {
+            $marca[] = ['id' => $chave, 'codigo' => $t['codigo_cliente'] ?: $t['produto_codigo'], 'nome' => $t['nome_rotulo'], 'embalagem' => $t['embalagem'],
+                'categoria' => 'marca do cliente', 'imagem' => null, 'preco' => $t['preco_final'], 'estoque' => null, 'terceirizado' => true,
+                'rotulos' => (int) $t['rotulos_estoque']];
+        }
+        $produtos = array_merge($marca, $produtos);
         $ultimo = Banco::valor("SELECT id FROM pedidos WHERE cliente_id = ? AND situacao IN ('faturado','aprovado') ORDER BY criado_em DESC LIMIT 1", [$cliente['id']]);
         $quantidades = (array) Sessao::antigo('qtd', []);
         if (!$quantidades && ($_GET['repetir'] ?? '') === '1' && $ultimo) {
             foreach (Pedido::itens((int) $ultimo) as $i) {
-                $quantidades[$i['produto_id']] = $i['quantidade'];
+                $quantidades[$i['terceirizacao_produto_id'] ? 't' . $i['terceirizacao_produto_id'] : $i['produto_id']] = $i['quantidade'];
             }
         }
         $this->tela('pedidos/novo', [

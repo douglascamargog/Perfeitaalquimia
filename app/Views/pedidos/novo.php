@@ -31,11 +31,11 @@
         <thead><tr><th>Produto</th><th class="direita">Preço</th><th>Qtd.</th><th class="direita">Total</th></tr></thead>
         <tbody>
         <?php foreach ($produtos as $p): $q = (int) ($quantidades[$p['id']] ?? 0); ?>
-          <tr data-linha data-nome="<?= e(mb_strtolower(($p['codigo'] ?? '') . ' ' . $p['nome'] . ' ' . $p['categoria'])) ?>" data-preco="<?= e((string) $p['preco']) ?>">
+          <tr data-linha class="<?= !empty($p['terceirizado']) ? 'ped-linha-marca' : '' ?>" data-nome="<?= e(mb_strtolower(($p['codigo'] ?? '') . ' ' . $p['nome'] . ' ' . $p['categoria'])) ?>" data-preco="<?= e((string) $p['preco']) ?>">
             <td><div class="ped-produto"><?php if ($p['imagem']): ?><img src="<?= url('/' . $p['imagem']) ?>" alt="" width="40" height="40" loading="lazy"><?php endif; ?>
-              <span><strong><?= !empty($p['codigo']) ? '<span class="cod-produto">' . e($p['codigo']) . '</span> ' : '' ?><?= e($p['nome']) ?></strong><small><?= e($p['embalagem']) ?><?= $p['estoque'] !== null ? ' · estoque ' . (int) $p['estoque'] : '' ?></small></span></div></td>
+              <span><strong><?= !empty($p['codigo']) ? '<span class="cod-produto">' . e($p['codigo']) . '</span> ' : '' ?><?= e($p['nome']) ?></strong><small><?= !empty($p['terceirizado']) ? '<span class="selo-marca">marca do cliente</span> ' . (int) $p['rotulos'] . ' rótulo(s) · ' : '' ?><?= e($p['embalagem']) ?><?= $p['estoque'] !== null ? ' · estoque ' . (int) $p['estoque'] : '' ?></small></span></div></td>
             <td class="direita"><?= dinheiro((float) $p['preco']) ?></td>
-            <td><input class="ped-qtd" type="number" name="qtd[<?= (int) $p['id'] ?>]" min="0" max="9999" value="<?= $q ?: '' ?>" placeholder="0" aria-label="Quantidade de <?= e($p['nome']) ?>"></td>
+            <td><input class="ped-qtd" type="number" name="qtd[<?= e((string) $p['id']) ?>]" min="0" max="<?= !empty($p['terceirizado']) ? 99999 : 9999 ?>" value="<?= $q ?: '' ?>" placeholder="0" aria-label="Quantidade de <?= e($p['nome']) ?>"></td>
             <td class="direita" data-total-linha><?= $q ? dinheiro($q * (float) $p['preco']) : '' ?></td>
           </tr>
         <?php endforeach; ?>

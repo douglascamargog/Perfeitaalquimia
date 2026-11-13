@@ -174,11 +174,12 @@ class CatalogoAcesso
         return array_map('intval', $_SESSION['catalogo']['carrinho'] ?? []);
     }
 
-    public static function definirQuantidade(int $produtoId, int $quantidade): void
+    /** $produtoId: id do produto, ou "t{id}" para o produto com a marca do cliente (Terceirização) */
+    public static function definirQuantidade(int|string $produtoId, int $quantidade): void
     {
         $carrinho = self::carrinho();
         if ($quantidade > 0) {
-            $carrinho[$produtoId] = min(9999, $quantidade);
+            $carrinho[$produtoId] = min(99999, $quantidade);
         } else {
             unset($carrinho[$produtoId]);
         }
