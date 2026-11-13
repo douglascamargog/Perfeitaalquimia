@@ -201,7 +201,7 @@ const aviso = async (p) => (await p.locator('.aviso').allInnerTexts()).join(' | 
   await entrar(p, 'televendas1@demo.local');
   const rv = await p.goto(BASE + '/producao');
   ok(rv.status() === 403, `vendedor recebe 403 (${rv.status()})`);
-  ok(await p.locator('.menu-lateral a[href$="/producao"]').count() === 0, 'vendedor não vê Produção no menu');
+  ok(await p.locator('.menu-lateral a[href$="/producao"][data-bloqueado]').count() === 1, 'vendedor: Produção com cadeado no menu');
   await sair(p);
 
   // celular

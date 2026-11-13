@@ -15,7 +15,7 @@ let falhas = 0; const ok = (c, m) => { if (!c) { console.log('FALHA ' + m); falh
       await p.route('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/**', r => r.fulfill({ path: RECURSOS + '/chart.umd.js', contentType: 'text/javascript' }));
       await p.route(/maplibre|open-meteo|tiles|openfreemap|cartocdn/, r => r.fulfill({ body: '' }));
       await p.goto(BASE + '/entrar'); await p.fill('#email', email); await p.fill('#senha', 'Demo@2026'); await p.click('button[type=submit]'); await p.waitForLoadState();
-      const links = await p.$$eval('.menu-lateral nav a', as => as.map(a => a.getAttribute('href')));
+      const links = await p.$$eval('.menu-lateral nav a:not([data-bloqueado])', as => as.map(a => a.getAttribute('href')));
       for (const href of ['/', ...links.map(h => h.replace(/^https?:\/\/[^/]+/, ''))]) {
         if (href === '/app') continue; // app do externo tem teste próprio (PWA)
         const r = await p.goto(BASE + href); await p.waitForTimeout(200);
