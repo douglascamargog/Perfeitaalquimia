@@ -76,6 +76,10 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 .dp-ilustra[data-tipo="frasco"] .pc-corpo { fill: #8a4a12; fill-opacity: .9; }
 .dp-ilustra[data-tipo="caixinha"] .pc-corpo .lado { fill: #ddd6c6; }
 .dp-ilustra .pc-rotulo { fill: #1f4d3a; }
+.dp-ilustra .pc-rotulo .branco { fill: #fff; }
+.dp-ilustra[data-tipo="pote"] .pc-arte { fill: #1f4d3a; }
+.dp-ilustra[data-tipo="pote"] .pc-conteudo { fill: #c9ab6f; }
+.dp-ilustra[data-tipo="pote"] .pc-codigo { fill: #fff; }
 .dp-ilustra .pc-arte { fill: #9aa39e; }
 .dp-ilustra .pc-codigo { fill: #111; }
 .dp-ilustra .pc-tampa, .dp-ilustra .pc-tampa * { fill: #1f4d3a; }
@@ -93,6 +97,12 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 .tem-codigo .reserva .pc-codigo, .tem-aprovacao .reserva .pc-selo, .tem-recebimento .reserva .pc-tampa, .tem-piloto .reserva .pc-lacre { opacity: 1; }
 .tem-arte .reserva .pc-rotulo { opacity: 1; }
 .tem-grafica .reserva .pc-arte { fill: #caff4d; }
+.dp-ilustra.completo[data-tipo="pote"] .pc-arte, .tem-grafica .reserva[data-tipo="pote"] .pc-arte { fill: #14473a; }
+.dp-gaveta .dp-atual .dp-ok { margin: 0; }
+.dp-editar { justify-self: start; font-size: .66rem; font-weight: 700; color: #2e7d4f; text-decoration: underline; }
+.dp-balao.concluida > button { background: rgba(255, 255, 255, .92); color: #1f4d3a; border: 0; transform: scale(.88); cursor: pointer; }
+.dp-balao.concluida > button b { color: #2e7d4f; }
+.dp-balao.concluida > button:hover { transform: scale(.92); }
 
 /* Palco */
 .dp-jogo { position: relative; background: radial-gradient(ellipse at 50% 45%, #2f6b52 0%, #1f4d3a 45%, #10291f 100%); color: #fff; border-radius: 22px; padding: 16px 18px 18px; margin: 0 0 16px; overflow: hidden; }
@@ -122,13 +132,14 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 .dp-balao.andamento > div, .dp-balao.andamento > button { background: var(--lima); color: #10291f; border: 0; max-width: 250px; min-width: 200px; box-shadow: 0 0 0 0 rgba(202, 255, 77, .6); animation: dp-pulsar 2s infinite; cursor: pointer; }
 .dp-balao.andamento ul { margin: 4px 0 2px; padding-left: 16px; font-size: .72rem; line-height: 1.3; }
 .dp-balao.andamento em { font-size: .74rem; font-weight: 700; font-style: normal; }
+.dp-baloes.compacto .dp-balao.andamento > button { min-width: 150px; max-width: 190px; }
 .dp-balao-acao { justify-self: start; margin-top: 4px; background: #10291f; color: var(--lima); border-radius: 99px; padding: 3px 10px; font-size: .7rem; font-weight: 700; }
 .dp-balao.andamento > button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 @keyframes dp-pulsar { 0% { box-shadow: 0 0 0 0 rgba(202, 255, 77, .55); } 70% { box-shadow: 0 0 0 16px rgba(202, 255, 77, 0); } 100% { box-shadow: 0 0 0 0 rgba(202, 255, 77, 0); } }
-.dp-balao.estourou > div { animation: dp-estourar .9s ease-out .2s both; }
+.dp-balao.estourou > div, .dp-balao.estourou > button { animation: dp-estourar .9s ease-out .2s both; }
 @keyframes dp-estourar { 0% { transform: scale(1.25); background: var(--lima); } 40% { transform: scale(.7); } 100% { transform: scale(.88); } }
 
-.dp-palco.circulo { height: 600px; display: block; margin-top: 0; }
+.dp-palco.circulo { height: 640px; display: block; margin-top: 0; }
 .dp-palco.circulo .dp-cena { position: absolute; left: 30%; right: 30%; top: 16%; bottom: 16%; height: auto; }
 .dp-palco.circulo .dp-baloes { display: block; overflow: visible; padding: 0; }
 .dp-palco.circulo .dp-balao { position: absolute; transform: translate(-50%, -50%); z-index: 2; }

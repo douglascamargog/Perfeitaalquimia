@@ -1,11 +1,14 @@
 <?php
-/** Desenvolvimento de Produto: quadro por etapa. Variáveis: $etapas, $projetos, $progressos, $f, $categorias, $clientesTerc, $podeGerenciar */
+/** Desenvolvimento de Produto: quadro por etapa. Variáveis: $etapas, $projetos, $progressos, $ativas, $f, $categorias, $clientesTerc, $podeGerenciar */
 use App\Core\Visao;
 
 $icones = asset('img/icones.svg');
 $porEtapa = [];
 foreach ($projetos as $p) {
-    $porEtapa[(int) $p['etapa_id']][] = $p;
+    // O projeto aparece em cada etapa aberta (as "ao mesmo tempo" andam juntas)
+    foreach (array_unique($ativas[(int) $p['id']] ?? [(int) $p['etapa_id']]) as $etapaId) {
+        $porEtapa[$etapaId][] = $p;
+    }
 }
 $link = fn(array $x) => url('/desenvolvimento') . '?' . e(http_build_query(array_filter($x + $f)));
 ?>

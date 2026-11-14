@@ -20,7 +20,7 @@ class DesenvolvimentoController extends Controller
         $f = ['tipo' => (string) ($_GET['tipo'] ?? ''), 'situacao' => (string) ($_GET['situacao'] ?? ''), 'atrasados' => !empty($_GET['atrasados'])];
         $this->tela('desenvolvimento/index', [
             'titulo' => 'Desenvolvimento de Produto', 'etapas' => D::etapas(), 'projetos' => $projetos = D::projetos($f), 'f' => $f,
-            'progressos' => D::progressos(array_column($projetos, 'id')),
+            'progressos' => D::progressos(array_column($projetos, 'id')), 'ativas' => D::ativasDe(array_column($projetos, 'id')),
             'categorias' => Banco::todos('SELECT id, nome FROM categorias ORDER BY nome'),
             'clientesTerc' => Banco::todos("SELECT DISTINCT c.id, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS nome FROM clientes c
                 JOIN funcoes f ON f.id = c.funcao_id WHERE f.slug = 'terceirizacao' AND c.excluido_em IS NULL ORDER BY nome LIMIT 500"),
@@ -32,19 +32,32 @@ class DesenvolvimentoController extends Controller
     {
         $projetos = D::minhas();
         $this->tela('desenvolvimento/minhas', ['titulo' => 'Minhas tarefas · Desenvolvimento', 'projetos' => $projetos,
-            'progressos' => D::progressos(array_column($projetos, 'id')), 'estilos' => self::ESTILOS]);
+            'progressos' => D::progressos(array_column($projetos, 'id')), 'ativas' => D::ativasDe(array_column($projetos, 'id')), 'estilos' => self::ESTILOS]);
     }
 
     public function ver(string $id): void
     {
         $p = $this->projeto($id);
         $linha = D::linhaDoProjeto((int) $p['id']);
-        $falta = $p['situacao'] === 'andamento' ? D::pendencias($p) : [];
+        // Uma gaveta por etapa aberta (várias ao mesmo tempo) e pelas já concluídas que ainda dá para editar
+        $gavetas = [];
+        $faltaPorEtapa = [];
+        foreach ($linha as $e) {
+            $aberta = $e['situacao'] === 'andamento' && $p['situacao'] === 'andamento';
+            $editavel = $e['situacao'] === 'concluida' && !in_array((string) $e['checagem'], ['', 'aprovacao', 'lancamento'], true);
+            if (!$aberta && !$editavel) {
+                continue;
+            }
+            $pe = D::naEtapa($p, $e);
+            $falta = $aberta ? D::pendencias($pe) : [];
+            $faltaPorEtapa[(int) $e['id']] = $falta;
+            $gavetas[] = ['pe' => $pe, 'falta' => $falta, 'aberta' => $aberta, 'linha' => $e,
+                'podeConcluir' => $aberta && D::podeConcluir($pe),
+                'aprovacoes' => $e['checagem'] === 'aprovacao' ? D::aprovacoesDaRodada((int) $p['id'], (int) $e['id']) : []];
+        }
         $this->tela('desenvolvimento/ver', [
-            'titulo' => $p['nome'], 'p' => $p, 'linha' => $linha, 'historico' => D::historico((int) $p['id']),
-            'jogo' => D::dadosDoJogo($p, $linha, $falta), 'scripts' => ['dp-jogo.js'],
-            'falta' => $falta, 'podeConcluir' => $p['situacao'] === 'andamento' && D::podeConcluir($p),
-            'aprovacoes' => $p['checagem'] === 'aprovacao' ? D::aprovacoesDaRodada((int) $p['id'], (int) $p['etapa_id']) : [],
+            'titulo' => $p['nome'], 'p' => $p, 'linha' => $linha, 'historico' => D::historico((int) $p['id']), 'gavetas' => $gavetas,
+            'jogo' => D::dadosDoJogo($p, $linha, $faltaPorEtapa), 'scripts' => ['dp-jogo.js'],
             'ficha' => Banco::todos('SELECT ft.materia_prima_id, m.nome, m.unidade, m.tipo, m.estoque FROM ficha_tecnica ft JOIN materias_primas m ON m.id = ft.materia_prima_id
                 WHERE ft.produto_id = ? ORDER BY m.tipo, m.nome', [$p['produto_id']]),
             'ordem' => $p['ordem_id'] ? Banco::um('SELECT id, quantidade, situacao FROM ordens_producao WHERE id = ?', [$p['ordem_id']]) : null,
@@ -71,7 +84,7 @@ class DesenvolvimentoController extends Controller
         $uid = Auth::id();
         try {
             $msg = match ($acao) {
-                'concluir'  => (function () use ($pid, $uid) { D::concluir($pid, $uid, $this->campo('observacao'), isset($_POST['manual'])); return 'Etapa concluída.'; })(),
+                'concluir'  => (function () use ($pid, $uid) { D::concluir($pid, $uid, $this->campo('observacao'), isset($_POST['manual']), (int) $this->campo('etapa')); return 'Etapa concluída.'; })(),
                 'aprovar'   => D::aprovar($pid, $this->campo('decisao') === 'ajustar' ? 'ajustar' : 'aprovado', $this->campo('comentario'), $uid),
                 'codigo'    => (function () use ($pid, $uid) { $this->exigirFuncao('qualidade'); D::salvarCodigo($pid, $this->campo('ean'), $this->campo('ncm'), $uid); return 'Código de barras e NCM salvos.'; })(),
                 'arte'      => (function () use ($pid, $uid) { $this->exigirFuncao('marketing'); D::enviarArquivo($pid, 'rotulo', $_FILES['arquivo'] ?? [], $uid); return 'Arte do rótulo enviada.'; })(),
@@ -103,9 +116,13 @@ class DesenvolvimentoController extends Controller
     public function salvarEtapas(): void
     {
         foreach ((array) ($_POST['etapa'] ?? []) as $id => $e) {
-            Banco::executar('UPDATE dp_etapas SET nome = ?, ordem = ?, funcao_slug = ?, aprovadores = ?, ativa = ? WHERE id = ?', [
+            Banco::executar('UPDATE dp_etapas SET nome = ?, ordem = ?, funcao_slug = ?, aprovadores = ?, paralela = ?, ativa = ? WHERE id = ?', [
                 mb_substr(trim((string) ($e['nome'] ?? '')), 0, 120) ?: 'Etapa', (int) ($e['ordem'] ?? 0), ($e['funcao'] ?? '') ?: null,
-                implode(',', array_filter((array) ($e['aprovadores'] ?? []))) ?: null, !empty($e['ativa']) ? 1 : 0, (int) $id]);
+                implode(',', array_filter((array) ($e['aprovadores'] ?? []))) ?: null, !empty($e['paralela']) ? 1 : 0, !empty($e['ativa']) ? 1 : 0, (int) $id]);
+        }
+        // Os projetos em andamento passam a seguir as etapas novas (abre o que ficou "ao mesmo tempo")
+        foreach (Banco::todos("SELECT id FROM dp_projetos WHERE situacao IN ('andamento', 'pausado')") as $x) {
+            D::sincronizar(D::buscar((int) $x['id']), Auth::id());
         }
         $nova = trim((string) ($_POST['nova'] ?? ''));
         if ($nova !== '') {

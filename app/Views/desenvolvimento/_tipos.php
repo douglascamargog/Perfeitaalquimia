@@ -13,15 +13,15 @@ foreach ([0, 3, 5, 9, 11, 14, 17, 19, 22] as $i => $x) {
 ?>
 <svg class="dp-ilustra <?= e($classe) ?>" viewBox="0 0 120 160" role="img" aria-label="<?= e(\App\Services\DesenvolvimentoService::TIPOS[$tipo]) ?>" data-tipo="<?= e($tipo) ?>">
 <?php if ($tipo === 'pote'): ?>
-  <rect class="pc-fantasma" x="25" y="45" width="70" height="98" rx="12"/>
-  <rect class="pc-conteudo" x="31" y="62" width="58" height="76" rx="8"/>
-  <rect class="pc-corpo" x="25" y="45" width="70" height="98" rx="12"/>
-  <rect class="pc-rotulo" x="25" y="72" width="70" height="50"/>
-  <rect class="pc-arte" x="31" y="78" width="40" height="8" rx="2"/>
-  <g class="pc-codigo" transform="translate(64 104)"><?= $barras ?></g>
-  <rect class="pc-tampa" x="21" y="28" width="78" height="20" rx="6"/>
-  <rect class="pc-lacre" x="21" y="44" width="78" height="4"/>
-  <g class="pc-selo"><circle cx="92" cy="60" r="11"/><path d="M87 60l4 4 6-8"/></g>
+  <rect class="pc-fantasma" x="30" y="10" width="60" height="142" rx="9"/>
+  <rect class="pc-conteudo" x="35" y="40" width="50" height="106" rx="6"/>
+  <rect class="pc-corpo" x="30" y="30" width="60" height="122" rx="9"/>
+  <g class="pc-rotulo"><rect class="branco" x="30" y="44" width="60" height="96"/><rect x="30" y="44" width="60" height="2.5"/><rect x="30" y="98" width="60" height="42"/><rect x="53" y="44" width="14" height="14" rx="3"/></g>
+  <g class="pc-arte"><rect x="38" y="66" width="44" height="9" rx="2"/><rect x="42" y="78" width="36" height="9" rx="2"/></g>
+  <g class="pc-codigo" transform="translate(64 120)"><?= $barras ?></g>
+  <rect class="pc-tampa" x="29" y="8" width="62" height="25" rx="5"/>
+  <rect class="pc-lacre" x="29" y="30" width="62" height="4"/>
+  <g class="pc-selo"><circle cx="84" cy="56" r="9"/><path d="M80 56l3 3 5-6"/></g>
 <?php elseif ($tipo === 'frasco'): ?>
   <path class="pc-fantasma" d="M50 40h20v14c10 4 15 10 15 20v64q0 8-8 8H43q-8 0-8-8V74c0-10 5-16 15-20z"/>
   <path class="pc-conteudo" d="M40 86h40v50q0 6-6 6H46q-6 0-6-6z"/>

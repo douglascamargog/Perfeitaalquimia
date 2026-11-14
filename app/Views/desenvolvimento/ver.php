@@ -1,13 +1,12 @@
 <?php
 /**
- * Página do projeto (o "jogo"). Variáveis: $p, $linha, $jogo, $historico, $falta, $podeConcluir, $aprovacoes, $ficha, $ordem, $podeGerenciar
+ * Página do projeto (o "jogo"). Variáveis: $p, $linha, $jogo, $gavetas, $historico, $ficha, $ordem, $podeGerenciar
  */
 $acao = fn(string $a) => url('/desenvolvimento/' . (int) $p['id'] . '/' . $a);
 $aba = fn(string $a) => url('/produtos/' . e($p['produto_slug'])) . '?aba=' . $a;
 $atalhos = ['ficha' => ['ficha', 'Preencher a ficha técnica do produto'], 'composicao' => ['composicao', 'Preencher a composição do produto'], 'arte' => ['documentos', 'Ver os documentos do produto']];
 $tec = \App\Core\Banco::um('SELECT ean, ncm FROM produto_tecnico WHERE produto_id = ?', [$p['produto_id']]) ?: [];
 $situacoes = ['andamento' => ['Em andamento', 'lima'], 'pausado' => ['Pausado', 'cinza'], 'lancado' => ['Lançado', 'lima'], 'cancelado' => ['Cancelado', 'vermelho']];
-$ch = (string) $p['checagem'];
 ?>
 <a class="voltar-link" href="<?= url('/desenvolvimento') ?>">← Todos os projetos</a>
 <div class="cabecalho-secao">
@@ -38,8 +37,10 @@ $ch = (string) $p['checagem'];
 <?php
 // ---------- Palco do "jogo": a embalagem vai se formando a cada etapa concluída ----------
 $tem = array_map(fn($e) => 'tem-' . preg_replace('/[^a-z]/', '', (string) $e['checagem']), array_filter($linha, fn($e) => $e['situacao'] === 'concluida'));
-$atualIdx = null;
-foreach ($linha as $i => $e) { if ($e['situacao'] === 'andamento') { $atualIdx = $i; } }
+$comGaveta = [];
+foreach ($gavetas as $g) { $comGaveta[(int) $g['pe']['etapa_id']] = $g; }
+// Com várias etapas abertas ao mesmo tempo, o balão mostra só quantas coisas faltam (a lista fica na gaveta)
+$compacto = count(array_filter($gavetas, fn($g) => $g['aberta'])) > 2;
 ?>
 <section class="dp-jogo <?= $p['situacao'] === 'lancado' ? 'lancado' : '' ?>" data-jogo aria-label="Como está o produto">
   <div class="dp-jogo-topo">
@@ -57,15 +58,21 @@ foreach ($linha as $i => $e) { if ($e['situacao'] === 'andamento') { $atualIdx =
     <div class="dp-cena <?= e(implode(' ', $tem)) ?>" data-cena>
       <?= \App\Core\Visao::renderizar('desenvolvimento/_tipos', ['tipo' => $jogo['tipo'], 'classe' => 'reserva']) ?>
     </div>
-    <ol class="dp-baloes" data-baloes style="--n: <?= count($linha) ?>">
+    <ol class="dp-baloes <?= $compacto ? 'compacto' : '' ?>" data-baloes style="--n: <?= count($linha) ?>">
       <?php foreach ($linha as $i => $e): $sit = $e['situacao'] ?: 'pendente'; ?>
         <li class="dp-balao <?= e($sit) ?>" style="--i: <?= $i ?>" data-checagem="<?= e((string) $e['checagem']) ?>">
-          <?php if ($sit === 'andamento' && $p['situacao'] === 'andamento'): ?>
-            <button type="button" data-abrir-etapa aria-controls="dp-etapa">
+          <?php $g = $comGaveta[(int) $e['id']] ?? null; if ($g && $g['aberta']): $f = $g['falta']; ?>
+            <button type="button" data-abrir-etapa="<?= (int) $e['id'] ?>" aria-controls="dp-etapa-<?= (int) $e['id'] ?>">
               <b><?= e($e['nome']) ?></b><small><?= e($e['funcao'] ?: 'Gestão') ?></small>
-              <?php if ($falta): ?><ul><?php foreach (array_slice($falta, 0, 3) as $x): ?><li><?= e($x) ?></li><?php endforeach; ?><?= count($falta) > 3 ? '<li>…</li>' : '' ?></ul>
+              <?php if ($f && $compacto): ?><em class="dp-faltam"><?= count($f) ?> <?= count($f) === 1 ? 'coisa falta' : 'coisas faltam' ?></em>
+              <?php elseif ($f): ?><ul><?php foreach (array_slice($f, 0, 3) as $x): ?><li><?= e($x) ?></li><?php endforeach; ?><?= count($f) > 3 ? '<li>…</li>' : '' ?></ul>
               <?php else: ?><em>Tudo pronto — concluir!</em><?php endif; ?>
               <span class="dp-balao-acao">Abrir etapa</span>
+            </button>
+          <?php elseif ($g): ?>
+            <button type="button" data-abrir-etapa="<?= (int) $e['id'] ?>" aria-controls="dp-etapa-<?= (int) $e['id'] ?>" title="Ver ou corrigir">
+              <b>✓ <?= e($e['nome']) ?></b>
+              <small><?= e(trim(($e['concluida_por'] ?? '') . ' · ' . data_br($e['concluida_em']), ' ·')) ?></small><span class="dp-editar">editar</span>
             </button>
           <?php else: ?>
             <div><b><?= $sit === 'concluida' ? '✓ ' : '' ?><?= e($e['nome']) ?></b>
@@ -78,7 +85,12 @@ foreach ($linha as $i => $e) { if ($e['situacao'] === 'andamento') { $atualIdx =
   <script type="application/json" id="dp-dados"><?= json_encode($jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
 </section>
 
-<?= \App\Core\Visao::renderizar('desenvolvimento/_etapa', compact('p', 'falta', 'podeConcluir', 'aprovacoes', 'ficha', 'ordem', 'acao', 'aba', 'atalhos', 'tec', 'ch')) ?>
+<div class="dp-gavetas">
+<?php foreach ($gavetas as $g): ?>
+  <?= \App\Core\Visao::renderizar('desenvolvimento/_etapa', ['p' => $g['pe'], 'falta' => $g['falta'], 'aberta' => $g['aberta'], 'linhaEtapa' => $g['linha'],
+      'podeConcluir' => $g['podeConcluir'], 'aprovacoes' => $g['aprovacoes']] + compact('ficha', 'ordem', 'acao', 'aba', 'atalhos', 'tec')) ?>
+<?php endforeach; ?>
+</div>
 
 <div class="ac-duas dp-duas">
   <section class="card"><h2>Briefing</h2>

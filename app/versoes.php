@@ -17,6 +17,20 @@
  */
 return [
     [
+        'versao' => '8.2', 'data' => '2026-11-14', 'titulo' => 'Desenvolvimento: etapas ao mesmo tempo e o nosso pote',
+        'novo' => [
+            'Formulação e ficha técnica, Informações de rotulagem, Criação do rótulo e Compras de matéria-prima e embalagens ficam abertas ao mesmo tempo, logo depois do briefing. Cada área faz a sua parte sem esperar a outra.',
+            'O projeto segue conforme cada parte é concluída. Só espera quando precisa: o envio à gráfica espera a arte, o lote piloto espera a ficha e as compras, e o lançamento espera tudo.',
+            'Etapa concluída continua editável: clique no balão (✓ editar) para corrigir o código de barras, a arte, as compras e o que mais precisar.',
+        ],
+        'melhoria' => [
+            'O pote em 3D ficou igual ao nosso pote de cápsulas: alto, tampa verde-escura brilhante, rótulo com a marca no alto, o nome grande e a faixa verde embaixo, com cápsulas dentro.',
+        ],
+        'admin' => [
+            'Em Administração › Etapas do desenvolvimento há a coluna "Ao mesmo tempo" para escolher quais etapas andam juntas.',
+        ],
+    ],
+    [
         'versao' => '8.1', 'data' => '2026-11-14', 'titulo' => 'Desenvolvimento de Produto virou jogo',
         'novo' => [
             'Ao criar um projeto, você escolhe o que vai fabricar: pote, frasco ou caixinha.',

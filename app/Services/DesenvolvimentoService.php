@@ -82,7 +82,7 @@ class DesenvolvimentoService
     /** Linha das etapas do projeto: cada etapa com situação, quem concluiu e quando */
     public static function linhaDoProjeto(int $id): array
     {
-        return Banco::todos('SELECT e.id, e.nome, e.ordem, e.funcao_slug, e.checagem, f.nome AS funcao, pe.situacao, pe.concluida_em, pe.observacao, u.nome AS concluida_por
+        return Banco::todos('SELECT e.id, e.nome, e.ordem, e.funcao_slug, e.checagem, e.aprovadores, e.paralela, f.nome AS funcao, pe.situacao, pe.concluida_em, pe.observacao, u.nome AS concluida_por
             FROM dp_etapas e LEFT JOIN dp_projeto_etapas pe ON pe.etapa_id = e.id AND pe.projeto_id = ? LEFT JOIN funcoes f ON f.slug = e.funcao_slug
             LEFT JOIN usuarios u ON u.id = pe.concluida_por WHERE e.ativa = 1 ORDER BY e.ordem, e.id', [$id]);
     }
@@ -90,6 +90,38 @@ class DesenvolvimentoService
     public static function historico(int $id): array
     {
         return Banco::todos('SELECT h.*, u.nome AS usuario FROM dp_historico h LEFT JOIN usuarios u ON u.id = h.usuario_id WHERE h.projeto_id = ? ORDER BY h.id DESC LIMIT 200', [$id]);
+    }
+
+    /**
+     * Etapas em andamento agora: a da sequência e as que andam "ao mesmo tempo" (paralela = 1: Formulação, Rotulagem,
+     * Criação do rótulo, Compras...). Cada item é o projeto "visto" naquela etapa
+     * (etapa_id, etapa, checagem, funcao_slug, aprovadores...), pronto para pendencias(), podeConcluir() e concluir().
+     */
+    public static function atuais(array $p): array
+    {
+        $etapas = Banco::todos("SELECT e.id, e.nome, e.ordem, e.funcao_slug, e.checagem, e.aprovadores, f.nome AS funcao
+            FROM dp_projeto_etapas pe JOIN dp_etapas e ON e.id = pe.etapa_id AND e.ativa = 1 LEFT JOIN funcoes f ON f.slug = e.funcao_slug
+            WHERE pe.projeto_id = ? AND pe.situacao = 'andamento' ORDER BY e.ordem, e.id", [(int) $p['id']]);
+        return array_map(fn($e) => self::naEtapa($p, $e), $etapas);
+    }
+
+    public static function naEtapa(array $p, array $e): array
+    {
+        return array_merge($p, ['etapa_id' => (int) $e['id'], 'etapa' => $e['nome'], 'etapa_ordem' => (int) $e['ordem'], 'funcao_slug' => $e['funcao_slug'],
+            'checagem' => $e['checagem'], 'aprovadores' => $e['aprovadores'], 'funcao' => $e['funcao']]);
+    }
+
+    /** Etapas em andamento de vários projetos (para o quadro): [projeto_id => [etapa_id, ...]] */
+    public static function ativasDe(array $ids): array
+    {
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+        $r = [];
+        if ($ids) {
+            foreach (Banco::todos("SELECT projeto_id, etapa_id FROM dp_projeto_etapas WHERE situacao = 'andamento' AND projeto_id IN (" . implode(',', $ids) . ')') as $x) {
+                $r[(int) $x['projeto_id']][] = (int) $x['etapa_id'];
+            }
+        }
+        return $r;
     }
 
     /** Projetos esperando uma etapa das funções da pessoa (ou a aprovação dela) */
@@ -100,8 +132,17 @@ class DesenvolvimentoService
             return [];
         }
         $lista = "'" . implode("','", array_map(fn($f) => preg_replace('/[^a-z0-9_]/', '', $f), $funcoes)) . "'";
-        return array_values(array_filter(self::projetos(), fn($p) => $p['situacao'] === 'andamento'
-            && (in_array((string) $p['funcao_slug'], $funcoes, true) || self::aguardaAprovacaoDe($p, $funcoes))));
+        return array_values(array_filter(self::projetos(), function ($p) use ($funcoes) {
+            if ($p['situacao'] !== 'andamento') {
+                return false;
+            }
+            foreach (self::atuais($p) as $a) {
+                if (in_array((string) $a['funcao_slug'], $funcoes, true) || self::aguardaAprovacaoDe($a, $funcoes)) {
+                    return true;
+                }
+            }
+            return false;
+        }));
     }
 
     private static function funcoesDe(int $usuarioId): array
@@ -193,6 +234,7 @@ class DesenvolvimentoService
                 if ($faltam) { $falta[] = count($faltam) . ' item(ns) da ficha ainda sem compra marcada.'; }
                 break;
             case 'grafica':
+                $falta = array_merge($falta, self::esperando($p, ['arte']));
                 if (empty($p['grafica']) || empty($p['grafica_pedido_em'])) { $falta[] = 'Informar a gráfica e a data do pedido.'; }
                 break;
             case 'aprovacao':
@@ -206,11 +248,32 @@ class DesenvolvimentoService
                 if ((int) $p['rotulos_recebidos'] <= 0) { $falta[] = 'Registrar a quantidade de rótulos recebidos.'; }
                 break;
             case 'piloto':
+                $falta = array_merge($falta, self::esperando($p, ['ficha', 'compras']));
                 $ordem = $p['ordem_id'] ? Banco::valor('SELECT situacao FROM ordens_producao WHERE id = ?', [$p['ordem_id']]) : null;
                 if ($ordem !== 'concluida') { $falta[] = $ordem ? 'Concluir a ordem do lote piloto em Produção › Ordens.' : 'Criar a ordem do lote piloto.'; }
                 break;
+            case 'lancamento':
+                $falta = array_merge($falta, self::esperando($p, null));
+                break;
         }
         return $falta;
+    }
+
+    /**
+     * Etapas que precisam estar concluídas antes desta (pelas checagens; null = todas as outras).
+     * Assim as etapas "ao mesmo tempo" não seguram o projeto, mas a gráfica espera a arte, o piloto espera ficha e compras
+     * e o lançamento espera tudo.
+     */
+    private static function esperando(array $p, ?array $checagens): array
+    {
+        $sql = "SELECT e.nome FROM dp_etapas e LEFT JOIN dp_projeto_etapas pe ON pe.etapa_id = e.id AND pe.projeto_id = ?
+            WHERE e.ativa = 1 AND e.id <> ? AND COALESCE(pe.situacao, 'pendente') <> 'concluida'";
+        $par = [(int) $p['id'], (int) $p['etapa_id']];
+        if ($checagens !== null) {
+            $sql .= ' AND e.checagem IN (' . implode(',', array_fill(0, count($checagens), '?')) . ')';
+            $par = array_merge($par, $checagens);
+        }
+        return array_map(fn($n) => 'Antes, concluir: ' . $n . '.', array_column(Banco::todos($sql . ' ORDER BY e.ordem, e.id', $par), 'nome'));
     }
 
     private static function temDocumento(int $produtoId, string $tipo): bool
@@ -229,11 +292,18 @@ class DesenvolvimentoService
     }
 
     /** Conclui a etapa atual e passa para a próxima. Observação vai para o histórico. */
-    public static function concluir(int $id, ?int $usuarioId, string $observacao = '', bool $forcarPiloto = false): void
+    public static function concluir(int $id, ?int $usuarioId, string $observacao = '', bool $forcarPiloto = false, int $etapaId = 0): void
     {
-        $p = self::buscar($id);
-        if (!$p || $p['situacao'] !== 'andamento') {
+        $projeto = self::buscar($id);
+        if (!$projeto || $projeto['situacao'] !== 'andamento') {
             throw new RuntimeException('Projeto não está em andamento.');
+        }
+        // Qual etapa concluir: a pedida; sem pedir, a primeira em andamento que a pessoa pode concluir
+        $atuais = self::atuais($projeto);
+        $p = $etapaId ? (current(array_filter($atuais, fn($a) => $a['etapa_id'] === $etapaId)) ?: null)
+            : (current(array_filter($atuais, fn($a) => self::podeConcluir($a))) ?: ($atuais[0] ?? null));
+        if (!$p) {
+            throw new RuntimeException('Esta etapa não está em andamento.');
         }
         if (!self::podeConcluir($p)) {
             throw new RuntimeException('Esta etapa é feita por ' . ($p['funcao'] ?: 'quem gerencia o desenvolvimento') . '.');
@@ -241,7 +311,7 @@ class DesenvolvimentoService
         $falta = self::pendencias($p);
         // Lote piloto: pode concluir sem ordem, explicando (ex.: teste feito fora do sistema)
         if ($p['checagem'] === 'piloto' && $forcarPiloto && trim($observacao) !== '') {
-            $falta = [];
+            $falta = self::esperando($p, ['ficha', 'compras']);
         }
         if ($falta) {
             throw new RuntimeException('Ainda falta: ' . implode(' ', $falta));
@@ -260,46 +330,79 @@ class DesenvolvimentoService
         Banco::executar("UPDATE dp_projeto_etapas SET situacao = 'concluida', concluida_por = ?, concluida_em = NOW(), observacao = ? WHERE projeto_id = ? AND etapa_id = ?",
             [$usuarioId, mb_substr($observacao, 0, 500) ?: null, $id, $p['etapa_id']]);
         self::registrar($id, $usuarioId, 'etapa', 'Etapa concluída: ' . $p['etapa'] . ($observacao !== '' ? ' — ' . $observacao : ''));
-        $proxima = Banco::um('SELECT * FROM dp_etapas WHERE ativa = 1 AND (ordem > ? OR (ordem = ? AND id > ?)) ORDER BY ordem, id LIMIT 1',
-            [$p['etapa_ordem'], $p['etapa_ordem'], $p['etapa_id']]);
-        if (!$proxima) {
+        self::sincronizar($p, $usuarioId);
+    }
+
+    /**
+     * Abre o que pode estar aberto agora:
+     *  - da SEQUÊNCIA: a etapa (ou etapas com o mesmo número) de menor ordem ainda por fazer;
+     *  - as de "AO MESMO TEMPO" (paralela): todas as que faltam, desde que o projeto já começou (briefing concluído).
+     * Quem é da função de cada etapa que abriu recebe aviso. Nada mais por fazer = produto lançado.
+     */
+    public static function sincronizar(array $p, ?int $usuarioId): void
+    {
+        $id = (int) $p['id'];
+        $etapas = Banco::todos('SELECT e.*, pe.situacao FROM dp_etapas e LEFT JOIN dp_projeto_etapas pe ON pe.etapa_id = e.id AND pe.projeto_id = ?
+            WHERE e.ativa = 1 ORDER BY e.ordem, e.id', [$id]);
+        $abertas = array_values(array_filter($etapas, fn($e) => $e['situacao'] !== 'concluida'));
+        if (!$abertas) {
             Banco::executar("UPDATE dp_projetos SET situacao = 'lancado', lancado_em = NOW() WHERE id = ?", [$id]);
             self::registrar($id, $usuarioId, 'sistema', 'Produto lançado. 🎉');
             Auditoria::registrar('desenvolvimento', $id, 'lancar');
             return;
         }
-        Banco::executar('UPDATE dp_projetos SET etapa_id = ? WHERE id = ?', [$proxima['id'], $id]);
-        Banco::executar("INSERT INTO dp_projeto_etapas (projeto_id, etapa_id, situacao) VALUES (?, ?, 'andamento') ON DUPLICATE KEY UPDATE situacao = 'andamento'",
-            [$id, $proxima['id']]);
-        Auditoria::registrar('desenvolvimento', $id, 'etapa', ['etapa' => $p['etapa']], ['etapa' => $proxima['nome']]);
-        self::avisarFuncao($proxima['funcao_slug'] ?: null, $p, 'Desenvolvimento: "' . $p['nome'] . '" chegou na etapa ' . $proxima['nome'], $usuarioId);
-        if ($proxima['aprovadores']) {
-            foreach (explode(',', $proxima['aprovadores']) as $f) {
+        $sequencia = array_values(array_filter($abertas, fn($e) => !$e['paralela']));
+        $fase = $sequencia ? (int) $sequencia[0]['ordem'] : null;
+        $comecou = (bool) array_filter($etapas, fn($e) => $e['situacao'] === 'concluida');
+        $novas = [];
+        foreach ($abertas as $e) {
+            $abre = $e['paralela'] ? $comecou : (int) $e['ordem'] === $fase;
+            if ($abre && $e['situacao'] !== 'andamento') {
+                Banco::executar("INSERT INTO dp_projeto_etapas (projeto_id, etapa_id, situacao) VALUES (?, ?, 'andamento') ON DUPLICATE KEY UPDATE situacao = 'andamento'",
+                    [$id, $e['id']]);
+                $novas[] = $e;
+            }
+        }
+        // Etapa "principal" (a da sequência): é a que aparece como etapa do projeto no quadro e nas listas
+        $principal = $sequencia ? (int) $sequencia[0]['id'] : (int) $abertas[0]['id'];
+        Banco::executar('UPDATE dp_projetos SET etapa_id = ? WHERE id = ?', [$principal, $id]);
+        foreach ($novas as $e) {
+            Auditoria::registrar('desenvolvimento', $id, 'etapa', null, ['etapa' => $e['nome']]);
+            self::avisarFuncao($e['funcao_slug'] ?: null, $p, 'Desenvolvimento: "' . $p['nome'] . '" chegou na etapa ' . $e['nome'], $usuarioId);
+            foreach (array_filter(explode(',', (string) $e['aprovadores'])) as $f) {
                 self::avisarFuncao($f, $p, 'Desenvolvimento: aprovar a prova de "' . $p['nome'] . '"', $usuarioId);
             }
         }
     }
 
-    /** Volta uma etapa (quem gerencia) */
+    /** Volta uma etapa da sequência (quem gerencia). As etapas "ao mesmo tempo" não mudam. */
     public static function voltar(int $id, ?int $usuarioId, string $motivo): void
     {
         $p = self::buscar($id);
-        $anterior = $p ? Banco::um('SELECT * FROM dp_etapas WHERE ativa = 1 AND (ordem < ? OR (ordem = ? AND id < ?)) ORDER BY ordem DESC, id DESC LIMIT 1',
-            [$p['etapa_ordem'], $p['etapa_ordem'], $p['etapa_id']]) : null;
-        if (!$anterior) {
+        $ordem = $p ? Banco::valor('SELECT MAX(ordem) FROM dp_etapas WHERE ativa = 1 AND paralela = 0 AND ordem < ?', [$p['etapa_ordem']]) : null;
+        if ($ordem === null || $ordem === false) {
             throw new RuntimeException('Já está na primeira etapa.');
         }
-        self::irPara($p, $anterior, $usuarioId, 'Voltou para ' . $anterior['nome'] . ($motivo !== '' ? ' — ' . $motivo : ''));
+        $anteriores = Banco::todos('SELECT * FROM dp_etapas WHERE ativa = 1 AND paralela = 0 AND ordem = ? ORDER BY id', [$ordem]);
+        self::irPara($p, $anteriores, $usuarioId, 'Voltou para ' . implode(', ', array_column($anteriores, 'nome')) . ($motivo !== '' ? ' — ' . $motivo : ''));
     }
 
-    private static function irPara(array $p, array $etapa, ?int $usuarioId, string $texto): void
+    /** Reabre estas etapas; as etapas da sequência que vêm depois delas ficam para refazer */
+    private static function irPara(array $p, array $etapas, ?int $usuarioId, string $texto): void
     {
-        Banco::executar("UPDATE dp_projeto_etapas SET situacao = 'pendente' WHERE projeto_id = ? AND etapa_id = ?", [$p['id'], $p['etapa_id']]);
-        Banco::executar("UPDATE dp_projeto_etapas SET situacao = 'andamento', concluida_em = NULL, concluida_por = NULL WHERE projeto_id = ? AND etapa_id = ?", [$p['id'], $etapa['id']]);
-        Banco::executar('UPDATE dp_projetos SET etapa_id = ? WHERE id = ?', [$etapa['id'], $p['id']]);
-        self::registrar((int) $p['id'], $usuarioId, 'etapa', $texto);
-        Auditoria::registrar('desenvolvimento', (int) $p['id'], 'voltar', ['etapa' => $p['etapa']], ['etapa' => $etapa['nome']]);
-        self::avisarFuncao($etapa['funcao_slug'] ?: null, $p, 'Desenvolvimento: "' . $p['nome'] . '" voltou para ' . $etapa['nome'], $usuarioId);
+        $id = (int) $p['id'];
+        $ordem = min(array_map(fn($e) => (int) $e['ordem'], $etapas));
+        $ids = array_map(fn($e) => (int) $e['id'], $etapas);
+        Banco::executar("UPDATE dp_projeto_etapas pe JOIN dp_etapas e ON e.id = pe.etapa_id SET pe.situacao = 'pendente'
+            WHERE pe.projeto_id = ? AND e.paralela = 0 AND e.ordem > ? AND e.id NOT IN (" . implode(',', $ids) . ')', [$id, $ordem]);
+        foreach ($etapas as $e) {
+            Banco::executar("INSERT INTO dp_projeto_etapas (projeto_id, etapa_id, situacao) VALUES (?, ?, 'andamento')
+                ON DUPLICATE KEY UPDATE situacao = 'andamento', concluida_em = NULL, concluida_por = NULL", [$id, $e['id']]);
+            self::avisarFuncao($e['funcao_slug'] ?: null, $p, 'Desenvolvimento: "' . $p['nome'] . '" voltou para ' . $e['nome'], $usuarioId);
+        }
+        self::registrar($id, $usuarioId, 'etapa', $texto);
+        Auditoria::registrar('desenvolvimento', $id, 'voltar', ['etapa' => $p['etapa']], ['etapa' => implode(', ', array_column($etapas, 'nome'))]);
+        self::sincronizar(self::buscar($id), $usuarioId);
     }
 
     public static function situacao(int $id, string $situacao, ?int $usuarioId): void
@@ -351,7 +454,7 @@ class DesenvolvimentoService
      * Dados para o palco 3D (vão embutidos na página como JSON; nada de dado de cliente em endereço).
      * Cada etapa diz a sua checagem; o JS liga a peça correspondente quando a etapa está concluída.
      */
-    public static function dadosDoJogo(array $p, array $linha, array $falta): array
+    public static function dadosDoJogo(array $p, array $linha, array $faltaPorEtapa): array
     {
         $prod = (int) $p['produto_id'];
         $arte = $prod ? Banco::um("SELECT id, mime FROM produto_documentos WHERE produto_id = ? AND tipo = 'rotulo' AND arquivado_em IS NULL
@@ -361,11 +464,11 @@ class DesenvolvimentoService
             'situacao' => $p['situacao'], 'progresso' => self::progresso($linha),
             'ean' => $prod ? (string) Banco::valor('SELECT ean FROM produto_tecnico WHERE produto_id = ?', [$prod]) : '',
             'arte' => $arte && str_starts_with((string) $arte['mime'], 'image/') ? url('/produtos/documentos/' . (int) $arte['id']) : null,
-            'falta' => array_values($falta),
+            'embalagem' => (string) ($p['embalagem'] ?? ''),
             'etapas' => array_map(fn($e) => [
                 'id' => (int) $e['id'], 'nome' => $e['nome'], 'checagem' => (string) $e['checagem'], 'situacao' => $e['situacao'] ?: 'pendente',
                 'funcao' => $e['funcao'] ?: 'Gestão', 'por' => $e['concluida_por'], 'em' => $e['concluida_em'] ? data_br($e['concluida_em']) : null,
-                'peca' => self::PECAS[(string) $e['checagem']] ?? null,
+                'peca' => self::PECAS[(string) $e['checagem']] ?? null, 'falta' => $faltaPorEtapa[(int) $e['id']] ?? [], 'paralela' => (bool) $e['paralela'],
             ], $linha),
         ];
     }
@@ -433,8 +536,9 @@ class DesenvolvimentoService
     /** Aprovação da prova da gráfica: cada função aprovadora decide uma vez por rodada; "Ajustar" volta para a criação do rótulo */
     public static function aprovar(int $id, string $decisao, string $comentario, ?int $usuarioId): string
     {
-        $p = self::buscar($id);
-        if (!$p || $p['checagem'] !== 'aprovacao') {
+        $projeto = self::buscar($id);
+        $p = $projeto ? current(array_filter(self::atuais($projeto), fn($a) => $a['checagem'] === 'aprovacao')) : false;
+        if (!$p) {
             throw new RuntimeException('O projeto não está na aprovação da prova.');
         }
         $rodada = self::rodada($id, (int) $p['etapa_id']);
@@ -458,13 +562,15 @@ class DesenvolvimentoService
             self::registrar($id, $usuarioId, 'aprovacao', "$nomeFuncao pediu ajuste na prova: " . trim($comentario));
             $arte = Banco::um("SELECT * FROM dp_etapas WHERE ativa = 1 AND checagem = 'arte' ORDER BY ordem LIMIT 1");
             if ($arte) {
-                self::irPara($p, $arte, $usuarioId, 'Voltou para ' . $arte['nome'] . ' para ajustar o rótulo.');
+                self::irPara($p, [$arte], $usuarioId, 'Voltou para ' . $arte['nome'] . ' para ajustar o rótulo.');
             }
             return 'Ajuste pedido: o projeto voltou para a criação do rótulo.';
         }
         self::registrar($id, $usuarioId, 'aprovacao', "$nomeFuncao aprovou a prova da gráfica.");
-        if (!self::pendencias(self::buscar($id))) {
-            self::avancar(self::buscar($id), $usuarioId, 'Prova aprovada por todos');
+        $agora = self::naEtapa(self::buscar($id), ['id' => $p['etapa_id'], 'nome' => $p['etapa'], 'ordem' => $p['etapa_ordem'], 'funcao_slug' => $p['funcao_slug'],
+            'checagem' => $p['checagem'], 'aprovadores' => $p['aprovadores'], 'funcao' => $p['funcao']]);
+        if (!self::pendencias($agora)) {
+            self::avancar($agora, $usuarioId, 'Prova aprovada por todos');
             return 'Prova aprovada por todas as áreas: o projeto seguiu para a próxima etapa.';
         }
         return 'Aprovação registrada. Falta a outra área aprovar.';

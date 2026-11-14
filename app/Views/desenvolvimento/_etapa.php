@@ -1,15 +1,18 @@
 <?php
 /**
- * Cartão da etapa atual (formulários de cada etapa e o botão Concluir).
- * Na página do projeto ele abre como gaveta ao clicar no balão da etapa atual (dp-jogo.js); sem JS fica visível na página.
- * Variáveis: as mesmas de ver.php ($p, $falta, $podeConcluir, $aprovacoes, $ficha, $ordem) + $acao, $aba, $atalhos, $tec, $ch
+ * Gaveta de uma etapa (formulários e o botão Concluir). Uma por etapa aberta — várias ao mesmo tempo — e pelas
+ * concluídas que ainda dá para editar (ficha, rotulagem, arte, compras, código, gráfica...).
+ * Na página do projeto abre ao clicar no balão (dp-jogo.js); sem JS fica visível na página.
+ * Variáveis: $p (projeto visto nesta etapa), $falta, $aberta, $linhaEtapa, $podeConcluir, $aprovacoes, $ficha, $ordem,
+ *            $acao, $aba, $atalhos, $tec
  */
+$ch = (string) $p['checagem'];
 ?>
-<?php if ($p['situacao'] === 'andamento'): ?>
-<section class="card dp-atual" id="dp-etapa" data-etapa-atual="<?= e($ch) ?>">
-  <span class="sobretitulo">ETAPA ATUAL · <?= e(mb_strtoupper((string) ($p['funcao'] ?: 'gestão do desenvolvimento'))) ?></span>
+<section class="card dp-atual" id="dp-etapa-<?= (int) $p['etapa_id'] ?>" data-etapa="<?= (int) $p['etapa_id'] ?>" data-etapa-atual="<?= e($ch) ?>">
+  <span class="sobretitulo"><?= $aberta ? 'ETAPA EM ANDAMENTO' : 'ETAPA CONCLUÍDA' ?> · <?= e(mb_strtoupper((string) ($p['funcao'] ?: 'gestão do desenvolvimento'))) ?></span>
   <h2><?= e($p['etapa']) ?></h2>
-  <?php if ($falta): ?><ul class="dp-falta" data-falta><?php foreach ($falta as $x): ?><li><?= e($x) ?></li><?php endforeach; ?></ul>
+  <?php if (!$aberta): ?><p class="dp-ok">✓ Concluída por <?= e($linhaEtapa['concluida_por'] ?? '—') ?> em <?= data_br($linhaEtapa['concluida_em']) ?>. Você ainda pode corrigir as informações abaixo.</p>
+  <?php elseif ($falta): ?><ul class="dp-falta" data-falta><?php foreach ($falta as $x): ?><li><?= e($x) ?></li><?php endforeach; ?></ul>
   <?php elseif ($ch !== 'lancamento'): ?><p class="dp-ok">Tudo pronto nesta etapa.</p><?php endif; ?>
   <?php if (isset($atalhos[$ch])): ?><p><a class="botao contorno pequeno" href="<?= $aba($atalhos[$ch][0]) ?>"><?= $atalhos[$ch][1] ?> →</a></p><?php endif; ?>
 
@@ -34,7 +37,7 @@
       <label>Gráfica<input type="text" name="grafica" value="<?= e($p['grafica']) ?>" maxlength="160" required></label>
       <label>Pedido enviado em<input type="date" name="data" value="<?= e($p['grafica_pedido_em'] ?: date('Y-m-d')) ?>" required></label>
       <button class="botao contorno" type="submit">Salvar pedido</button></form>
-  <?php elseif ($ch === 'aprovacao'): ?>
+  <?php elseif ($ch === 'aprovacao' && $aberta): ?>
     <form method="post" action="<?= $acao('prova') ?>" enctype="multipart/form-data" class="pd-form dp-inline"><?= csrf_campo() ?>
       <label>Prova que a gráfica mandou (PDF ou imagem)<input type="file" name="arquivo" accept="application/pdf,image/jpeg,image/png" required></label>
       <button class="botao contorno" type="submit">Anexar prova</button></form>
@@ -59,15 +62,13 @@
     <p><?= $p['cliente'] ? 'Ao concluir, o produto vira um produto exclusivo de <strong>' . e($p['cliente']) . '</strong> (Terceirização), com os rótulos recebidos.' : 'Ao concluir, o produto fica ativo e aparece no <strong>catálogo</strong> e na <strong>Academia</strong>.' ?></p>
   <?php endif; ?>
 
-  <?php if ($podeConcluir && $ch !== 'aprovacao'): ?>
-    <form method="post" action="<?= $acao('concluir') ?>" class="pd-form dp-concluir"><?= csrf_campo() ?>
+  <?php if ($aberta && $podeConcluir && $ch !== 'aprovacao'): ?>
+    <form method="post" action="<?= $acao('concluir') ?>" class="pd-form dp-concluir"><?= csrf_campo() ?><input type="hidden" name="etapa" value="<?= (int) $p['etapa_id'] ?>">
       <label>Observação <small>opcional</small><input type="text" name="observacao" maxlength="500"></label>
       <?php if ($ch === 'piloto'): ?><label class="caixa-marcar"><input type="checkbox" name="manual" value="1"> Concluir sem ordem no sistema (explique na observação)</label><?php endif; ?>
       <button class="botao lima" type="submit" <?= $falta && $ch !== 'piloto' ? 'disabled title="Complete o que falta"' : '' ?>><?= $ch === 'lancamento' ? 'Lançar o produto' : 'Concluir etapa' ?></button>
     </form>
-  <?php elseif (!$podeConcluir && $ch !== 'aprovacao'): ?>
+  <?php elseif ($aberta && $ch !== 'aprovacao'): ?>
     <p class="pequeno suave">Esta etapa é concluída por <?= e($p['funcao'] ?: 'quem gerencia o desenvolvimento') ?>.</p>
   <?php endif; ?>
 </section>
-<?php endif; ?>
-

@@ -32,6 +32,9 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
     return [...html.matchAll(/class="aviso [a-z]+"[^>]*>([^<]*)</g)].map((m) => m[1]).join(' | ');
   };
   const etapa = (id) => sql(`select e.checagem from dp_projetos p join dp_etapas e on e.id=p.etapa_id where p.id=${id}`);
+  const abertas = (id) => sql(`select group_concat(e.checagem order by e.ordem) from dp_projeto_etapas pe join dp_etapas e on e.id=pe.etapa_id where pe.projeto_id=${id} and pe.situacao='andamento'`);
+  const sit = (id, ch) => sql(`select pe.situacao from dp_projeto_etapas pe join dp_etapas e on e.id=pe.etapa_id where pe.projeto_id=${id} and e.checagem='${ch}'`);
+  const etapaId = (ch) => sql(`select id from dp_etapas where checagem='${ch}'`);
 
   // ---------- Criar ----------
   const g = await como('gestor@demo.local');
@@ -49,9 +52,9 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
   const dadosJogo = async (pg) => pg.evaluate(() => JSON.parse(document.getElementById('dp-dados').textContent));
   ok(await g.p.locator('.dp-balao').count() === 11, 'um balão por etapa em volta da embalagem');
   ok(await g.p.locator('.dp-balao.andamento [data-abrir-etapa]').count() === 1, 'o balão da etapa atual é clicável');
-  ok(await g.p.locator('#dp-etapa').isHidden(), 'o cartão da etapa fica guardado na gaveta');
+  ok(await g.p.locator('dialog.dp-gaveta').count() === 1 && await g.p.locator('dialog.dp-gaveta[open]').count() === 0, 'o cartão da etapa fica guardado na gaveta');
   await g.p.click('[data-abrir-etapa]');
-  ok(await g.p.locator('dialog.dp-gaveta[open] #dp-etapa .dp-concluir button').isVisible(), 'clicar no balão abre a gaveta com o botão Concluir');
+  ok(await g.p.locator('dialog.dp-gaveta[open] .dp-concluir button').isVisible(), 'clicar no balão abre a gaveta com o botão Concluir');
   await g.p.click('.dp-gaveta-fechar');
   let jogo = await dadosJogo(g.p);
   ok(jogo.tipo === 'frasco' && jogo.progresso === 0 && jogo.etapas.length === 11, 'dados do jogo: tipo, progresso 0% e as etapas');
@@ -60,20 +63,22 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
   ok(sql(`select concat(ativo,visivel_catalogo) from produtos where id=${prod}`) === '00', 'o projeto cria o produto oculto (fora do catálogo)');
   ok(Number(sql(`select count(*) from produtos where ativo=1 and id=${prod}`)) === 0, 'produto em desenvolvimento não aparece em Produtos');
   await post('gestor@demo.local', `/desenvolvimento/${id}/concluir`);
-  ok(etapa(id) === 'ficha', 'briefing concluído pela gestão → Formulação');
+  ok(abertas(id) === 'ficha,composicao,codigo,arte,compras' && etapa(id) === 'codigo',
+    'briefing concluído: Formulação, Rotulagem, Criação do rótulo e Compras abrem ao mesmo tempo (e a sequência segue no Código)');
 
   // ---------- Formulação (Técnica) ----------
   let msg = await post('tecnica@demo.local', `/desenvolvimento/${id}/concluir`);
-  ok(msg.includes('Ainda falta') && etapa(id) === 'ficha', 'sem ficha técnica a etapa não conclui');
-  msg = await post('qualidade@demo.local', `/desenvolvimento/${id}/concluir`);
-  ok(msg.includes('feita por') && etapa(id) === 'ficha', 'quem não é da Técnica não conclui a Formulação');
+  ok(msg.includes('Ainda falta'), 'sem ficha técnica a etapa não conclui');
+  ok(sit(id, 'ficha') === 'andamento', 'sem ficha técnica a Formulação não conclui');
+  msg = await post('qualidade@demo.local', `/desenvolvimento/${id}/concluir`, { etapa: etapaId('ficha') });
+  ok(msg.includes('feita por') && sit(id, 'ficha') === 'andamento', 'quem não é da Técnica não conclui a Formulação');
   const mp = sql("select id from materias_primas where tipo='materia_prima' and estoque > 50 order by estoque desc limit 1");
   const pote = sql("select id from materias_primas where tipo='embalagem' and estoque > 50 order by estoque desc limit 1");
   const t = await como('tecnica@demo.local');
   await t.p.request.post(BASE + `/produtos/${slug}/ficha`, { form: { _csrf: t.csrf, voltar: 'ficha', 'mp[]': mp, 'qtd[]': '0,01' } });
   await t.p.request.post(BASE + `/produtos/${slug}/ficha`, { form: { _csrf: t.csrf, voltar: 'embalagens', 'mp[]': pote, 'qtd[]': '1' } });
   await post('tecnica@demo.local', `/desenvolvimento/${id}/concluir`);
-  ok(etapa(id) === 'composicao', 'Técnica conclui a Formulação');
+  ok(sit(id, 'ficha') === 'concluida' && abertas(id) === 'composicao,codigo,arte,compras', 'Técnica conclui a Formulação; as outras continuam abertas');
   await g.p.goto(BASE + `/desenvolvimento/${id}`);
   jogo = await dadosJogo(g.p);
   ok(jogo.etapas.find((e) => e.checagem === 'ficha').situacao === 'concluida' && jogo.progresso === 18, 'Formulação concluída: a peça "conteúdo" entra no jogo (18% formado)');
@@ -82,20 +87,30 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
   // Rotulagem
   await t.p.request.post(BASE + `/produtos/${slug}/composicao`, { form: { _csrf: t.csrf, ingredientes: 'Ingrediente teste', porcao: '10 g', 'nutriente[]': 'Proteína', 'quantidade[]': '5 g', 'vd[]': '10%' } });
   await post('tecnica@demo.local', `/desenvolvimento/${id}/concluir`);
-  ok(etapa(id) === 'codigo', 'Técnica conclui a Rotulagem → Código de barras');
+  ok(sit(id, 'composicao') === 'concluida' && etapa(id) === 'codigo', 'Técnica conclui a Rotulagem');
 
   // ---------- Qualidade: código ----------
   msg = await post('qualidade@demo.local', `/desenvolvimento/${id}/codigo`, { ean: '123', ncm: '21069030' });
   ok(msg.includes('EAN'), 'EAN inválido é recusado');
   await post('qualidade@demo.local', `/desenvolvimento/${id}/codigo`, { ean: '7891234567895', ncm: '21069030' });
   await post('qualidade@demo.local', `/desenvolvimento/${id}/concluir`);
-  ok(etapa(id) === 'arte' && sql(`select ean from produto_tecnico where produto_id=${prod}`) === '7891234567895', 'Qualidade cadastra EAN/NCM e conclui');
+  ok(etapa(id) === 'grafica' && sit(id, 'codigo') === 'concluida' && sql(`select ean from produto_tecnico where produto_id=${prod}`) === '7891234567895', 'Qualidade cadastra EAN/NCM e conclui');
+  // A gráfica espera a arte do rótulo
+  await post('qualidade@demo.local', `/desenvolvimento/${id}/grafica`, { grafica: 'Gráfica Teste', data: new Date().toISOString().slice(0, 10) });
+  msg = await post('qualidade@demo.local', `/desenvolvimento/${id}/concluir`, { etapa: etapaId('grafica') });
+  ok(msg.includes('Antes, concluir') && etapa(id) === 'grafica', 'envio à gráfica espera a Criação do rótulo');
+  // Etapa concluída continua editável
+  await post('qualidade@demo.local', `/desenvolvimento/${id}/codigo`, { ean: '7891234567895', ncm: '21069090' });
+  ok(sql(`select ncm from produto_tecnico where produto_id=${prod}`) === '2106.90.90', 'dá para corrigir o código depois de concluído');
+  await g.p.goto(BASE + `/desenvolvimento/${id}`);
+  ok(await g.p.locator(`.dp-balao.concluida [data-abrir-etapa="${etapaId('codigo')}"]`).count() === 1
+    && await g.p.locator('.dp-balao.andamento [data-abrir-etapa]').count() === 3, 'balões: etapa concluída abre para editar; arte, compras e gráfica abertas ao mesmo tempo');
 
   // ---------- Marketing: arte ----------
   await post('marketing@demo.local', `/desenvolvimento/${id}/arte`, {}, { arquivo: { name: 'arte.pdf', mimeType: 'application/pdf', buffer: PDF } });
   await post('marketing@demo.local', `/desenvolvimento/${id}/arte`, {}, { arquivo: { name: 'arte.png', mimeType: 'image/png', buffer: PNG } });
   await post('marketing@demo.local', `/desenvolvimento/${id}/concluir`);
-  ok(etapa(id) === 'compras' && sql(`select count(*) from produto_documentos where produto_id=${prod} and tipo='rotulo'`) === '2', 'Marketing envia a arte e conclui');
+  ok(sit(id, 'arte') === 'concluida' && sql(`select count(*) from produto_documentos where produto_id=${prod} and tipo='rotulo'`) === '2', 'Marketing envia a arte e conclui');
   // A arte em imagem vira a textura do rótulo no 3D (servida só pelo sistema, para quem acompanha)
   await g.p.goto(BASE + `/desenvolvimento/${id}`);
   jogo = await dadosJogo(g.p);
@@ -110,13 +125,12 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
   sql(`delete from usuario_permissoes where usuario_id=${fin} and permissao='produtos.ver'`);
 
   // ---------- Compras e gráfica ----------
-  msg = await post('qualidade@demo.local', `/desenvolvimento/${id}/concluir`);
+  msg = await post('qualidade@demo.local', `/desenvolvimento/${id}/concluir`, { etapa: etapaId('compras') });
   ok(msg.includes('sem compra'), 'compras: precisa marcar os itens');
   for (const x of [mp, pote]) await post('qualidade@demo.local', `/desenvolvimento/${id}/compra`, { mp: x, comprado: '1' });
-  await post('qualidade@demo.local', `/desenvolvimento/${id}/concluir`);
-  await post('qualidade@demo.local', `/desenvolvimento/${id}/grafica`, { grafica: 'Gráfica Teste', data: new Date().toISOString().slice(0, 10) });
-  await post('qualidade@demo.local', `/desenvolvimento/${id}/concluir`);
-  ok(etapa(id) === 'aprovacao', 'compras e envio à gráfica concluídos');
+  await post('qualidade@demo.local', `/desenvolvimento/${id}/concluir`, { etapa: etapaId('compras') });
+  await post('qualidade@demo.local', `/desenvolvimento/${id}/concluir`, { etapa: etapaId('grafica') });
+  ok(etapa(id) === 'aprovacao' && sit(id, 'compras') === 'concluida', 'compras e envio à gráfica concluídos');
 
   // ---------- Aprovação da prova ----------
   await post('qualidade@demo.local', `/desenvolvimento/${id}/prova`, {}, { arquivo: { name: 'prova.pdf', mimeType: 'application/pdf', buffer: PDF } });
@@ -125,9 +139,9 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
   msg = await post('marketing@demo.local', `/desenvolvimento/${id}/aprovar`, { decisao: 'aprovado' });
   ok(msg.includes('já respondeu'), 'a mesma pessoa não aprova duas vezes');
   msg = await post('qualidade@demo.local', `/desenvolvimento/${id}/aprovar`, { decisao: 'ajustar', comentario: 'Cor do logo errada' });
-  ok(etapa(id) === 'arte' && msg.includes('voltou'), '"Pedir ajuste" volta para a Criação do rótulo');
+  ok(sit(id, 'arte') === 'andamento' && sit(id, 'grafica') === 'andamento' && msg.includes('voltou'), '"Pedir ajuste" reabre a Criação do rótulo (e a gráfica de novo)');
   await post('marketing@demo.local', `/desenvolvimento/${id}/concluir`);
-  ok(etapa(id) === 'compras' || etapa(id) === 'grafica' || etapa(id) === 'aprovacao', 'Marketing reenvia e o fluxo segue');
+  ok(sit(id, 'arte') === 'concluida' && etapa(id) === 'grafica', 'Marketing reenvia e o fluxo segue');
   while (etapa(id) !== 'aprovacao') { await post('qualidade@demo.local', `/desenvolvimento/${id}/concluir`); }
   await post('marketing@demo.local', `/desenvolvimento/${id}/aprovar`, { decisao: 'aprovado' });
   ok(etapa(id) === 'aprovacao', 'nova rodada: aprovação anterior não vale');
@@ -170,8 +184,8 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
   await pSem.goto(BASE + `/desenvolvimento/${id}`);
   await pSem.waitForTimeout(800);
   ok(await pSem.locator('.dp-cena .dp-ilustra.reserva').isVisible() && await pSem.locator('.dp-cena.com-3d').count() === 0, 'sem 3D: aparece a ilustração da embalagem');
-  await pSem.click('[data-abrir-etapa]');
-  ok(await pSem.locator('dialog.dp-gaveta[open] #dp-etapa').isVisible(), 'sem 3D: a gaveta da etapa funciona');
+  await pSem.locator('.dp-balao.andamento [data-abrir-etapa]').first().click();
+  ok(await pSem.locator('dialog.dp-gaveta[open] .dp-atual').isVisible(), 'sem 3D: a gaveta da etapa funciona');
   // Celular: balões em faixa embaixo da embalagem
   const cel = await b3.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await cel.addCookies((await g.p.context().cookies()));
@@ -190,7 +204,9 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
   const cli = sql(`select cliente_id from dp_projetos where id=${p3}`);
   const prod3 = sql(`select produto_id from dp_projetos where id=${p3}`);
   sql(`update dp_projetos set rotulos_recebidos=300 where id=${p3}`);
-  sql(`update dp_projetos set etapa_id=(select id from dp_etapas where checagem='lancamento') where id=${p3}`);
+  sql(`update dp_projeto_etapas set situacao='concluida' where projeto_id=${p3}`);
+  sql(`update dp_projeto_etapas set situacao='andamento' where projeto_id=${p3} and etapa_id=${etapaId('lancamento')}`);
+  sql(`update dp_projetos set etapa_id=${etapaId('lancamento')} where id=${p3}`);
   await post('gestor@demo.local', `/desenvolvimento/${p3}/concluir`);
   ok(sql(`select concat(ativo,visivel_catalogo,'|',cliente_exclusivo_id) from produtos where id=${prod3}`) === `10|${cli}`, 'Terceirização: produto exclusivo do cliente, fora do catálogo');
   ok(sql(`select rotulos_estoque from terceirizacao_produtos where produto_id=${prod3} and cliente_id=${cli}`) === '300', 'rótulos recebidos vão para os rótulos do cliente');
