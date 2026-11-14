@@ -11,7 +11,7 @@ class InicioController extends Controller
 {
     public function index(): void
     {
-        $modulos = array_filter(require RAIZ . '/app/menu.php', fn($m) => $m['url'] !== '/' && self::visivel($m));
+        $modulos = array_filter(require RAIZ . '/app/menu.php', fn($m) => $m['url'] !== '/' && empty($m['oculto']) && self::visivel($m));
         $this->tela('inicio/index', [
             'titulo'   => 'Início',
             'usuario'  => Auth::usuario(),

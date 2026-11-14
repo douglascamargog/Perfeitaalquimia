@@ -24,6 +24,7 @@ $link = fn(array $p) => url('/equipe') . '?' . e(http_build_query($p + ['mes' =>
     <a class="botao-icone" href="<?= $link(['mes' => $seguinte, 'frente' => $frente]) ?>" aria-label="Próximo mês">→</a>
   </div>
 </div>
+<?= \App\Core\Visao::renderizar('layout/_abas_grupo', ['grupo' => 'resultados', 'atual' => '/equipe']) ?>
 
 <?= Visao::renderizar('meu_mes/_equipe', compact('mes', 'equipe', 'podeEquipe', 'nomeMes', 'pct', 'ou')) ?>
 

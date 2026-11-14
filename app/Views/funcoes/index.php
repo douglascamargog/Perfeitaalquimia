@@ -7,6 +7,7 @@
     <strong>Setor de venda</strong>: a função tem carteira própria e vira um grupo no menu lateral (Carteira, Meu mês, Agenda, Pedidos e Recompra só daquele setor);
     cada pessoa vê os setores das funções dela.</p>
 </div>
+<?= \App\Core\Visao::renderizar('layout/_abas_grupo', ['grupo' => 'pessoas_acessos', 'atual' => '/funcoes']) ?>
 
 <div class="card">
   <div class="tabela-rolagem">

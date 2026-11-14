@@ -3,6 +3,7 @@
   <p class="suave">Regras comerciais do sistema. Toda alteração fica registrada na Auditoria.</p>
   <a class="botao contorno" href="<?= url('/configuracoes/listas') ?>">Etapas, segmentos e origens</a>
 </div>
+<?= \App\Core\Visao::renderizar('layout/_abas_grupo', ['grupo' => 'configuracoes', 'atual' => '/configuracoes']) ?>
 
 <form method="post" action="<?= url('/configuracoes') ?>">
   <?= csrf_campo() ?>

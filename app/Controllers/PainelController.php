@@ -69,4 +69,17 @@ class PainelController extends Controller
         }
         fclose($s);
     }
+
+    /** Gestão › Resultados: abre a primeira aba que a pessoa pode ver (Painel, Equipe de vendas ou Acompanhamento) */
+    public function resultados(): void
+    {
+        foreach (['/painel' => ['painel.ver'], '/equipe' => ['equipe.ver'], '/acompanhamento' => ['acompanhamento.ver', 'setor.gestao', 'cobranca.gerenciar']] as $url => $perms) {
+            foreach ($perms as $p) {
+                if (\App\Core\Auth::pode($p)) {
+                    redirecionar($url);
+                }
+            }
+        }
+        redirecionar('/');
+    }
 }

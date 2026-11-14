@@ -17,6 +17,7 @@ $modos = ['simulado' => 'Demonstração: ligações e gravações simuladas', 'm
       <?php if ($modo === 'api'): ?><form method="post" action="<?= url('/telefonia/sincronizar') ?>"><?= csrf_campo() ?><button class="botao contorno pequeno" type="submit">Buscar ligações agora</button></form><?php endif; ?>
     <?php endif; ?></div>
 </div>
+<?= \App\Core\Visao::renderizar('layout/_abas_grupo', ['grupo' => 'resultados', 'atual' => '/acompanhamento']) ?>
 
 <?= Visao::renderizar('acompanhamento/_visoes', ['visoes' => $visoes, 'atual' => 'vendas', 'periodo' => $periodo, 'de' => $de, 'ate' => $ate]) ?>
 <?= Visao::renderizar('acompanhamento/_periodo', ['acao' => '/acompanhamento', 'periodo' => $periodo, 'de' => $de, 'ate' => $ate, 'extra' => array_filter(['setor' => $setor])]) ?>

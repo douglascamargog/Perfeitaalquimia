@@ -13,6 +13,7 @@ $tiposPor = ['etapas' => $tipos, 'cobranca' => $tiposCobranca, 'posts' => $tipos
   <p class="suave">Listas usadas na Carteira e na Cobrança. Itens em uso não são apagados: desative para esconder dos formulários. Toda mudança fica na Auditoria.</p>
   <a class="botao contorno" href="<?= url('/configuracoes') ?>">Configurações gerais</a>
 </div>
+<?= \App\Core\Visao::renderizar('layout/_abas_grupo', ['grupo' => 'configuracoes', 'atual' => '/configuracoes/listas']) ?>
 
 <?php foreach ($secoes as $lista => [$titulo, $ajuda, $itens]): $ativo = isset($tiposPor[$lista]) ? 'ativa' : 'ativo'; $tiposLista = $tiposPor[$lista] ?? []; ?>
   <section class="card" id="<?= $lista ?>">

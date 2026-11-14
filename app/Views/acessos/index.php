@@ -10,6 +10,7 @@ $niveis = [0 => 'Sem acesso', 1 => 'Ver', 2 => 'Ver e editar'];
     <p>Quem pode ver e quem pode editar cada aba, por perfil. Todas as abas aparecem no menu para todo mundo:
       sem acesso, a aba fica com cadeado; com "Ver", a tela abre sem os botões de alterar.</p></div>
 </div>
+<?= \App\Core\Visao::renderizar('layout/_abas_grupo', ['grupo' => 'pessoas_acessos', 'atual' => '/acessos']) ?>
 <div class="aviso aviso">O perfil <strong>Admin</strong> tem acesso a tudo e não aparece aqui. Exceções de uma pessoa (dar ou tirar algo só dela)
   ficam no cadastro dela, em Usuários. O que aparece no Início e nos avisos de cada um segue a <strong>função</strong> (Administração › Funções).</div>
 <form method="post" action="<?= url('/acessos') ?>" class="card sem-espaco" data-grade-acessos>

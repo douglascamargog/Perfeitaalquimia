@@ -3,6 +3,7 @@
   <p class="suave">Cada pessoa tem o seu login. O <strong>perfil</strong> define o que ela acessa; as <strong>funções</strong> definem as filas e regras que recebe.</p>
   <a class="botao" href="<?= url('/usuarios/novo') ?>">+ Novo usuário</a>
 </div>
+<?= \App\Core\Visao::renderizar('layout/_abas_grupo', ['grupo' => 'pessoas_acessos', 'atual' => '/usuarios']) ?>
 
 <div class="card">
   <div class="tabela-rolagem">

@@ -17,6 +17,17 @@
  */
 return [
     [
+        'versao' => '9.2', 'data' => '2026-11-14', 'titulo' => 'Menu mais organizado',
+        'melhoria' => [
+            'Gestão › Resultados: Painel de vendas, Equipe de vendas e Acompanhamento ficam numa entrada só, em abas.',
+            '"Equipe" no topo do menu agora se chama "Pessoas" (para não confundir com a Equipe de vendas).',
+            'Mensagens prontas passou para o Marketing.',
+        ],
+        'admin' => [
+            'Administração mais enxuta: "Pessoas e acessos" junta Usuários, Funções e Acessos em abas; Configurações e Listas também viraram abas; Etapas do desenvolvimento foi para o grupo Desenvolvimento. "Dados de teste" só aparece no modo de demonstração (modo_demo no config.php).',
+        ],
+    ],
+    [
         'versao' => '9.1', 'data' => '2026-11-14', 'titulo' => 'Produção: máximo e desperdício',
         'novo' => [
             'A prévia da ordem de produção mostra quantas unidades dá para produzir com o estoque de hoje e qual item limita.',

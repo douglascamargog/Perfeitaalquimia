@@ -32,6 +32,7 @@ $linkCarteira = fn(int $dias) => url('/carteira/lista') . '?' . http_build_query
     <a class="botao contorno" href="<?= url('/painel/exportar.csv') ?>?<?= e($query) ?>"><svg class="icone"><use href="<?= $icones ?>#baixar"/></svg>CSV</a>
   </div>
 </div>
+<?= \App\Core\Visao::renderizar('layout/_abas_grupo', ['grupo' => 'resultados', 'atual' => '/painel']) ?>
 
 <form class="filtros card nao-imprimir" method="get" action="<?= url('/painel') ?>" data-filtros>
   <div class="filtros-grade">

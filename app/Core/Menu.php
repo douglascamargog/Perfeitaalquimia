@@ -42,7 +42,10 @@ class Menu
         }
         $comuns = array_filter($itens, fn($i) => !empty($i['setor']));
         foreach ($itens as $item) {
-            $item['ativo'] = $item['url'] === '/' ? $caminhoAtual === '/' : $item['url'] === $urlAtual;
+            if (!empty($item['oculto'])) {
+                continue; // tela que fica em abas de outra entrada (ex.: Painel de vendas dentro de Resultados)
+            }
+            $item['ativo'] = $item['url'] === '/' ? $caminhoAtual === '/' : ($item['url'] === $urlAtual || in_array($urlAtual, $item['tambem'] ?? [], true));
             $item['href'] = $item['url'];
             $item['contador'] = (int) ($pendencias[$item['url']] ?? 0);
             if (($item['grupo'] ?? '') === '') {
