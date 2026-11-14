@@ -12,7 +12,7 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
   const erros = []; p.on('pageerror', e => erros.push(e.message));
   await p.goto(BASE + '/entrar'); await p.fill('#email', 'admin@demo.local'); await p.fill('#senha', 'Demo@2026'); await p.click('button[type=submit]');
   await p.goto(BASE + '/configuracoes/listas');
-  ok(await p.locator('nav a.ativo').innerText() === 'Listas', 'só "Listas" fica destacado no menu');
+  ok(await p.locator('.menu-lateral a.ativo').innerText() === 'Configurações' && await p.locator('[data-abas-grupo] a.ativo').innerText() === 'Listas (funil, segmentos, origens)', 'menu destaca Configurações e a aba Listas');
   // nova etapa
   const sec = p.locator('#etapas form.nova-linha');
   await sec.locator('input[name=nome]').fill('Pós-venda');

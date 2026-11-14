@@ -67,7 +67,7 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   // 4. Quem não tem acesso: cadeado
   const prod = await nova();
   await entrar(prod, 'producao@demo.local');
-  ok(await prod.locator('.menu-lateral a[href$="/equipe"][data-bloqueado]').count() === 1, 'Produção: Equipe de vendas com cadeado');
+  ok(await prod.locator('.menu-lateral a[href$="/resultados"][data-bloqueado]').count() === 1, 'Produção: Resultados (Equipe de vendas) com cadeado');
 
   ok(erros.length === 0, 'sem erros de JavaScript ' + erros.join(' / '));
   await b.close();
