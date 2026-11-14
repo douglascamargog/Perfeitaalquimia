@@ -31,7 +31,7 @@
 .meta-equipe-rodape summary, .form-equipe summary { cursor: pointer; color: var(--lima); font-weight: 700; }
 .meta-equipe-rodape details p { margin: 8px 0 0; max-width: 760px; line-height: 1.6; }
 .meta-equipe-rodape strong { color: #fff; }
-.grafico-evolucao { width: 100%; height: 150px; margin-top: 16px; background: #ffffff08; border-radius: 14px; }
+.grafico-evolucao { position: relative; width: 100%; height: 200px; margin-top: 16px; padding: 10px; background: #ffffff08; border-radius: 14px; }
 .grafico-evolucao .linha-meta { stroke: #efc07a; stroke-dasharray: 6 6; }
 .grafico-evolucao .linha-ideal { stroke: #ffffff40; stroke-dasharray: 3 5; }
 .grafico-evolucao .linha-real { fill: none; stroke: var(--lima); stroke-width: 3; }

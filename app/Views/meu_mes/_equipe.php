@@ -49,21 +49,15 @@ $feriados = implode(', ', array_map(fn($d) => substr($d, 8, 2) . '/' . substr($d
       <span class="pequeno">Atualizado por <?= e($q['linha']['atualizado_por_nome'] ?? '—') ?> em <?= data_br($q['linha']['atualizado_em'], true) ?></span>
     </div>
 
-    <?php if (count($q['lancamentos']) > 1): // Evolução: vendido acumulado × caminho ideal até a meta
-        $l = $q['lancamentos'];
-        $trabalho = $q['trabalho'];
-        $total = max(1, count($trabalho));
-        $maximo = max($q['meta'], ...array_map(fn($x) => (float) $x['vendido'], $l));
-        $x = fn(string $data) => (count(array_filter($trabalho, fn($d) => $d <= $data)) / $total) * 600;
-        $y = fn(float $v) => 150 - $v / $maximo * 140;
-        $pontos = implode(' ', array_map(fn($p) => round($x($p['data']), 1) . ',' . round($y((float) $p['vendido']), 1), $l));
+    <?php if ($q['lancamentos']): // Evolução: vendido acumulado (último lançamento de cada dia) × ritmo necessário até a meta
+        $ultimoDoDia = [];
+        foreach ($q['lancamentos'] as $lan) {
+            $ultimoDoDia[$lan['data']] = (float) $lan['vendido']; // correções no mesmo dia: vale o último valor
+        }
+        $dadosEvolucao = ['dias' => array_values($q['trabalho']), 'meta' => (float) $q['meta'], 'vendido' => $ultimoDoDia];
     ?>
-      <svg class="grafico-evolucao" viewBox="0 0 600 160" role="img" aria-label="Evolução do vendido pela equipe no mês">
-        <line x1="0" y1="<?= $y($q['meta']) ?>" x2="600" y2="<?= $y($q['meta']) ?>" class="linha-meta"/>
-        <line x1="0" y1="150" x2="600" y2="<?= $y($q['meta']) ?>" class="linha-ideal"/>
-        <polyline points="0,150 <?= $pontos ?>" class="linha-real"/>
-        <?php foreach ($l as $p): ?><circle cx="<?= round($x($p['data']), 1) ?>" cy="<?= round($y((float) $p['vendido']), 1) ?>" r="4"><title><?= data_br($p['data']) ?>: <?= dinheiro($p['vendido']) ?></title></circle><?php endforeach; ?>
-      </svg>
+      <div class="grafico-evolucao"><canvas id="grafico-evolucao" aria-label="Evolução do vendido pela equipe no mês"></canvas></div>
+      <script type="application/json" id="dados-evolucao"><?= json_encode($dadosEvolucao, JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
       <div class="legenda-evolucao"><span><i class="real"></i>Vendido (lançamentos do gestor)</span><span><i class="ideal"></i>Ritmo necessário para a meta</span></div>
     <?php endif; ?>
   <?php endif; ?>

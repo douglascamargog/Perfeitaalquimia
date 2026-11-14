@@ -23,3 +23,38 @@ if (canvas && window.Chart) {
     },
   });
 }
+
+// Evolução da meta da equipe: um ponto por dia de trabalho (o último valor lançado no dia), linha do ritmo necessário e a meta
+const evolucao = JSON.parse(document.getElementById('dados-evolucao')?.textContent || 'null');
+const telaEvolucao = document.getElementById('grafico-evolucao');
+if (evolucao && telaEvolucao && window.Chart) {
+  const dias = evolucao.dias;
+  // Até o último lançamento: cada dia mostra o vendido acumulado mais recente lançado até ele; depois, sem ponto
+  const datas = Object.keys(evolucao.vendido).sort();
+  const ultima = datas[datas.length - 1];
+  const real2 = dias.map((d) => {
+    if (d > ultima) return null;
+    const ate = datas.filter((x) => x <= d);
+    return ate.length ? evolucao.vendido[ate[ate.length - 1]] : 0;
+  });
+  const moeda = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  new Chart(telaEvolucao, {
+    type: 'line',
+    data: {
+      labels: dias.map((d) => d.slice(8, 10) + '/' + d.slice(5, 7)),
+      datasets: [
+        { label: 'Vendido', data: real2, borderColor: '#caff4d', backgroundColor: '#caff4d', borderWidth: 3, pointRadius: 3, spanGaps: true, tension: 0.2 },
+        { label: 'Ritmo necessário', data: dias.map((_, i) => (evolucao.meta * (i + 1)) / dias.length), borderColor: '#ffffff60', borderDash: [4, 5], borderWidth: 2, pointRadius: 0 },
+        { label: 'Meta', data: dias.map(() => evolucao.meta), borderColor: '#efc07a', borderDash: [7, 6], borderWidth: 1.5, pointRadius: 0 },
+      ],
+    },
+    options: {
+      maintainAspectRatio: false, animation: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${moeda(c.parsed.y)}` } } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#ffffff14' }, ticks: { color: '#ffffffb0', callback: (v) => (v >= 1000 ? (v / 1000).toLocaleString('pt-BR') + ' mil' : v) } },
+        x: { grid: { display: false }, ticks: { color: '#ffffffb0', maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
+      },
+    },
+  });
+}

@@ -35,7 +35,7 @@ class AgendaController extends Controller
             'grupos'     => Tarefa::agenda($quem, $setor),
             'verTodas'   => $verTodas || $equipe,
             'pessoa'     => $pessoa,
-            'vendedores' => $verTodas ? \App\Models\Listas::vendedores() : $equipe,
+            'vendedores' => $verTodas ? \App\Models\Listas::vendedores($setor) : $equipe,
             'estilos'    => ['carteira.css'],
             'scripts'    => ['carteira.js', 'busca_contatos.js'],
         ]);

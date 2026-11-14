@@ -86,13 +86,16 @@ class Listas
         ));
     }
 
-    /** Pessoas que podem ser responsáveis por clientes (usuários ativos com código de vendedor ou função) */
-    public static function vendedores(): array
+    /**
+     * Pessoas que podem ser responsáveis por clientes: usuários ativos com código de vendedor ou numa função
+     * de SETOR DE VENDA (Produção, Marketing etc. não entram). $setor = id da função: só a equipe daquele setor.
+     */
+    public static function vendedores(?int $setor = null): array
     {
-        return self::lembrar('ven', fn() => Banco::todos(
+        return self::lembrar('ven' . (int) $setor, fn() => Banco::todos(
             'SELECT DISTINCT u.id, u.nome FROM usuarios u
-               LEFT JOIN usuario_funcoes uf ON uf.usuario_id = u.id
-              WHERE u.ativo = 1 AND (u.codigo_vendedor IS NOT NULL OR uf.funcao_id IS NOT NULL)
+               LEFT JOIN usuario_funcoes uf ON uf.usuario_id = u.id LEFT JOIN funcoes f ON f.id = uf.funcao_id
+              WHERE u.ativo = 1 AND ' . ($setor ? 'uf.funcao_id = ' . (int) $setor : '(u.codigo_vendedor IS NOT NULL OR f.setor_venda = 1)') . '
               ORDER BY u.nome'
         ));
     }

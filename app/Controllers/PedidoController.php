@@ -22,7 +22,7 @@ class PedidoController extends Controller
         $filtros = Pedido::filtrosDaUrl() + ['funcao' => (string) (\App\Services\Setores::funcaoIdAtual() ?? '')];
         $this->tela('pedidos/index', [
             'titulo' => 'Pedidos', 'filtros' => $filtros, 'resultado' => Pedido::listar($filtros, (int) ($_GET['pagina'] ?? 1)),
-            'vendedores' => Auth::pode('pedidos.ver_todos') ? Listas::vendedores() : [],
+            'vendedores' => Auth::pode('pedidos.ver_todos') ? Listas::vendedores(\App\Services\Setores::funcaoIdAtual()) : [],
             'meuCodigo' => Banco::valor('SELECT codigo_vendedor FROM usuarios WHERE id = ?', [Auth::id()]),
             'estilos' => ['carteira.css', 'pedidos.css'],
         ]);

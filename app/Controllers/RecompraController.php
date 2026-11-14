@@ -27,7 +27,7 @@ class RecompraController extends Controller
         }
         $this->tela('recompra/index', [
             'titulo' => 'Recompra', 'clientes' => $clientes, 'vendedor' => $vendedor,
-            'vendedores' => Auth::pode('carteira.ver_todas') ? Listas::vendedores() : \App\Services\Setores::equipeGerenciada(),
+            'vendedores' => Auth::pode('carteira.ver_todas') ? Listas::vendedores(\App\Services\Setores::funcaoIdAtual()) : \App\Services\Setores::equipeGerenciada(),
             'estilos' => ['carteira.css', 'inicio.css', 'painel.css'], 'scripts' => ['carteira.js', 'busca_contatos.js'],
         ]);
     }
