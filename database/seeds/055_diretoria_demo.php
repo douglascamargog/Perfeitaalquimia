@@ -24,5 +24,9 @@ foreach (['diretoria.vende', 'carteira.ver_propria', 'pedidos.criar', 'meu_mes.u
     Banco::executar('INSERT IGNORE INTO usuario_permissoes (usuario_id, permissao, concedida) VALUES (?, ?, 1)', [$vende, $perm]);
 }
 $tele = (int) Banco::valor("SELECT id FROM usuarios WHERE email = 'televendas2@demo.local'");
-Banco::executar('UPDATE clientes SET responsavel_id = ? WHERE responsavel_id = ? ORDER BY id LIMIT 20', [$vende, $tele]);
+// Carteira própria do diretor que vende (cliente e carteira sempre com o mesmo responsável)
+$origem = Banco::um('SELECT * FROM carteiras WHERE responsavel_id = ? ORDER BY id LIMIT 1', [$tele]);
+$carteira = Banco::inserir('carteiras', array_filter(['nome' => 'Carteira da Diretoria (demo)', 'funcao_id' => $origem['funcao_id'] ?? null,
+    'responsavel_id' => $vende, 'descricao' => 'Clientes atendidos pelo sócio que também vende'], fn($v) => $v !== null));
+Banco::executar('UPDATE clientes SET responsavel_id = ?, carteira_id = ? WHERE responsavel_id = ? ORDER BY id LIMIT 20', [$vende, $carteira, $tele]);
 return 'Diretoria (demonstração): diretoria@demo.local e diretoria.vende@demo.local (com 20 clientes).';
