@@ -28,6 +28,9 @@ return [
             'Quem foi escolhido aprova, pede outra cotação ou recusa, pelo sino. Depois de aprovado, a Qualidade registra a compra e o Depósito confere a chegada: matéria-prima e rótulo entram sozinhos no estoque.',
             'Sugestões de orçamento: matérias-primas abaixo do mínimo e produtos novos do Desenvolvimento na etapa de compras.',
         ],
+        'melhoria' => [
+            'Nova ordem de produção: a prévia mostra tudo o que vai ser usado, separado em matérias-primas e embalagens (pote, tampa, selo, rótulo…), e avisa quando o produto ainda não tem as embalagens cadastradas.',
+        ],
         'admin' => [
             'Crie o login de quem trabalha no depósito com o perfil novo "Depósito" e a função "Separação e Expedição". Os orçamentos são feitos por quem tem a função Qualidade. Em Configurações › Depósito: lote obrigatório, transportadoras sugeridas e dias para considerar atrasado.',
         ],
