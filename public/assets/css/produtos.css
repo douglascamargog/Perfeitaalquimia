@@ -91,3 +91,8 @@ aside .pd-dados { grid-template-columns: 1fr; }
 @media print {
   .abas, .pd-form .acoes-form, .pd-doc-acoes, .voltar-link { display: none !important; }
 }
+/* Trocar foto do produto (V10.3) */
+.pd-foto-caixa { display: grid; gap: 6px; justify-items: center; }
+.pd-trocar-foto { margin: 0; }
+.pd-trocar-foto label { cursor: pointer; }
+@media (max-width: 760px) { .pd-foto-caixa { width: 100%; } }

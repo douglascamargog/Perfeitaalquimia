@@ -35,8 +35,9 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   ok(await ven.locator('[data-pagina-cliente] .ficha-topo').count() === 0 && await ven.locator('[data-pagina-cliente] h3:has-text("Gestão comercial"), [data-pagina-cliente] h3').count() > 0, 'ficha da gaveta ao lado (sem o cabeçalho repetido)');
 
   // 3. Salvar pela ficha na página: registra o contato e a página mostra na linha do tempo
-  await ven.fill('[data-pagina-cliente] #c-resumo', 'Contato pela página do cliente');
-  await Promise.all([ven.waitForNavigation(), ven.locator('[data-pagina-cliente] form[action$="/contato"] button[type=submit]').click()]);
+  await ven.click('.cl-principal [data-cx-aba="contato"]');
+  await ven.fill('.cl-principal [data-cx-painel="contato"] textarea[name=resumo]', 'Contato pela página do cliente');
+  await Promise.all([ven.waitForNavigation(), ven.locator('.cl-principal [data-cx-painel="contato"] button[type=submit]').click()]);
   ok(await ven.locator('.cl-linha-tempo li', { hasText: 'Contato pela página do cliente' }).count() === 1, 'contato registrado na página aparece na linha do tempo');
 
   // 4. Cliente de outra carteira: sem acesso

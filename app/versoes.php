@@ -23,6 +23,7 @@ return [
             'Agendar atividade direto na ficha (ligar, WhatsApp, visita, reunião, enviar orçamento) com dia e hora: vai para a Agenda e aparece em "Próximas atividades", com o botão Concluir.',
             'Discador ao lado do sino (Televendas e Cobrança): digite qualquer número e ligue pelo Ligue Talk. Se o número for de um cliente, o One mostra a ficha e a ligação vai para a linha do tempo dele.',
             'Letreiro no topo: quando entra um pedido, passa "Novo pedido feito por (vendedor)" por 30 segundos para todo mundo.',
+            'Foto do produto: na página do produto, "Trocar foto" atualiza a foto no catálogo, na Academia, nos pedidos e nos orçamentos.',
         ],
         'melhoria' => [
             'O comunicado do topo passa em movimento até você clicar e marcar "Li e entendi".',

@@ -67,6 +67,19 @@ class ProdutoController extends Controller
         redirecionar('/produtos/' . $p['slug'] . '?aba=conteudo');
     }
 
+    /** Foto do produto (a mesma do catálogo, da Academia, do pedido e do orçamento) */
+    public function trocarFoto(string $slug): void
+    {
+        $p = $this->produto($slug);
+        try {
+            PS::trocarFoto($p, $_FILES['foto'] ?? null, Auth::id());
+            Sessao::aviso('sucesso', 'Foto trocada. O catálogo, a Academia, os pedidos e os orçamentos já mostram a nova.');
+        } catch (\RuntimeException $e) {
+            Sessao::aviso('erro', $e->getMessage());
+        }
+        redirecionar('/produtos/' . $p['slug']);
+    }
+
     public function salvarComposicao(string $slug): void
     {
         $p = $this->produto($slug);

@@ -66,9 +66,10 @@ async function sair(page) { await page.click('form[action$="/sair"] button'); }
   await page.goto(BASE + '/carteira/lista?abrir=' + lead);
   await page.waitForSelector('.ficha-topo h2');
   await page.screenshot({ path: SHOTS + '/carteira-ficha.png' });
-  await page.selectOption('#c-canal', 'Ligação');
-  await page.fill('#c-resumo', 'Teste automático: conversei com o comprador.');
-  await page.click('form[action$="/contato"] button[type=submit]');
+  await page.click('.gaveta [data-cx-aba="contato"]');
+  await page.selectOption('.gaveta [data-cx-painel="contato"] select[name=canal]', 'Ligação');
+  await page.fill('.gaveta [data-cx-painel="contato"] textarea[name=resumo]', 'Teste automático: conversei com o comprador.');
+  await page.click('.gaveta [data-cx-painel="contato"] button[type=submit]');
   await page.waitForFunction(() => document.querySelector('.linha-tempo')?.innerText.includes('Teste automático'));
   ok(sql(`select e.nome from clientes c join funil_etapas e on e.id=c.etapa_id where c.id=${lead}`) === 'Contato realizado', 'contato avança a etapa para "Contato realizado"');
   ok((await page.locator('.ficha-selos').innerText()).includes('Contato realizado'), 'ficha recarregada mostra a etapa nova');

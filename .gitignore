@@ -22,6 +22,7 @@ Thumbs.db
 /public/media/academia/
 # Imagens enviadas pelo Marketing (ficam só no servidor; entram no backup do site)
 /public/media/marketing/
+/public/media/produtos/
 /pacote/
 /VERSAO
 

@@ -12,7 +12,15 @@ $contador = ['ficha' => count($ficha['materia_prima']), 'embalagens' => count($f
 <a class="voltar-link" href="<?= url('/produtos') ?>">← Todos os produtos</a>
 
 <section class="pd-capa">
-  <span class="pd-foto"><?php if ($p['imagem']): ?><img src="<?= url('/' . e($p['imagem'])) ?>" alt="Embalagem de <?= e($p['nome']) ?>"><?php else: ?><b>PA</b><?php endif; ?></span>
+  <div class="pd-foto-caixa">
+    <span class="pd-foto"><?php if ($p['imagem']): ?><img src="<?= url('/' . e($p['imagem'])) ?>" alt="Embalagem de <?= e($p['nome']) ?>" data-foto-produto><?php else: ?><b>PA</b><?php endif; ?></span>
+    <?php if (\App\Core\Auth::pode('catalogo.editar')): ?>
+      <form method="post" action="<?= url('/produtos/' . e($p['slug']) . '/foto') ?>" enctype="multipart/form-data" class="pd-trocar-foto" data-trocar-foto>
+        <?= csrf_campo() ?>
+        <label class="botao contorno pequeno"><input type="file" name="foto" accept="image/jpeg,image/png,image/webp" hidden onchange="this.form.submit()">📷 <?= $p['imagem'] ? 'Trocar foto' : 'Colocar foto' ?></label>
+      </form>
+    <?php endif; ?>
+  </div>
   <div>
     <div class="sobretitulo">PRODUTO · <?= e(mb_strtoupper((string) $p['categoria'])) ?></div>
     <h1><?= e($p['nome']) ?></h1>

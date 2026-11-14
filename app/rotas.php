@@ -157,6 +157,7 @@ return [
     ['GET',  '/produtos/documentos/{id}',            'ProdutoController@baixar',          'produtos.ver|catalogo.editar|produtos.tecnico|desenvolvimento.ver|desenvolvimento.gerenciar'],
     ['POST', '/produtos/documentos/{id}/arquivar',   'ProdutoController@arquivarDocumento', 'produtos.tecnico'],
     ['GET',  '/produtos/{slug}',                     'ProdutoController@ver',             'produtos.ver|catalogo.editar|produtos.tecnico'],
+    ['POST', '/produtos/{slug}/foto',                'ProdutoController@trocarFoto',      'catalogo.editar'],
     ['POST', '/produtos/{slug}/conteudo',            'ProdutoController@salvarConteudo',  'academia.editar|catalogo.editar'],
     ['POST', '/produtos/{slug}/composicao',          'ProdutoController@salvarComposicao', 'produtos.tecnico'],
     ['POST', '/produtos/{slug}/ficha',               'ProdutoController@salvarFicha',     'produtos.tecnico'],

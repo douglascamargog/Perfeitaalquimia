@@ -149,21 +149,7 @@ $linkSeguro = function (?string $url): string {
     <button class="botao" type="submit">Salvar alterações</button>
   </form>
 
-  <!-- Registrar contato -->
-  <form class="ficha-secao" method="post" action="<?= url("/carteira/clientes/$id/contato") ?>" data-ajax>
-    <?= csrf_campo() ?>
-    <h3>Registrar contato</h3>
-    <div class="grade-campos">
-      <div class="campo"><label for="c-data">Data</label><input type="date" id="c-data" name="data" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>"></div>
-      <div class="campo">
-        <label for="c-canal">Canal</label>
-        <select id="c-canal" name="canal"><?php foreach ($canais as $canal): ?><option><?= e($canal) ?></option><?php endforeach; ?></select>
-      </div>
-      <div class="campo"><label for="c-proximo">Próximo contato (opcional)</label><input type="date" id="c-proximo" name="proximo_contato" min="<?= date('Y-m-d') ?>"></div>
-    </div>
-    <div class="campo"><label for="c-resumo">Resumo da conversa</label><textarea id="c-resumo" name="resumo" rows="3" placeholder="O que foi conversado, objeções, próximos passos…"></textarea></div>
-    <button class="botao lima" type="submit">Registrar contato</button>
-  </form>
+  <!-- Registrar contato: fica na caixa rápida da linha do tempo (aba 📞 Contato) -->
 
   <!-- Ligação com 1 clique (plano B do Ligue Talk) -->
   <section class="ficha-secao">

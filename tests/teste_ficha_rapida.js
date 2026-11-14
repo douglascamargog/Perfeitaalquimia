@@ -124,6 +124,21 @@ const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwA
     ok(await g.evaluate(() => getComputedStyle(document.querySelector('.com-rolar')).animationName) === 'letreiro-passar', 'comunicado também passa em movimento (até "Li e entendi")');
   }
 
+  // ---------- Foto do produto (admin) ----------
+  const adm = await como('admin@demo.local');
+  const slug = sql(`select slug from produtos where id=${prodPed}`);
+  await adm.p.goto(BASE + `/produtos/${slug}`);
+  ok(await adm.p.locator('[data-trocar-foto]').count() === 1, 'admin vê "Trocar foto" no produto');
+  const fotoAntes = sql(`select coalesce(imagem_id,0) from produtos where id=${prodPed}`);
+  const foto = require('fs').readFileSync(require('path').join(__dirname, '..', 'public', 'assets', 'img', 'logo.png'));
+  await Promise.all([adm.p.waitForNavigation(), adm.p.setInputFiles('[data-trocar-foto] input[type=file]', { name: 'nova.png', mimeType: 'image/png', buffer: foto })]);
+  const fotoDepois = sql(`select imagem_id from produtos where id=${prodPed}`);
+  ok(fotoDepois !== fotoAntes && sql(`select arquivo from midias where id=${fotoDepois}`).startsWith('media/produtos/'), 'foto trocada (vale para catálogo, Academia, pedido e orçamento)');
+  const srcFoto = await adm.p.getAttribute('[data-foto-produto]', 'src');
+  ok(!!srcFoto && (await adm.p.request.get(BASE + srcFoto.replace(/^.*?\/media\//, '/media/'))).status() === 200, 'a página do produto mostra a foto nova');
+  ok((await v.p.request.post(BASE + `/produtos/${slug}/foto`, { multipart: { _csrf: v.csrf, foto: { name: 'x.png', mimeType: 'image/png', buffer: foto } } })).status() === 403, 'vendedora não troca a foto');
+  ok((await adm.p.request.post(BASE + `/produtos/${slug}/foto`, { multipart: { _csrf: adm.csrf, foto: { name: 'x.txt', mimeType: 'text/plain', buffer: Buffer.from('oi') } } }).then((r) => r.text())).includes('JPG, PNG ou WEBP'), 'arquivo que não é foto é recusado');
+
   // ---------- Celular ----------
   const cel = await como('televendas1@demo.local', { viewport: { width: 390, height: 844 }, isMobile: true });
   await cel.p.goto(BASE + `/carteira/clientes/${cli}`);

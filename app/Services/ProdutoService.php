@@ -215,6 +215,41 @@ class ProdutoService
      * Conteúdo (Marketing): o que a Academia e o catálogo mostram.
      * Perguntas frequentes: uma por linha no formato "Pergunta? | Resposta".
      */
+    /**
+     * Troca a foto do produto (JPG, PNG ou WEBP, até 8 MB). A foto é pública (catálogo): fica em public/media/produtos.
+     * A foto antiga continua guardada na biblioteca de mídia (pode estar em uso em outro lugar).
+     */
+    public static function trocarFoto(array $produto, ?array $arquivo, ?int $usuarioId): void
+    {
+        if (!$arquivo || ($arquivo['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            throw new RuntimeException('Escolha a foto.');
+        }
+        if ($arquivo['error'] !== UPLOAD_ERR_OK || !is_uploaded_file($arquivo['tmp_name']) || (int) $arquivo['size'] > 8 * 1024 * 1024) {
+            throw new RuntimeException('Não foi possível receber a foto (até 8 MB).');
+        }
+        $tipos = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+        $tipo = (new \finfo(FILEINFO_MIME_TYPE))->file($arquivo['tmp_name']);
+        if (!isset($tipos[$tipo])) {
+            throw new RuntimeException('Envie a foto em JPG, PNG ou WEBP.');
+        }
+        $hash = sha1_file($arquivo['tmp_name']);
+        $midia = Banco::valor('SELECT id FROM midias WHERE hash = ?', [$hash]);
+        if (!$midia) {
+            $caminho = 'media/produtos/' . $hash . '.' . $tipos[$tipo];
+            $pasta = RAIZ . '/public/media/produtos';
+            if (!is_dir($pasta) && !mkdir($pasta, 0755, true)) {
+                throw new RuntimeException('Sem permissão para gravar fotos no servidor.');
+            }
+            if (!move_uploaded_file($arquivo['tmp_name'], RAIZ . '/public/' . $caminho)) {
+                throw new RuntimeException('Não foi possível guardar a foto.');
+            }
+            $midia = Banco::inserir('midias', ['arquivo' => $caminho, 'tipo' => $tipo, 'tamanho' => (int) $arquivo['size'], 'hash' => $hash,
+                'alt' => mb_substr('Embalagem de ' . $produto['nome'], 0, 255), 'origem' => 'Produto']);
+        }
+        Banco::executar('UPDATE produtos SET imagem_id = ? WHERE id = ?', [(int) $midia, (int) $produto['id']]);
+        Auditoria::registrar('produto', (int) $produto['id'], 'foto', ['imagem_id' => $produto['imagem_id'] ?? null], ['imagem_id' => (int) $midia]);
+    }
+
     public static function salvarConteudo(array $produto, array $d): void
     {
         $ficha = $produto['ficha'];
