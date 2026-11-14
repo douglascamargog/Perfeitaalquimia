@@ -21,9 +21,23 @@ class AcompanhamentoController extends Controller
     public function index(): void
     {
         [$de, $ate, $periodo] = A::periodo((string) ($_GET['periodo'] ?? 'mes'), (string) ($_GET['de'] ?? ''), (string) ($_GET['ate'] ?? ''));
+        // Duas visões: Vendas (vendedoras) e Cobrança (quem cuida dos títulos em atraso)
+        $visao = (($_GET['visao'] ?? '') === 'cobranca' || !A::podeVerVendas()) && A::podeVerCobranca() ? 'cobranca' : 'vendas';
+        [$deA, $ateA] = A::anterior($de, $ate);
+        if ($visao === 'cobranca') {
+            $pessoas = A::pessoasCobranca();
+            $this->tela('acompanhamento/cobranca', [
+                'titulo' => 'Acompanhamento · Cobrança', 'linhas' => A::resumoCobranca($pessoas, $de, $ate),
+                'antes' => array_column(A::resumoCobranca($pessoas, $deA, $ateA), null, 'id'),
+                'de' => $de, 'ate' => $ate, 'periodo' => $periodo, 'visoes' => $this->visoes(), 'estilos' => self::ESTILOS,
+            ]);
+            return;
+        }
         $setor = (int) ($_GET['setor'] ?? 0) ?: (Setores::funcaoIdAtual() ?: null);
-        $linhas = A::resumo(A::pessoas($setor), $de, $ate);
+        $pessoas = A::pessoas($setor);
+        $linhas = A::resumo($pessoas, $de, $ate);
         $this->tela('acompanhamento/index', [
+            'antes' => array_column(A::resumo($pessoas, $deA, $ateA), null, 'id'), 'visoes' => $this->visoes(),
             'titulo' => 'Acompanhamento', 'linhas' => $linhas, 'de' => $de, 'ate' => $ate, 'periodo' => $periodo, 'setor' => $setor,
             'setores' => Auth::pode('acompanhamento.ver') ? array_values(Setores::todos()) : array_values(array_filter(Setores::todos(), fn($s) => in_array((int) $s['id'], Setores::gerenciados(), true))),
             'modo' => TelefoniaService::modo(), 'estilos' => self::ESTILOS,
@@ -39,11 +53,37 @@ class AcompanhamentoController extends Controller
             redirecionar('/acompanhamento');
         }
         [$de, $ate, $periodo] = A::periodo((string) ($_GET['periodo'] ?? 'mes'), (string) ($_GET['de'] ?? ''), (string) ($_GET['ate'] ?? ''));
+        [$deA, $ateA] = A::anterior($de, $ate);
+        $aba = in_array($_GET['aba'] ?? '', ['resumo', 'ligacoes', 'carteira', 'agenda', 'contatos', 'pedidos'], true) ? $_GET['aba'] : 'resumo';
         $this->tela('acompanhamento/pessoa', [
             'titulo' => 'Acompanhamento · ' . $p['nome'], 'p' => $p, 'resumo' => A::resumo([$p], $de, $ate)[0] ?? [], 'det' => A::detalhe((int) $p['id'], $de, $ate),
+            'antes' => A::resumo([$p], $deA, $ateA)[0] ?? [], 'aba' => $aba, 'extra' => A::carteiraEAgenda((int) $p['id'], $de, $ate),
+            'meta' => A::meta((int) $p['id'], substr($ate, 0, 7)),
             'de' => $de, 'ate' => $ate, 'periodo' => $periodo, 'estilos' => self::ESTILOS,
             'scripts' => ['https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js', 'acompanhamento.js'],
         ]);
+    }
+
+    /** Detalhe de quem cuida da Cobrança */
+    public function cobranca(string $id): void
+    {
+        $p = current(array_filter(A::pessoasCobranca(), fn($x) => (int) $x['id'] === (int) $id));
+        if (!$p) {
+            Sessao::aviso('erro', 'Pessoa não encontrada na Cobrança.');
+            redirecionar('/acompanhamento?visao=cobranca');
+        }
+        [$de, $ate, $periodo] = A::periodo((string) ($_GET['periodo'] ?? 'mes'), (string) ($_GET['de'] ?? ''), (string) ($_GET['ate'] ?? ''));
+        $this->tela('acompanhamento/cobranca_pessoa', [
+            'titulo' => 'Cobrança · ' . $p['nome'], 'p' => $p, 'r' => A::resumoCobranca([$p], $de, $ate)[0] ?? [], 'det' => A::detalheCobranca((int) $p['id'], $de, $ate),
+            'de' => $de, 'ate' => $ate, 'periodo' => $periodo, 'estilos' => self::ESTILOS,
+            'scripts' => ['https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js', 'acompanhamento.js'],
+        ]);
+    }
+
+    /** Abas Vendas / Cobrança que a pessoa pode ver */
+    private function visoes(): array
+    {
+        return array_filter(['vendas' => A::podeVerVendas() ? 'Vendas' : null, 'cobranca' => A::podeVerCobranca() ? 'Cobrança' : null]);
     }
 
     /** Toca a gravação (nunca há link público; a própria pessoa ou quem a acompanha) */

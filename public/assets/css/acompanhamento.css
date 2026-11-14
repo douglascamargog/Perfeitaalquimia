@@ -22,3 +22,17 @@ audio[data-gravacao] { height: 32px; max-width: 260px; }
 a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lima); border-color: var(--primaria-escura); }
 @media print { .ac-periodo, .ac-setores, audio { display: none !important; } }
 @media (max-width: 600px) { .ac-duas { grid-template-columns: minmax(0, 1fr); } }
+.ac-visoes { margin-bottom: 12px; }
+.ac-aba { margin-top: 14px; }
+.ac-delta { font-size: .7rem; font-weight: 700; white-space: nowrap; }
+.ac-delta.bom { color: var(--sucesso); }
+.ac-delta.ruim { color: var(--perigo); }
+.ac-delta.igual { color: var(--texto-suave); }
+.ac-atraso { color: var(--perigo); font-weight: 600; }
+.ac-meta .ac-barra { height: 12px; border-radius: 999px; background: var(--primaria-clara); overflow: hidden; margin: 6px 0 14px; }
+.ac-meta .ac-barra i { display: block; height: 100%; background: var(--secundaria); border-radius: 999px; }
+.ac-funil { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ac-funil li { display: grid; grid-template-columns: 150px minmax(0, 1fr) 40px; gap: 8px; align-items: center; font-size: .82rem; }
+.ac-funil i { display: block; height: 14px; border-radius: 6px; min-width: 2px; }
+.ac-funil b { text-align: right; }
+@media (max-width: 600px) { .ac-funil li { grid-template-columns: 100px minmax(0, 1fr) 32px; } }

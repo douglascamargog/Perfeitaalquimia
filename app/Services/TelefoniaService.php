@@ -133,8 +133,8 @@ class TelefoniaService
     /** A pessoa pode ouvir a gravação desta ligação? (a própria, ou de quem ela acompanha) */
     public static function podeOuvir(array $ligacao): bool
     {
-        return (int) $ligacao['usuario_id'] === Auth::id()
-            || in_array((int) $ligacao['usuario_id'], array_map('intval', array_column(AcompanhamentoService::pessoas(), 'id')), true);
+        $acompanha = array_merge(AcompanhamentoService::podeVerVendas() ? AcompanhamentoService::pessoas() : [], AcompanhamentoService::pessoasCobranca());
+        return (int) $ligacao['usuario_id'] === Auth::id() || in_array((int) $ligacao['usuario_id'], array_map('intval', array_column($acompanha, 'id')), true);
     }
 
     /** Conteúdo da gravação (para tocar no navegador) — registra na auditoria quem ouviu */

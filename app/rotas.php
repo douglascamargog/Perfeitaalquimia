@@ -156,8 +156,9 @@ return [
     ['POST', '/carteiras/{id}/importar',            'CarteirasController@importar',  'carteiras.gerenciar|setor.gestao'],
 
     // ---------- Gestão › Acompanhamento (ligações, gravações, contatos e reativações por vendedora) ----------
-    ['GET',  '/acompanhamento',                     'AcompanhamentoController@index',    'acompanhamento.ver|setor.gestao'],
+    ['GET',  '/acompanhamento',                     'AcompanhamentoController@index',    'acompanhamento.ver|setor.gestao|cobranca.gerenciar'],
     ['GET',  '/acompanhamento/pessoa/{id}',         'AcompanhamentoController@pessoa',   'acompanhamento.ver|setor.gestao'],
+    ['GET',  '/acompanhamento/cobranca/{id}',       'AcompanhamentoController@cobranca', 'acompanhamento.ver|cobranca.gerenciar'],
     ['GET',  '/ligacoes/{id}/gravacao',             'AcompanhamentoController@gravacao', 'logado'],
     ['POST', '/telefonia/discador',                 'AcompanhamentoController@discador', 'carteiras.gerenciar|setor.gestao'],
     ['POST', '/telefonia/testar',                   'AcompanhamentoController@testar',   'integracao.gerenciar'],
@@ -307,6 +308,9 @@ return [
     ['POST', '/configuracoes/listas/{lista}',         'ListaController@criar',  'config.gerenciar'],
     ['POST', '/configuracoes/listas/{lista}/{id}',    'ListaController@salvar', 'config.gerenciar'],
 
+    ['GET',  '/sistema/dados-de-teste',               'SimuladorController@index',     'sistema.atualizar'],
+    ['POST', '/sistema/dados-de-teste/gerar',         'SimuladorController@gerar',     'sistema.atualizar'],
+    ['POST', '/sistema/dados-de-teste/apagar',        'SimuladorController@apagar',    'sistema.atualizar'],
     ['GET',  '/sistema/atualizacao',                  'AtualizacaoController@index',   'sistema.atualizar'],
     ['POST', '/sistema/atualizacao/aplicar',          'AtualizacaoController@aplicar', 'sistema.atualizar'],
     ['POST', '/sistema/atualizacao/backup',           'AtualizacaoController@backup',  'sistema.atualizar'],

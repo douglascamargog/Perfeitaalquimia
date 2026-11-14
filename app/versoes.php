@@ -17,6 +17,22 @@
  */
 return [
     [
+        'versao' => '7.1', 'data' => '2026-11-14', 'titulo' => 'Acompanhamento completo e Cobrança',
+        'novo' => [
+            'Acompanhamento mais completo de cada vendedora: meta do mês × faturado, WhatsApp e mensagens prontas, retornos no prazo e atrasados, e uma página com abas (Resumo, Ligações, Carteira e funil, Agenda, WhatsApp e contatos, Reativações e pedidos).',
+            'Acompanhamento da Cobrança: valor recuperado, tentativas, promessas cumpridas e quebradas, títulos em atraso por etapa e as ligações com gravação de quem cuida da cobrança.',
+            'Os números mostram ▲ ▼ em relação ao período anterior.',
+        ],
+        'correcao' => [
+            'O gráfico da meta da equipe agora mostra um ponto por dia (vale o último valor lançado no dia), sem as linhas quebradas.',
+            'Na Carteira de cada setor, o filtro de responsável mostra só a equipe daquele setor.',
+        ],
+        'admin' => [
+            'Administração › Dados de teste: gera 60 dias de movimento simulado para as pessoas cadastradas (vendas, cobrança, produção e marketing) e apaga tudo o que foi simulado com um clique (backup antes).',
+            'Para alguém aparecer como responsável no setor (ex.: a gestora do Televendas), coloque a pessoa na função do setor em Usuários (e marque "gestor(a) do setor" se coordenar a equipe).',
+        ],
+    ],
+    [
         'versao' => '7.0', 'data' => '2026-11-14', 'titulo' => 'Carteiras e Acompanhamento com o Ligue Talk',
         'novo' => [
             'Gestão › Carteiras: a carteira de cada vendedora e as que estão sem ninguém. Quando alguém sai, a carteira inteira passa para outra pessoa com um clique; também dá para mover clientes entre carteiras, juntar carteiras e criar carteiras novas.',
