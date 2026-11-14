@@ -59,7 +59,7 @@ class EquipeVendasService
                FROM usuarios u
                LEFT JOIN pedidos p ON p.vendedor_id = u.id AND p.situacao = 'faturado' AND p.faturado_em >= ? AND p.faturado_em < ? + INTERVAL 1 DAY
               WHERE u.ativo = 1 AND EXISTS (SELECT 1 FROM usuario_funcoes uf JOIN funcoes f ON f.id = uf.funcao_id WHERE uf.usuario_id = u.id AND f.frente IS NOT NULL)
-              GROUP BY u.id ORDER BY faturado DESC, u.nome",
+              GROUP BY u.id, u.nome, u.apelido, u.foto ORDER BY faturado DESC, u.nome",
             [$mes, $de, $ate]
         );
         foreach ($linhas as &$l) {

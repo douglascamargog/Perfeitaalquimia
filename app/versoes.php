@@ -28,6 +28,9 @@ return [
         'melhoria' => [
             'O quadro de projetos mostra o desenho da embalagem e quanto o produto já está "formado".',
         ],
+        'correcao' => [
+            'Equipe de vendas e as categorias do catálogo podiam dar erro em alguns servidores. Resolvido.',
+        ],
     ],
     [
         'versao' => '8.0', 'data' => '2026-11-14', 'titulo' => 'Desenvolvimento de Produto',

@@ -36,7 +36,7 @@ class Produto
     public static function categorias(): array
     {
         return Banco::todos('SELECT c.id, c.nome, COUNT(p.id) AS total FROM categorias c JOIN produtos p ON p.categoria_id = c.id AND p.ativo = 1 AND p.visivel_catalogo = 1
-            GROUP BY c.id ORDER BY c.ordem, c.nome');
+            GROUP BY c.id, c.nome, c.ordem ORDER BY c.ordem, c.nome');
     }
 
     public static function porSlug(string $slug, ?int $tabelaId): ?array
