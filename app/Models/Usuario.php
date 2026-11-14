@@ -29,7 +29,7 @@ class Usuario
     {
         $usuarios = Banco::todos(
             'SELECT u.*, p.nome AS perfil_nome,
-                    (SELECT GROUP_CONCAT(f.nome ORDER BY f.ordem SEPARATOR ", ")
+                    (SELECT GROUP_CONCAT(CONCAT(f.nome, IF(uf.gestor = 1, " (gestão)", "")) ORDER BY f.ordem SEPARATOR ", ")
                        FROM usuario_funcoes uf JOIN funcoes f ON f.id = uf.funcao_id
                       WHERE uf.usuario_id = u.id) AS funcoes_nomes
                FROM usuarios u JOIN perfis p ON p.id = u.perfil_id
@@ -56,18 +56,22 @@ class Usuario
     public static function funcoesDe(int $usuarioId): array
     {
         return Banco::todos(
-            'SELECT f.id, f.slug, f.nome FROM usuario_funcoes uf JOIN funcoes f ON f.id = uf.funcao_id
+            'SELECT f.id, f.slug, f.nome, uf.gestor FROM usuario_funcoes uf JOIN funcoes f ON f.id = uf.funcao_id
               WHERE uf.usuario_id = ? ORDER BY f.ordem',
             [$usuarioId]
         );
     }
 
-    /** Substitui as funções da pessoa pela lista de ids informada */
-    public static function definirFuncoes(int $usuarioId, array $funcaoIds): void
+    /**
+     * Substitui as funções da pessoa pela lista de ids informada.
+     * $gestorIds: funções (setores de venda) que a pessoa também GERENCIA (ex.: gestora do Televendas que vende).
+     */
+    public static function definirFuncoes(int $usuarioId, array $funcaoIds, array $gestorIds = []): void
     {
+        $gestorIds = array_map('intval', $gestorIds);
         Banco::executar('DELETE FROM usuario_funcoes WHERE usuario_id = ?', [$usuarioId]);
         foreach (array_unique(array_map('intval', $funcaoIds)) as $funcaoId) {
-            Banco::inserir('usuario_funcoes', ['usuario_id' => $usuarioId, 'funcao_id' => $funcaoId]);
+            Banco::inserir('usuario_funcoes', ['usuario_id' => $usuarioId, 'funcao_id' => $funcaoId, 'gestor' => in_array($funcaoId, $gestorIds, true) ? 1 : 0]);
         }
     }
 

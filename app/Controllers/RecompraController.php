@@ -18,7 +18,7 @@ class RecompraController extends Controller
 {
     public function index(): void
     {
-        $vendedor = Auth::pode('carteira.ver_todas') && ctype_digit((string) ($_GET['vendedor'] ?? '')) ? (int) $_GET['vendedor'] : null;
+        $vendedor = ctype_digit((string) ($_GET['vendedor'] ?? '')) ? (int) $_GET['vendedor'] : null; // só vale para quem vê a equipe (gestor ou gestor(a) do setor)
         $clientes = VendasService::recompra($vendedor, \App\Services\Setores::funcaoIdAtual());
         // Texto do WhatsApp: o primeiro modelo da categoria Recompra em Conteúdo › Mensagens prontas
         foreach ($clientes as &$c) {
@@ -27,7 +27,7 @@ class RecompraController extends Controller
         }
         $this->tela('recompra/index', [
             'titulo' => 'Recompra', 'clientes' => $clientes, 'vendedor' => $vendedor,
-            'vendedores' => Auth::pode('carteira.ver_todas') ? Listas::vendedores() : [],
+            'vendedores' => Auth::pode('carteira.ver_todas') ? Listas::vendedores() : \App\Services\Setores::equipeGerenciada(),
             'estilos' => ['carteira.css', 'inicio.css', 'painel.css'], 'scripts' => ['carteira.js', 'busca_contatos.js'],
         ]);
     }

@@ -46,6 +46,46 @@ class Setores
         return $meus ?: (Auth::pode('carteira.ver_propria') ? $todos : []);
     }
 
+    /**
+     * Setores (ids das funções) que a pessoa GERENCIA: marcados como "gestor(a) do setor" em Usuários.
+     * Nesses setores ela vê e trabalha os clientes, pedidos, agenda e recompra de toda a equipe — e continua vendendo.
+     */
+    public static function gerenciados(): array
+    {
+        if (!Auth::logado()) {
+            return [];
+        }
+        $todos = self::todos();
+        return array_values(array_map(fn($f) => (int) $f['id'], array_filter(Auth::usuario()['funcoes'] ?? [],
+            fn($f) => !empty($f['gestor']) && isset($todos[$f['slug']]))));
+    }
+
+    /** SQL para "o cliente é de um setor que a pessoa gerencia" (ou '' se não gerencia nenhum). Ids são inteiros. */
+    public static function sqlGerenciados(string $coluna = 'c.funcao_id'): string
+    {
+        $ids = self::gerenciados();
+        return $ids ? "$coluna IN (" . implode(',', $ids) . ')' : '';
+    }
+
+    /** A pessoa gerencia o setor em que está agora (ou algum setor, se não escolheu)? */
+    public static function gerenciaAtual(): bool
+    {
+        $ids = self::gerenciados();
+        $atual = self::funcaoIdAtual();
+        return $ids && ($atual === null || in_array($atual, $ids, true));
+    }
+
+    /** Pessoas da equipe dos setores que a pessoa gerencia (para os filtros "Vendedor") */
+    public static function equipeGerenciada(): array
+    {
+        $ids = self::gerenciados();
+        if (!$ids) {
+            return [];
+        }
+        return Banco::todos('SELECT DISTINCT u.id, u.nome FROM usuarios u JOIN usuario_funcoes uf ON uf.usuario_id = u.id
+            WHERE u.ativo = 1 AND uf.funcao_id IN (' . implode(',', $ids) . ') ORDER BY u.nome');
+    }
+
     /** Guarda o setor escolhido no menu (?setor=). Setor que a pessoa não vê é ignorado; ?setor= vazio limpa. */
     public static function lerDaUrl(): void
     {

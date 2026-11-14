@@ -40,6 +40,7 @@ class UsuarioController extends Controller
             'perfis'        => Usuario::perfis(),
             'funcoes'       => Funcao::listar(true),
             'funcoesMarcadas' => $usuario ? array_column(Usuario::funcoesDe((int) $usuario['id']), 'id') : [],
+            'funcoesGestor' => $usuario ? array_column(array_filter(Usuario::funcoesDe((int) $usuario['id']), fn($f) => $f['gestor']), 'id') : [],
             'acessos'       => \App\Services\AcessoService::definicao(),
             'permPerfis'    => array_map(fn($p) => array_column(Banco::todos('SELECT permissao FROM perfil_permissoes WHERE perfil_id = ?', [$p['id']]), 'permissao'),
                                    array_column(Usuario::perfis(), null, 'id')),
@@ -61,7 +62,7 @@ class UsuarioController extends Controller
         $dados['versao_vista'] = \App\Services\Versoes::atual(); // quem chega agora não precisa das novidades antigas
         $id = Banco::transacao(function () use ($dados) {
             $id = Banco::inserir('usuarios', $dados);
-            Usuario::definirFuncoes($id, (array) ($_POST['funcoes'] ?? []));
+            Usuario::definirFuncoes($id, (array) ($_POST['funcoes'] ?? []), (array) ($_POST['gestor'] ?? []));
             return $id;
         });
         \App\Services\Foco::salvarEscolha($id, ($_POST['foco_modo'] ?? 'funcoes') !== 'escolher', (array) ($_POST['foco'] ?? []));
@@ -99,12 +100,13 @@ class UsuarioController extends Controller
             $this->voltarComErros("/usuarios/$id/editar", $erros);
         }
 
-        $funcoesAntes = array_column(Usuario::funcoesDe($id), 'nome');
+        $nomesFuncoes = fn() => array_map(fn($f) => $f['nome'] . ($f['gestor'] ? ' (gestão)' : ''), Usuario::funcoesDe($id));
+        $funcoesAntes = $nomesFuncoes();
         Banco::transacao(function () use ($id, $dados) {
             Banco::atualizar('usuarios', $id, $dados);
-            Usuario::definirFuncoes($id, (array) ($_POST['funcoes'] ?? []));
+            Usuario::definirFuncoes($id, (array) ($_POST['funcoes'] ?? []), (array) ($_POST['gestor'] ?? []));
         });
-        $funcoesDepois = array_column(Usuario::funcoesDe($id), 'nome');
+        $funcoesDepois = $nomesFuncoes();
         $focoAntes = $antes['areas_foco'];
         \App\Services\Foco::salvarEscolha($id, ($_POST['foco_modo'] ?? 'funcoes') !== 'escolher', (array) ($_POST['foco'] ?? []));
         $focoDepois = \App\Core\Banco::valor('SELECT areas_foco FROM usuarios WHERE id = ?', [$id]);

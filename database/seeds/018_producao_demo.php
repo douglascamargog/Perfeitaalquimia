@@ -155,6 +155,12 @@ for ($d = 90; $d >= 1; $d--) {
     }
 }
 
+// A demonstração sempre mostra ao menos um produto para reabastecer (as vendas simuladas variam com a data)
+if (!P::reabastecer() && $produtos) {
+    $pid = array_key_first($produtos);
+    P::ajustarAcabado($pid, intdiv($produtos[$pid]['minimo'], 2), 'Contagem de inventário (demonstração)', $usuario);
+}
+
 // Perda encontrada na contagem de inventário (deixa as matérias-primas "sem compra" abaixo do mínimo)
 foreach ($semCompraNoFim as $nome) {
     $mp = P::materia($mpId[$nome]);

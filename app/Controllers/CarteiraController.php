@@ -39,7 +39,7 @@ class CarteiraController extends Controller
                 'segmentos'   => Listas::segmentos(),
                 'etapas'      => Listas::etapas(),
                 'prioridades' => Listas::prioridades(),
-                'vendedores'  => Auth::pode('carteira.ver_todas') ? Listas::vendedores() : [],
+                'vendedores'  => Auth::pode('carteira.ver_todas') ? Listas::vendedores() : \App\Services\Setores::equipeGerenciada(),
                 'faixas'      => Config::get('carteira.faixas_sem_compra', [30, 60, 90]),
                 'origens'     => Listas::origens(),
             ],

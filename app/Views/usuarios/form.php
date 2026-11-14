@@ -4,6 +4,7 @@ $novo = $usuario === null;
 $valor = fn(string $campo) => antigo($campo, $usuario[$campo] ?? '');
 $perfilAtual = (int) \App\Core\Sessao::antigo('perfil_id', $usuario['perfil_id'] ?? 0);
 $marcadas = array_map('intval', (array) \App\Core\Sessao::antigo('funcoes', $funcoesMarcadas));
+$gestorDe = array_map('intval', (array) \App\Core\Sessao::antigo('gestor', $funcoesGestor ?? []));
 $ativo = $novo || $usuario['ativo'];
 ?>
 <form method="post" action="<?= url($novo ? '/usuarios' : '/usuarios/' . (int) $usuario['id']) ?>" class="card" style="max-width:820px" enctype="multipart/form-data">
@@ -39,12 +40,19 @@ $ativo = $novo || $usuario['ativo'];
 
   <h2>Funções</h2>
   <p class="suave pequeno">As filas e regras (ex.: reativação) usam a função, não a pessoa. Trocou o funcionário? Basta mudar as funções.</p>
+  <p class="suave pequeno">Nos <strong>setores de venda</strong>, marque também "gestor(a) do setor" para quem coordena a equipe e também vende:
+    a pessoa continua com a própria carteira e o próprio Meu mês e passa a ver e trabalhar a carteira, os pedidos, a agenda e a recompra de todo o setor.</p>
   <div class="grade-campos">
     <?php foreach ($funcoes as $f): ?>
-      <label class="opcao">
-        <input type="checkbox" name="funcoes[]" value="<?= (int) $f['id'] ?>" <?= in_array((int) $f['id'], $marcadas, true) ? 'checked' : '' ?>>
-        <?= e($f['nome']) ?>
-      </label>
+      <div class="us-funcao">
+        <label class="opcao">
+          <input type="checkbox" name="funcoes[]" value="<?= (int) $f['id'] ?>" <?= in_array((int) $f['id'], $marcadas, true) ? 'checked' : '' ?>>
+          <?= e($f['nome']) ?>
+        </label>
+        <?php if (!empty($f['setor_venda'])): ?>
+          <label class="opcao pequeno us-gestor"><input type="checkbox" name="gestor[]" value="<?= (int) $f['id'] ?>" <?= in_array((int) $f['id'], $gestorDe, true) ? 'checked' : '' ?>> gestor(a) do setor</label>
+        <?php endif; ?>
+      </div>
     <?php endforeach; ?>
   </div>
 

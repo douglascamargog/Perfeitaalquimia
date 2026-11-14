@@ -29,7 +29,7 @@ $amanha = date('Y-m-d', strtotime('+1 weekday'));
     <article class="card rc-item" data-recompra="<?= (int) $c['id'] ?>">
       <div class="rc-principal">
         <button class="nome-cliente" type="button" data-abrir-cliente="<?= (int) $c['id'] ?>"><?= e($c['nome_fantasia'] ?: $c['razao_social']) ?></button><?= \App\Services\NotificacaoService::marca((int) $c['id']) ?>
-        <small class="suave"><?= e($c['cidade']) ?>/<?= e($c['uf']) ?><?= Auth::pode('carteira.ver_todas') ? ' · ' . e($c['responsavel']) : '' ?></small>
+        <small class="suave"><?= e($c['cidade']) ?>/<?= e($c['uf']) ?><?= Auth::pode('carteira.ver_todas') || \App\Services\Setores::gerenciados() ? ' · ' . e($c['responsavel']) : '' ?></small>
         <?php if ($c['produtos']): ?><small>Costuma comprar: <?= e(implode(', ', $c['produtos'])) ?></small><?php endif; ?>
       </div>
       <div class="rc-numeros">

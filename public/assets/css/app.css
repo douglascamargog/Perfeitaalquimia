@@ -455,3 +455,7 @@ a.eq-pessoa { color: inherit; text-decoration: none; }
 .selo-setor a { color: inherit; text-decoration: none; margin-left: 2px; opacity: .7; }
 .selo-setor a:hover { opacity: 1; }
 @media (max-width: 600px) { .selo-setor { display: none; } }
+
+/* Usuários: função + "gestor(a) do setor" */
+.us-funcao { display: grid; gap: 0; align-content: start; }
+.us-funcao .us-gestor { margin: -4px 0 8px 26px; color: var(--texto-suave); }

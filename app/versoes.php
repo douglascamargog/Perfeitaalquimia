@@ -17,6 +17,16 @@
  */
 return [
     [
+        'versao' => '6.1', 'data' => '2026-11-14', 'titulo' => 'Gestão do setor',
+        'novo' => [
+            'Quem coordena um setor de venda e também vende (como a gestão do Televendas) continua com a própria carteira e o próprio Meu mês e agora vê a carteira, os pedidos, a agenda e a recompra de toda a equipe do setor.',
+            'A gestão do setor pode passar clientes do setor de uma pessoa para outra da equipe, direto na ficha do cliente.',
+        ],
+        'admin' => [
+            'Administração › Usuários › Funções: marque "gestor(a) do setor" ao lado da função de venda. A pessoa continua com o perfil Vendedor; vê só o(s) setor(es) que gerencia, não os outros.',
+        ],
+    ],
+    [
         'versao' => '6.0', 'data' => '2026-11-13', 'titulo' => 'Menu por setores',
         'novo' => [
             'Cada setor de venda tem o seu espaço: Televendas, Externo, Terceirização e Prospecção e Reativação, cada um com a sua carteira.',

@@ -12,8 +12,23 @@ class Tarefa
      * Tarefas abertas de um usuário (ou de todos, se $usuarioId = null), separadas em atrasadas, hoje e futuras.
      */
     /** $funcaoId: só tarefas de clientes daquele setor de venda (as tarefas sem cliente continuam) */
-    public static function agenda(?int $usuarioId, ?int $funcaoId = null): array
+    public static function agenda(int|array|null $usuarioId, ?int $funcaoId = null): array
     {
+        // Lista de pessoas (equipe do setor do(a) gestor(a)): t.usuario_id IN (...)
+        if (is_array($usuarioId)) {
+            $ids = array_map('intval', $usuarioId) ?: [0];
+            $sql = 'SELECT t.*, c.razao_social, c.cidade, c.uf, c.telefone, c.whatsapp, u.nome AS usuario_nome
+                      FROM tarefas t JOIN usuarios u ON u.id = t.usuario_id
+                      LEFT JOIN clientes c ON c.id = t.cliente_id AND c.excluido_em IS NULL
+                     WHERE t.concluida_em IS NULL AND t.usuario_id IN (' . implode(',', $ids) . ')' . ($funcaoId ? ' AND (t.cliente_id IS NULL OR c.funcao_id = ' . (int) $funcaoId . ')' : '') . '
+                     ORDER BY t.vence_em, t.id LIMIT 500';
+            $grupos = ['atrasadas' => [], 'hoje' => [], 'futuras' => []];
+            $hoje = date('Y-m-d');
+            foreach (Banco::todos($sql) as $t) {
+                $grupos[$t['vence_em'] < $hoje ? 'atrasadas' : ($t['vence_em'] === $hoje ? 'hoje' : 'futuras')][] = $t;
+            }
+            return $grupos;
+        }
         $sql = 'SELECT t.*, c.razao_social, c.cidade, c.uf, c.telefone, c.whatsapp, u.nome AS usuario_nome
                   FROM tarefas t
                   JOIN usuarios u ON u.id = t.usuario_id

@@ -169,10 +169,12 @@ class VendasService
             'c.ultima_compra_em + INTERVAL (c.intervalo_medio_dias + ?) DAY < CURDATE()',
             'c.ultima_compra_em >= CURDATE() - INTERVAL ? DAY'];
         $par = [$tolerancia, (int) Config::get('carteira.dias_inatividade', 90)];
+        $gerencia = Setores::sqlGerenciados(); // gestor(a) do setor vê a recompra da equipe do setor
         if (!Auth::pode('carteira.ver_todas')) {
-            $w[] = 'c.responsavel_id = ?';
+            $w[] = $gerencia ? "(c.responsavel_id = ? OR $gerencia)" : 'c.responsavel_id = ?';
             $par[] = Auth::id();
-        } elseif ($vendedor) {
+        }
+        if ($vendedor && (Auth::pode('carteira.ver_todas') || $gerencia)) {
             $w[] = 'c.responsavel_id = ?';
             $par[] = $vendedor;
         }

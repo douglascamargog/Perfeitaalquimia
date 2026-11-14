@@ -45,7 +45,9 @@ class Cliente
         $p = [];
 
         if (!Auth::pode('carteira.ver_todas')) {
-            $w[] = 'c.responsavel_id = ?';
+            // Própria carteira + a dos setores que a pessoa gerencia (gestor(a) do setor)
+            $setor = \App\Services\Setores::sqlGerenciados();
+            $w[] = $setor ? "(c.responsavel_id = ? OR $setor)" : 'c.responsavel_id = ?';
             $p[] = Auth::id() ?? 0;
         }
         if ($f['q'] ?? '') {
@@ -127,7 +129,8 @@ class Cliente
     /** O usuário logado pode ver/editar este cliente? */
     public static function podeVer(array $cliente): bool
     {
-        return Auth::pode('carteira.ver_todas') || (int) $cliente['responsavel_id'] === Auth::id();
+        return Auth::pode('carteira.ver_todas') || (int) $cliente['responsavel_id'] === Auth::id()
+            || in_array((int) ($cliente['funcao_id'] ?? 0), \App\Services\Setores::gerenciados(), true); // gestor(a) do setor
     }
 
     /** Números da visão geral (respeitando filtros e escopo) */

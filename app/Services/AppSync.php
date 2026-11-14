@@ -18,7 +18,8 @@ class AppSync
     /** Clientes que esta pessoa pode atender pelo app */
     private static function escopo(): array
     {
-        return Auth::pode('carteira.ver_todas') ? ['1 = 1', []] : ['c.responsavel_id = ?', [Auth::id()]];
+        $setor = \App\Services\Setores::sqlGerenciados(); // gestor(a) do setor leva a carteira do setor no app
+        return Auth::pode('carteira.ver_todas') ? ['1 = 1', []] : ['(c.responsavel_id = ?' . ($setor ? " OR $setor" : '') . ')', [Auth::id()]];
     }
 
     public static function pacote(): array

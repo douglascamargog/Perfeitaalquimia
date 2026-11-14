@@ -38,7 +38,8 @@ class Pedido
         if (Auth::pode('pedidos.ver_todos')) {
             return ['1 = 1', []];
         }
-        return ['(p.vendedor_id = ? OR c.responsavel_id = ?)', [Auth::id(), Auth::id()]];
+        $setor = \App\Services\Setores::sqlGerenciados(); // gestor(a) do setor vê os pedidos do setor
+        return ['(p.vendedor_id = ? OR c.responsavel_id = ?' . ($setor ? " OR $setor" : '') . ')', [Auth::id(), Auth::id()]];
     }
 
     private static function montarWhere(array $f): array

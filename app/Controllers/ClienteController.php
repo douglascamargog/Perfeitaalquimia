@@ -21,6 +21,18 @@ use App\Services\Normalizar;
 class ClienteController extends Controller
 {
     /** Carrega o cliente e confere se o usuário pode vê-lo (senão: 404/403 e para) */
+    /**
+     * Para quem a pessoa pode passar este cliente: quem tem "Transferir cliente" escolhe qualquer vendedor;
+     * o(a) gestor(a) do setor passa os clientes do setor para alguém da equipe do setor.
+     */
+    private static function paraTransferir(array $cliente): array
+    {
+        if (Auth::pode('carteira.transferir')) {
+            return Listas::vendedores();
+        }
+        return in_array((int) ($cliente['funcao_id'] ?? 0), \App\Services\Setores::gerenciados(), true) ? \App\Services\Setores::equipeGerenciada() : [];
+    }
+
     private function clienteOuErro(string $id): array
     {
         $cliente = Cliente::buscar((int) $id);
@@ -47,7 +59,7 @@ class ClienteController extends Controller
             'retorno'     => Tarefa::proximoRetorno((int) $cliente['id']),
             'etapas'      => Listas::etapas(),
             'prioridades' => Listas::prioridades(),
-            'vendedores'  => Auth::pode('carteira.transferir') ? Listas::vendedores() : [],
+            'vendedores'  => self::paraTransferir($cliente),
             'canais'      => array_keys(CarteiraService::CANAIS),
             'cobranca'    => \App\Models\Cobranca::doCliente((int) $cliente['id']),
             'pedidos'     => \App\Models\Pedido::doCliente((int) $cliente['id'], 5),
@@ -91,7 +103,7 @@ class ClienteController extends Controller
             // a ficha (mesma da gaveta), sem o cabeçalho
             'ficha' => Visao::renderizar('carteira/_ficha', [
                 'c' => $cliente, 'eventos' => [], 'retorno' => Tarefa::proximoRetorno($cid), 'etapas' => Listas::etapas(),
-                'prioridades' => Listas::prioridades(), 'vendedores' => Auth::pode('carteira.transferir') ? Listas::vendedores() : [],
+                'prioridades' => Listas::prioridades(), 'vendedores' => self::paraTransferir($cliente),
                 'canais' => array_keys(CarteiraService::CANAIS), 'cobranca' => \App\Models\Cobranca::doCliente($cid), 'pedidos' => [],
                 'acesso' => \App\Core\Banco::um('SELECT senha_hash IS NOT NULL AS tem_senha, ultimo_acesso_em FROM cliente_acessos WHERE cliente_id = ?', [$cid]),
                 'codigoCatalogo' => \App\Core\Sessao::get('codigo_catalogo_' . $cid), 'pagina' => true,
@@ -124,7 +136,9 @@ class ClienteController extends Controller
         $cliente = $this->clienteOuErro($id);
         $dados = array_intersect_key($_POST, array_flip(['etapa_id', 'prioridade', 'responsavel_id', 'proximo_contato', 'observacoes']));
         try {
-            CarteiraService::salvar((int) $cliente['id'], $dados, (string) ($_POST['atualizado_em'] ?? ''), Auth::id(), Auth::pode('carteira.transferir'));
+            $podeTransferir = Auth::pode('carteira.transferir')
+                || in_array((int) ($dados['responsavel_id'] ?? 0), array_map('intval', array_column(self::paraTransferir($cliente), 'id')), true);
+            CarteiraService::salvar((int) $cliente['id'], $dados, (string) ($_POST['atualizado_em'] ?? ''), Auth::id(), $podeTransferir);
             $this->json(['ok' => true, 'mensagem' => 'Salvo para toda a equipe.']);
         } catch (ConflitoException $e) {
             $this->json(['ok' => false, 'conflito' => true, 'mensagem' => $e->getMessage()], 409);
