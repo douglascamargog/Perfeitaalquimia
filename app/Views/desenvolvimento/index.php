@@ -45,7 +45,7 @@ $link = fn(array $x) => url('/desenvolvimento') . '?' . e(http_build_query(array
 
 <?php if ($podeGerenciar): ?>
 <dialog id="novo-projeto" class="ct-dialogo">
-  <form method="post" action="<?= url('/desenvolvimento') ?>" class="pd-form">
+  <form method="post" action="<?= url('/desenvolvimento') ?>" class="pd-form" data-cores-alvo>
     <?= csrf_campo() ?>
     <h2>Novo projeto de produto</h2>
     <fieldset class="dp-tipos"><legend>O que vamos fabricar?</legend>
@@ -55,6 +55,7 @@ $link = fn(array $x) => url('/desenvolvimento') . '?' . e(http_build_query(array
           <strong><?= e($nomeTipo) ?></strong><small><?= ['pote' => 'pó ou cápsulas', 'frasco' => 'líquido ou gotas', 'caixinha' => 'cartucho, chás, blister'][$slug] ?></small></label>
       <?php endforeach; ?>
     </fieldset>
+    <?= Visao::renderizar('desenvolvimento/_cores', ['tipo' => 'pote', 'cor' => 'branco', 'tampa' => '#14473a']) ?>
     <label>Nome do produto<input type="text" name="nome" maxlength="160" required placeholder="Ex.: Colágeno + Vitamina C 300 g"></label>
     <label>Briefing <small>objetivo, público, diferenciais, apresentação</small><textarea name="briefing" rows="4"></textarea></label>
     <div class="pd-duas">

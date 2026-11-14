@@ -6,6 +6,9 @@
  */
 $tipo = in_array($tipo ?? '', ['pote', 'frasco', 'caixinha'], true) ? $tipo : 'pote';
 $classe = $classe ?? '';
+$arte = $arte ?? null;
+// Onde a arte do rótulo encaixa em cada desenho (x, y, largura, altura)
+$areaArte = ['pote' => [30, 44, 60, 96], 'frasco' => [35, 84, 50, 42], 'caixinha' => [25, 35, 60, 110]][$tipo];
 $barras = '';
 foreach ([0, 3, 5, 9, 11, 14, 17, 19, 22] as $i => $x) {
     $barras .= '<rect x="' . $x . '" y="0" width="' . ($i % 3 ? 1.4 : 2.2) . '" height="12"/>';
@@ -42,5 +45,8 @@ foreach ([0, 3, 5, 9, 11, 14, 17, 19, 22] as $i => $x) {
   <path class="pc-tampa" d="M25 35l15-10h60l-15 10z"/>
   <rect class="pc-lacre" x="25" y="35" width="60" height="4"/>
   <g class="pc-selo"><circle cx="90" cy="54" r="11"/><path d="M85 54l4 4 6-8"/></g>
+<?php endif; ?>
+<?php if ($arte): ?>
+  <image class="pc-imagem" href="<?= e($arte) ?>" x="<?= $areaArte[0] ?>" y="<?= $areaArte[1] ?>" width="<?= $areaArte[2] ?>" height="<?= $areaArte[3] ?>" preserveAspectRatio="xMidYMid slice"/>
 <?php endif; ?>
 </svg>

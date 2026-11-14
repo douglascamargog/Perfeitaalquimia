@@ -48,15 +48,19 @@ $compacto = count(array_filter($gavetas, fn($g) => $g['aberta'])) > 2;
       <strong class="dp-pct" data-pct><?= (int) $jogo['progresso'] ?>% formado</strong></div>
     <span class="dp-barra grande"><i style="width: <?= (int) $jogo['progresso'] ?>%"></i></span>
     <?php if ($podeGerenciar && $p['situacao'] !== 'lancado'): ?>
-      <form method="post" action="<?= $acao('tipo') ?>" class="dp-trocar-tipo"><?= csrf_campo() ?>
-        <label>Embalagem <select name="tipo" data-enviar-ao-mudar><?php foreach (\App\Services\DesenvolvimentoService::TIPOS as $slug => $nomeTipo): ?>
-          <option value="<?= e($slug) ?>" <?= $slug === $jogo['tipo'] ? 'selected' : '' ?>><?= e($nomeTipo) ?></option><?php endforeach; ?></select></label>
-        <noscript><button class="botao contorno pequeno" type="submit">Trocar</button></noscript></form>
+      <details class="dp-personalizar"><summary>🎨 Embalagem e cores</summary>
+        <form method="post" action="<?= $acao('tipo') ?>" class="pd-form" data-enviar-ao-mudar-form><?= csrf_campo() ?>
+          <label>Tipo <select name="tipo" data-enviar-ao-mudar><?php foreach (\App\Services\DesenvolvimentoService::TIPOS as $slug => $nomeTipo): ?>
+            <option value="<?= e($slug) ?>" <?= $slug === $jogo['tipo'] ? 'selected' : '' ?>><?= e($nomeTipo) ?></option><?php endforeach; ?></select></label>
+          <?= \App\Core\Visao::renderizar('desenvolvimento/_cores', ['tipo' => $jogo['tipo'], 'cor' => $p['cor_embalagem'], 'tampa' => $p['cor_tampa']]) ?>
+          <noscript><button class="botao contorno pequeno" type="submit">Salvar</button></noscript>
+        </form>
+      </details>
     <?php endif; ?>
   </div>
   <div class="dp-palco">
-    <div class="dp-cena <?= e(implode(' ', $tem)) ?>" data-cena>
-      <?= \App\Core\Visao::renderizar('desenvolvimento/_tipos', ['tipo' => $jogo['tipo'], 'classe' => 'reserva']) ?>
+    <div class="dp-cena <?= e(implode(' ', $tem)) ?>" data-cena style="<?= e(\App\Services\DesenvolvimentoService::estiloCores($p)) ?>">
+      <?= \App\Core\Visao::renderizar('desenvolvimento/_tipos', ['tipo' => $jogo['tipo'], 'classe' => 'reserva', 'arte' => $jogo['arte']]) ?>
     </div>
     <ol class="dp-baloes <?= $compacto ? 'compacto' : '' ?>" data-baloes style="--n: <?= count($linha) ?>">
       <?php foreach ($linha as $i => $e): $sit = $e['situacao'] ?: 'pendente'; ?>
@@ -88,7 +92,7 @@ $compacto = count(array_filter($gavetas, fn($g) => $g['aberta'])) > 2;
 <div class="dp-gavetas">
 <?php foreach ($gavetas as $g): ?>
   <?= \App\Core\Visao::renderizar('desenvolvimento/_etapa', ['p' => $g['pe'], 'falta' => $g['falta'], 'aberta' => $g['aberta'], 'linhaEtapa' => $g['linha'],
-      'podeConcluir' => $g['podeConcluir'], 'aprovacoes' => $g['aprovacoes']] + compact('ficha', 'ordem', 'acao', 'aba', 'atalhos', 'tec')) ?>
+      'podeConcluir' => $g['podeConcluir'], 'aprovacoes' => $g['aprovacoes'], 'artePdf' => $jogo['arte_pdf']] + compact('ficha', 'ordem', 'acao', 'aba', 'atalhos', 'tec')) ?>
 <?php endforeach; ?>
 </div>
 

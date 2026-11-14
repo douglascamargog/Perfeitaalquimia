@@ -23,8 +23,9 @@ $ch = (string) $p['checagem'];
       <button class="botao contorno" type="submit">Salvar código</button></form>
   <?php elseif ($ch === 'arte'): ?>
     <form method="post" action="<?= $acao('arte') ?>" enctype="multipart/form-data" class="pd-form dp-inline"><?= csrf_campo() ?>
-      <label>Arte do rótulo (PDF, JPG ou PNG)<input type="file" name="arquivo" accept="application/pdf,image/jpeg,image/png" required></label>
+      <label>Arte do rótulo <small>PNG ou JPG: já aparece envolvendo a embalagem 3D (a arte inteira, planificada)</small><input type="file" name="arquivo" accept="image/png,image/jpeg,application/pdf" required></label>
       <button class="botao contorno" type="submit">Enviar arte</button></form>
+    <?php if (!empty($artePdf)): ?><p class="pequeno aviso-texto">A arte foi enviada em PDF. Para aparecer na embalagem 3D, envie também em PNG ou JPG.</p><?php endif; ?>
   <?php elseif ($ch === 'compras'): ?>
     <ul class="dp-compras"><?php foreach ($ficha as $it): $ok = in_array((int) $it['materia_prima_id'], array_map('intval', $p['compras_ok']), true); ?>
       <li><form method="post" action="<?= $acao('compra') ?>"><?= csrf_campo() ?><input type="hidden" name="mp" value="<?= (int) $it['materia_prima_id'] ?>"><input type="hidden" name="comprado" value="<?= $ok ? '0' : '1' ?>">

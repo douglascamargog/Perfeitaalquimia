@@ -24,7 +24,7 @@ class DesenvolvimentoController extends Controller
             'categorias' => Banco::todos('SELECT id, nome FROM categorias ORDER BY nome'),
             'clientesTerc' => Banco::todos("SELECT DISTINCT c.id, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS nome FROM clientes c
                 JOIN funcoes f ON f.id = c.funcao_id WHERE f.slug = 'terceirizacao' AND c.excluido_em IS NULL ORDER BY nome LIMIT 500"),
-            'podeGerenciar' => Auth::pode('desenvolvimento.gerenciar'), 'estilos' => self::ESTILOS, 'scripts' => ['carteiras.js'],
+            'podeGerenciar' => Auth::pode('desenvolvimento.gerenciar'), 'estilos' => self::ESTILOS, 'scripts' => ['carteiras.js', 'dp-cores.js'],
         ]);
     }
 
@@ -57,7 +57,7 @@ class DesenvolvimentoController extends Controller
         }
         $this->tela('desenvolvimento/ver', [
             'titulo' => $p['nome'], 'p' => $p, 'linha' => $linha, 'historico' => D::historico((int) $p['id']), 'gavetas' => $gavetas,
-            'jogo' => D::dadosDoJogo($p, $linha, $faltaPorEtapa), 'scripts' => ['dp-jogo.js'],
+            'jogo' => D::dadosDoJogo($p, $linha, $faltaPorEtapa), 'scripts' => ['dp-jogo.js', 'dp-cores.js'],
             'ficha' => Banco::todos('SELECT ft.materia_prima_id, m.nome, m.unidade, m.tipo, m.estoque FROM ficha_tecnica ft JOIN materias_primas m ON m.id = ft.materia_prima_id
                 WHERE ft.produto_id = ? ORDER BY m.tipo, m.nome', [$p['produto_id']]),
             'ordem' => $p['ordem_id'] ? Banco::um('SELECT id, quantidade, situacao FROM ordens_producao WHERE id = ?', [$p['ordem_id']]) : null,
@@ -95,7 +95,7 @@ class DesenvolvimentoController extends Controller
                 'piloto'    => (function () use ($pid, $uid) { $this->exigirFuncao('producao'); D::criarPiloto($pid, (int) $this->campo('quantidade'), $uid); return 'Ordem do lote piloto criada.'; })(),
                 'voltar'    => (function () use ($pid, $uid) { $this->exigirGerenciar(); D::voltar($pid, $uid, $this->campo('motivo')); return 'Projeto voltou uma etapa.'; })(),
                 'situacao'  => (function () use ($pid, $uid) { $this->exigirGerenciar(); D::situacao($pid, $this->campo('situacao'), $uid); return 'Situação atualizada.'; })(),
-                'tipo'      => (function () use ($pid, $uid) { $this->exigirGerenciar(); D::trocarTipo($pid, $this->campo('tipo'), $uid); return 'Tipo de embalagem trocado.'; })(),
+                'tipo'      => (function () use ($pid, $uid) { $this->exigirGerenciar(); D::trocarTipo($pid, $this->campo('tipo'), $uid, $this->campo('cor_embalagem'), $this->campo('cor_tampa')); return 'Embalagem atualizada.'; })(),
                 'comentar'  => (function () use ($pid, $uid) { D::comentar($pid, $this->campo('texto'), $uid); return 'Comentário registrado.'; })(),
                 default     => throw new RuntimeException('Ação inválida.'),
             };

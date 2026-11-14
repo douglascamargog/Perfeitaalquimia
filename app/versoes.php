@@ -17,6 +17,15 @@
  */
 return [
     [
+        'versao' => '8.3', 'data' => '2026-11-14', 'titulo' => 'Mockup com as cores e a arte de verdade',
+        'novo' => [
+            'Ao criar um projeto, você escolhe a cor da embalagem (branco ou preto; o frasco também pode ser âmbar) e a cor da tampa: verde, preta, branca, dourada, vermelha, azul... ou qualquer outra cor.',
+            'A embalagem já aparece inteira, com a tampa, desde a criação do projeto. Só falta o rótulo.',
+            'Quando o Marketing envia a arte do rótulo (PNG ou JPG, planificada), ela envolve a embalagem do jeito que foi enviada, sem distorcer.',
+            'Dá para trocar o tipo e as cores a qualquer momento no botão "Embalagem e cores" do projeto.',
+        ],
+    ],
+    [
         'versao' => '8.2', 'data' => '2026-11-14', 'titulo' => 'Desenvolvimento: etapas ao mesmo tempo e o nosso pote',
         'novo' => [
             'Formulação e ficha técnica, Informações de rotulagem, Criação do rótulo e Compras de matéria-prima e embalagens ficam abertas ao mesmo tempo, logo depois do briefing. Cada área faz a sua parte sem esperar a outra.',

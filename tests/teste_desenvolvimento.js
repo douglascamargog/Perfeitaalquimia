@@ -43,10 +43,14 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
   await g.p.click('[data-abrir="#novo-projeto"]');
   ok(await g.p.locator('#novo-projeto .dp-tipo').count() === 3, 'novo projeto: escolher entre pote, frasco e caixinha');
   await g.p.fill('#novo-projeto input[name=nome]', 'Produto Teste Alfa');
+  ok(await g.p.locator('#novo-projeto .dp-cor:has(input[value=ambar])').isHidden(), 'cor âmbar só aparece para frasco');
   await g.p.click('#novo-projeto .dp-tipo:has(input[value=frasco])');
+  ok(await g.p.locator('#novo-projeto .dp-cor:has(input[value=ambar])').isVisible(), 'frasco: pode ser âmbar');
+  await g.p.click('#novo-projeto .dp-cor:has(input[value=preto])');
+  await g.p.click('#novo-projeto .dp-amostra[data-tampa="#b3261e"]');
   await Promise.all([g.p.waitForNavigation(), g.p.click('#novo-projeto button[type=submit]')]);
   const id = sql("select id from dp_projetos where nome='Produto Teste Alfa'");
-  ok(sql(`select tipo from dp_projetos where id=${id}`) === 'frasco', 'o tipo escolhido (frasco) fica gravado');
+  ok(sql(`select concat(tipo,'|',cor_embalagem,'|',cor_tampa) from dp_projetos where id=${id}`) === 'frasco|preto|#b3261e', 'tipo, cor da embalagem e cor da tampa ficam gravados');
 
   // ---------- O palco (jogo) ----------
   const dadosJogo = async (pg) => pg.evaluate(() => JSON.parse(document.getElementById('dp-dados').textContent));
@@ -57,7 +61,8 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
   ok(await g.p.locator('dialog.dp-gaveta[open] .dp-concluir button').isVisible(), 'clicar no balão abre a gaveta com o botão Concluir');
   await g.p.click('.dp-gaveta-fechar');
   let jogo = await dadosJogo(g.p);
-  ok(jogo.tipo === 'frasco' && jogo.progresso === 0 && jogo.etapas.length === 11, 'dados do jogo: tipo, progresso 0% e as etapas');
+  ok(jogo.tipo === 'frasco' && jogo.cor === 'preto' && jogo.tampa === '#b3261e' && jogo.progresso === 0 && jogo.etapas.length === 11, 'dados do jogo: tipo, cores, progresso 0% e as etapas');
+  ok(!jogo.arte, 'sem arte ainda: a embalagem aparece inteira, sem rótulo');
   const prod = sql(`select produto_id from dp_projetos where id=${id}`);
   const slug = sql(`select slug from produtos where id=${prod}`);
   ok(sql(`select concat(ativo,visivel_catalogo) from produtos where id=${prod}`) === '00', 'o projeto cria o produto oculto (fora do catálogo)');
@@ -166,8 +171,8 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
   // ---------- Trocar o tipo e ver o 3D (navegador com WebGL) ----------
   msg = await post('televendas1@demo.local', `/desenvolvimento/${id}/tipo`, { tipo: 'caixinha' });
   ok(msg.includes('Só quem gerencia') && sql(`select tipo from dp_projetos where id=${id}`) === 'frasco', 'vendedora não troca o tipo');
-  await post('gestor@demo.local', `/desenvolvimento/${id}/tipo`, { tipo: 'pote' });
-  ok(sql(`select tipo from dp_projetos where id=${id}`) === 'pote', 'quem gerencia troca o tipo de embalagem');
+  await post('gestor@demo.local', `/desenvolvimento/${id}/tipo`, { tipo: 'pote', cor_embalagem: 'ambar', cor_tampa: '#C9A227' });
+  ok(sql(`select concat(tipo,'|',cor_embalagem,'|',cor_tampa) from dp_projetos where id=${id}`) === 'pote|branco|#c9a227', 'quem gerencia troca tipo e cores (âmbar não vale para pote)');
   const b3 = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const c3 = await b3.newContext({ viewport: { width: 1300, height: 900 } });
   await c3.addCookies((await g.p.context().cookies()));

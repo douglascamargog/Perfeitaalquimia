@@ -23,11 +23,26 @@ class DesenvolvimentoService
     /** Tipos de embalagem do "jogo": cada um tem o seu modelo 3D (public/assets/js/dp-jogo.js) */
     public const TIPOS = ['pote' => 'Pote', 'frasco' => 'Frasco', 'caixinha' => 'Caixinha'];
 
+    /** Cores da embalagem do mockup (a tampa é qualquer cor) */
+    public const CORES = ['branco' => 'Branco', 'preto' => 'Preto', 'ambar' => 'Âmbar'];
+
+    /** Tom de cada cor (para os desenhos) */
+    public const HEX = ['branco' => '#f3f5f4', 'preto' => '#1d1f1e', 'ambar' => '#8a4a12'];
+
+    /** Estilo com as cores do projeto para os desenhos SVG (cartões, escolha e reserva do 3D) */
+    public static function estiloCores(array $p): string
+    {
+        [$cor, $tampa] = self::cores((string) ($p['tipo'] ?? 'pote'), (string) ($p['cor_embalagem'] ?? ''), (string) ($p['cor_tampa'] ?? ''));
+        return '--cor-pote: ' . self::HEX[$cor] . '; --cor-tampa: ' . $tampa . ';';
+    }
+
+    /** Cores de tampa sugeridas (a pessoa pode escolher outra) */
+    public const TAMPAS = ['#14473a' => 'Verde Perfeita Alquimia', '#111111' => 'Preta', '#f4f4f2' => 'Branca', '#c9a227' => 'Dourada',
+        '#b3261e' => 'Vermelha', '#1f4e9c' => 'Azul', '#6b3fa0' => 'Roxa', '#e07a1f' => 'Laranja', '#8bc34a' => 'Verde-claro', '#e46aa0' => 'Rosa'];
+
     /** Peça que cada etapa acrescenta na embalagem (pela checagem, para continuar certo se o admin renomear as etapas) */
     public const PECAS = [
-        'ficha' => 'o conteúdo', 'composicao' => 'o rótulo de trás com a tabela nutricional', 'codigo' => 'o código de barras',
-        'arte' => 'a arte do rótulo', 'compras' => 'a embalagem de verdade', 'grafica' => 'as cores da impressão',
-        'aprovacao' => 'o selo de aprovado', 'recebimento' => 'o rótulo colado e a tampa', 'piloto' => 'o lacre de produto pronto',
+        'arte' => 'a arte do rótulo na embalagem', 'aprovacao' => 'o selo de aprovado', 'piloto' => 'o lacre de produto pronto',
         'lancamento' => 'a festa do lançamento',
     ];
 
@@ -182,12 +197,13 @@ class DesenvolvimentoService
         $categoria = (int) ($d['categoria_id'] ?? 0) ?: null;
         $embalagem = mb_substr(trim((string) ($d['embalagem'] ?? '')), 0, 120) ?: null;
         $tipo = isset(self::TIPOS[$d['tipo'] ?? '']) ? $d['tipo'] : 'pote';
-        return Banco::transacao(function () use ($nome, $d, $clienteId, $etapas, $prazo, $categoria, $embalagem, $tipo, $usuarioId) {
+        [$cor, $tampa] = self::cores($tipo, (string) ($d['cor_embalagem'] ?? ''), (string) ($d['cor_tampa'] ?? ''));
+        return Banco::transacao(function () use ($nome, $d, $clienteId, $etapas, $prazo, $categoria, $embalagem, $tipo, $cor, $tampa, $usuarioId) {
             // O produto nasce oculto (fora do catálogo e da lista de Produtos) e vai sendo preenchido pelas áreas
             $produto = Banco::inserir('produtos', ['slug' => 'dev-' . bin2hex(random_bytes(5)), 'nome' => $nome, 'embalagem' => $embalagem,
                 'categoria_id' => $categoria, 'ativo' => 0, 'visivel_catalogo' => 0, 'ordem' => 9999, 'ficha_json' => '{}']);
             $id = Banco::inserir('dp_projetos', ['nome' => $nome, 'briefing' => mb_substr(trim((string) ($d['briefing'] ?? '')), 0, 5000) ?: null,
-                'categoria_id' => $categoria, 'embalagem' => $embalagem, 'tipo' => $tipo, 'cliente_id' => $clienteId, 'produto_id' => $produto,
+                'categoria_id' => $categoria, 'embalagem' => $embalagem, 'tipo' => $tipo, 'cor_embalagem' => $cor, 'cor_tampa' => $tampa, 'cliente_id' => $clienteId, 'produto_id' => $produto,
                 'etapa_id' => (int) $etapas[0]['id'], 'prazo' => $prazo, 'criado_por' => $usuarioId]);
             foreach ($etapas as $i => $e) {
                 Banco::inserir('dp_projeto_etapas', ['projeto_id' => $id, 'etapa_id' => (int) $e['id'], 'situacao' => $i === 0 ? 'andamento' : 'pendente']);
@@ -415,15 +431,24 @@ class DesenvolvimentoService
         Auditoria::registrar('desenvolvimento', $id, $situacao);
     }
 
-    /** Troca o tipo de embalagem (quem gerencia) */
-    public static function trocarTipo(int $id, string $tipo, ?int $usuarioId): void
+    /** Cor da embalagem (só as do tipo; âmbar só no frasco) e cor da tampa (#rrggbb) — valores inválidos viram o padrão */
+    public static function cores(string $tipo, string $cor, string $tampa): array
+    {
+        $validas = $tipo === 'frasco' ? ['ambar', 'branco', 'preto'] : ['branco', 'preto'];
+        return [in_array($cor, $validas, true) ? $cor : $validas[0], preg_match('/^#[0-9a-fA-F]{6}$/', $tampa) ? strtolower($tampa) : '#14473a'];
+    }
+
+    /** Troca o tipo e as cores do mockup (quem gerencia) */
+    public static function trocarTipo(int $id, string $tipo, ?int $usuarioId, ?string $cor = null, ?string $tampa = null): void
     {
         if (!isset(self::TIPOS[$tipo])) {
             throw new RuntimeException('Tipo de embalagem inválido.');
         }
-        Banco::executar('UPDATE dp_projetos SET tipo = ? WHERE id = ?', [$tipo, $id]);
-        self::registrar($id, $usuarioId, 'sistema', 'Tipo de embalagem: ' . self::TIPOS[$tipo] . '.');
-        Auditoria::registrar('desenvolvimento', $id, 'tipo', null, ['tipo' => $tipo]);
+        $p = self::buscar($id);
+        [$cor, $tampa] = self::cores($tipo, $cor ?? (string) $p['cor_embalagem'], $tampa ?? (string) $p['cor_tampa']);
+        Banco::executar('UPDATE dp_projetos SET tipo = ?, cor_embalagem = ?, cor_tampa = ? WHERE id = ?', [$tipo, $cor, $tampa, $id]);
+        self::registrar($id, $usuarioId, 'sistema', 'Embalagem: ' . self::TIPOS[$tipo] . ' ' . mb_strtolower(self::CORES[$cor]) . ', tampa ' . (self::TAMPAS[$tampa] ?? $tampa) . '.');
+        Auditoria::registrar('desenvolvimento', $id, 'tipo', null, ['tipo' => $tipo, 'cor' => $cor, 'tampa' => $tampa]);
     }
 
     /** % do produto "formado" (etapas concluídas sobre as etapas ativas) */
@@ -457,11 +482,14 @@ class DesenvolvimentoService
     public static function dadosDoJogo(array $p, array $linha, array $faltaPorEtapa): array
     {
         $prod = (int) $p['produto_id'];
+        // A arte mais recente em imagem (PDF não dá para "enrolar" na embalagem)
         $arte = $prod ? Banco::um("SELECT id, mime FROM produto_documentos WHERE produto_id = ? AND tipo = 'rotulo' AND arquivado_em IS NULL
-            ORDER BY id DESC LIMIT 1", [$prod]) : null;
+            ORDER BY mime LIKE 'image/%' DESC, id DESC LIMIT 1", [$prod]) : null;
         return [
             'id' => (int) $p['id'], 'tipo' => isset(self::TIPOS[$p['tipo'] ?? '']) ? $p['tipo'] : 'pote', 'nome' => $p['nome'],
             'situacao' => $p['situacao'], 'progresso' => self::progresso($linha),
+            'cor' => (string) ($p['cor_embalagem'] ?? ''), 'tampa' => (string) ($p['cor_tampa'] ?? '#14473a'),
+            'arte_pdf' => $arte && !str_starts_with((string) $arte['mime'], 'image/'),
             'ean' => $prod ? (string) Banco::valor('SELECT ean FROM produto_tecnico WHERE produto_id = ?', [$prod]) : '',
             'arte' => $arte && str_starts_with((string) $arte['mime'], 'image/') ? url('/produtos/documentos/' . (int) $arte['id']) : null,
             'embalagem' => (string) ($p['embalagem'] ?? ''),
