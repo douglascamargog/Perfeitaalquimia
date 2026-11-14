@@ -630,7 +630,7 @@ class DesenvolvimentoService
                 $nome = mb_substr('Rótulo ' . $p['nome'], 0, 160);
                 $mp = Banco::valor('SELECT id FROM materias_primas WHERE nome = ?', [$nome]);
                 if (!$mp) {
-                    $mp = ProducaoService::salvarMateria(null, ['nome' => $nome, 'unidade' => 'un', 'tipo' => 'embalagem', 'estoque_minimo' => '0', 'custo_unitario' => '0', 'ativo' => 1], $usuarioId);
+                    $mp = ProducaoService::salvarMateria(null, ['nome' => $nome, 'unidade' => 'un', 'tipo' => 'embalagem', 'rotulo' => 1, 'estoque_minimo' => '0', 'custo_unitario' => '0', 'ativo' => 1], $usuarioId);
                     Banco::executar('INSERT IGNORE INTO ficha_tecnica (produto_id, materia_prima_id, quantidade) VALUES (?, ?, 1)', [$p['produto_id'], $mp]);
                 }
                 ProducaoService::entrada((int) $mp, $quantidade, 0, $p['grafica'] ?: 'Gráfica', 'Rótulos do produto novo (Desenvolvimento)', $usuarioId);

@@ -224,6 +224,8 @@ return [
 
     // ---------- Produção e matérias-primas (ver: producao.ver · mexer: producao.gerenciar) ----------
     ['GET',  '/producao',                        'ProducaoController@painel',            'producao.gerenciar|producao.ver'],
+    ['GET',  '/producao/rotulos',                'ProducaoController@rotulos',           'producao.gerenciar|producao.ver'],
+    ['POST', '/producao/rotulos/{origem}/{id}',  'ProducaoController@movimentarRotulo',  'producao.gerenciar|terceirizacao.editar'],
     ['GET',  '/producao/acabados',               'ProducaoController@acabados',          'producao.gerenciar|producao.ver'],
     ['GET',  '/producao/acabados/{id}',          'ProducaoController@acabado',           'producao.gerenciar|producao.ver'],
     ['POST', '/producao/acabados/{id}/minimo',   'ProducaoController@minimo',            'producao.gerenciar'],

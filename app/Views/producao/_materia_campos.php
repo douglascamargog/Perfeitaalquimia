@@ -19,7 +19,8 @@ $num = fn($valor) => rtrim(rtrim(number_format((float) $valor, 4, ',', ''), '0')
       <option value="materia_prima" <?= $tipo !== 'embalagem' ? 'selected' : '' ?>>Matéria-prima</option>
       <option value="embalagem" <?= $tipo === 'embalagem' ? 'selected' : '' ?>>Embalagem (pote, tampa, rótulo, lacre...)</option>
     </select>
-    <div class="ajuda">Embalagens aparecem na aba Embalagens do produto.</div></div>
+    <div class="ajuda">Embalagens aparecem na aba Embalagens do produto.</div>
+    <label class="caixa-marcar"><input type="checkbox" name="rotulo" value="1" <?= !empty($m['rotulo']) || \App\Core\Sessao::antigo('rotulo') ? 'checked' : '' ?>> É rótulo de produto (aparece em Produção › Rótulos)</label></div>
   <div class="campo"><label for="estoque_minimo">Estoque mínimo</label>
     <input type="text" id="estoque_minimo" name="estoque_minimo" inputmode="decimal" value="<?= $m ? $num($m['estoque_minimo']) : antigo('estoque_minimo', '0') ?>"></div>
   <div class="campo"><label for="custo_unitario">Custo por unidade (R$)</label>

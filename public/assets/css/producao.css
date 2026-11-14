@@ -66,3 +66,11 @@ details[open] summary { margin-bottom: 14px; }
 @media print { @page { size: A4; margin: 14mm; } .pr-impressao { margin: 0; max-width: none; padding: 0; } }
 .pr-tabela td.direita { white-space: nowrap; }
 .pr-entrada-rapida .botao { white-space: nowrap; }
+
+/* Produção › Rótulos (mesmo formulário da Terceirização) */
+.pr-titulo-tabela { margin: 0; padding: 14px 16px 6px; font-size: 1rem; }
+.te-filtro-situacao { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.te-mov { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 0; }
+.te-mov select { width: auto; padding: 6px 8px; }
+.te-mov input[type=number] { width: 90px; padding: 6px 8px; }
+.te-mov input[type=text] { width: 170px; padding: 6px 8px; }

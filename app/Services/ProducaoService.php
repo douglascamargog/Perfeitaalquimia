@@ -72,6 +72,9 @@ class ProducaoService
     {
         $w = [($f['inativas'] ?? false) ? '1 = 1' : 'm.ativo = 1'];
         $par = [self::diasConsumo()];
+        if (!empty($f['rotulos'])) {
+            $w[] = 'm.rotulo = 1';
+        }
         if (($f['q'] ?? '') !== '') {
             $w[] = '(m.nome LIKE ? OR m.codigo LIKE ? OR m.fornecedor LIKE ?)';
             array_push($par, "%{$f['q']}%", "%{$f['q']}%", "%{$f['q']}%");
@@ -118,6 +121,7 @@ class ProducaoService
             'codigo'         => mb_substr(trim((string) ($d['codigo'] ?? '')), 0, 40) ?: null,
             'unidade'        => (string) ($d['unidade'] ?? ''),
             'tipo'           => ($d['tipo'] ?? '') === 'embalagem' ? 'embalagem' : 'materia_prima', // embalagem: pote, tampa, rótulo, lacre...
+            'rotulo'         => ($d['tipo'] ?? '') === 'embalagem' && !empty($d['rotulo']) ? 1 : 0,  // aparece em Produção › Rótulos
             'estoque_minimo' => max(0, self::numero((string) ($d['estoque_minimo'] ?? '0'))),
             'fornecedor'     => mb_substr(trim((string) ($d['fornecedor'] ?? '')), 0, 160) ?: null,
             'custo_unitario' => max(0, self::numero((string) ($d['custo_unitario'] ?? '0'))),
@@ -193,6 +197,41 @@ class ProducaoService
             Auditoria::registrar('materia_prima', $mpId, 'ajuste', ['estoque' => $atual], ['estoque' => $contagem, 'motivo' => $motivo]);
             return $diferenca;
         });
+    }
+
+    // ------------------------------------------------------------------
+    // Rótulos (nossos produtos + clientes de terceirização) num lugar só
+    // ------------------------------------------------------------------
+
+    /** Rótulos dos nossos produtos (embalagens marcadas como rótulo), com o que as ordens planejadas vão gastar */
+    public static function rotulos(): array
+    {
+        $emOrdens = [];
+        foreach (Banco::todos("SELECT ft.materia_prima_id, SUM(o.quantidade * ft.quantidade) AS qtd FROM ordens_producao o
+            JOIN ficha_tecnica ft ON ft.produto_id = o.produto_id JOIN materias_primas m ON m.id = ft.materia_prima_id AND m.rotulo = 1
+            WHERE o.situacao = 'planejada' GROUP BY ft.materia_prima_id") as $x) {
+            $emOrdens[(int) $x['materia_prima_id']] = (float) $x['qtd'];
+        }
+        return array_map(function ($m) use ($emOrdens) {
+            $m['em_ordens'] = $emOrdens[(int) $m['id']] ?? 0.0;
+            $m['alerta'] = $m['abaixo'] || $m['estoque'] < $m['em_ordens'];
+            return $m;
+        }, self::materias(['rotulos' => 1]));
+    }
+
+    /** Últimos movimentos de rótulos: nossos (mp_movimentos) e dos clientes (terceirização), juntos */
+    public static function movimentosRotulos(int $limite = 40): array
+    {
+        $limite = max(1, min(200, $limite));
+        return Banco::todos("SELECT * FROM (
+                SELECT mv.criado_em, m.nome, NULL AS cliente, mv.tipo, mv.quantidade, mv.saldo, mv.ordem_id, mv.observacao, u.nome AS usuario, mv.id
+                  FROM mp_movimentos mv JOIN materias_primas m ON m.id = mv.materia_prima_id AND m.rotulo = 1 LEFT JOIN usuarios u ON u.id = mv.usuario_id
+                UNION ALL
+                SELECT tm.criado_em, tp.nome_rotulo, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social), tm.tipo, tm.quantidade, tm.saldo_apos,
+                       tm.ordem_producao_id, tm.observacao, u.nome, tm.id
+                  FROM terceirizacao_rotulos_mov tm JOIN terceirizacao_produtos tp ON tp.id = tm.terceirizacao_produto_id
+                  JOIN clientes c ON c.id = tp.cliente_id LEFT JOIN usuarios u ON u.id = tm.usuario_id
+            ) x ORDER BY x.criado_em DESC, x.id DESC LIMIT $limite");
     }
 
     public static function movimentosMp(int $mpId, int $limite = 100): array

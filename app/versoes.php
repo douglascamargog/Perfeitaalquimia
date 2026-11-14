@@ -17,6 +17,17 @@
  */
 return [
     [
+        'versao' => '8.4', 'data' => '2026-11-14', 'titulo' => 'Rótulos na Produção',
+        'novo' => [
+            'Produção › Rótulos: o estoque de rótulos num lugar só, dos nossos produtos e dos clientes de terceirização, com mínimo, alerta, o que as ordens planejadas vão gastar e a previsão de quando acaba.',
+            'A Produção registra ali a chegada dos rótulos e a contagem. Na ordem de produção eles saem sozinhos.',
+            'Os rótulos que chegam pelo Desenvolvimento de Produto já aparecem nessa aba.',
+        ],
+        'admin' => [
+            'Para um rótulo já cadastrado aparecer na aba, marque "É rótulo de produto" no cadastro da embalagem em Produção › Matérias-primas (os com nome "Rótulo..." já foram marcados sozinhos).',
+        ],
+    ],
+    [
         'versao' => '8.3', 'data' => '2026-11-14', 'titulo' => 'Mockup com as cores e a arte de verdade',
         'novo' => [
             'Ao criar um projeto, você escolhe a cor da embalagem (branco ou preto; o frasco também pode ser âmbar) e a cor da tampa: verde, preta, branca, dourada, vermelha, azul... ou qualquer outra cor.',
