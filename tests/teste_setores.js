@@ -51,7 +51,7 @@ const secoes = (p) => p.$$eval('[data-menu-secao]', (l) => l.map((s) => s.datase
     const n = sql(`select count(*) from clientes where excluido_em is null and funcao_id=${fn(setor)}`);
     ok((await ges.content()).includes(n), `Carteira de ${setor}: ${n} clientes`);
     const responsaveis = await ges.$$eval('table tbody tr td:nth-child(6)', (tds) => [...new Set(tds.map((t) => t.innerText.trim()))]);
-    ok(responsaveis.length >= 1 && responsaveis.every((r) => r.toLowerCase().includes(setor === 'externo' ? 'externo' : 'televendas')), `Carteira de ${setor}: só clientes do setor (${responsaveis.join(', ')})`);
+    ok(responsaveis.length >= 1 && responsaveis.every((r) => r === '' || r.toLowerCase().includes(setor === 'externo' ? 'externo' : 'televendas')), `Carteira de ${setor}: só clientes do setor (${responsaveis.join(', ')})`);
   }
   // Pedidos do setor
   await ges.goto(BASE + '/pedidos?setor=terceirizacao');

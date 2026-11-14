@@ -1,15 +1,15 @@
 <?php
 /** Pré-visualização. Variáveis: $importacao, $linhas, $filtro */
 $i = $importacao;
-$acoes = ['novo' => ['Novos', $i['novos'], 'lima'], 'atualizar' => ['Completar cadastro', $i['atualizados'], ''], 'duplicado' => ['Duplicados (ignorados)', $i['duplicados'], 'cinza'], 'erro' => ['Com erro (ignorados)', $i['erros'], 'vermelho']];
+$acoes = ['novo' => ['Novos', $i['novos'], 'lima'], 'atualizar' => [!empty($i['carteira_id']) ? 'Já cadastrados (mudam para a carteira)' : 'Completar cadastro', $i['atualizados'], ''], 'duplicado' => ['Duplicados (ignorados)', $i['duplicados'], 'cinza'], 'erro' => ['Com erro (ignorados)', $i['erros'], 'vermelho']];
 ?>
 <div class="cabecalho-secao">
   <div><div class="sobretitulo">IMPORTAÇÃO · <?= e(strtoupper($i['formato'])) ?></div><h1><?= e($i['arquivo']) ?></h1>
     <p><?= (int) $i['total'] ?> linhas lidas em <?= data_br($i['criado_em'], true) ?>.</p></div>
   <?php if ($i['status'] === 'previa'): ?>
     <div class="acoes">
-      <form method="post" action="<?= url('/carteira/importar/' . (int) $i['id'] . '/cancelar') ?>"><?= csrf_campo() ?><button class="botao contorno" type="submit">Cancelar</button></form>
-      <form method="post" action="<?= url('/carteira/importar/' . (int) $i['id'] . '/confirmar') ?>" data-confirmar="Gravar <?= (int) $i['novos'] ?> novos e completar <?= (int) $i['atualizados'] ?> cadastros?"><?= csrf_campo() ?>
+      <form method="post" action="<?= url(($base ?? '/carteira/importar') . '/' . (int) $i['id'] . '/cancelar') ?>"><?= csrf_campo() ?><button class="botao contorno" type="submit">Cancelar</button></form>
+      <form method="post" action="<?= url(($base ?? '/carteira/importar') . '/' . (int) $i['id'] . '/confirmar') ?>" data-confirmar="Gravar <?= (int) $i['novos'] ?> novos e completar <?= (int) $i['atualizados'] ?> cadastros?"><?= csrf_campo() ?>
         <button class="botao lima" type="submit">Confirmar importação</button></form>
     </div>
   <?php else: ?>
@@ -19,7 +19,7 @@ $acoes = ['novo' => ['Novos', $i['novos'], 'lima'], 'atualizar' => ['Completar c
 
 <div class="agenda-resumo quatro">
   <?php foreach ($acoes as $chave => [$nome, $qtd, $cor]): ?>
-    <a class="card <?= $filtro === $chave ? 'ativo' : '' ?>" href="<?= url('/carteira/importar/' . (int) $i['id']) ?>?acao=<?= $chave ?>"><span><?= $nome ?></span><strong class="<?= $cor ?>"><?= (int) $qtd ?></strong></a>
+    <a class="card <?= $filtro === $chave ? 'ativo' : '' ?>" href="<?= url(($base ?? '/carteira/importar') . '/' . (int) $i['id']) ?>?acao=<?= $chave ?>"><span><?= $nome ?></span><strong class="<?= $cor ?>"><?= (int) $qtd ?></strong></a>
   <?php endforeach; ?>
 </div>
 

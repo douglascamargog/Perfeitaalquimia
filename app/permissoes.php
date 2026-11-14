@@ -48,6 +48,8 @@ return [
     'prospeccao.ver'          => ['Ver a Prospecção sem enviar empresas para o funil', []],
     'metas.ver'               => ['Ver as metas sem alterar', []],
     'produtos.ver'            => ['Ver os produtos sem alterar', []],
+    'carteiras.gerenciar'     => ['Gestão › Carteiras: criar carteiras, passar para outra pessoa, mover e importar clientes', ['gestor']],
+    'acompanhamento.ver'      => ['Gestão › Acompanhamento: ligações, gravações, contatos e reativações de cada vendedor(a)', ['gestor']],
     'produtos.tecnico'        => ['Preencher a parte técnica dos produtos (composição, ficha técnica, embalagens e documentos)', []],
     'mensagens.ver'           => ['Ver as mensagens prontas sem alterar', []],
     'usuarios.gerenciar'      => ['Cadastrar usuários e funções', []],

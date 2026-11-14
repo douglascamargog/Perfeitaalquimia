@@ -40,8 +40,16 @@ class Integracoes
 
     public static function telefonia(): TelefoniaInterface
     {
-        // Quando existir a API do Ligue Talk: 'api' => new LigueTalkClient(...)
-        return self::$telefonia ??= new LigueTalkManual();
+        // Configurações › Ligue Talk › Modo: manual | simulado (demonstração) | api (chaves no config.php)
+        return self::$telefonia ??= match (\App\Core\Config::get('telefonia.modo', 'simulado')) {
+            'api'    => (string) config('integracoes.ligue_talk.token', '') !== ''
+                ? new \App\Integrations\LigueTalk\LigueTalkClient(
+                    (string) config('integracoes.ligue_talk.url', 'https://sistema.liguetalk.com.br/index.php/API_control'),
+                    (string) config('integracoes.ligue_talk.company_id', ''), (string) config('integracoes.ligue_talk.token', ''))
+                : new LigueTalkManual(), // sem chave: volta para o registro manual
+            'manual' => new LigueTalkManual(),
+            default  => new \App\Integrations\LigueTalk\LigueTalkFake(),
+        };
     }
 
     /**

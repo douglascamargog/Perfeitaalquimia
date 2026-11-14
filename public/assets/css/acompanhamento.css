@@ -1,0 +1,24 @@
+/* Gestão › Acompanhamento */
+.ac-periodo { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.ac-periodo label { display: flex; align-items: center; gap: 6px; font-size: .85rem; }
+.ac-periodo .chip { cursor: pointer; font: inherit; font-size: .78rem; }
+.ac-setores { margin: 0 0 12px; }
+.ac-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.ac-cards .card { margin: 0; display: grid; gap: 2px; }
+.ac-cards span { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); }
+.ac-cards strong { font-size: 1.5rem; color: var(--primaria-escura); }
+.ac-cards small { color: var(--texto-suave); }
+.ac-grafico { height: 240px; }
+.ac-titulo { padding: 16px 18px 0; }
+.ac-tabela td, .ac-tabela th { white-space: nowrap; }
+.ac-duas { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+.ac-duas .card { margin: 0; }
+.ac-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: .85rem; }
+.ac-lista time { color: var(--texto-suave); font-size: .78rem; }
+audio[data-gravacao] { height: 32px; max-width: 260px; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--borda); background: #fff; border-radius: 999px; padding: 6px 12px;
+  font-size: .78rem; color: var(--primaria-escura); text-decoration: none; }
+a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lima); border-color: var(--primaria-escura); }
+@media print { .ac-periodo, .ac-setores, audio { display: none !important; } }
+@media (max-width: 600px) { .ac-duas { grid-template-columns: minmax(0, 1fr); } }

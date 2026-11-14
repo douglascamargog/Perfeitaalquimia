@@ -1,0 +1,34 @@
+/* Gestão › Carteiras */
+.ct-alerta { margin-bottom: 14px; }
+.ct-filtro { margin: 0 0 8px; }
+.ct-setor { font-size: 1.05rem; color: var(--primaria-escura); margin: 18px 0 10px; }
+.ct-setor small { font-weight: 500; color: var(--texto-suave); font-size: .8rem; margin-left: 6px; }
+.ct-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.ct-cartao { display: grid; gap: 12px; margin: 0; align-content: start; }
+.ct-cartao.sem { border: 2px solid var(--perigo); }
+.ct-cartao header { display: grid; gap: 6px; }
+.ct-cartao header a { color: var(--primaria-escura); text-decoration: none; }
+.ct-vendedor { display: inline-flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--texto-suave); }
+.ct-vendedor .icone { width: 16px; height: 16px; }
+.ct-numeros { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.ct-numeros div { background: var(--fundo); border-radius: 10px; padding: 6px 10px; }
+.ct-numeros dt { font-size: .66rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); }
+.ct-numeros dd { margin: 0; font-weight: 700; }
+.ct-passar { display: flex; gap: 6px; }
+.ct-passar select { flex: 1; min-width: 0; }
+.ct-cartao > .botao { justify-self: start; }
+.ct-ferramentas { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin-bottom: 14px; }
+.ct-ferramentas .card { margin: 0; align-content: start; }
+.ct-ferramentas h3 { margin: 0; font-size: .95rem; }
+.ct-mover { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--borda); }
+.ct-mover .opcao { margin: 0; }
+.ct-dialogo { border: 0; border-radius: var(--raio); padding: 20px; width: min(460px, calc(100vw - 32px)); }
+.ct-dialogo::backdrop { background: rgba(0, 0, 0, .35); }
+.paginacao { display: flex; gap: 10px; align-items: center; justify-content: center; margin: 14px 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--borda); background: #fff; border-radius: 999px; padding: 6px 12px;
+  font-size: .78rem; color: var(--primaria-escura); text-decoration: none; }
+a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lima); border-color: var(--primaria-escura); }
+.chip b { font-size: .7rem; color: #7d8a7f; }
+.chips.claros .chip { background: color-mix(in srgb, var(--secundaria-clara) 9%, transparent); color: #e7f1ec; border-color: #4b6345; }
+.ct-mover select { flex: 1; min-width: 200px; }

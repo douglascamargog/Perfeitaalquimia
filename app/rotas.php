@@ -55,6 +55,7 @@ return [
     ['POST', '/carteira/clientes/{id}',         'ClienteController@atualizar',   'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/ficha',   'ClienteController@salvar',      'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/contato', 'ClienteController@contato',     'carteira.ver_propria|carteira.ver_todas'],
+    ['POST', '/carteira/clientes/{id}/ligar',   'ClienteController@ligar',       'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/ligacao', 'ClienteController@ligacao',     'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/etapa',   'ClienteController@etapa',       'carteira.ver_propria|carteira.ver_todas'],
 
@@ -139,6 +140,28 @@ return [
     ['POST', '/produtos/{slug}/embalagens',          'ProdutoController@salvarTecnico',   'produtos.tecnico'],
     ['POST', '/produtos/{slug}/documentos',          'ProdutoController@enviarDocumento', 'produtos.tecnico'],
     ['POST', '/carteira/clientes/{id}/acesso-catalogo', 'ClienteController@acessoCatalogo', 'catalogo.acessos'],
+
+    // ---------- Gestão › Carteiras (Admin, Gestor e gestora do setor) ----------
+    ['GET',  '/carteiras',                          'CarteirasController@index',     'carteiras.gerenciar|setor.gestao'],
+    ['POST', '/carteiras',                          'CarteirasController@criar',     'carteiras.gerenciar|setor.gestao'],
+    ['GET',  '/carteiras/importacao/{id}',          'CarteirasController@previa',    'carteiras.gerenciar|setor.gestao'],
+    ['POST', '/carteiras/importacao/{id}/confirmar', 'CarteirasController@confirmar', 'carteiras.gerenciar|setor.gestao'],
+    ['POST', '/carteiras/importacao/{id}/cancelar', 'CarteirasController@cancelar',  'carteiras.gerenciar|setor.gestao'],
+    ['GET',  '/carteiras/{id}',                     'CarteirasController@ver',       'carteiras.gerenciar|setor.gestao'],
+    ['GET',  '/carteiras/{id}/exportar.csv',        'CarteirasController@exportar',  'carteiras.gerenciar|setor.gestao'],
+    ['POST', '/carteiras/{id}',                     'CarteirasController@editar',    'carteiras.gerenciar|setor.gestao'],
+    ['POST', '/carteiras/{id}/passar',              'CarteirasController@passar',    'carteiras.gerenciar|setor.gestao'],
+    ['POST', '/carteiras/{id}/juntar',              'CarteirasController@juntar',    'carteiras.gerenciar|setor.gestao'],
+    ['POST', '/carteiras/{id}/mover',               'CarteirasController@mover',     'carteiras.gerenciar|setor.gestao'],
+    ['POST', '/carteiras/{id}/importar',            'CarteirasController@importar',  'carteiras.gerenciar|setor.gestao'],
+
+    // ---------- Gestão › Acompanhamento (ligações, gravações, contatos e reativações por vendedora) ----------
+    ['GET',  '/acompanhamento',                     'AcompanhamentoController@index',    'acompanhamento.ver|setor.gestao'],
+    ['GET',  '/acompanhamento/pessoa/{id}',         'AcompanhamentoController@pessoa',   'acompanhamento.ver|setor.gestao'],
+    ['GET',  '/ligacoes/{id}/gravacao',             'AcompanhamentoController@gravacao', 'logado'],
+    ['POST', '/telefonia/discador',                 'AcompanhamentoController@discador', 'carteiras.gerenciar|setor.gestao'],
+    ['POST', '/telefonia/testar',                   'AcompanhamentoController@testar',   'integracao.gerenciar'],
+    ['POST', '/telefonia/sincronizar',              'AcompanhamentoController@sincronizar', 'integracao.gerenciar'],
 
     // ---------- Painel de vendas, metas e recompra ----------
     ['GET',  '/painel',                 'PainelController@index',    'painel.ver'],

@@ -19,7 +19,7 @@ class LigueTalkManual implements TelefoniaInterface
         ]);
     }
 
-    public function listarChamadas(string $desde): array
+    public function listarChamadas(string $desde, ?string $ate = null): array
     {
         return [];
     }
@@ -27,5 +27,21 @@ class LigueTalkManual implements TelefoniaInterface
     public function automatico(): bool
     {
         return false;
+    }
+
+    /** Sem API: quem liga é o telefone da pessoa (link tel:) e o resultado é registrado com 1 clique */
+    public function ligar(string $ramal, string $numero): array
+    {
+        return ['id_externo' => null, 'situacao' => 'manual', 'duracao' => 0, 'gravacao' => null, 'mensagem' => 'Ligue pelo telefone e registre o resultado abaixo.'];
+    }
+
+    public function gravacao(string $referencia): ?string
+    {
+        return null;
+    }
+
+    public function enviarLista(string $nome, array $leads): array
+    {
+        return ['ok' => false, 'mensagem' => 'O Ligue Talk está no modo manual (Configurações › Ligue Talk).'];
     }
 }

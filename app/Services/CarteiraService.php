@@ -98,6 +98,7 @@ class CarteiraService
         $dados['funcao_id'] ??= self::funcaoPrincipal((int) $dados['responsavel_id']);
 
         $id = Banco::inserir('clientes', $dados);
+        CarteirasService::encaixar([$id]); // entra na carteira do responsável naquele setor
         ClienteEvento::registrar($id, 'importacao', $descricaoEvento, $usuarioId, null, null, $dados['criado_em'] ?? null);
         return $id;
     }
@@ -136,6 +137,9 @@ class CarteiraService
             }
             if ($dados) {
                 Banco::atualizar('clientes', $id, $dados);
+                if (isset($dados['responsavel_id'])) {
+                    CarteirasService::encaixar([$id]); // transferido: vai para a carteira do novo responsável
+                }
             }
             // Próximo contato (cria/atualiza a tarefa de retorno do responsável)
             if (array_key_exists('proximo_contato', $novos)) {
@@ -218,7 +222,8 @@ class CarteiraService
         $clientes = Banco::todos(
             'SELECT id, responsavel_id, ultima_compra_em, DATEDIFF(CURDATE(), ultima_compra_em) AS dias
                FROM clientes WHERE excluido_em IS NULL AND ultima_compra_em IS NOT NULL
-                AND ultima_compra_em < CURDATE() - INTERVAL ? DAY AND (funcao_id IS NULL OR funcao_id <> ?)',
+                AND ultima_compra_em < CURDATE() - INTERVAL ? DAY AND (funcao_id IS NULL OR funcao_id <> ?)
+                AND responsavel_id IS NOT NULL', // carteira sem vendedor(a): os clientes ficam parados até alguém assumir
             [$dias, $funcaoId]
         );
         foreach ($clientes as $c) {
@@ -234,6 +239,7 @@ class CarteiraService
                 ['texto' => "Sem compra há mais de $dias dias."], $usuarioId);
         }
         if ($clientes) {
+            CarteirasService::encaixar(array_column($clientes, 'id'));
             Auditoria::registrar('carteira', null, 'processar_inatividade', null, ['clientes_movidos' => count($clientes), 'dias' => $dias]);
         }
         return count($clientes);
@@ -245,6 +251,7 @@ class CarteiraService
         $antes = Banco::um('SELECT responsavel_id FROM clientes WHERE id = ?', [$id]);
         Banco::atualizar('clientes', $id, ['responsavel_id' => $vendedorId, 'funcao_id' => self::funcaoPrincipal($vendedorId)]);
         self::eventoResponsavel($id, (int) $antes['responsavel_id'], $vendedorId, $usuarioId, 'Reativado: devolvido para vendedor');
+        CarteirasService::encaixar([$id]);
         Auditoria::registrar('cliente', $id, 'devolver_vendedor', ['responsavel_id' => $antes['responsavel_id']], ['responsavel_id' => $vendedorId]);
     }
 

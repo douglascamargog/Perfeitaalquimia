@@ -46,7 +46,8 @@ class ImportacaoService
     private const PREENCHIVEIS = ['nome_fantasia', 'endereco', 'bairro', 'cep', 'telefone', 'whatsapp', 'email', 'instagram', 'facebook', 'site'];
 
     /** Etapa 1: lê, normaliza e classifica. Devolve o id da importação. */
-    public static function prever(string $arquivo, string $nomeOriginal, int $usuarioId): int
+    /** $carteiraId: importação direto para uma carteira (Gestão › Carteiras): CNPJs existentes MUDAM para ela e os novos entram nela */
+    public static function prever(string $arquivo, string $nomeOriginal, int $usuarioId, ?int $carteiraId = null): int
     {
         $extensao = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
         if ($extensao === 'json') {
@@ -54,15 +55,15 @@ class ImportacaoService
             $originais = is_file(RAIZ . '/referencias/dashboard.html') ? CarteiraV4::lojasDoHtml(RAIZ . '/referencias/dashboard.html') : [];
             $linhas = array_map([CarteiraV4::class, 'paraCliente'], CarteiraV4::lojasDoBackup((string) file_get_contents($arquivo), $originais));
         } else {
-            $formato = $extensao === 'xlsx' ? 'xlsx' : 'csv';
+            $formato = in_array($extensao, ['xlsx', 'xml'], true) ? $extensao : 'csv';
             $linhas = array_map([self::class, 'mapearLinha'], LeitorPlanilha::ler($arquivo, $formato));
         }
         if (!$linhas) {
             throw new \RuntimeException('Não encontrei linhas com dados no arquivo. A primeira linha precisa ter os nomes das colunas.');
         }
 
-        return Banco::transacao(function () use ($linhas, $nomeOriginal, $formato, $usuarioId) {
-            $id = Banco::inserir('importacoes', ['usuario_id' => $usuarioId, 'arquivo' => mb_substr($nomeOriginal, 0, 200), 'formato' => $formato, 'total' => count($linhas)]);
+        return Banco::transacao(function () use ($linhas, $nomeOriginal, $formato, $usuarioId, $carteiraId) {
+            $id = Banco::inserir('importacoes', ['usuario_id' => $usuarioId, 'arquivo' => mb_substr($nomeOriginal, 0, 200), 'formato' => $formato, 'total' => count($linhas), 'carteira_id' => $carteiraId]);
 
             // Índices do que já existe, para achar duplicados rapidamente
             $porCnpj = $porNome = [];
@@ -79,6 +80,11 @@ class ImportacaoService
 
             foreach ($linhas as $i => $d) {
                 [$acao, $clienteId, $mensagem] = self::classificar($d, $porCnpj, $porNome, $vistosNoArquivo, $i + 2, $formato);
+                // Para uma carteira: o cliente que já existe (mesmo CNPJ ou mesmo nome na cidade) é MOVIDO para ela
+                if ($carteiraId && $clienteId && in_array($acao, ['atualizar', 'duplicado'], true)) {
+                    $acao = 'atualizar';
+                    $mensagem = 'Já cadastrado: muda para esta carteira (e completa os campos vazios).';
+                }
                 $contagem[$acao]++;
                 Banco::inserir('importacao_linhas', [
                     'importacao_id' => $id, 'linha' => $i + 2, 'acao' => $acao, 'cliente_id' => $clienteId, 'mensagem' => $mensagem,
@@ -176,11 +182,23 @@ class ImportacaoService
         }
         return Banco::transacao(function () use ($importacao, $usuarioId) {
             $novos = $atualizados = 0;
+            $paraMover = [];
+            $carteira = $importacao['carteira_id'] ? CarteirasService::buscar((int) $importacao['carteira_id']) : null;
             $origemImportacao = Listas::idPorNome(Listas::origens(), 'Carteira importada');
             $linhas = Banco::todos("SELECT * FROM importacao_linhas WHERE importacao_id = ? AND acao IN ('novo','atualizar') ORDER BY linha", [$importacao['id']]);
             foreach ($linhas as $linha) {
                 $d = json_decode($linha['dados_json'], true);
-                if ($linha['acao'] === 'novo') {
+                if ($linha['acao'] === 'novo' && $carteira) {
+                    // Direto para a carteira: responsável e setor da carteira
+                    $d['responsavel_id'] = $carteira['responsavel_id'];
+                    $d['funcao_id'] = $carteira['funcao_id'];
+                    $d['origem_id'] = $origemImportacao;
+                    $d['origem_detalhe'] = mb_substr('Arquivo ' . $importacao['arquivo'], 0, 160);
+                    $id = $d['responsavel_id'] ? CarteiraService::criar($d, $usuarioId, 'Importado para a carteira ' . $carteira['nome'])
+                        : self::criarSemVendedor($d, $usuarioId, 'Importado para a carteira ' . $carteira['nome']);
+                    $paraMover[] = $id;
+                    $novos++;
+                } elseif ($linha['acao'] === 'novo') {
                     $d['responsavel_id'] = self::vendedorDaPlanilha($d['vendedor'] ?? null);
                     $d['origem_id'] = $origemImportacao;
                     $d['origem_detalhe'] = mb_substr(($d['origem_detalhe'] ?? null) ?: 'Arquivo ' . $importacao['arquivo'], 0, 160);
@@ -200,10 +218,17 @@ class ImportacaoService
                         ClienteEvento::registrar((int) $atual['id'], 'importacao', 'Dados completados pelo arquivo ' . $importacao['arquivo'] . ': ' . implode(', ', array_keys($preencher)), $usuarioId);
                     }
                     $aplicouTrabalho = $importacao['formato'] === 'backup' && self::aplicarTrabalhoDaEquipe($atual, $d, $usuarioId);
-                    if ($preencher || $aplicouTrabalho) {
+                    if ($carteira && (int) $atual['carteira_id'] !== (int) $carteira['id']) {
+                        $paraMover[] = (int) $atual['id'];
+                    }
+                    if ($preencher || $aplicouTrabalho || ($carteira && (int) $atual['carteira_id'] !== (int) $carteira['id'])) {
                         $atualizados++;
                     }
                 }
+            }
+            if ($carteira && $paraMover) {
+                // Ajusta responsável, setor e carteira (com evento na linha do tempo de quem mudou de carteira)
+                CarteirasService::colocarNaCarteira($paraMover, (int) $carteira['id'], $usuarioId, 'Importado para a carteira ' . $carteira['nome']);
             }
             Banco::atualizar('importacoes', (int) $importacao['id'], ['status' => 'concluida', 'concluida_em' => date('Y-m-d H:i:s')]);
             Auditoria::registrar('importacao', (int) $importacao['id'], 'confirmar', null, ['arquivo' => $importacao['arquivo'], 'novos' => $novos, 'atualizados' => $atualizados]);
@@ -266,5 +291,13 @@ class ImportacaoService
         }
         $id = Banco::valor('SELECT id FROM usuarios WHERE ativo = 1 AND (email = ? OR codigo_vendedor = ?)', [mb_strtolower($valor), strtoupper($valor)]);
         return $id ? (int) $id : null;
+    }
+
+    /** Cliente novo numa carteira SEM vendedor(a): fica sem responsável (parado na carteira até alguém assumir) */
+    private static function criarSemVendedor(array $d, int $usuarioId, string $evento): int
+    {
+        $id = CarteiraService::criar($d + ['responsavel_id' => $usuarioId], $usuarioId, $evento);
+        Banco::executar('UPDATE clientes SET responsavel_id = NULL, funcao_id = ? WHERE id = ?', [$d['funcao_id'], $id]);
+        return $id;
     }
 }

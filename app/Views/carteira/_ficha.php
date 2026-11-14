@@ -56,7 +56,10 @@ $linkSeguro = function (?string $url): string {
 <div class="ficha-corpo">
   <!-- Ações rápidas -->
   <div class="ficha-acoes">
-    <?php if ($tel): ?><a class="botao contorno pequeno" href="tel:+55<?= e($c['telefone']) ?>"><svg class="icone"><use href="<?= $icones ?>#telefone"/></svg>Ligar</a><?php endif; ?>
+    <?php if ($tel || $whats): ?>
+      <form method="post" action="<?= url("/carteira/clientes/$id/ligar") ?>" data-ajax data-ligar><?= csrf_campo() ?>
+        <button class="botao contorno pequeno" type="submit" title="Ligar pelo Ligue Talk"><svg class="icone"><use href="<?= $icones ?>#telefone"/></svg>Ligar</button></form>
+    <?php endif; ?>
     <?php if ($whats): ?><a class="botao contorno pequeno" href="https://wa.me/55<?= e($whats) ?>" target="_blank" rel="noopener noreferrer"><svg class="icone"><use href="<?= $icones ?>#conversa"/></svg>WhatsApp</a><?php endif; ?>
     <?php if ($enderecoMapa): ?><a class="botao contorno pequeno" href="https://www.google.com/maps/search/?api=1&query=<?= rawurlencode($enderecoMapa) ?>" target="_blank" rel="noopener noreferrer"><svg class="icone"><use href="<?= $icones ?>#externo"/></svg>Rota</a><?php endif; ?>
     <a class="botao contorno pequeno" href="<?= url("/carteira/clientes/$id/editar") ?>"><svg class="icone"><use href="<?= $icones ?>#editar"/></svg>Editar cadastro</a>

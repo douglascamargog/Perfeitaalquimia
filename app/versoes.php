@@ -17,6 +17,23 @@
  */
 return [
     [
+        'versao' => '7.0', 'data' => '2026-11-14', 'titulo' => 'Carteiras e Acompanhamento com o Ligue Talk',
+        'novo' => [
+            'Gestão › Carteiras: a carteira de cada vendedora e as que estão sem ninguém. Quando alguém sai, a carteira inteira passa para outra pessoa com um clique; também dá para mover clientes entre carteiras, juntar carteiras e criar carteiras novas.',
+            'Importar clientes direto para uma carteira (CSV, Excel ou XML, inclusive XML de nota fiscal): quem já existe muda para a carteira e quem é novo entra nela.',
+            'Gestão › Acompanhamento: ligações, gravações, tempo falado, contatos, reativações e pedidos de cada vendedora num lugar só, por dia, semana ou mês.',
+            'Botão "Ligar" na ficha do cliente, ligado ao Ligue Talk, e "Enviar para o discador" para mandar uma carteira inteira para o discador.',
+        ],
+        'melhoria' => [
+            'Clientes de uma carteira sem vendedora ficam parados esperando alguém assumir (não vão sozinhos para a reativação).',
+        ],
+        'admin' => [
+            'Ligue Talk: em Configurações › Ligue Talk escolha o modo (simulado na demonstração; "api" para o real). Para o real, coloque company_id e token (X-LTK-VND) em config.php › integracoes.ligue_talk e agende cron/sincronizar_ligacoes.php a cada 20 minutos (limite da API: 10 requisições/min). Em Usuários, preencha "Usuário no Ligue Talk" de cada pessoa.',
+            'A API v1 do Ligue Talk não disca para um número: o "Ligar" abre o telefone/softphone, e as chamadas e gravações chegam pela sincronização. Configurações › "Campos recebidos" mostra os nomes dos campos que a API devolveu (para conferir a integração).',
+            'Desativar um usuário deixa as carteiras dele sem vendedor(a). Gravações de demonstração ficam em storage/gravacoes.',
+        ],
+    ],
+    [
         'versao' => '6.1', 'data' => '2026-11-14', 'titulo' => 'Gestão do setor',
         'novo' => [
             'Quem coordena um setor de venda e também vende (como a gestão do Televendas) continua com a própria carteira e o próprio Meu mês e agora vê a carteira, os pedidos, a agenda e a recompra de toda a equipe do setor.',

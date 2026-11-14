@@ -173,6 +173,17 @@ class ClienteController extends Controller
         $this->json(['ok' => true, 'mensagem' => 'Ligação registrada.']);
     }
 
+    /** "Ligar" pelo Ligue Talk (demonstração: simula a ligação; real: abre o telefone/softphone) */
+    public function ligar(string $id): void
+    {
+        $cliente = $this->clienteOuErro($id);
+        try {
+            $this->json(\App\Services\TelefoniaService::ligar($cliente, $this->campo('qual', 'telefone')));
+        } catch (\RuntimeException $e) {
+            $this->json(['ok' => false, 'mensagem' => $e->getMessage()], 422);
+        }
+    }
+
     /** Muda a etapa (arrastar no funil) */
     public function etapa(string $id): void
     {

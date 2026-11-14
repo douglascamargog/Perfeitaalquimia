@@ -44,8 +44,13 @@ return [
             'app_secret' => '',
             'url'        => 'https://app.omie.com.br/api/v1/',
         ],
-        // 'manual' = plano B (registrar ligação com 1 clique); 'api' quando o Ligue Talk liberar
-        'telefonia' => 'manual',
+        // Ligue Talk: o modo (manual | simulado | api) fica em Configurações › Ligue Talk.
+        // Para o modo "api": dados da API v1 do Ligue Talk (company_id e token X-LTK-VND, pedidos ao Ligue Talk). Nunca no git.
+        'ligue_talk' => [
+            'url'        => 'https://sistema.liguetalk.com.br/index.php/API_control',
+            'company_id' => '',
+            'token'      => '',
+        ],
         // Busca de contatos com IA (Claude, da Anthropic). Chave criada em console.anthropic.com › API Keys.
         // Com a chave vazia, a busca funciona só no modo demonstração (Configurações › busca_ia.provedor = fake).
         'anthropic' => [

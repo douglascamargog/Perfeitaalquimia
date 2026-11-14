@@ -33,6 +33,11 @@ $ativo = $novo || $usuario['ativo'];
       <input type="text" id="codigo_vendedor" name="codigo_vendedor" value="<?= $valor('codigo_vendedor') ?>" maxlength="20">
       <div class="ajuda">Usado no link do catálogo: /catalogo/v/CÓDIGO. Deixe vazio se a pessoa não vende.</div>
     </div>
+    <div class="campo">
+      <label for="ramal">Usuário no Ligue Talk</label>
+      <input type="text" id="ramal" name="ramal" value="<?= $valor('ramal') ?>" maxlength="20">
+      <div class="ajuda">ID ou ramal da pessoa no Ligue Talk: liga as ligações e gravações a ela no Acompanhamento.</div>
+    </div>
   </div>
 
   <h2>Ficha do funcionário</h2>

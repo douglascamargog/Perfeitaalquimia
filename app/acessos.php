@@ -26,6 +26,8 @@ return [
         'Gestão' => [
             ['Painel de vendas', null, 'painel.ver', ''],
             ['Metas', 'metas.ver', 'metas.gerenciar', ''],
+            ['Acompanhamento (ligações e gravações)', null, 'acompanhamento.ver', 'A gestora do setor vê a equipe dela.'],
+            ['Carteiras (configuração)', null, 'carteiras.gerenciar', 'Passar carteiras, mover e importar clientes. A gestora do setor usa nas carteiras do setor dela.'],
         ],
         'Marketing' => [
             ['Mural de posts e Planejamento', 'marketing.ver', 'marketing.editar', ''],

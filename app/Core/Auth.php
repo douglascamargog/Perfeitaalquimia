@@ -109,6 +109,10 @@ class Auth
     public static function pode(string $permissao): bool
     {
         $permissoes = self::usuario()['permissoes'] ?? [];
+        if ($permissao === 'setor.gestao') {
+            // Não é uma permissão da grade: vale para quem é "gestor(a) do setor" (Administração › Usuários › Funções)
+            return \App\Services\Setores::gerenciados() !== [];
+        }
         return in_array('*', $permissoes, true) || in_array($permissao, $permissoes, true);
     }
 

@@ -89,6 +89,7 @@ document.addEventListener('submit', async (evento) => {
       return;
     } else {
       avisar(dados.mensagem || 'Salvo.');
+      if (dados.tel) window.location.href = 'tel:' + dados.tel; // Ligue Talk sem discagem pela API: abre o telefone/softphone
       alterouAlgo = true;
       if (dados.abrir) clienteAberto = dados.abrir; // item recém-criado: a gaveta passa a mostrar ele
     }

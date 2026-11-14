@@ -123,6 +123,10 @@ class UsuarioController extends Controller
             array_intersect_key($antes, $dados) + ['funcoes' => implode(', ', $funcoesAntes)],
             $dados + ['funcoes' => implode(', ', $funcoesDepois)]);
         Sessao::aviso('sucesso', 'Usuário atualizado.');
+        // Pessoa desativada (saiu da empresa): as carteiras dela ficam SEM vendedor(a) em Gestão › Carteiras
+        if ($antes['ativo'] && !$dados['ativo'] && ($n = \App\Services\CarteirasService::liberarDoUsuario($id, Auth::id()))) {
+            Sessao::aviso('aviso', "$n cliente(s) ficaram em carteira sem vendedor(a). Passe a carteira para outra pessoa em Gestão › Carteiras.");
+        }
         redirecionar('/usuarios');
     }
 
@@ -134,6 +138,8 @@ class UsuarioController extends Controller
             'email'           => mb_strtolower($this->campo('email')),
             'perfil_id'       => (int) $this->campo('perfil_id'),
             'codigo_vendedor' => $codigo !== '' ? $codigo : null,
+            // Usuário (ID ou ramal) da pessoa no Ligue Talk: liga as gravações à pessoa certa
+            'ramal'           => mb_substr(trim($this->campo('ramal')), 0, 20) ?: null,
             'ativo'           => isset($_POST['ativo']) ? 1 : 0,
         ] + \App\Services\EquipeService::dadosFicha($_POST); // ficha do funcionário: apelido, nascimento, admissão, contatos
     }

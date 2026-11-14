@@ -74,7 +74,7 @@ async function sair(page) { await page.click('form[action$="/sair"] button'); }
   // Vendedor: menu restrito, 403 em área de admin
   await entrar(page, 'televendas1@demo.local');
   ok(await page.locator('nav a:not([data-bloqueado])', { hasText: 'Usuários' }).count() === 0 && await page.locator('nav a[data-bloqueado]', { hasText: 'Usuários' }).count() === 1, 'vendedor: Usuários aparece com cadeado');
-  ok(await page.locator('nav a', { hasText: 'Carteira' }).count() === 1, 'vendedor vê Carteira');
+  ok(await page.locator('nav a', { hasText: /Carteira(?!s)/ }).count() === 1, 'vendedor vê Carteira');
   ok((await page.locator('.topo').innerText()).includes('Televendas'), 'topo mostra a função');
   const r = await page.goto(BASE + '/usuarios');
   ok(r.status() === 403, 'vendedor recebe 403 em /usuarios');
