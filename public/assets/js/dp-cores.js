@@ -24,3 +24,9 @@ document.querySelectorAll('[data-cores]').forEach((caixa) => {
   }));
   pintar();
 });
+
+// "Embalagem e cores": fecha ao clicar fora ou apertar Esc
+document.querySelectorAll('.dp-personalizar').forEach((d) => {
+  document.addEventListener('click', (ev) => { if (d.open && !d.contains(ev.target)) d.open = false; });
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') d.open = false; });
+});

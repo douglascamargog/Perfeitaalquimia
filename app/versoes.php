@@ -17,6 +17,12 @@
  */
 return [
     [
+        'versao' => '8.5', 'data' => '2026-11-14', 'titulo' => 'Ajuste no Desenvolvimento',
+        'correcao' => [
+            'O painel "Embalagem e cores" do projeto abre por cima dos balões (antes ficava atrás deles) e fecha ao clicar fora.',
+        ],
+    ],
+    [
         'versao' => '8.4', 'data' => '2026-11-14', 'titulo' => 'Rótulos na Produção',
         'novo' => [
             'Produção › Rótulos: o estoque de rótulos num lugar só, dos nossos produtos e dos clientes de terceirização, com mínimo, alerta, o que as ordens planejadas vão gastar e a previsão de quando acaba.',

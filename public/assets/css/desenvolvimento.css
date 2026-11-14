@@ -97,7 +97,7 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 
 /* Palco */
 .dp-jogo { position: relative; background: radial-gradient(ellipse at 50% 45%, #2f6b52 0%, #1f4d3a 45%, #10291f 100%); color: #fff; border-radius: 22px; padding: 16px 18px 18px; margin: 0 0 16px; overflow: hidden; }
-.dp-jogo-topo { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; position: relative; z-index: 3; }
+.dp-jogo-topo { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; position: relative; z-index: 10; } /* acima dos balões (o painel "Embalagem e cores" abre por cima) */
 .dp-jogo-topo .sobretitulo { color: #b9d9c6; display: block; }
 .dp-pct { font-size: 1.35rem; color: var(--lima); }
 .dp-trocar-tipo-antigo label { display: flex; gap: 8px; align-items: center; font-size: .78rem; color: #d7e8de; }
