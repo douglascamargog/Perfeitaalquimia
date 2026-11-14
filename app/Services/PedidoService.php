@@ -118,6 +118,26 @@ class PedidoService
             'quantidade' => array_sum(array_column($itens, 'quantidade')), 'minimo' => $minimo, 'falta' => max(0, round($minimo - $subtotal, 2))];
     }
 
+    /**
+     * Produtos que este cliente pode comprar, com o preço da tabela dele (para montar pedido ou orçamento).
+     * Os produtos com a marca do cliente (Terceirização) vêm primeiro, como linhas próprias ("t{id}").
+     */
+    public static function produtosDoCliente(array $cliente): array
+    {
+        $tabela = self::tabelaDoCliente($cliente);
+        $produtos = Banco::todos('SELECT p.id, p.codigo, p.nome, p.embalagem, c.nome AS categoria, m.arquivo AS imagem, pp.preco, e.quantidade AS estoque
+            FROM produtos p JOIN produto_precos pp ON pp.produto_id = p.id AND pp.tabela_preco_id = ?
+            LEFT JOIN categorias c ON c.id = p.categoria_id LEFT JOIN midias m ON m.id = p.imagem_id LEFT JOIN produto_estoque e ON e.produto_id = p.id
+            WHERE p.ativo = 1 AND p.visivel_catalogo = 1 ORDER BY p.nome', [$tabela['id']]);
+        $marca = [];
+        foreach (TerceirizacaoService::linhasDoPedido((int) $cliente['id']) as $chave => $t) {
+            $marca[] = ['id' => $chave, 'codigo' => $t['codigo_cliente'] ?: $t['produto_codigo'], 'nome' => $t['nome_rotulo'], 'embalagem' => $t['embalagem'],
+                'categoria' => 'marca do cliente', 'imagem' => null, 'preco' => $t['preco_final'], 'estoque' => null, 'terceirizado' => true,
+                'rotulos' => (int) $t['rotulos_estoque']];
+        }
+        return array_merge($marca, $produtos);
+    }
+
     // ------------------------------------------------------------------
     // Criar
     // ------------------------------------------------------------------
@@ -167,7 +187,7 @@ class PedidoService
 
         $desconto = $condicao ? round($carrinho['subtotal'] * (float) $condicao['desconto_pct'] / 100, 2) : 0.0;
         $vendedor = (int) ($d['vendedor_id'] ?? 0) ?: (int) ($d['usuario_id'] ?? 0) ?: (int) $cliente['responsavel_id'] ?: null;
-        $origem = in_array($d['origem'] ?? '', ['catalogo', 'sistema', 'app'], true) ? $d['origem'] : 'sistema';
+        $origem = in_array($d['origem'] ?? '', ['catalogo', 'sistema', 'app', 'orcamento'], true) ? $d['origem'] : 'sistema';
 
         $id = Banco::transacao(function () use ($cliente, $carrinho, $forma, $condicao, $desconto, $vendedor, $origem, $uuid, $d) {
             $id = Banco::inserir('pedidos', [
@@ -175,17 +195,17 @@ class PedidoService
                 'tabela_preco_id' => $carrinho['tabela']['id'], 'forma_pagamento_id' => $forma['id'], 'condicao_id' => $condicao['id'] ?? null,
                 'subtotal' => $carrinho['subtotal'], 'desconto' => $desconto, 'total' => round($carrinho['subtotal'] - $desconto, 2),
                 'observacoes' => mb_substr(trim((string) ($d['observacoes'] ?? '')), 0, 1000) ?: null,
-                'criado_por_usuario' => $d['usuario_id'] ?? null, 'criado_por_cliente' => $origem === 'catalogo' ? 1 : 0,
+                'criado_por_usuario' => $d['usuario_id'] ?? null, 'criado_por_cliente' => in_array($origem, ['catalogo', 'orcamento'], true) ? 1 : 0,
             ]);
             foreach ($carrinho['itens'] as $i) {
                 Banco::inserir('pedido_itens', ['pedido_id' => $id, 'produto_id' => $i['id'], 'codigo' => $i['codigo'] ?? null, 'nome' => $i['nome'],
                     'quantidade' => $i['quantidade'], 'preco_unitario' => $i['preco'], 'total' => $i['total'],
                     'terceirizacao_produto_id' => $i['terceirizacao_produto_id'] ?? null]);
             }
-            $quem = ['catalogo' => 'pelo cliente no catálogo', 'sistema' => 'pela equipe', 'app' => 'pelo app do vendedor externo'][$origem];
+            $quem = ['catalogo' => 'pelo cliente no catálogo', 'sistema' => 'pela equipe', 'app' => 'pelo app do vendedor externo', 'orcamento' => 'pelo cliente, aprovando o orçamento'][$origem];
             self::historico($id, 'aguardando_aprovacao', "Pedido criado $quem.", $d['usuario_id'] ?? null);
             ClienteEvento::registrar((int) $cliente['id'], 'pedido', 'Pedido #' . $id . ' · ' . dinheiro(round($carrinho['subtotal'] - $desconto, 2)) . ' · ' . $forma['nome'] . ' (aguardando aprovação)',
-                $d['usuario_id'] ?? null, ucfirst($origem), ['pedido_id' => $id]);
+                $d['usuario_id'] ?? null, $origem === 'orcamento' ? 'Orçamento' : ucfirst($origem), ['pedido_id' => $id]);
             Auditoria::registrar('pedido', $id, 'criar', null, ['cliente_id' => $cliente['id'], 'total' => round($carrinho['subtotal'] - $desconto, 2), 'origem' => $origem]);
             return $id;
         });

@@ -1,12 +1,15 @@
 <?php
 /**
  * Novo pedido — passo 2: produtos (preço da tabela do cliente), pagamento e enviar.
- * Variáveis: $c (cliente), $tabela, $produtos, $quantidades, $minimo, $formas, $boletoBloqueado, $ultimo, $uuid
+ * Variáveis: $c (cliente), $tabela, $produtos, $quantidades, $minimo, $formas, $boletoBloqueado, $ultimo, $uuid,
+ *            $orcamento (editando um orçamento em aberto, ou null), $modelos, $podeCampanha, $setores
+ * O mesmo formulário serve para "Enviar pedido" e "Gerar orçamento" (botão com formaction).
  */
+$jsonModelos = array_map(fn($m) => ['id' => (int) $m['id'], 'itens' => (object) $m['itens']], $modelos);
 ?>
 <div class="cabecalho-secao">
   <div>
-    <div class="sobretitulo">NOVO PEDIDO · TABELA <?= e(mb_strtoupper($tabela['nome'])) ?></div>
+    <div class="sobretitulo"><?= $orcamento ? 'ORÇAMENTO #' . (int) $orcamento['id'] . ' · EDITANDO' : 'NOVO PEDIDO OU ORÇAMENTO' ?> · TABELA <?= e(mb_strtoupper($tabela['nome'])) ?></div>
     <h1><?= e($c['nome_fantasia'] ?: $c['razao_social']) ?></h1>
     <p><?= e($c['cidade']) ?>/<?= e($c['uf']) ?> · pedido mínimo da região: <strong><?= dinheiro($minimo) ?></strong>
       <?= $boletoBloqueado ? ' · <span class="selo vermelho">Boleto bloqueado (título em aberto)</span>' : '' ?></p>
@@ -21,6 +24,40 @@
   <?= csrf_campo() ?>
   <input type="hidden" name="cliente_id" value="<?= (int) $c['id'] ?>">
   <input type="hidden" name="uuid" value="<?= e($uuid) ?>">
+  <?php if ($orcamento): ?><input type="hidden" name="orcamento_id" value="<?= (int) $orcamento['id'] ?>"><?php endif; ?>
+  <?php if ($orcamento): ?><p class="aviso ped-aviso-orc">Você está mexendo no <a href="<?= url('/orcamentos/' . (int) $orcamento['id']) ?>">orçamento #<?= (int) $orcamento['id'] ?></a>:
+    <strong>Atualizar orçamento</strong> mantém o mesmo link do cliente; <strong>Enviar pedido</strong> transforma ele em pedido agora.</p><?php endif; ?>
+  <section class="card ped-modelos" data-modelos='<?= e(json_encode($jsonModelos)) ?>'>
+    <div class="ped-modelos-usar">
+      <label for="usar-modelo"><strong>Usar um modelo</strong> <small>soma as quantidades do modelo ao que já está escolhido</small></label>
+      <div class="ped-modelos-linha">
+        <select id="usar-modelo" data-modelo-escolha>
+          <option value="">— escolha um modelo pronto</option>
+          <?php foreach (['campanha' => 'Campanhas da equipe', 'pessoal' => 'Meus modelos'] as $tipo => $grupo): $doTipo = array_filter($modelos, fn($m) => $m['tipo'] === $tipo); if (!$doTipo) continue; ?>
+            <optgroup label="<?= $grupo ?>"><?php foreach ($doTipo as $m): ?>
+              <option value="<?= (int) $m['id'] ?>" title="<?= e(implode(', ', $m['nomes'] ?? [])) ?>"><?= e($m['nome']) ?> · <?= count($m['itens']) ?> produto(s)<?= $m['setor'] ? ' · ' . e($m['setor']) : '' ?><?= $m['validade_ate'] ? ' · até ' . data_br($m['validade_ate']) : '' ?></option>
+            <?php endforeach; ?></optgroup>
+          <?php endforeach; ?>
+        </select>
+        <button type="button" class="botao contorno" data-modelo-aplicar>Aplicar</button>
+        <a class="botao contorno pequeno" href="<?= url('/pedidos/modelos') ?>">Gerenciar modelos</a>
+      </div>
+      <p class="pequeno suave" data-modelo-msg role="status"><?= $modelos ? '' : 'Nenhum modelo ainda: escolha os produtos e use "Salvar como modelo".' ?></p>
+    </div>
+    <details class="ped-modelos-salvar" data-salvar-modelo>
+      <summary>Salvar como modelo</summary>
+      <div class="ped-modelos-campos">
+        <label>Nome do modelo<input type="text" name="modelo_nome" maxlength="120" placeholder="Ex.: Primeiro pedido — loja pequena"></label>
+        <?php if ($podeCampanha): ?>
+          <label>Para quem<select name="modelo_tipo"><option value="pessoal">Só para mim</option><option value="campanha">Campanha para a equipe</option></select></label>
+          <label>Setor <small>campanha</small><select name="modelo_funcao"><option value="">Todos os setores</option><?php foreach ($setores as $s): ?><option value="<?= (int) $s['id'] ?>"><?= e($s['nome']) ?></option><?php endforeach; ?></select></label>
+          <label>Vale até <small>campanha</small><input type="date" name="modelo_validade"></label>
+        <?php endif; ?>
+        <button class="botao contorno" type="submit" formaction="<?= url('/pedidos/modelos') ?>" formnovalidate data-salvar-modelo-botao>Salvar modelo</button>
+      </div>
+      <p class="pequeno suave">Guarda os produtos e as quantidades escolhidos (sem preço: o preço é sempre o da tabela do cliente).</p>
+    </details>
+  </section>
   <section class="card ped-produtos">
     <div class="ped-produtos-topo">
       <input type="search" placeholder="Filtrar por produto ou código…" aria-label="Filtrar produtos" data-filtro-produtos>
@@ -64,5 +101,8 @@
     <div class="campo"><label for="obs">Observação</label><textarea id="obs" name="observacoes" rows="2" maxlength="1000"><?= antigo('observacoes') ?></textarea></div>
     <button class="botao largo" type="submit" data-enviar>Enviar pedido</button>
     <p class="pequeno suave">Vai ao ERP como orçamento e para a aprovação do Financeiro.</p>
+    <div class="ped-ou"><span>ou</span></div>
+    <button class="botao lima largo" type="submit" formaction="<?= url('/orcamentos') ?>" formnovalidate data-gerar-orcamento><?= $orcamento ? 'Atualizar orçamento' : 'Gerar orçamento para o cliente' ?></button>
+    <p class="pequeno suave">O cliente recebe um link pelo WhatsApp, confere, muda o que quiser e aprova. Aprovado, vira pedido sozinho.</p>
   </aside>
 </form>

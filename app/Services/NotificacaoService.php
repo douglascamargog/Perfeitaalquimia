@@ -82,7 +82,7 @@ class NotificacaoService
         $extra = ['pedido_id' => $pedidoId, 'cliente_id' => (int) $p['cliente_id']];
         self::avisar(self::destinatarios('pedidos.aprovar', 'aprovacao'), 'pedido_aprovar', "Novo pedido #$pedidoId para aprovar", '/aprovacao',
             $extra + ['texto' => $loja . ' · ' . dinheiro((float) $p['total'])], $quemFez);
-        if ($p['origem'] === 'catalogo' && $p['vendedor_id']) {
+        if ($p['origem'] === 'catalogo' && $p['vendedor_id']) { // (orçamento aprovado: o OrcamentoService avisa o vendedor)
             self::avisar([(int) $p['vendedor_id']], 'pedido_catalogo', "$loja fez um pedido pelo catálogo", '/pedidos/' . $pedidoId,
                 $extra + ['texto' => 'Pedido #' . $pedidoId . ' · ' . dinheiro((float) $p['total'])]);
         }

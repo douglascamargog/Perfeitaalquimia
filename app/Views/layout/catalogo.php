@@ -2,6 +2,7 @@
 /**
  * Layout do CATÁLOGO B2B (área do cliente, pensada para o celular).
  * Variáveis: $titulo, $conteudo, $clienteCatalogo (ou null), $vendedorCatalogo (ou null), $qtdCarrinho
+ *            $semMenu (link do orçamento: sem menu do catálogo e fora dos buscadores), $estilos, $scripts
  */
 use App\Core\Config;
 use App\Core\Sessao;
@@ -19,6 +20,8 @@ $icones = asset('img/icones.svg');
   <link rel="icon" type="image/png" href="<?= asset('img/logo.png') ?>">
   <link rel="stylesheet" href="<?= asset('css/base.css') ?>">
   <link rel="stylesheet" href="<?= asset('css/catalogo.css') ?>">
+  <?php foreach ($estilos ?? [] as $css): ?><link rel="stylesheet" href="<?= asset('css/' . $css) ?>"><?php endforeach; ?>
+  <?php if (!empty($semMenu)): ?><meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer"><?php endif; ?>
   <meta name="csrf" content="<?= e(\App\Core\Csrf::token()) ?>">
   <meta name="base" content="<?= e(url_base()) ?>">
   <?= \App\Services\Aparencia::estilo(null, true) /* cores do sistema */ ?>
@@ -27,6 +30,7 @@ $icones = asset('img/icones.svg');
 <?php if (config('modo_demo')): ?><div class="faixa-demo">Ambiente de demonstração — dados simulados</div><?php endif; ?>
 <header class="cat-topo">
   <a class="cat-marca" href="<?= url('/catalogo') ?>"><img src="<?= asset('img/logo.png') ?>" alt="Perfeita Alquimia" width="44" height="44"><span><?= e(Config::get('catalogo.titulo', 'Catálogo')) ?></span></a>
+  <?php if (empty($semMenu)): ?>
   <nav class="cat-nav" aria-label="Catálogo">
     <?php if ($cli): ?>
       <a href="<?= url('/catalogo/pedidos') ?>">Meus pedidos</a>
@@ -38,6 +42,7 @@ $icones = asset('img/icones.svg');
       <a class="cat-botao" href="<?= url('/catalogo/entrar') ?>">Entrar para ver preços</a>
     <?php endif; ?>
   </nav>
+  <?php endif; ?>
 </header>
 <?php if ($cli || !empty($vendedorCatalogo)): ?>
   <div class="cat-faixa">
@@ -57,5 +62,6 @@ $icones = asset('img/icones.svg');
 </footer>
 <div class="aviso-flutuante" data-aviso-flutuante role="status" aria-live="polite"></div>
 <script type="module" src="<?= asset('js/catalogo.js') ?>"></script>
+<?php foreach ($scripts ?? [] as $js): ?><script type="module" src="<?= asset('js/' . $js) ?>"></script><?php endforeach; ?>
 </body>
 </html>

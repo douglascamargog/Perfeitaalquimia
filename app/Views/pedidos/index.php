@@ -7,7 +7,7 @@ $r = $resultado;
 $icones = asset('img/icones.svg');
 $sel = fn(string $campo, $valor) => (string) $filtros[$campo] === (string) $valor ? 'selected' : '';
 $linkPagina = fn(int $p) => url('/pedidos') . '?' . e(http_build_query(array_filter($filtros) + ['pagina' => $p]));
-$origens = ['catalogo' => 'Catálogo', 'sistema' => 'Sistema', 'app' => 'App externo'];
+$origens = ['catalogo' => 'Catálogo', 'sistema' => 'Sistema', 'app' => 'App externo', 'orcamento' => 'Orçamento'];
 ?>
 <div class="cabecalho-secao">
   <div>

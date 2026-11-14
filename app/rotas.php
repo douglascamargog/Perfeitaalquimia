@@ -34,6 +34,10 @@ return [
     ['GET',  '/catalogo/pedidos',              'CatalogoController@pedidos',     'publico'],
     ['POST', '/catalogo/pedidos/{id}/repetir', 'CatalogoController@repetir',     'publico'],
     ['POST', '/catalogo/pedidos/{id}/cancelar', 'CatalogoController@cancelar',   'publico'],
+    // Link do orçamento para o cliente (sem senha: token secreto com validade)
+    ['GET',  '/o/{token}',                     'OrcamentoClienteController@ver',     'publico'],
+    ['POST', '/o/{token}/aprovar',             'OrcamentoClienteController@aprovar', 'publico'],
+    ['POST', '/o/{token}/recusar',             'OrcamentoClienteController@recusar', 'publico'],
 
     // ---------- Início ----------
     ['GET',  '/',              'InicioController@index', 'logado'],
@@ -116,6 +120,14 @@ return [
     // ---------- Pedidos, aprovação e produtos ----------
     ['GET',  '/pedidos',                        'PedidoController@index',   'pedidos.criar|pedidos.ver_todos|pedidos.aprovar'],
     ['GET',  '/pedidos/novo',                   'PedidoController@novo',    'pedidos.criar'],
+    ['GET',  '/pedidos/modelos',                'OrcamentoController@modelos',      'pedidos.criar'],
+    ['POST', '/pedidos/modelos',                'OrcamentoController@salvarModelo', 'pedidos.criar'],
+    ['POST', '/pedidos/modelos/{id}/remover',   'OrcamentoController@removerModelo', 'pedidos.criar'],
+    ['GET',  '/orcamentos',                     'OrcamentoController@index',    'pedidos.criar|pedidos.ver_todos'],
+    ['POST', '/orcamentos',                     'OrcamentoController@criar',    'pedidos.criar'],
+    ['GET',  '/orcamentos/{id}',                'OrcamentoController@ver',      'pedidos.criar|pedidos.ver_todos'],
+    ['POST', '/orcamentos/{id}/cancelar',       'OrcamentoController@cancelar', 'pedidos.criar|pedidos.ver_todos'],
+    ['POST', '/orcamentos/{id}/enviado',        'OrcamentoController@enviado',  'pedidos.criar|pedidos.ver_todos'],
     ['POST', '/pedidos',                        'PedidoController@criar',   'pedidos.criar'],
     ['GET',  '/pedidos/{id}',                   'PedidoController@ver',     'pedidos.criar|pedidos.ver_todos|pedidos.aprovar|deposito.ver|deposito.operar'],
     ['POST', '/pedidos/{id}/cancelar',          'PedidoController@cancelar', 'pedidos.criar|pedidos.ver_todos'],

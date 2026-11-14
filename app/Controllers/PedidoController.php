@@ -9,6 +9,8 @@ use App\Integrations\Omie\OmieFake;
 use App\Models\Cliente;
 use App\Models\Listas;
 use App\Models\Pedido;
+use App\Services\ModeloPedidoService;
+use App\Services\OrcamentoService;
 use App\Services\PedidoService;
 
 /**
@@ -42,20 +44,19 @@ class PedidoController extends Controller
             return;
         }
         $tabela = PedidoService::tabelaDoCliente($cliente);
-        $produtos = Banco::todos('SELECT p.id, p.codigo, p.nome, p.embalagem, c.nome AS categoria, m.arquivo AS imagem, pp.preco, e.quantidade AS estoque
-            FROM produtos p JOIN produto_precos pp ON pp.produto_id = p.id AND pp.tabela_preco_id = ?
-            LEFT JOIN categorias c ON c.id = p.categoria_id LEFT JOIN midias m ON m.id = p.imagem_id LEFT JOIN produto_estoque e ON e.produto_id = p.id
-            WHERE p.ativo = 1 AND p.visivel_catalogo = 1 ORDER BY p.nome', [$tabela['id']]);
-        // Produtos com a marca do cliente (Terceirização) vêm primeiro, como linhas próprias ("t{id}")
-        $marca = [];
-        foreach (\App\Services\TerceirizacaoService::linhasDoPedido((int) $cliente['id']) as $chave => $t) {
-            $marca[] = ['id' => $chave, 'codigo' => $t['codigo_cliente'] ?: $t['produto_codigo'], 'nome' => $t['nome_rotulo'], 'embalagem' => $t['embalagem'],
-                'categoria' => 'marca do cliente', 'imagem' => null, 'preco' => $t['preco_final'], 'estoque' => null, 'terceirizado' => true,
-                'rotulos' => (int) $t['rotulos_estoque']];
+        $produtos = PedidoService::produtosDoCliente($cliente);
+        // Editar um orçamento em aberto (ou transformá-lo em pedido): a tela vem com os itens dele
+        $orcamento = ctype_digit((string) ($_GET['orcamento'] ?? '')) ? OrcamentoService::buscar((int) $_GET['orcamento']) : null;
+        if ($orcamento && (!OrcamentoService::podeVer($orcamento) || (int) $orcamento['cliente_id'] !== (int) $cliente['id'] || !OrcamentoService::emAberto($orcamento))) {
+            $orcamento = null;
         }
-        $produtos = array_merge($marca, $produtos);
         $ultimo = Banco::valor("SELECT id FROM pedidos WHERE cliente_id = ? AND situacao IN ('faturado','aprovado') ORDER BY criado_em DESC LIMIT 1", [$cliente['id']]);
         $quantidades = (array) Sessao::antigo('qtd', []);
+        if (!$quantidades && $orcamento) {
+            foreach (OrcamentoService::itens((int) $orcamento['id']) as $i) {
+                $quantidades[$i['chave']] = $i['quantidade'];
+            }
+        }
         if (!$quantidades && ($_GET['repetir'] ?? '') === '1' && $ultimo) {
             foreach (Pedido::itens((int) $ultimo) as $i) {
                 $quantidades[$i['terceirizacao_produto_id'] ? 't' . $i['terceirizacao_produto_id'] : $i['produto_id']] = $i['quantidade'];
@@ -65,6 +66,8 @@ class PedidoController extends Controller
             'titulo' => 'Novo pedido', 'c' => $cliente, 'tabela' => $tabela, 'produtos' => $produtos, 'quantidades' => $quantidades,
             'minimo' => PedidoService::pedidoMinimo($cliente['uf']), 'formas' => PedidoService::formasDePagamento($cliente, PHP_FLOAT_MAX),
             'boletoBloqueado' => PedidoService::boletoBloqueado($cliente), 'ultimo' => $ultimo, 'uuid' => PedidoService::novoUuid(),
+            'orcamento' => $orcamento, 'modelos' => ModeloPedidoService::disponiveis((int) Auth::id()),
+            'podeCampanha' => ModeloPedidoService::podeCampanha(), 'setores' => \App\Services\Setores::todos(),
             'estilos' => ['carteira.css', 'pedidos.css'], 'scripts' => ['pedido.js'],
         ]);
     }
@@ -82,6 +85,9 @@ class PedidoController extends Controller
         ]);
         if ($erros) {
             $this->voltarComErros('/pedidos/novo?cliente=' . (int) $cliente['id'], $erros);
+        }
+        if (ctype_digit($this->campo('orcamento_id'))) {
+            OrcamentoService::vincularPedido((int) $this->campo('orcamento_id'), (int) $id, (int) Auth::id()); // o orçamento virou este pedido
         }
         Sessao::aviso('sucesso', "Pedido #$id criado e enviado ao ERP como orçamento. Agora é com o Financeiro.");
         redirecionar("/pedidos/$id");

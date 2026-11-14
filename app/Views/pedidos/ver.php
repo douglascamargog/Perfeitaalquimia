@@ -4,7 +4,7 @@ use App\Core\Auth;
 use App\Services\PedidoService;
 
 [$rotulo, $cor] = PedidoService::SITUACOES[$p['situacao']] ?? [$p['situacao'], 'cinza'];
-$origens = ['catalogo' => 'Catálogo (cliente)', 'sistema' => 'Sistema (equipe)', 'app' => 'App do externo'];
+$origens = ['catalogo' => 'Catálogo (cliente)', 'sistema' => 'Sistema (equipe)', 'app' => 'App do externo', 'orcamento' => 'Orçamento aprovado pelo cliente'];
 ?>
 <div class="cabecalho-secao nao-imprimir">
   <div><div class="sobretitulo">PEDIDO · <?= e(mb_strtoupper($origens[$p['origem']] ?? $p['origem'])) ?></div><h1>Pedido #<?= (int) $p['id'] ?> <span class="selo <?= $cor ?>"><?= $rotulo ?></span></h1></div>

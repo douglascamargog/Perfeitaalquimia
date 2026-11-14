@@ -13,7 +13,7 @@ class ClienteEvento
         'contato' => 'Contato', 'ligacao' => 'Ligação', 'whatsapp' => 'WhatsApp', 'visita' => 'Visita', 'email' => 'E-mail',
         'nota' => 'Anotação', 'etapa' => 'Mudança de etapa', 'responsavel' => 'Responsável', 'importacao' => 'Cadastro',
         'pedido' => 'Pedido', 'tarefa' => 'Tarefa', 'cobranca' => 'Cobrança', 'promessa' => 'Promessa de pagamento',
-        'busca_contato' => 'Contatos atualizados',
+        'busca_contato' => 'Contatos atualizados', 'orcamento' => 'Orçamento',
     ];
 
     public static function registrar(int $clienteId, string $tipo, ?string $descricao, ?int $usuarioId, ?string $canal = null, ?array $dados = null, ?string $ocorridoEm = null): int

@@ -17,6 +17,22 @@
  */
 return [
     [
+        'versao' => '10.0', 'data' => '2026-11-14', 'titulo' => 'Orçamento por link e modelos de pedido',
+        'novo' => [
+            'Orçamento para o cliente: no Novo pedido, monte os produtos e toque em "Gerar orçamento". O One cria um link para mandar pelo WhatsApp.',
+            'O cliente abre o link no celular sem senha, vê os produtos com os preços da tabela dele, muda as quantidades, acrescenta outros produtos e aprova ou recusa.',
+            'Aprovado pelo cliente, o orçamento vira pedido sozinho (aguardando aprovação do Financeiro) e você recebe o aviso no sino. Se recusar, você vê o motivo.',
+            'Baixar imagem do orçamento: uma imagem bonita com logo, produtos, total e validade, para mandar no WhatsApp.',
+            'Nova aba Orçamentos no seu setor: os que estão esperando o cliente, os aprovados e os recusados ou vencidos. Você também fica sabendo quando o cliente abriu o link.',
+            'Modelos de pedido: salve uma lista pronta de produtos e quantidades (ex.: "Primeiro pedido — loja pequena") e use no Novo pedido com um clique. Dá para usar mais de um modelo e ajustar depois.',
+            'Campanhas: a gestão cria modelos para toda a equipe ou para um setor, com data para sair do ar.',
+            'Tudo do orçamento (criado, enviado, aberto, aprovado ou recusado) aparece na linha do tempo do cliente.',
+        ],
+        'admin' => [
+            'Configurações › Pedidos: validade do orçamento (padrão 15 dias) e a mensagem que vai junto do link no WhatsApp. O link usa só um código secreto (nenhum dado do cliente) e para de funcionar ao vencer ou ser cancelado. Quem cria pedidos cria orçamentos; campanhas: quem vê todos os pedidos ou é gestor(a) de setor.',
+        ],
+    ],
+    [
         'versao' => '9.2', 'data' => '2026-11-14', 'titulo' => 'Menu mais organizado',
         'melhoria' => [
             'Gestão › Resultados: Painel de vendas, Equipe de vendas e Acompanhamento ficam numa entrada só, em abas.',

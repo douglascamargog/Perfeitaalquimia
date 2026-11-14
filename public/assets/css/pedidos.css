@@ -108,3 +108,37 @@ tr.inativo td { opacity: .6; }
 .selo-marca { display: inline-block; font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; padding: 1px 7px; border-radius: 99px;
   background: var(--secundaria-clara); color: var(--primaria-escura); }
 .ped-linha-marca td:first-child { box-shadow: inset 3px 0 0 var(--secundaria); }
+
+/* Modelos de pedido e orçamento (V10.0) */
+.ped-modelos, .ped-aviso-orc { grid-column: 1 / -1; }
+.ped-modelos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 24px; padding: 14px 16px; align-items: start; }
+.ped-modelos-usar label { display: block; margin-bottom: 6px; }
+.ped-modelos-usar small, .ped-modelos-campos small { color: var(--texto-suave); font-weight: 400; }
+.ped-modelos-linha { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.ped-modelos-linha select { flex: 1 1 220px; min-width: 0; }
+.ped-modelos-usar p { margin: 6px 0 0; min-height: 1.2em; }
+.ped-modelos-salvar summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
+.ped-modelos-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; align-items: end; margin-top: 6px; }
+.ped-modelos-campos label { display: grid; gap: 4px; font-size: .85rem; font-weight: 600; }
+.ped-ou { display: flex; align-items: center; gap: 10px; color: var(--texto-suave); font-size: .8rem; }
+.ped-ou::before, .ped-ou::after { content: ""; flex: 1; border-top: 1px solid var(--borda); }
+tr.ped-do-modelo { animation: ped-pisca 1.2s ease; }
+@keyframes ped-pisca { 0% { background: var(--secundaria); } 100% { background: var(--secundaria-clara); } }
+@media (max-width: 760px) { .ped-modelos { grid-template-columns: minmax(0, 1fr); } }
+
+/* Orçamentos (equipe) */
+.orc-abas { margin-bottom: 14px; }
+.orc-pagina { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+.orc-enviar { display: grid; gap: 10px; position: sticky; top: 16px; }
+.orc-enviar h2 { margin: 0; }
+.orc-link { display: flex; gap: 6px; }
+.orc-link input { flex: 1; min-width: 0; font-size: .8rem; font-family: ui-monospace, Consolas, monospace; }
+.orc-botoes { display: grid; gap: 8px; }
+.orc-botoes .botao { justify-content: center; }
+.orc-mensagem { background: var(--primaria-clara); border-radius: 12px; padding: 10px 12px; font-size: .84rem; white-space: pre-wrap; margin: 0; }
+.orc-total { display: flex; justify-content: space-between; align-items: baseline; font-size: 1rem; padding: 10px 12px 0; }
+.orc-total strong { font-size: 1.5rem; color: var(--verde-escuro); }
+.orc-mudou { color: var(--aviso); font-weight: 700; }
+.orc-riscado { text-decoration: line-through; color: var(--texto-suave); }
+.orc-lista td small { display: block; color: var(--texto-suave); }
+@media (max-width: 980px) { .orc-pagina { grid-template-columns: minmax(0, 1fr); } .orc-enviar { position: static; } }
