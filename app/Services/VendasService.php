@@ -115,7 +115,7 @@ class VendasService
                 . self::BASE . " LEFT JOIN funcoes fn ON fn.id = c.funcao_id WHERE $w GROUP BY c.funcao_id, fn.nome",
             'uf'       => 'SELECT c.uf AS id, c.uf AS nome, SUM(p.total) AS valor, COUNT(*) AS pedidos, COUNT(DISTINCT p.cliente_id) AS clientes ' . self::BASE . " WHERE $w GROUP BY c.uf",
             'origem'   => 'SELECT p.origem AS id, p.origem AS nome, SUM(p.total) AS valor, COUNT(*) AS pedidos, COUNT(DISTINCT p.cliente_id) AS clientes ' . self::BASE . " WHERE $w GROUP BY p.origem",
-            'cliente'  => 'SELECT c.id, COALESCE(NULLIF(c.nome_fantasia, ""), c.razao_social) AS nome, c.cidade, c.uf, SUM(p.total) AS valor, COUNT(*) AS pedidos ' . self::BASE . " WHERE $w GROUP BY c.id",
+            'cliente'  => 'SELECT c.id, MAX(COALESCE(NULLIF(c.nome_fantasia, ""), c.razao_social)) AS nome, MAX(c.cidade) AS cidade, MAX(c.uf) AS uf, SUM(p.total) AS valor, COUNT(*) AS pedidos ' . self::BASE . " WHERE $w GROUP BY c.id",
             'produto'  => 'SELECT i.produto_id AS id, i.nome, SUM(i.total) AS valor, SUM(i.quantidade) AS quantidade ' . self::BASE . " JOIN pedido_itens i ON i.pedido_id = p.id WHERE $w GROUP BY i.produto_id, i.nome",
         };
         $linhas = Banco::todos("$sql ORDER BY valor DESC LIMIT " . (int) $limite, $par);

@@ -74,14 +74,15 @@ class CarteirasService
         if ($setor) {
             $w[] = 'k.funcao_id = ' . (int) $setor;
         }
+        // Números por subconsulta (sem GROUP BY: compatível com MySQL 5.7 e MariaDB em modo estrito)
+        $c = fn(string $expr) => "(SELECT $expr FROM clientes c WHERE c.carteira_id = k.id AND c.excluido_em IS NULL)";
         return Banco::todos("SELECT k.*, u.nome AS vendedor, f.nome AS setor, f.ordem AS setor_ordem,
-                COUNT(c.id) AS clientes, SUM(c.tipo = 'cliente') AS ativos, MAX(c.ultima_compra_em) AS ultima_compra,
+                {$c('COUNT(*)')} AS clientes, {$c("SUM(c.tipo = 'cliente')")} AS ativos, {$c('MAX(c.ultima_compra_em)')} AS ultima_compra,
                 (SELECT COALESCE(SUM(p.total), 0) FROM pedidos p JOIN clientes c2 ON c2.id = p.cliente_id
                   WHERE c2.carteira_id = k.id AND p.situacao = 'faturado' AND p.faturado_em >= CURDATE() - INTERVAL 12 MONTH) AS faturado
             FROM carteiras k LEFT JOIN usuarios u ON u.id = k.responsavel_id LEFT JOIN funcoes f ON f.id = k.funcao_id
-            LEFT JOIN clientes c ON c.carteira_id = k.id AND c.excluido_em IS NULL
             WHERE " . implode(' AND ', $w) . '
-            GROUP BY k.id ORDER BY f.ordem, k.responsavel_id IS NOT NULL, k.nome');
+            ORDER BY f.ordem, k.responsavel_id IS NOT NULL, k.nome');
     }
 
     /** Clientes de uma carteira (busca + paginação no servidor) */

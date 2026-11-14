@@ -17,6 +17,15 @@
  */
 return [
     [
+        'versao' => '7.2', 'data' => '2026-11-14', 'titulo' => 'Correção dos dados de teste',
+        'correcao' => [
+            'Gerar os dados de teste não dá mais erro, e ficou bem mais rápido.',
+        ],
+        'admin' => [
+            'O erro vinha de recursos de banco que a hospedagem não tem (REGEXP_REPLACE e consultas agrupadas no modo estrito do MySQL). Se algo falhar de novo, a tela de Dados de teste mostra o motivo.',
+        ],
+    ],
+    [
         'versao' => '7.1', 'data' => '2026-11-14', 'titulo' => 'Acompanhamento completo e Cobrança',
         'novo' => [
             'Acompanhamento mais completo de cada vendedora: meta do mês × faturado, WhatsApp e mensagens prontas, retornos no prazo e atrasados, e uma página com abas (Resumo, Ligações, Carteira e funil, Agenda, WhatsApp e contatos, Reativações e pedidos).',

@@ -102,10 +102,11 @@ class AcompanhamentoService
     private static function sqlReativacoes(string $listaVendedores): string
     {
         $dias = max(1, (int) Config::get('carteira.dias_inatividade', 90));
-        return "SELECT p.id, p.vendedor_id, p.cliente_id, p.faturado_em, p.total,
+        // Tabela derivada + WHERE (sem HAVING sem GROUP BY: compatível com MySQL 5.7 e MariaDB em modo estrito)
+        return "SELECT x.* FROM (SELECT p.id, p.vendedor_id, p.cliente_id, p.faturado_em, p.total,
                 (SELECT MAX(p2.faturado_em) FROM pedidos p2 WHERE p2.cliente_id = p.cliente_id AND p2.situacao = 'faturado' AND p2.faturado_em < p.faturado_em) AS anterior
-            FROM pedidos p WHERE p.situacao = 'faturado' AND p.vendedor_id IN ($listaVendedores) AND p.faturado_em BETWEEN ? AND ?
-            HAVING anterior IS NOT NULL AND anterior < p.faturado_em - INTERVAL $dias DAY";
+            FROM pedidos p WHERE p.situacao = 'faturado' AND p.vendedor_id IN ($listaVendedores) AND p.faturado_em BETWEEN ? AND ?) x
+            WHERE x.anterior IS NOT NULL AND x.anterior < x.faturado_em - INTERVAL $dias DAY";
     }
 
     private static function porPessoa(string $sql, array $par): array
@@ -151,9 +152,8 @@ class AcompanhamentoService
                 SUM(tipo = 'cliente' AND (ultima_compra_em < CURDATE() - INTERVAL 90 DAY OR ultima_compra_em IS NULL)) AS sem_90,
                 SUM(criado_em BETWEEN ? AND ?) AS novos
             FROM clientes WHERE responsavel_id = ? AND excluido_em IS NULL", [...$par, $usuarioId]) ?: [];
-        $funil = Banco::todos('SELECT e.nome, e.cor, COUNT(c.id) AS qtd FROM funil_etapas e
-            LEFT JOIN clientes c ON c.etapa_id = e.id AND c.responsavel_id = ? AND c.excluido_em IS NULL
-            WHERE e.ativa = 1 GROUP BY e.id ORDER BY e.ordem', [$usuarioId]);
+        $funil = Banco::todos('SELECT e.nome, e.cor, (SELECT COUNT(*) FROM clientes c WHERE c.etapa_id = e.id AND c.responsavel_id = ? AND c.excluido_em IS NULL) AS qtd
+            FROM funil_etapas e WHERE e.ativa = 1 ORDER BY e.ordem', [$usuarioId]);
         $etapas = Banco::todos("SELECT descricao, COUNT(*) AS qtd FROM cliente_eventos WHERE usuario_id = ? AND tipo = 'etapa' AND ocorrido_em BETWEEN ? AND ?
             GROUP BY descricao ORDER BY qtd DESC LIMIT 12", [$usuarioId, ...$par]);
         $canais = Banco::todos("SELECT tipo, COUNT(*) AS qtd FROM cliente_eventos WHERE usuario_id = ? AND tipo IN (" . self::CONTATOS . ")
@@ -272,8 +272,10 @@ class AcompanhamentoService
     /** Detalhe de quem cuida da Cobrança */
     public static function detalheCobranca(int $usuarioId, string $de, string $ate): array
     {
-        $etapas = Banco::todos("SELECT e.nome, e.cor, COUNT(cb.id) AS casos, COALESCE(SUM(cb.valor_total), 0) AS valor FROM cobranca_etapas e
-            LEFT JOIN cobrancas cb ON cb.etapa_id = e.id AND cb.responsavel_id = ? AND cb.situacao = 'aberta' WHERE e.ativa = 1 GROUP BY e.id ORDER BY e.ordem", [$usuarioId]);
+        $etapas = Banco::todos("SELECT e.nome, e.cor,
+                (SELECT COUNT(*) FROM cobrancas cb WHERE cb.etapa_id = e.id AND cb.responsavel_id = ? AND cb.situacao = 'aberta') AS casos,
+                (SELECT COALESCE(SUM(cb.valor_total), 0) FROM cobrancas cb WHERE cb.etapa_id = e.id AND cb.responsavel_id = ? AND cb.situacao = 'aberta') AS valor
+            FROM cobranca_etapas e WHERE e.ativa = 1 ORDER BY e.ordem", [$usuarioId, $usuarioId]);
         $atrasos = Banco::todos("SELECT cb.id, cb.valor_total, cb.vencimento_mais_antigo, DATEDIFF(CURDATE(), cb.vencimento_mais_antigo) AS dias, cb.cliente_id,
                 COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS cliente, e.nome AS etapa
             FROM cobrancas cb JOIN clientes c ON c.id = cb.cliente_id JOIN cobranca_etapas e ON e.id = cb.etapa_id

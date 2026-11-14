@@ -58,13 +58,17 @@ class SimuladorService
         $antes = self::contagem();
         $p = self::pessoas();
         $gravacoes = [LigueTalkFake::gerarGravacao('sim-a', 4), LigueTalkFake::gerarGravacao('sim-b', 6), LigueTalkFake::gerarGravacao('sim-c', 3)];
+        @set_time_limit(300); // hospedagem compartilhada: dá tempo para gerar tudo
+        self::$fila = [];
         Banco::transacao(function () use ($p, $gravacoes, $quem) {
             foreach ($p['vendas'] as $pessoa) {
                 self::vendas((int) $pessoa['id'], $gravacoes);
+                self::esvaziar();
             }
             foreach ($p['cobranca'] as $pessoa) {
                 self::cobranca((int) $pessoa['id'], $gravacoes);
             }
+            self::esvaziar();
             self::producao($quem);
             self::marketing($quem);
         });
@@ -109,8 +113,8 @@ class SimuladorService
         }
         $etapas = array_column(Banco::todos('SELECT nome FROM funil_etapas WHERE ativa = 1 ORDER BY ordem'), 'nome');
         $prontas = array_column(Banco::todos('SELECT titulo FROM mensagens_prontas WHERE ativo = 1 LIMIT 8'), 'titulo') ?: ['Retomar contato'];
-        $produtos = Banco::todos('SELECT p.id, p.nome, p.codigo, MIN(pp.preco) AS preco FROM produtos p JOIN produto_precos pp ON pp.produto_id = p.id
-            WHERE p.ativo = 1 AND pp.preco > 0 GROUP BY p.id ORDER BY RAND() LIMIT 40');
+        $produtos = Banco::todos('SELECT p.id, p.nome, p.codigo, (SELECT MIN(pp.preco) FROM produto_precos pp WHERE pp.produto_id = p.id AND pp.preco > 0) AS preco
+            FROM produtos p WHERE p.ativo = 1 AND EXISTS (SELECT 1 FROM produto_precos pp WHERE pp.produto_id = p.id AND pp.preco > 0) ORDER BY RAND() LIMIT 40');
         $tabela = (int) Banco::valor('SELECT id FROM tabelas_preco ORDER BY id LIMIT 1');
         $forma = (int) Banco::valor('SELECT id FROM formas_pagamento ORDER BY id LIMIT 1');
         $ritmo = mt_rand(5, 14);
@@ -131,7 +135,7 @@ class SimuladorService
                 $s = mt_rand(1, 100);
                 $sit = $s <= 63 ? 'atendida' : ($s <= 90 ? 'nao_atendida' : 'ocupado');
                 $dur = $sit === 'atendida' ? mt_rand(30, 480) : 0;
-                Banco::inserir('ligacoes', ['id_externo' => 'sim-' . bin2hex(random_bytes(6)), 'usuario_id' => $uid, 'cliente_id' => $c['id'], 'numero' => $c['tel'],
+                self::guardar('ligacoes', ['id_externo' => 'sim-' . bin2hex(random_bytes(6)), 'usuario_id' => $uid, 'cliente_id' => $c['id'], 'numero' => $c['tel'],
                     'situacao' => $sit, 'inicio' => $quando, 'duracao_seg' => $dur, 'gravacao' => $sit === 'atendida' ? $gravacoes[array_rand($gravacoes)] : null,
                     'origem' => 'demonstracao', 'simulado' => 1, 'criado_em' => $quando]);
                 if ($sit === 'atendida') {
@@ -162,7 +166,7 @@ class SimuladorService
                 } elseif ($d > 3 && $sorte <= 88) {
                     $concluida = date('Y-m-d 10:00:00', strtotime("$data +" . mt_rand(1, 3) . ' days'));
                 }
-                Banco::inserir('tarefas', ['cliente_id' => $c['id'], 'usuario_id' => $uid, 'titulo' => 'Retorno: ' . ['ver reposição', 'mandar tabela', 'confirmar pedido', 'oferecer lançamento'][mt_rand(0, 3)],
+                self::guardar('tarefas', ['cliente_id' => $c['id'], 'usuario_id' => $uid, 'titulo' => 'Retorno: ' . ['ver reposição', 'mandar tabela', 'confirmar pedido', 'oferecer lançamento'][mt_rand(0, 3)],
                     'tipo' => 'retorno', 'vence_em' => $data, 'concluida_em' => $concluida, 'simulado' => 1, 'criado_em' => date('Y-m-d 08:00:00', strtotime("$data -3 days"))]);
             }
             // Pedidos
@@ -174,7 +178,7 @@ class SimuladorService
         // Retornos futuros
         for ($i = 1; $i <= 6; $i++) {
             $c = $clientes[array_rand($clientes)];
-            Banco::inserir('tarefas', ['cliente_id' => $c['id'], 'usuario_id' => $uid, 'titulo' => 'Retorno: ligar de novo', 'tipo' => 'retorno',
+            self::guardar('tarefas', ['cliente_id' => $c['id'], 'usuario_id' => $uid, 'titulo' => 'Retorno: ligar de novo', 'tipo' => 'retorno',
                 'vence_em' => date('Y-m-d', strtotime("+$i weekdays")), 'simulado' => 1]);
         }
         // Meta do mês (só se a pessoa ainda não tem)
@@ -218,9 +222,9 @@ class SimuladorService
     {
         $etapas = array_column(Banco::todos('SELECT id, tipo FROM cobranca_etapas WHERE ativa = 1'), 'id', 'tipo');
         $entrada = (int) (CobrancaService::etapaEntrada()['id'] ?? 0);
-        $clientes = Banco::todos("SELECT c.id, REGEXP_REPLACE(COALESCE(NULLIF(c.telefone, ''), c.whatsapp, ''), '[^0-9]', '') AS tel FROM clientes c
+        $clientes = self::comTelefone(Banco::todos("SELECT c.id, COALESCE(NULLIF(c.telefone, ''), c.whatsapp, '') AS tel FROM clientes c
             WHERE c.excluido_em IS NULL AND c.tipo = 'cliente' AND NOT EXISTS (SELECT 1 FROM cobrancas cb WHERE cb.cliente_id = c.id AND cb.situacao = 'aberta')
-            ORDER BY RAND() LIMIT 18");
+            ORDER BY RAND() LIMIT 18"));
         foreach ($clientes as $i => $c) {
             $venc = date('Y-m-d', strtotime('-' . mt_rand(5, 75) . ' days'));
             $titulos = [];
@@ -247,7 +251,7 @@ class SimuladorService
                 self::evento($c['id'], $uid, 'cobranca', "Cobrança — $resultado", $quando, $resultado === 'Respondeu mensagem' || $resultado === 'Mensagem sem resposta' ? 'WhatsApp' : 'Ligação', ['cobranca_id' => $caso]);
                 if (!str_contains($resultado, 'ensagem')) {
                     $atendeu = $resultado === 'Atendeu';
-                    Banco::inserir('ligacoes', ['id_externo' => 'sim-' . bin2hex(random_bytes(6)), 'usuario_id' => $uid, 'cliente_id' => $c['id'], 'numero' => $c['tel'],
+                    self::guardar('ligacoes', ['id_externo' => 'sim-' . bin2hex(random_bytes(6)), 'usuario_id' => $uid, 'cliente_id' => $c['id'], 'numero' => $c['tel'],
                         'situacao' => $atendeu ? 'atendida' : 'nao_atendida', 'inicio' => $quando, 'duracao_seg' => $atendeu ? mt_rand(60, 400) : 0,
                         'gravacao' => $atendeu ? $gravacoes[array_rand($gravacoes)] : null, 'origem' => 'demonstracao', 'simulado' => 1, 'criado_em' => $quando]);
                 }
@@ -304,8 +308,8 @@ class SimuladorService
     /** Clientes da carteira da pessoa; se tiver poucos, cria 30 clientes simulados para ela */
     private static function clientesDe(int $uid): array
     {
-        $sql = "SELECT id, REGEXP_REPLACE(COALESCE(NULLIF(telefone, ''), whatsapp, ''), '[^0-9]', '') AS tel FROM clientes WHERE responsavel_id = ? AND excluido_em IS NULL LIMIT 120";
-        $lista = Banco::todos($sql, [$uid]);
+        $sql = "SELECT id, COALESCE(NULLIF(telefone, ''), whatsapp, '') AS tel FROM clientes WHERE responsavel_id = ? AND excluido_em IS NULL LIMIT 120";
+        $lista = self::comTelefone(Banco::todos($sql, [$uid]));
         if (count($lista) >= 10) {
             return $lista;
         }
@@ -321,12 +325,44 @@ class SimuladorService
                 null, 'Cliente simulado para teste');
             Banco::executar('UPDATE clientes SET simulado = 1 WHERE id = ?', [$id]);
         }
-        return Banco::todos($sql, [$uid]);
+        return self::comTelefone(Banco::todos($sql, [$uid]));
+    }
+
+    /** Só os dígitos do telefone (feito no PHP: o MySQL da hospedagem pode não ter REGEXP_REPLACE) */
+    private static function comTelefone(array $clientes): array
+    {
+        return array_map(fn($c) => ['id' => (int) $c['id'], 'tel' => mb_substr(preg_replace('/\D/', '', (string) $c['tel']), 0, 20)], $clientes);
+    }
+
+    // ---------- Gravação em lote (muitas linhas de uma vez: rápido em hospedagem compartilhada) ----------
+
+    private static array $fila = [];
+
+    private static function guardar(string $tabela, array $linha): void
+    {
+        self::$fila[$tabela . '|' . implode(',', array_keys($linha))][] = $linha;
+    }
+
+    private static function esvaziar(): void
+    {
+        foreach (self::$fila as $chave => $linhas) {
+            [$tabela] = explode('|', $chave);
+            $colunas = array_keys($linhas[0]);
+            foreach (array_chunk($linhas, 200) as $bloco) {
+                $marcas = '(' . implode(',', array_fill(0, count($colunas), '?')) . ')';
+                $valores = [];
+                foreach ($bloco as $l) {
+                    array_push($valores, ...array_values($l));
+                }
+                Banco::executar("INSERT INTO $tabela (" . implode(',', $colunas) . ') VALUES ' . implode(',', array_fill(0, count($bloco), $marcas)), $valores);
+            }
+        }
+        self::$fila = [];
     }
 
     private static function evento(int $clienteId, int $uid, string $tipo, string $descricao, string $quando, ?string $canal = null, ?array $dados = null): void
     {
-        Banco::inserir('cliente_eventos', array_filter(['cliente_id' => $clienteId, 'usuario_id' => $uid, 'tipo' => $tipo, 'canal' => $canal, 'descricao' => $descricao,
+        self::guardar('cliente_eventos', array_filter(['cliente_id' => $clienteId, 'usuario_id' => $uid, 'tipo' => $tipo, 'canal' => $canal, 'descricao' => $descricao,
             'dados_json' => $dados ? json_encode($dados) : null, 'ocorrido_em' => $quando, 'simulado' => 1], fn($v) => $v !== null));
     }
 

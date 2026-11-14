@@ -17,7 +17,13 @@ class SimuladorController extends Controller
 
     public function gerar(): void
     {
-        $c = S::gerar(Auth::id());
+        try {
+            $c = S::gerar(Auth::id());
+        } catch (\Throwable $e) {
+            error_log((string) $e);
+            Sessao::aviso('erro', 'Não foi possível gerar os dados de teste: ' . mb_substr($e->getMessage(), 0, 300) . ' (nada foi gravado).');
+            redirecionar('/sistema/dados-de-teste');
+        }
         Sessao::aviso('sucesso', "Movimento simulado gerado: {$c['ligacoes']} ligações, {$c['contatos']} contatos, {$c['tarefas']} retornos, {$c['pedidos']} pedidos, "
             . "{$c['cobrancas']} casos de cobrança, {$c['ordens']} ordens e {$c['posts']} posts" . ($c['clientes'] ? " (e {$c['clientes']} clientes de teste)." : '.'));
         redirecionar('/sistema/dados-de-teste');
@@ -29,7 +35,13 @@ class SimuladorController extends Controller
             Sessao::aviso('erro', 'Para apagar, digite APAGAR no campo de confirmação.');
             redirecionar('/sistema/dados-de-teste');
         }
-        $c = S::apagar(Auth::id());
+        try {
+            $c = S::apagar(Auth::id());
+        } catch (\Throwable $e) {
+            error_log((string) $e);
+            Sessao::aviso('erro', 'Não foi possível apagar: ' . mb_substr($e->getMessage(), 0, 300));
+            redirecionar('/sistema/dados-de-teste');
+        }
         Sessao::aviso('sucesso', 'Dados simulados apagados (' . array_sum($c) . ' registros). Um backup do banco foi feito antes. O que a equipe fez de verdade continua.');
         redirecionar('/sistema/dados-de-teste');
     }

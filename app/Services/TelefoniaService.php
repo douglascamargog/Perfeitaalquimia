@@ -100,8 +100,10 @@ class TelefoniaService
         if (strlen($fim) < 8) {
             return null;
         }
-        $id = Banco::valor("SELECT id FROM clientes WHERE excluido_em IS NULL AND (RIGHT(REGEXP_REPLACE(COALESCE(telefone,''), '[^0-9]', ''), 8) = ?
-            OR RIGHT(REGEXP_REPLACE(COALESCE(whatsapp,''), '[^0-9]', ''), 8) = ?) ORDER BY ultima_compra_em DESC LIMIT 1", [$fim, $fim]);
+        // Só dígitos com REPLACE (o MySQL 5.7 da hospedagem não tem REGEXP_REPLACE)
+        $digitos = fn(string $c) => "RIGHT(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE($c, ''), ' ', ''), '-', ''), '(', ''), ')', ''), '+', ''), '.', ''), 8)";
+        $id = Banco::valor('SELECT id FROM clientes WHERE excluido_em IS NULL AND (' . $digitos('telefone') . ' = ? OR ' . $digitos('whatsapp') . ' = ?)
+            ORDER BY ultima_compra_em DESC LIMIT 1', [$fim, $fim]);
         return $id ? (int) $id : null;
     }
 
