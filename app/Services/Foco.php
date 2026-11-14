@@ -20,6 +20,7 @@ class Foco
         'marketing' => 'Marketing (posts, campanhas, e-commerce, leads)',
         'producao'  => 'Produção',
         'terceirizacao' => 'Terceirização (produtos dos clientes e rótulos)',
+        'desenvolvimento' => 'Desenvolvimento de Produto (projetos esperando a sua etapa)',
         'diretoria' => 'Diretoria (resumo da empresa: faturado, aprovação, cobrança, produção)',
     ];
 

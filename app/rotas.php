@@ -164,6 +164,15 @@ return [
     ['POST', '/telefonia/testar',                   'AcompanhamentoController@testar',   'integracao.gerenciar'],
     ['POST', '/telefonia/sincronizar',              'AcompanhamentoController@sincronizar', 'integracao.gerenciar'],
 
+    // ---------- Desenvolvimento de Produto ----------
+    ['GET',  '/desenvolvimento',                    'DesenvolvimentoController@index',   'desenvolvimento.ver|desenvolvimento.gerenciar'],
+    ['POST', '/desenvolvimento',                    'DesenvolvimentoController@criar',   'desenvolvimento.gerenciar'],
+    ['GET',  '/desenvolvimento/minhas',             'DesenvolvimentoController@minhas',  'logado'],
+    ['GET',  '/desenvolvimento/etapas',             'DesenvolvimentoController@etapas',  'config.gerenciar'],
+    ['POST', '/desenvolvimento/etapas',             'DesenvolvimentoController@salvarEtapas', 'config.gerenciar'],
+    ['GET',  '/desenvolvimento/{id}',               'DesenvolvimentoController@ver',     'desenvolvimento.ver|desenvolvimento.gerenciar'],
+    ['POST', '/desenvolvimento/{id}/{acao}',        'DesenvolvimentoController@acao',    'desenvolvimento.ver|desenvolvimento.gerenciar'],
+
     // ---------- Painel de vendas, metas e recompra ----------
     ['GET',  '/painel',                 'PainelController@index',    'painel.ver'],
     ['GET',  '/painel/exportar.csv',    'PainelController@exportar', 'painel.ver'],

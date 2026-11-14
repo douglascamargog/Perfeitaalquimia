@@ -52,7 +52,7 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   await p.goto(BASE + '/academia/produtos/' + omega + '?aba=treinamento');
   ok(await p.locator('.capitulo').count() === 16, 'treinamento técnico do Ômega 3 com 16 capítulos');
   // Todas as fichas abrem e todas as fotos existem
-  const slugs = sql('select slug from produtos').split('\n');
+  const slugs = sql('select slug from produtos where ativo = 1').split('\n');
   let fichasOk = 0;
   for (const s of slugs) { const r = await p.request.get(BASE + '/academia/produtos/' + s); if (r.ok() && (await r.text()).includes('Conheça o produto')) fichasOk++; }
   ok(fichasOk === slugs.length, `as ${slugs.length} fichas de produto abrem`);

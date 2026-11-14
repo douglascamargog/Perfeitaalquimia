@@ -1,0 +1,49 @@
+/* Desenvolvimento de Produto */
+.dp-filtros { margin: 0 0 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--borda); background: #fff; border-radius: 999px; padding: 6px 12px; font-size: .78rem; color: var(--primaria-escura); text-decoration: none; }
+a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lima); border-color: var(--primaria-escura); }
+.dp-quadro { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 10px; }
+.dp-coluna { background: var(--primaria-clara); border-radius: 14px; padding: 10px; display: grid; gap: 8px; align-content: start; min-height: 140px; }
+.dp-coluna header { display: grid; gap: 2px; padding: 2px 4px 6px; }
+.dp-coluna header strong { font-size: .82rem; color: var(--primaria-escura); }
+.dp-coluna header small { font-size: .7rem; color: var(--texto-suave); }
+.dp-cartao { display: grid; gap: 4px; background: #fff; border: 1px solid var(--borda); border-radius: 12px; padding: 10px 12px; text-decoration: none; color: var(--texto); }
+.dp-cartao:hover { border-color: var(--secundaria); }
+.dp-cartao strong { color: var(--primaria-escura); font-size: .88rem; }
+.dp-cartao small { font-size: .72rem; color: var(--texto-suave); }
+.dp-cartao.atrasado { border-left: 4px solid var(--perigo); }
+.dp-cartao.pausado { opacity: .65; }
+.dp-atraso { color: var(--perigo) !important; font-weight: 700; }
+.dp-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.dp-tarefa { display: grid; gap: 6px; }
+.dp-linha { list-style: none; margin: 0 0 16px; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(110px, 1fr); gap: 6px; overflow-x: auto; }
+.dp-linha li { display: grid; gap: 2px; padding: 10px; border-radius: 12px; background: #fff; border: 1px solid var(--borda); font-size: .75rem; }
+.dp-linha li b { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--primaria-clara); font-size: .7rem; }
+.dp-linha li span { font-weight: 700; color: var(--primaria-escura); }
+.dp-linha li small { color: var(--texto-suave); }
+.dp-linha li.concluida { background: var(--sucesso-fundo); border-color: transparent; }
+.dp-linha li.concluida b { background: var(--sucesso); color: #fff; }
+.dp-linha li.andamento { border: 2px solid var(--secundaria); }
+.dp-linha li.andamento b { background: var(--secundaria); }
+.dp-atual { display: grid; gap: 8px; }
+.dp-atual h2 { margin: 0; }
+.dp-falta { margin: 0; padding-left: 18px; color: var(--aviso); }
+.dp-ok { color: var(--sucesso); font-weight: 600; margin: 0; }
+.dp-inline { display: flex !important; flex-wrap: wrap; gap: 10px; align-items: end; }
+.dp-inline label { min-width: 180px; }
+.dp-inline > input { flex: 1; min-width: 200px; }
+.dp-concluir { border-top: 1px solid var(--borda); padding-top: 12px; }
+.dp-compras { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.dp-compras li { display: flex; gap: 10px; align-items: center; font-size: .88rem; }
+.dp-compras form { margin: 0; }
+.dp-check { width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--borda); background: #fff; cursor: pointer; font-weight: 800; color: #fff; }
+.dp-check.ok { background: var(--sucesso); border-color: var(--sucesso); }
+.dp-duas { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin-top: 14px; }
+.dp-duas .card { margin: 0; }
+.dp-historico { margin-top: 12px; max-height: 420px; overflow: auto; }
+.dp-historico li.etapa strong, .dp-historico li.aprovacao strong { color: var(--primaria-escura); }
+.ct-dialogo { border: 0; border-radius: var(--raio); padding: 20px; width: min(560px, calc(100vw - 32px)); }
+.ct-dialogo::backdrop { background: rgba(0, 0, 0, .35); }
+.ac-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: .85rem; }
+.ac-lista time { color: var(--texto-suave); font-size: .78rem; }

@@ -23,6 +23,8 @@ $contador = ['ficha' => count($ficha['materia_prima']), 'embalagens' => count($f
     </p>
     <?php if ($p['chamada']): ?><p class="pd-chamada"><?= e($p['chamada']) ?></p><?php endif; ?>
     <div class="pd-selos">
+      <?php if (!$p['ativo']): $dp = \App\Core\Banco::um('SELECT id, situacao FROM dp_projetos WHERE produto_id = ? ORDER BY id DESC LIMIT 1', [$p['id']]); ?>
+        <a class="pd-selo falta" href="<?= url('/desenvolvimento/' . (int) ($dp['id'] ?? 0)) ?>">Em desenvolvimento — ver o projeto</a><?php endif; ?>
       <span class="pd-selo <?= $p['visivel_catalogo'] ? 'ok' : 'cinza' ?>"><?= $p['visivel_catalogo'] ? 'Aparece no catálogo' : 'Oculto no catálogo' ?></span>
       <span class="pd-selo <?= $contador['ficha'] ? 'ok' : 'falta' ?>"><?= $contador['ficha'] ? 'Ficha técnica preenchida' : 'Sem ficha técnica' ?></span>
       <?php if ($vencendo): ?><span class="pd-selo falta"><?= $vencendo ?> documento(s) vencido(s) ou vencendo</span><?php endif; ?>

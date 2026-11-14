@@ -26,6 +26,7 @@ class ProdutoService
         'certificado'  => 'Certificado',
         'especificacao' => 'Especificação técnica',
         'rotulo'       => 'Arte do rótulo',
+        'prova'        => 'Prova da gráfica',
         'outro'        => 'Outro',
     ];
 
@@ -133,7 +134,8 @@ class ProdutoService
                    ea.quantidade AS estoque_fabrica, ea.minimo AS minimo_fabrica
               FROM produtos p LEFT JOIN categorias c ON c.id = p.categoria_id LEFT JOIN midias m ON m.id = p.imagem_id
               LEFT JOIN produto_estoque e ON e.produto_id = p.id LEFT JOIN estoque_acabado ea ON ea.produto_id = p.id
-             WHERE p.slug = ? AND p.ativo = 1', [$slug]);
+             WHERE p.slug = ? AND (p.ativo = 1 OR EXISTS (SELECT 1 FROM dp_projetos dp WHERE dp.produto_id = p.id))', [$slug]);
+        // (ativo = 0 com projeto: produto em Desenvolvimento, preenchido pelas áreas antes do lançamento)
         if (!$p) {
             return null;
         }

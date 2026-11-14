@@ -17,6 +17,19 @@
  */
 return [
     [
+        'versao' => '8.0', 'data' => '2026-11-14', 'titulo' => 'Desenvolvimento de Produto',
+        'novo' => [
+            'Setor novo no menu: Desenvolvimento de Produto. Cada produto novo vira um projeto que passa por etapas, do briefing ao lançamento.',
+            'Cada área faz a sua parte: a Responsável Técnica cuida da formulação, da ficha técnica e da rotulagem, o Marketing cria o rótulo, a Qualidade cuida do código de barras, das compras, da gráfica e do recebimento dos rótulos, e a Produção faz o lote piloto.',
+            'A prova da gráfica é aprovada pelo Marketing e pela Qualidade. "Pedir ajuste" volta para a criação do rótulo com o comentário.',
+            'Os rótulos recebidos entram sozinhos no estoque. No lançamento o produto aparece no catálogo (ou, se for de terceirização, nos produtos do cliente).',
+            'Minhas tarefas: os projetos esperando a sua área, com aviso no sino.',
+        ],
+        'admin' => [
+            'Coloque o funcionário "coringa" na função nova Qualidade (ele pode continuar também no Marketing). As etapas, a função de cada uma e quem aprova ficam em Administração › Etapas do desenvolvimento.',
+        ],
+    ],
+    [
         'versao' => '7.2', 'data' => '2026-11-14', 'titulo' => 'Correção dos dados de teste',
         'correcao' => [
             'Gerar os dados de teste não dá mais erro, e ficou bem mais rápido.',

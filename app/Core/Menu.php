@@ -6,7 +6,7 @@ class Menu
 {
     /** Ícone de cada grupo (submenu) que não é setor de venda */
     private const ICONES_GRUPO = ['Financeiro' => 'moeda', 'Gestão' => 'grafico', 'Marketing' => 'megafone', 'Produtos' => 'caixa',
-        'Produção' => 'fabrica', 'Administração' => 'engrenagem', 'Vendas' => 'pessoas', 'Comercial' => 'pessoas'];
+        'Produção' => 'fabrica', 'Administração' => 'engrenagem', 'Vendas' => 'pessoas', 'Comercial' => 'pessoas', 'Desenvolvimento' => 'faisca'];
 
     /**
      * Monta o menu lateral em grupos que abrem e fecham (submenus).

@@ -78,6 +78,10 @@ class PendenciasService
         if ($pode('produtos.tecnico') && Foco::tem('producao')) {
             $r['/produtos'] = count(ProdutoService::documentosVencendo(99));
         }
+        // Desenvolvimento: projetos esperando a etapa (ou a aprovação) de uma função da pessoa
+        if (($pode('desenvolvimento.ver') || $pode('desenvolvimento.gerenciar')) && Foco::tem('desenvolvimento')) {
+            $r['/desenvolvimento/minhas'] = DesenvolvimentoService::qtdMinhas($id);
+        }
         // Terceirização: rótulos de clientes abaixo do mínimo ou que não dão para as ordens planejadas
         if (($pode('terceirizacao.ver') || $pode('terceirizacao.editar')) && Foco::tem('terceirizacao')) {
             $r['/terceirizacao'] = count(\App\Services\TerceirizacaoService::alertas());

@@ -318,7 +318,8 @@ class ProducaoService
     {
         $produtoId = (int) ($d['produto_id'] ?? 0);
         $qtd = (int) ($d['quantidade'] ?? 0);
-        if (!Banco::valor('SELECT 1 FROM produtos WHERE id = ? AND ativo = 1', [$produtoId])) {
+        // Produto ativo, ou produto novo em Desenvolvimento (lote piloto)
+        if (!Banco::valor("SELECT 1 FROM produtos WHERE id = ? AND (ativo = 1 OR EXISTS (SELECT 1 FROM dp_projetos dp WHERE dp.produto_id = produtos.id AND dp.situacao = 'andamento'))", [$produtoId])) {
             throw new RuntimeException('Escolha o produto.');
         }
         if ($qtd < 1 || $qtd > 1000000) {

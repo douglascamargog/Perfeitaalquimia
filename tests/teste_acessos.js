@@ -21,7 +21,7 @@ const MURAL = 'Mural de posts e Planejamento';
 
   // O admin trabalha no Marketing (função Marketing, sem escolha pessoal de foco)
   const admId = sql("select id from usuarios where email='admin@demo.local'");
-  sql(`insert ignore into usuario_funcoes (usuario_id, funcao_id) select ${admId}, id from funcoes where areas_foco='marketing' limit 1`);
+  sql(`insert ignore into usuario_funcoes (usuario_id, funcao_id) select ${admId}, id from funcoes where slug='marketing' limit 1`);
   sql(`update usuarios set areas_foco=null where id=${admId}`);
   await entrar(adm, 'admin@demo.local');
 

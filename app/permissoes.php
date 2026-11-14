@@ -50,6 +50,8 @@ return [
     'produtos.ver'            => ['Ver os produtos sem alterar', []],
     'carteiras.gerenciar'     => ['Gestão › Carteiras: criar carteiras, passar para outra pessoa, mover e importar clientes', ['gestor']],
     'acompanhamento.ver'      => ['Gestão › Acompanhamento: ligações, gravações, contatos e reativações de cada vendedor(a)', ['gestor']],
+    'desenvolvimento.ver'     => ['Ver o Desenvolvimento de Produto (projetos e etapas)', []],
+    'desenvolvimento.gerenciar' => ['Criar, pausar e voltar etapas de projetos de produto novo', []],
     'produtos.tecnico'        => ['Preencher a parte técnica dos produtos (composição, ficha técnica, embalagens e documentos)', []],
     'mensagens.ver'           => ['Ver as mensagens prontas sem alterar', []],
     'usuarios.gerenciar'      => ['Cadastrar usuários e funções', []],

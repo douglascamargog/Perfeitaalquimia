@@ -40,6 +40,9 @@ return [
             ['Academia', 'academia.ver', 'academia.editar', ''],
             ['Mensagens prontas', 'mensagens.ver', 'mensagens.gerenciar', 'Usar as mensagens na ficha do cliente fica nas ações especiais'],
         ],
+        'Desenvolvimento de Produto' => [
+            ['Projetos de produto novo', 'desenvolvimento.ver', 'desenvolvimento.gerenciar', 'Editar: criar, pausar e voltar etapa. Cada etapa é concluída por quem é da função dela (Técnica, Marketing, Qualidade, Produção).'],
+        ],
         'Produção' => [
             ['Produção e matérias-primas', 'producao.ver', 'producao.gerenciar', ''],
         ],

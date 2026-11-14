@@ -72,6 +72,12 @@ class OneAssistente
             $falas[] = ['humor' => 'ops', 'texto' => count($docs) . ' documento(s) de produto vencido(s) ou vencendo (o primeiro: ' . $docs[0]['titulo'] . ' — ' . $docs[0]['produto'] . ', ' . data_br($docs[0]['validade']) . ').',
                 'link' => '/produtos?situacao=vencendo', 'acao' => 'Ver documentos'];
         }
+        // Desenvolvimento de Produto: projetos esperando a pessoa
+        if ((Auth::pode('desenvolvimento.ver') || Auth::pode('desenvolvimento.gerenciar')) && Foco::tem('desenvolvimento')
+            && ($dp = DesenvolvimentoService::minhas((int) Auth::id()))) {
+            $falas[] = ['humor' => 'ideia', 'texto' => count($dp) . ' projeto(s) de produto novo esperando você (ex.: "' . $dp[0]['nome'] . '", etapa ' . $dp[0]['etapa'] . ').',
+                'link' => '/desenvolvimento/minhas', 'acao' => 'Ver minhas tarefas'];
+        }
         // Terceirização: rótulos de clientes que não dão para produzir
         if ((Auth::pode('terceirizacao.ver') || Auth::pode('terceirizacao.editar')) && Foco::tem('terceirizacao')
             && ($rot = \App\Services\TerceirizacaoService::alertas())) {
