@@ -19,6 +19,7 @@ class ListaController extends Controller
         'origens'   => ['tabela' => 'origens',      'ativo' => 'ativo', 'titulo' => 'Origens'],
         'cobranca'  => ['tabela' => 'cobranca_etapas', 'ativo' => 'ativa', 'titulo' => 'Funil de cobrança'],
         'posts'     => ['tabela' => 'mkt_post_etapas', 'ativo' => 'ativa', 'titulo' => 'Etapas dos posts'],
+        'mkt_tipos' => ['tabela' => 'mkt_tipos',    'ativo' => 'ativo', 'titulo' => 'Tipos de tarefa do Marketing'],
     ];
     public const TIPOS_ETAPA = ['aberta' => 'Em andamento', 'ganho' => 'Ganho (cliente)', 'perdido' => 'Perdido', 'inativo' => 'Inativo'];
     /** Tipos das etapas da cobrança: os de encerramento (pago, acordo, jurídico, perda) fecham o caso */
@@ -40,7 +41,10 @@ class ListaController extends Controller
             'posts'     => Listas::etapasPosts(false),
             'usos'      => ['etapas' => $contar('etapa_id'), 'segmentos' => $contar('segmento_id'), 'origens' => $contar('origem_id'),
                 'cobranca' => array_column(Banco::todos("SELECT etapa_id AS id, COUNT(*) AS total FROM cobrancas WHERE situacao = 'aberta' GROUP BY etapa_id"), 'total', 'id'),
-                'posts'    => array_column(Banco::todos('SELECT etapa_id AS id, COUNT(*) AS total FROM mkt_posts GROUP BY etapa_id'), 'total', 'id')],
+                'posts'    => array_column(Banco::todos('SELECT etapa_id AS id, COUNT(*) AS total FROM mkt_posts GROUP BY etapa_id'), 'total', 'id'),
+                'mkt_tipos' => array_column(Banco::todos('SELECT tipo_id AS id, COUNT(*) AS total FROM mkt_tarefas GROUP BY tipo_id'), 'total', 'id')],
+            'mktTipos'  => Banco::todos('SELECT * FROM mkt_tipos ORDER BY ordem, nome'),
+            'funcoesLista' => Banco::todos('SELECT slug, nome FROM funcoes WHERE ativa = 1 ORDER BY nome'),
             'tipos'     => self::TIPOS_ETAPA,
             'tiposCobranca' => self::TIPOS_COBRANCA,
             'tiposPost' => self::TIPOS_POST,
@@ -93,6 +97,10 @@ class ListaController extends Controller
         $dados = ['nome' => $nome, self::LISTAS[$lista]['ativo'] => $antes === null || isset($_POST['ativo']) ? 1 : 0];
         if ($lista !== 'origens') {
             $dados['ordem'] = (int) $this->campo('ordem', (string) ($antes['ordem'] ?? 99));
+        }
+        if ($lista === 'mkt_tipos') { // função que recebe as tarefas deste tipo
+            $funcao = $this->campo('funcao_slug');
+            $dados['funcao_slug'] = Banco::valor('SELECT 1 FROM funcoes WHERE slug = ?', [$funcao]) ? $funcao : ($antes['funcao_slug'] ?? 'gestor_marketing');
         }
         if (in_array($lista, ['etapas', 'cobranca', 'posts'], true)) {
             $tipos = ['etapas' => self::TIPOS_ETAPA, 'cobranca' => self::TIPOS_COBRANCA, 'posts' => self::TIPOS_POST][$lista];

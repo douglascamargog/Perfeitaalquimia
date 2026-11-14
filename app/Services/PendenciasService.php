@@ -70,6 +70,9 @@ class PendenciasService
             $tipo = $pode('marketing.aprovar') ? 'aprovacao' : 'ajuste';
             $r['/marketing'] = (int) Banco::valor('SELECT COUNT(*) FROM mkt_posts p JOIN mkt_post_etapas e ON e.id = p.etapa_id WHERE e.tipo = ?', [$tipo]);
         }
+        if (($pode('marketing.editar') || $pode('marketing.aprovar')) && Foco::tem('marketing')) {
+            $r['/marketing/inicio'] = MarketingTarefaService::pendentes($id); // atrasadas/urgentes das minhas funções + aprovações
+        }
         if ($pode('producao.gerenciar') && Foco::tem('producao')) {
             $a = ProducaoService::alertas();
             $r['/producao'] = $a['mp_abaixo'] + $a['reabastecer'];

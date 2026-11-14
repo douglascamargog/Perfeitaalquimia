@@ -1,7 +1,7 @@
 <?php
 /**
  * Cabeçalho comum do Marketing: título, navegação de mês e abas.
- * Variáveis: $aba ('mural'|'feed'|'planejamento'|'ecommerce'), $mes (AAAA-MM), $titulo, $subtitulo, $acoes (HTML opcional)
+ * Variáveis: $aba ('inicio'|'mural'|'feed'|'planejamento'|'ecommerce'), $mes (AAAA-MM), $titulo, $subtitulo, $acoes (HTML opcional)
  */
 use App\Core\Auth;
 
@@ -10,9 +10,11 @@ $nomeMes = ucfirst($meses[(int) substr($mes, 5, 2) - 1]) . ' ' . substr($mes, 0,
 $anterior = date('Y-m', strtotime("$mes-01 -1 month"));
 $proximo = date('Y-m', strtotime("$mes-01 +1 month"));
 $links = array_filter([
+    'inicio' => Auth::pode('marketing.editar') || Auth::pode('marketing.aprovar') ? ['Início', '/marketing/inicio'] : null,
     'mural' => Auth::pode('marketing.ver') ? ['Mural', '/marketing'] : null,
     'feed' => Auth::pode('marketing.ver') ? ['Prévia do feed', '/marketing/feed'] : null,
-    'planejamento' => Auth::pode('marketing.ver') ? ['Planejamento', '/marketing/planejamento'] : null,
+    // Planejamento: guardado por enquanto (continua abrindo pelo link /marketing/planejamento)
+    'planejamento' => $aba === 'planejamento' ? ['Planejamento', '/marketing/planejamento'] : null,
     'ecommerce' => Auth::pode('ecommerce.ver') ? ['E-commerce', '/marketing/ecommerce'] : null,
 ]);
 $caminho = $links[$aba][1] ?? '/marketing';

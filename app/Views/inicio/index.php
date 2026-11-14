@@ -32,7 +32,7 @@ $maxSemana = max(1, ...array_column($semana ?: [['total' => 1]], 'total'));
 // Atalhos do topo (conforme o perfil; a diretoria tem os seus)
 $focos = $p['focos'];
 $atalhosFoco = [ // atalhos da área principal da pessoa (quando não é do comercial)
-    'marketing' => [['Mural de posts', '/marketing', 'calendario', 'marketing.ver'], ['Planejamento', '/marketing/planejamento', 'alvo', 'marketing.ver'], ['Leads do site', '/leads', 'pessoas', 'leads.ver']],
+    'marketing' => [['Início do Marketing', '/marketing/inicio', 'casa', 'marketing.ver'], ['Mural de posts', '/marketing', 'calendario', 'marketing.ver'], ['E-commerce', '/marketing/ecommerce', 'carrinho', 'ecommerce.ver']],
     'producao'  => [['Produção', '/producao', 'fabrica', 'producao.ver'], ['Ordens de produção', '/producao/ordens', 'check', 'producao.ver'], ['Matérias-primas', '/producao/materias', 'caixa', 'producao.ver']],
     'aprovacao' => [['Aprovação', '/aprovacao', 'check', 'pedidos.aprovar'], ['Pedidos', '/pedidos', 'carrinho', 'pedidos.ver_todos'], ['Cobrança', '/cobranca', 'alerta', 'cobranca.ver']],
     'cobranca'  => [['Cobrança', '/cobranca', 'alerta', 'cobranca.ver'], ['Aprovação', '/aprovacao', 'check', 'pedidos.aprovar'], ['Pedidos', '/pedidos', 'carrinho', 'pedidos.ver_todos']],
@@ -60,6 +60,7 @@ $atalhos = $principal && isset($atalhosFoco[$principal])
         <?php foreach (array_slice($atalhos, 0, 3) as $i => [$rotulo, $link, $icone]): ?>
           <a class="<?= $i === 0 ? 'b-atalho-forte' : '' ?>" href="<?= url($link) ?>"><svg class="icone"><use href="<?= $icones ?>#<?= $icone ?>"/></svg><?= e($rotulo) ?></a>
         <?php endforeach; ?>
+        <?php if ($principal !== 'marketing'): ?><a href="<?= url('/marketing/pedir') ?>" data-pedir-marketing><svg class="icone"><use href="<?= $icones ?>#conversa"/></svg>Pedir ao Marketing</a><?php endif; ?>
       </div>
     </div>
     <img class="b-hero-one" src="<?= asset('img/one/one-' . e($saudacao['humor']) . '-invertido.svg') ?>" alt="One, o ajudante" width="170" height="187">

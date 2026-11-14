@@ -77,7 +77,9 @@ a.b-chip:hover { background: var(--lima); }
 .mk-fluxo details form { display: grid; gap: 8px; margin-top: 8px; }
 .mk-ajuste { margin-bottom: 12px; }
 .mk-previa { display: grid; gap: 8px; margin-bottom: 12px; }
-.mk-previa img { width: 100%; max-height: 380px; object-fit: cover; border-radius: 16px; background: var(--primaria-clara); }
+.mk-previa img { display: block; width: 100%; height: auto; max-height: 75vh; object-fit: contain; border-radius: 16px; background: var(--primaria-clara); cursor: zoom-in; }
+.mk-previa a.mk-previa-imagem { display: block; position: relative; }
+.mk-previa a.mk-previa-imagem::after { content: "⤢ ver inteira"; position: absolute; right: 10px; bottom: 10px; font-size: .72rem; font-weight: 700; color: #fff; background: #0009; padding: 3px 9px; border-radius: 99px; }
 .mk-comentar { display: flex; gap: 8px; margin-bottom: 12px; }
 .mk-comentar input { flex: 1; }
 .mk-legenda-texto { white-space: normal; font-size: .9rem; }
@@ -159,3 +161,84 @@ a.b-chip:hover { background: var(--lima); }
   .mk-barra, .acoes, .mk-aviso-simulado { display: none !important; }
   .b-card { break-inside: avoid; box-shadow: none; }
 }
+
+/* =====================================================================
+   Início do Marketing (V10.1): resumo, quadro de tarefas e mini calendário
+   ===================================================================== */
+.mt-resumo { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.mt-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.mt-quadro-topo { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.mt-quadro-topo h2 { margin: 0; }
+.mt-filtro { display: inline-flex; background: var(--card); border: 1px solid var(--borda); border-radius: 99px; padding: 3px; }
+.mt-filtro a { padding: 6px 14px; border-radius: 99px; text-decoration: none; color: var(--texto-suave); font-weight: 600; font-size: .85rem; }
+.mt-filtro a.ativo { background: var(--verde-escuro); color: var(--lima); }
+.mt-colunas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.mt-coluna { background: var(--primaria-clara); border-radius: 20px; padding: 10px; display: grid; gap: 8px; min-height: 120px; }
+.mt-coluna h3 { margin: 2px 4px 4px; font-size: .92rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.mt-coluna h3 b { background: var(--card); border-radius: 99px; padding: 0 8px; font-size: .78rem; }
+.mt-coluna h3 small { width: 100%; font-weight: 400; color: var(--texto-suave); font-size: .74rem; }
+.mt-fazendo { box-shadow: inset 0 4px 0 #f59e0b; }
+.mt-a_fazer { box-shadow: inset 0 4px 0 #38bdf8; }
+.mt-aprovacao { box-shadow: inset 0 4px 0 #a78bfa; }
+.mt-feito { box-shadow: inset 0 4px 0 #16a34a; }
+.mt-vazio { margin: 6px 4px; font-size: .82rem; color: var(--texto-suave); }
+.mt-cartao { background: var(--card); border: 1px solid var(--borda); border-radius: 14px; padding: 10px 12px; display: grid; gap: 6px; box-shadow: var(--sombra); }
+.mt-cartao.urgente { border-color: #f87171; }
+.mt-cartao.atrasada .mt-prazo { color: var(--perigo); font-weight: 700; }
+.mt-cartao.mt-post { border-left: 4px solid #a78bfa; }
+.mt-cartao.mt-projeto { border-left: 4px solid var(--lima-escuro); }
+.mt-titulo { font-weight: 700; color: var(--texto); text-decoration: none; line-height: 1.25; overflow-wrap: anywhere; }
+.mt-titulo:hover { text-decoration: underline; }
+.mt-meta { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font-size: .74rem; }
+.mt-etiqueta { background: var(--primaria-clara); color: var(--primaria-escura); border-radius: 99px; padding: 1px 8px; font-weight: 600; }
+.mt-etiqueta.post { background: #ede9fe; color: #5b21b6; }
+.mt-etiqueta.projeto { background: var(--secundaria-clara); }
+.mt-etiqueta.urgente { background: var(--perigo-fundo); color: var(--perigo); }
+.mt-prazo { color: var(--texto-suave); }
+.mt-quem { color: var(--texto-suave); font-size: .74rem; }
+.mt-acoes { display: flex; flex-wrap: wrap; gap: 4px; }
+.mt-acoes form { margin: 0; }
+.mt-acoes .botao.pequeno { padding: 4px 10px; font-size: .74rem; }
+.selo.azul { background: #e0f2fe; color: #0369a1; }
+.selo.roxo { background: #ede9fe; color: #5b21b6; }
+.selo.laranja { background: var(--aviso-fundo); color: var(--aviso); }
+.selo.verde { background: var(--sucesso-fundo); color: var(--sucesso); }
+
+.mt-calendario { position: sticky; top: 16px; display: grid; gap: 8px; }
+.mt-calendario h2 { margin: 0; }
+.mt-cal-grade { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.mt-cal-dsem { text-align: center; font-size: .7rem; font-weight: 700; color: var(--texto-suave); }
+.mt-cal-dia { position: relative; aspect-ratio: 1; border: 0; border-radius: 10px; background: transparent; cursor: pointer; display: grid; align-content: center; justify-items: center; gap: 2px; font: inherit; font-size: .82rem; color: var(--texto); padding: 0; }
+.mt-cal-dia:hover, .mt-cal-dia.escolhido { background: var(--primaria-clara); }
+.mt-cal-dia.fora { opacity: .35; }
+.mt-cal-dia.hoje span { background: var(--verde-escuro); color: var(--lima); border-radius: 99px; width: 24px; height: 24px; display: grid; place-items: center; font-weight: 700; }
+.mt-pontos { display: flex; gap: 2px; height: 5px; font-style: normal; }
+.mt-pontos b, .mt-legenda b { width: 5px; height: 5px; border-radius: 50%; background: var(--c, #a78bfa); display: inline-block; }
+.mt-pontos b.prazo, .mt-legenda b.prazo { background: #ef4444; }
+.mt-data { position: absolute; top: 1px; right: 3px; font-size: .55rem; color: #d97706; font-style: normal; }
+.mt-legenda { margin: 0; font-size: .72rem; color: var(--texto-suave); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.mt-legenda em { color: #d97706; font-style: normal; }
+.mt-cal-lista ul { margin: 6px 0 0; padding-left: 0; list-style: none; display: grid; gap: 4px; font-size: .85rem; }
+.mt-dialogo { border: 0; border-radius: 22px; padding: 20px; width: min(560px, calc(100vw - 32px)); box-shadow: var(--sombra); }
+.mt-dialogo::backdrop { background: #0006; }
+.mt-dialogo h2 { margin-top: 0; }
+
+/* Pedir ao Marketing e página da tarefa */
+.mt-pedir { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.mt-pedir h2 { margin-top: 0; }
+.mt-pedir .pr-titulo-tabela { padding: 16px 16px 4px; margin: 0; }
+.mt-urgente { align-self: end; padding-bottom: 10px; }
+.mt-pagina { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.mt-descricao { white-space: normal; line-height: 1.5; }
+.mt-anexo-img { display: block; max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 14px; background: var(--primaria-clara); }
+.mt-comentar { margin-bottom: 10px; }
+.mt-botoes form { margin: 0; }
+.mt-decidir { border: 2px solid #a78bfa; }
+
+@media (max-width: 1640px) { .mt-colunas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1200px) { .mt-resumo { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 980px) {
+  .mt-layout, .mt-pedir, .mt-pagina { grid-template-columns: minmax(0, 1fr); }
+  .mt-calendario { position: static; order: -1; }
+}
+@media (max-width: 600px) { .mt-colunas, .mt-resumo { grid-template-columns: minmax(0, 1fr); } }

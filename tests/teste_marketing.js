@@ -18,8 +18,8 @@ const etapaDo = (id) => sql(`select e.tipo from mkt_posts p join mkt_post_etapas
   await p.route('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/**', r => r.fulfill({ path: RECURSOS + '/chart.umd.js', contentType: 'text/javascript' }));
   await p.route('https://api.open-meteo.com/**', r => r.fulfill({ json: {} }));
 
-  // ---------- Marketing cria post ----------
-  await entrar(p, 'marketing@demo.local');
+  // ---------- Social Media (Marketing, sem aprovar) cria post ----------
+  await entrar(p, 'social@demo.local');
   ok(await p.locator('nav a', { hasText: 'Mural de posts' }).count() === 1, 'Marketing vê "Mural de posts" no menu');
   await p.goto(BASE + '/marketing');
   ok(await p.locator('.mk-post').count() >= 20, 'mural mostra os posts do mês (' + await p.locator('.mk-post').count() + ')');
@@ -84,7 +84,7 @@ const etapaDo = (id) => sql(`select e.tipo from mkt_posts p join mkt_post_etapas
   await sair(p);
 
   // ---------- Marketing: editar legenda tira a aprovação; publicar ----------
-  await entrar(p, 'marketing@demo.local');
+  await entrar(p, 'social@demo.local');
   await p.goto(BASE + '/marketing');
   await p.evaluate((i) => window.Carteira.abrirCliente(i), id); await p.waitForSelector('#pt-legenda');
   await p.fill('#pt-legenda', 'Legenda mudada depois da aprovação');

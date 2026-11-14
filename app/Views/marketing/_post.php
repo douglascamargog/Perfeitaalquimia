@@ -65,7 +65,7 @@ $acao = $id ? url("/marketing/posts/$id") : url('/marketing/posts');
   <!-- Prévia -->
   <?php if ($p['imagem'] || $p['legenda']): ?>
     <section class="mk-previa">
-      <?php if ($p['imagem']): ?><img src="<?= url('/' . $p['imagem']) ?>" alt="Imagem do post"><?php endif; ?>
+      <?php if ($p['imagem']): ?><a class="mk-previa-imagem" href="<?= url('/' . $p['imagem']) ?>" target="_blank" rel="noopener" title="Abrir a imagem inteira"><img src="<?= url('/' . $p['imagem']) ?>" alt="Imagem do post"></a><?php endif; ?>
       <div class="ficha-acoes">
         <?php if ($p['legenda']): ?><button class="botao contorno pequeno" type="button" data-copiar-texto="<?= e(trim($p['legenda'] . "\n\n" . $p['hashtags'])) ?>">Copiar legenda</button><?php endif; ?>
         <?php if ($p['imagem']): ?><a class="botao contorno pequeno" href="<?= url('/' . $p['imagem']) ?>" download><svg class="icone"><use href="<?= $icones ?>#baixar"/></svg>Baixar imagem</a><?php endif; ?>

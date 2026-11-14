@@ -97,6 +97,14 @@ return [
     ['POST', '/clientes/{id}/contatos-ia/aplicar',  'BuscaContatoController@aplicar', 'contatos.buscar_ia'],
 
     // ---------- Marketing (mural de posts, planejamento, e-commerce) ----------
+    ['GET',  '/marketing/inicio',                  'MarketingTarefaController@inicio', 'marketing.editar|marketing.aprovar'],
+    ['GET',  '/marketing/pedir',                   'MarketingTarefaController@pedir',  'logado'],
+    ['POST', '/marketing/tarefas',                 'MarketingTarefaController@criar',  'logado'],
+    ['GET',  '/marketing/tarefas/{id}',            'MarketingTarefaController@ver',    'logado'],
+    ['GET',  '/marketing/tarefas/{id}/anexo',      'MarketingTarefaController@anexo',  'logado'],
+    ['POST', '/marketing/tarefas/{id}/mudar',      'MarketingTarefaController@mudar',  'logado'],
+    ['POST', '/marketing/tarefas/{id}/comentar',   'MarketingTarefaController@comentar', 'logado'],
+    ['POST', '/marketing/tarefas/{id}/encaminhar', 'MarketingTarefaController@encaminhar', 'marketing.editar'],
     ['GET',  '/marketing',                         'MarketingController@mural',        'marketing.ver'],
     ['GET',  '/marketing/feed',                    'MarketingController@feed',         'marketing.ver'],
     ['GET',  '/marketing/planejamento',            'MarketingController@planejamento', 'marketing.ver'],

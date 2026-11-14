@@ -89,3 +89,7 @@ if (mural) {
     }
   });
 }
+
+// Link direto para um post (avisos do sino, Início do Marketing): /marketing?post=ID abre a janela do post
+const postNaCarga = new URLSearchParams(window.location.search).get('post');
+if (postNaCarga && /^\d+$/.test(postNaCarga)) window.Carteira?.abrirCliente('post-' + postNaCarga, `/marketing/posts/${postNaCarga}`);

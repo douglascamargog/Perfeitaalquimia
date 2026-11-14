@@ -17,6 +17,26 @@
  */
 return [
     [
+        'versao' => '10.1', 'data' => '2026-11-14', 'titulo' => 'Marketing de cara nova',
+        'novo' => [
+            'Pedir ao Marketing: qualquer pessoa pede uma arte, um material, um cadastro na loja, um envio FULL ou uma oferta. O pedido vai direto para quem cuida daquele assunto e você é avisado quando ficar pronto.',
+            'Em "Pedir ao Marketing" você acompanha a situação de cada pedido (a fazer, fazendo, esperando aprovação, feito) e pode trocar recados com o Marketing.',
+            'Início do Marketing: resumo da semana, mini calendário com os posts e os prazos e a lista de tarefas (fazendo agora, a fazer, esperando aprovação e feito).',
+            'Na lista de tarefas também aparecem os posts para aprovar e os rótulos do Desenvolvimento que esperam o Marketing.',
+            'Cada função do Marketing recebe o que é dela: Social Media (posts e artes), Gestor de Marketing (aprovações e rótulos) e E-commerce e Marketplaces (perguntas, campanhas, cadastros, FULL e ofertas relâmpago).',
+        ],
+        'correcao' => [
+            'A imagem do post na aprovação aparece inteira, sem corte (e abre em tamanho real com um clique).',
+            'O aviso de "post para aprovar" agora abre o post direto.',
+        ],
+        'melhoria' => [
+            'Planejamento e Leads do site saíram do menu por enquanto.',
+        ],
+        'admin' => [
+            'Coloque cada pessoa do Marketing na sua função nova (Administração › Pessoas e acessos › Usuários): Social Media, Gestor de Marketing ou E-commerce e Marketplaces. Quem aprova o Marketing precisa da permissão "Aprovar posts". A etapa "Criação do rótulo" do Desenvolvimento passou para o Gestor de Marketing. Qual função recebe cada assunto: Configurações › Listas › Tipos de tarefa do Marketing.',
+        ],
+    ],
+    [
         'versao' => '10.0', 'data' => '2026-11-14', 'titulo' => 'Orçamento por link e modelos de pedido',
         'novo' => [
             'Orçamento para o cliente: no Novo pedido, monte os produtos e toque em "Gerar orçamento". O One cria um link para mandar pelo WhatsApp.',

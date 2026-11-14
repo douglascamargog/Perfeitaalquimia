@@ -1,5 +1,5 @@
 <?php
-/** Listas configuráveis. Variáveis: $etapas, $segmentos, $origens, $cobranca, $posts, $usos, $tipos, $tiposCobranca, $tiposPost */
+/** Listas configuráveis. Variáveis: $etapas, $segmentos, $origens, $cobranca, $posts, $usos, $tipos, $tiposCobranca, $tiposPost, $mktTipos, $funcoesLista */
 $secoes = [
     'etapas'    => ['Etapas do funil', 'A ordem define as colunas do funil. "Ganho" marca o cliente que comprou.', $etapas],
     'segmentos' => ['Segmentos', 'Usados nos filtros, no mapa e na normalização das planilhas importadas.', $segmentos],
@@ -7,6 +7,7 @@ $secoes = [
     'cobranca'  => ['Funil de cobrança', 'Colunas do funil da Cobrança. Etapas "Encerra: …" fecham o caso; "Sem contato" é para onde vão os casos depois das tentativas sem resposta.', $cobranca],
 ];
 $secoes['posts'] = ['Etapas dos posts (Marketing)', 'Colunas do fluxo dos posts do Instagram. O tipo "Aguardando aprovação" exige aprovação antes de "Agendado/Publicado".', $posts];
+$secoes['mkt_tipos'] = ['Tipos de tarefa do Marketing', 'Assuntos do "Pedir ao Marketing" e a FUNÇÃO que recebe cada um (as pessoas dessa função são avisadas).', $mktTipos];
 $tiposPor = ['etapas' => $tipos, 'cobranca' => $tiposCobranca, 'posts' => $tiposPost];
 ?>
 <div class="cabecalho-pagina">
@@ -21,7 +22,7 @@ $tiposPor = ['etapas' => $tipos, 'cobranca' => $tiposCobranca, 'posts' => $tipos
     <p class="suave pequeno"><?= e($ajuda) ?></p>
     <div class="tabela-rolagem">
       <table class="tabela">
-        <thead><tr><th>Nome</th><?= $lista !== 'origens' ? '<th>Ordem</th>' : '' ?><?= $tiposLista ? '<th>Cor</th><th>Tipo</th>' : '' ?><th><?= ['cobranca' => 'Casos abertos', 'posts' => 'Posts'][$lista] ?? 'Clientes' ?></th><th>Ativo</th><th></th></tr></thead>
+        <thead><tr><th>Nome</th><?= $lista !== 'origens' ? '<th>Ordem</th>' : '' ?><?= $tiposLista ? '<th>Cor</th><th>Tipo</th>' : '' ?><?= $lista === 'mkt_tipos' ? '<th>Função que recebe</th>' : '' ?><th><?= ['cobranca' => 'Casos abertos', 'posts' => 'Posts', 'mkt_tipos' => 'Tarefas'][$lista] ?? 'Clientes' ?></th><th>Ativo</th><th></th></tr></thead>
         <tbody>
         <?php foreach ($itens as $item): $form = $lista . '-' . (int) $item['id']; ?>
           <tr class="<?= $item[$ativo] ? '' : 'inativo' ?>">
@@ -31,6 +32,7 @@ $tiposPor = ['etapas' => $tipos, 'cobranca' => $tiposCobranca, 'posts' => $tipos
               <td style="width:70px"><input type="color" name="cor" form="<?= $form ?>" value="<?= e($item['cor']) ?>" aria-label="Cor"></td>
               <td><select name="tipo" form="<?= $form ?>" aria-label="Tipo"><?php foreach ($tiposLista as $valor => $rotulo): ?><option value="<?= $valor ?>" <?= $item['tipo'] === $valor ? 'selected' : '' ?>><?= $rotulo ?></option><?php endforeach; ?></select></td>
             <?php endif; ?>
+            <?php if ($lista === 'mkt_tipos'): ?><td><select name="funcao_slug" form="<?= $form ?>" aria-label="Função que recebe"><?php foreach ($funcoesLista as $f): ?><option value="<?= e($f['slug']) ?>" <?= $f['slug'] === $item['funcao_slug'] ? 'selected' : '' ?>><?= e($f['nome']) ?></option><?php endforeach; ?></select></td><?php endif; ?>
             <td><?= (int) ($usos[$lista][$item['id']] ?? 0) ?></td>
             <td><input type="checkbox" name="ativo" value="1" form="<?= $form ?>" <?= $item[$ativo] ? 'checked' : '' ?> aria-label="Ativo"></td>
             <td><form id="<?= $form ?>" method="post" action="<?= url("/configuracoes/listas/$lista/" . (int) $item['id']) ?>"><?= csrf_campo() ?><button class="botao contorno pequeno" type="submit">Salvar</button></form></td>
@@ -47,6 +49,7 @@ $tiposPor = ['etapas' => $tipos, 'cobranca' => $tiposCobranca, 'posts' => $tipos
         <input type="color" name="cor" value="#94a3b8" aria-label="Cor">
         <select name="tipo" aria-label="Tipo" style="max-width:180px"><?php foreach ($tiposLista as $valor => $rotulo): ?><option value="<?= $valor ?>"><?= $rotulo ?></option><?php endforeach; ?></select>
       <?php endif; ?>
+      <?php if ($lista === 'mkt_tipos'): ?><select name="funcao_slug" aria-label="Função que recebe" style="max-width:220px"><?php foreach ($funcoesLista as $f): ?><option value="<?= e($f['slug']) ?>"><?= e($f['nome']) ?></option><?php endforeach; ?></select><?php endif; ?>
       <button class="botao pequeno" type="submit">Adicionar</button>
     </form>
   </section>
