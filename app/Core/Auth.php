@@ -121,6 +121,16 @@ class Auth
         return in_array('*', $permissoes, true) || in_array($permissao, $permissoes, true);
     }
 
+    /**
+     * Diretoria: vê tudo, mas só ACOMPANHA e APROVA (não muda nada do dia a dia nem configurações).
+     * Vem da permissão "acompanhar.somente" (perfil Diretoria). O Admin ('*') nunca é "só acompanha".
+     */
+    public static function somenteAcompanha(): bool
+    {
+        $p = self::usuario()['permissoes'] ?? [];
+        return !in_array('*', $p, true) && in_array('acompanhar.somente', $p, true);
+    }
+
     /** O usuário logado está vinculado a esta função? Ex.: Auth::temFuncao('prospeccao_reativacao') */
     public static function temFuncao(string $slugFuncao): bool
     {

@@ -257,6 +257,11 @@ class CobrancaService
                 self::recalcular($id);
             }
             Auditoria::registrar('cobranca', $id, 'etapa', $caso, $dados);
+            if (in_array($etapa['tipo'], ['juridico', 'perda'], true)) {
+                $loja = (string) Banco::valor("SELECT COALESCE(NULLIF(nome_fantasia, ''), razao_social) FROM clientes WHERE id = ?", [$caso['cliente_id']]);
+                NotificacaoService::diretoria('problemas', 'Cobrança encerrada como ' . $etapa['nome'] . ": $loja", '/cobranca',
+                    ['texto' => 'Valor: ' . dinheiro((float) ($caso['valor_total'] ?? 0)), 'cliente_id' => (int) $caso['cliente_id']], $usuarioId);
+            }
             self::eventoEtapa($caso, $etapaId, $usuarioId);
         });
     }

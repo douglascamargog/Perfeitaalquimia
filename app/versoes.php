@@ -17,6 +17,17 @@
  */
 return [
     [
+        'versao' => '10.2', 'data' => '2026-11-14', 'titulo' => 'Diretoria',
+        'novo' => [
+            'Novo acesso para a Diretoria: vê todas as áreas do One (vendas, financeiro, marketing, produção, depósito, compras, desenvolvimento) e aprova o que for pedido a ela, sem mexer no dia a dia.',
+            'A Diretoria é avisada no sino do que interessa aos donos: etapa do desenvolvimento concluída e produto lançado, matéria-prima, embalagem, rótulo ou produto acabado abaixo do mínimo, ordem de produção criada e concluída, alguém da equipe batendo a meta e problemas (pedido recusado, despacho sem algum item, cobrança para jurídico).',
+            'Diretor que também vende trabalha a própria carteira, pedidos e orçamentos normalmente.',
+        ],
+        'admin' => [
+            'Novo perfil "Diretoria" (Administração › Pessoas e acessos): vê tudo e aprova (pedidos, posts, orçamentos de compras enviados a ela e provas do Desenvolvimento quando a função Diretoria é aprovadora), mas não altera nada nem entra em Configurações, Usuários, Atualização e Integração. Para o sócio que vende: dê a exceção "Diretoria que também vende" e as permissões de vendedor (carteira própria, pedidos, Meu mês); ele altera só os clientes em que é o responsável. Os avisos da Diretoria ligam/desligam em Configurações › Diretoria (também vão para o Admin que acompanha a área Diretoria).',
+        ],
+    ],
+    [
         'versao' => '10.1', 'data' => '2026-11-14', 'titulo' => 'Marketing de cara nova',
         'novo' => [
             'Pedir ao Marketing: qualquer pessoa pede uma arte, um material, um cadastro na loja, um envio FULL ou uma oferta. O pedido vai direto para quem cuida daquele assunto e você é avisado quando ficar pronto.',

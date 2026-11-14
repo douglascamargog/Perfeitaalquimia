@@ -250,6 +250,9 @@ class ProducaoService
             }
             $saldo = round((float) $atual + $quantidade, 3);
             Banco::executar('UPDATE materias_primas SET estoque = ? WHERE id = ?', [$saldo, $mpId]);
+            if ($quando === null && $quantidade < 0) {
+                self::avisarSeCruzouMinimoMp($mpId, (float) $atual, $saldo);
+            }
             Banco::inserir('mp_movimentos', array_filter([
                 'materia_prima_id' => $mpId, 'tipo' => $tipo, 'quantidade' => round($quantidade, 3), 'saldo' => $saldo,
                 'custo_unitario' => $extra['custo_unitario'] ?? null, 'referencia' => $extra['referencia'] ?? null,
@@ -440,6 +443,9 @@ class ProducaoService
         $id = Banco::inserir('ordens_producao', $dados);
         if ($quando === null) {
             Auditoria::registrar('ordem_producao', $id, 'criar', null, $dados);
+            $nome = (string) Banco::valor('SELECT nome FROM produtos WHERE id = ?', [$produtoId]);
+            NotificacaoService::diretoria('op_criada', "Ordem de produção criada: $qtd × $nome", '/producao/ordens/' . $id,
+                ['texto' => 'Ordem #' . $id . ($dados['previsto_para'] ?? null ? ' · prevista para ' . data_br($dados['previsto_para']) : '')], $usuarioId);
         }
         return $id;
     }
@@ -453,6 +459,31 @@ class ProducaoService
      * como está e vira uma MEDIÇÃO de perda (usado × teórico); o que não for informado baixa a previsão (com a perda já conhecida).
      */
     public static function concluirOrdem(int $id, ?int $usuarioId, ?int $quantidadeReal = null, ?string $quando = null, array $usado = []): array
+    {
+        $r = self::concluirOrdem_($id, $usuarioId, $quantidadeReal, $quando, $usado);
+        if ($quando === null) {
+            $op = Banco::um('SELECT o.quantidade, p.nome FROM ordens_producao o JOIN produtos p ON p.id = o.produto_id WHERE o.id = ?', [$id]);
+            $qtd = (int) ($op['quantidade'] ?? 0);
+            NotificacaoService::diretoria('op_concluida', "Produção concluída: $qtd × " . ($op['nome'] ?? ''), '/producao/ordens/' . $id,
+                ['texto' => 'Ordem #' . $id . ': os produtos entraram no estoque.'], $usuarioId);
+        }
+        return $r;
+    }
+
+    /** Aviso para a Diretoria quando a matéria-prima/embalagem/rótulo acabou de ficar abaixo do mínimo */
+    private static function avisarSeCruzouMinimoMp(int $mpId, float $antes, float $depois): void
+    {
+        $m = Banco::um('SELECT nome, unidade, tipo, rotulo, estoque_minimo FROM materias_primas WHERE id = ?', [$mpId]);
+        $minimo = (float) ($m['estoque_minimo'] ?? 0);
+        if (!$m || $minimo <= 0 || $antes < $minimo || $depois >= $minimo) {
+            return;
+        }
+        $o_que = $m['rotulo'] ? 'Rótulo' : ($m['tipo'] === 'embalagem' ? 'Embalagem' : 'Matéria-prima');
+        NotificacaoService::diretoria('estoque', "$o_que abaixo do mínimo: {$m['nome']}", '/producao/materias/' . $mpId,
+            ['texto' => 'Ficou com ' . self::qtd($depois, (string) $m['unidade']) . ' (mínimo ' . self::qtd($minimo, (string) $m['unidade']) . ')']);
+    }
+
+    private static function concluirOrdem_(int $id, ?int $usuarioId, ?int $quantidadeReal = null, ?string $quando = null, array $usado = []): array
     {
         return Banco::transacao(function () use ($id, $usuarioId, $quantidadeReal, $quando, $usado) {
             $op = Banco::um('SELECT * FROM ordens_producao WHERE id = ? FOR UPDATE', [$id]);
@@ -704,6 +735,14 @@ class ProducaoService
             Banco::executar('INSERT IGNORE INTO estoque_acabado (produto_id, quantidade, minimo) VALUES (?, 0, 0)', [$produtoId]);
             $saldo = (int) Banco::valor('SELECT quantidade FROM estoque_acabado WHERE produto_id = ? FOR UPDATE', [$produtoId]) + $quantidade;
             Banco::executar('UPDATE estoque_acabado SET quantidade = ? WHERE produto_id = ?', [$saldo, $produtoId]);
+            if ($quando === null && $quantidade < 0) {
+                $minimo = (int) Banco::valor('SELECT minimo FROM estoque_acabado WHERE produto_id = ?', [$produtoId]);
+                if ($minimo > 0 && $saldo - $quantidade >= $minimo && $saldo < $minimo) { // acabou de ficar abaixo do mínimo
+                    $nome = (string) Banco::valor('SELECT nome FROM produtos WHERE id = ?', [$produtoId]);
+                    NotificacaoService::diretoria('estoque', "Produto acabando: $nome", '/producao/reabastecer',
+                        ['texto' => "Ficou com $saldo un. (mínimo $minimo)"], $extra['usuario_id'] ?? null);
+                }
+            }
             Banco::inserir('acabado_movimentos', array_filter([
                 'produto_id' => $produtoId, 'tipo' => $tipo, 'quantidade' => $quantidade, 'saldo' => $saldo,
                 'referencia' => $extra['referencia'] ?? null, 'ordem_id' => $extra['ordem_id'] ?? null, 'pedido_id' => $extra['pedido_id'] ?? null,

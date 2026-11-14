@@ -50,6 +50,11 @@ class Roteador
             if (!$this->autorizado($permissao)) {
                 return;
             }
+            // Diretoria (só acompanha e aprova): POST só nas ações liberadas (aprovar, comentar, o próprio perfil...)
+            if ($metodo === 'POST' && Auth::logado() && Auth::somenteAcompanha() && !self::liberadoParaDiretoria($padrao, $parametros, $permissao)) {
+                $this->erro(403, 'A Diretoria acompanha e aprova. Para mudar isto, peça a quem cuida da área.');
+                return;
+            }
 
             [$classe, $acao] = explode('@', $destino);
             $classe = 'App\\Controllers\\' . $classe;
@@ -104,6 +109,60 @@ class Roteador
             return false;
         }
         return true;
+    }
+
+    /** POST que a Diretoria pode fazer: aprovar, decidir, comentar, coisas pessoais. Rotas exatas (padrões de app/rotas.php). */
+    private const POST_DIRETORIA = [
+        '/sair', '/minha-senha', '/meu-perfil', '/meu-perfil/publico', '/meu-perfil/aparencia', '/notificacoes/marcar-todas', '/novidades/vista',
+        '/aniversario/{id}/mensagens', '/aniversario/mensagens/{id}/apagar', '/comunicados/{id}/ler', '/academia/progresso',
+        '/aprovacao/{id}/aprovar', '/aprovacao/{id}/recusar',
+        '/marketing/posts/{id}/aprovar', '/marketing/posts/{id}/ajuste', '/marketing/posts/{id}/comentar', '/marketing/ecommerce/atualizar',
+        '/marketing/tarefas', '/marketing/tarefas/{id}/mudar', '/marketing/tarefas/{id}/comentar', // o serviço só deixa aprovar/devolver
+    ];
+    /** Permissões das telas de VENDA: liberadas para a Diretoria que também vende ("diretoria.vende"), só nos clientes dela */
+    private const PERMISSOES_VENDA = ['carteira.ver_propria', 'pedidos.criar', 'meu_mes.usar', 'app.usar', 'mensagens.usar', 'recompra.ver',
+        'catalogo.acessos', 'cobranca.enviar', 'contatos.buscar_ia', 'prospeccao.usar'];
+
+    private static function liberadoParaDiretoria(string $padrao, array $parametros, string $permissao): bool
+    {
+        if (in_array($padrao, self::POST_DIRETORIA, true)) {
+            return true;
+        }
+        // Ações de páginas com várias ações: só as de aprovar/comentar
+        if ($padrao === '/compras/{id}/{acao}' && ($parametros['acao'] ?? '') === 'decidir') {
+            return true;
+        }
+        if ($padrao === '/desenvolvimento/{id}/{acao}' && in_array($parametros['acao'] ?? '', ['aprovar', 'comentar'], true)) {
+            return true;
+        }
+        // Diretoria que também vende: telas de venda, mas só nos clientes em que é a responsável
+        if (Auth::pode('diretoria.vende') && array_intersect(explode('|', $permissao), self::PERMISSOES_VENDA)) {
+            $cliente = self::clienteDaRequisicao($padrao, $parametros);
+            return $cliente === null || (int) \App\Core\Banco::valor('SELECT responsavel_id FROM clientes WHERE id = ?', [$cliente]) === Auth::id();
+        }
+        return false;
+    }
+
+    /** Cliente envolvido no POST (pela rota ou pelo formulário), ou null quando não há um cliente específico */
+    private static function clienteDaRequisicao(string $padrao, array $p): ?int
+    {
+        $id = (int) ($p['id'] ?? 0);
+        $sql = match (true) {
+            str_starts_with($padrao, '/carteira/clientes/{id}'), str_starts_with($padrao, '/clientes/{id}') => null,
+            str_starts_with($padrao, '/pedidos/{id}') => 'SELECT cliente_id FROM pedidos WHERE id = ?',
+            str_starts_with($padrao, '/orcamentos/{id}') => 'SELECT cliente_id FROM orcamentos WHERE id = ?',
+            str_starts_with($padrao, '/agenda/{id}') => 'SELECT cliente_id FROM tarefas WHERE id = ?',
+            str_starts_with($padrao, '/reativacao/{id}'), str_starts_with($padrao, '/recompra/{id}') => null,
+            default => false,
+        };
+        if ($sql === null && $id) {
+            return $id; // a própria rota é do cliente
+        }
+        if (is_string($sql) && $id) {
+            return (int) \App\Core\Banco::valor($sql, [$id]) ?: -1;
+        }
+        $doForm = (int) ($_POST['cliente_id'] ?? 0);
+        return $doForm ?: null;
     }
 
     /** A requisição pede JSON (chamadas do app e dos scripts)? */

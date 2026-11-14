@@ -82,6 +82,22 @@ class MetaService
         return $linha;
     }
 
+    /** Diretoria: a pessoa acabou de bater a meta do mês (uma vez por pessoa e mês) */
+    public static function avisarSeBateuMeta(int $usuarioId, string $mes, float $antes, float $depois): void
+    {
+        $meta = (float) (self::meuMes($usuarioId, $mes)['meta'] ?? 0);
+        if ($meta <= 0 || $antes >= $meta || $depois < $meta) {
+            return;
+        }
+        $link = '/resultados?mes=' . $mes . '&pessoa=' . $usuarioId;
+        if (Banco::valor("SELECT 1 FROM notificacoes WHERE tipo = 'diretoria_meta' AND link = ? LIMIT 1", [$link])) {
+            return;
+        }
+        $nome = (string) Banco::valor('SELECT nome FROM usuarios WHERE id = ?', [$usuarioId]);
+        NotificacaoService::diretoria('meta', "$nome bateu a meta do mês! 🎯", $link,
+            ['texto' => 'Vendido ' . dinheiro($depois) . ' · meta ' . dinheiro($meta)], $usuarioId);
+    }
+
     /** Indicadores individuais do mês */
     public static function indicadores(int $usuarioId, string $mes): array
     {

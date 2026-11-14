@@ -193,6 +193,10 @@ class DepositoService
         Banco::executar("UPDATE pedidos SET expedicao = 'separado', separado_por = ?, separado_em = NOW(), expedicao_aguarda_produto = 0, falta = ?,
             expedicao_obs = COALESCE(NULLIF(?, ''), expedicao_obs) WHERE id = ?", [$usuarioId, $falta ? 1 : 0, mb_substr(trim($observacao), 0, 500), $id]);
         PedidoService::historico($id, 'deposito', $falta ? "Separado sem: $lista. " . trim($observacao) : 'Separado no depósito.', $usuarioId);
+        if ($falta) {
+            NotificacaoService::diretoria('problemas', "Pedido #$id vai sem alguns itens", '/pedidos/' . $id,
+                ['texto' => mb_substr("Faltou: $lista. " . trim($observacao), 0, 300), 'pedido_id' => $id], $usuarioId);
+        }
         Auditoria::registrar('pedido', $id, 'expedicao_separado', ['expedicao' => 'separando'], ['expedicao' => 'separado', 'falta' => $lista]);
         if ($falta) {
             self::avisarFalta($p, "Pedido #$id vai sair sem alguns itens", $lista . ' · ' . trim($observacao), $usuarioId, true);

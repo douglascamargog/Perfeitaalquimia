@@ -26,6 +26,11 @@ class Menu
         foreach (require RAIZ . '/app/menu.php' as $item) {
             $item['bloqueado'] = !\App\Controllers\InicioController::visivel($item);
             $item['leitura'] = !$item['bloqueado'] && !empty($item['editar']) && !Auth::pode($item['editar']);
+            // Diretoria (só acompanha): tudo com o olho, menos onde ela aprova ou pede (e as telas de venda de quem também vende)
+            if (!$item['bloqueado'] && Auth::somenteAcompanha() && !in_array($item['url'], ['/', '/pessoas', '/aprovacao', '/compras', '/marketing/pedir'], true)
+                && !(Auth::pode('diretoria.vende') && (!empty($item['setor']) || !empty($item['so_setor'])))) {
+                $item['leitura'] = true;
+            }
             $itens[] = $item;
             if (!$item['bloqueado'] && $item['url'] !== '/' && str_starts_with($caminhoAtual . '/', $item['url'] . '/') && strlen($item['url']) > strlen($urlAtual)) {
                 $urlAtual = $item['url'];

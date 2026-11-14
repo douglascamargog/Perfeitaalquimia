@@ -347,6 +347,11 @@ class DesenvolvimentoService
             [$usuarioId, mb_substr($observacao, 0, 500) ?: null, $id, $p['etapa_id']]);
         self::registrar($id, $usuarioId, 'etapa', 'Etapa concluída: ' . $p['etapa'] . ($observacao !== '' ? ' — ' . $observacao : ''));
         self::sincronizar($p, $usuarioId);
+        if (PHP_SAPI !== 'cli') {
+            $lancado = Banco::valor('SELECT situacao FROM dp_projetos WHERE id = ?', [$id]) === 'lancado';
+            NotificacaoService::diretoria('etapa_dp', ($lancado ? 'Produto lançado: ' : 'Desenvolvimento avançou: ') . $p['nome'], '/desenvolvimento/' . $id,
+                ['texto' => 'Etapa concluída: ' . $p['etapa']], $usuarioId);
+        }
     }
 
     /**

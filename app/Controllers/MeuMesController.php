@@ -105,7 +105,9 @@ class MeuMesController extends Controller
         if (!$valor) {
             $this->voltarComErros("/meu-mes?mes=$mes&aba=vendas", ['Digite um valor de venda maior que zero. Exemplo: 1.250,50']);
         }
+        $antes = (float) Banco::valor('SELECT COALESCE(SUM(valor), 0) FROM vendas_registradas WHERE usuario_id = ? AND data LIKE ?', [Auth::id(), "$mes-%"]);
         $id = Banco::inserir('vendas_registradas', ['usuario_id' => Auth::id(), 'data' => $data, 'valor' => $valor, 'descricao' => mb_substr($this->campo('descricao'), 0, 200) ?: null]);
+        \App\Services\MetaService::avisarSeBateuMeta((int) Auth::id(), $mes, $antes, $antes + $valor);
         Auditoria::registrar('venda_registrada', $id, 'criar', null, ['data' => $data, 'valor' => $valor]);
         Sessao::aviso('sucesso', 'Venda registrada: ' . dinheiro($valor) . '.');
         $this->voltar($mes, $this->campo('voltar_aba') === 'vendas' ? 'vendas' : 'painel');

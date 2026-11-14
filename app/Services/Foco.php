@@ -28,7 +28,7 @@ class Foco
 
     /** Padrão de quem não tem função */
     private const POR_PERFIL = ['admin' => ['diretoria'], 'gestor' => ['comercial', 'diretoria'], 'vendedor' => ['comercial'],
-        'financeiro' => ['aprovacao', 'cobranca'], 'marketing' => ['marketing'], 'producao' => ['producao'], 'deposito' => ['deposito']];
+        'financeiro' => ['aprovacao', 'cobranca'], 'marketing' => ['marketing'], 'producao' => ['producao'], 'deposito' => ['deposito'], 'diretoria' => ['diretoria']];
 
     private static array $cache = [];
 

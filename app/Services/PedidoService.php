@@ -273,6 +273,8 @@ class PedidoService
         ClienteEvento::registrar((int) $pedido['cliente_id'], 'pedido', 'Pedido #' . $pedido['id'] . ' recusado: ' . $motivo, $usuarioId, null, ['pedido_id' => (int) $pedido['id']]);
         Auditoria::registrar('pedido', (int) $pedido['id'], 'recusar', ['situacao' => $pedido['situacao']], ['situacao' => 'recusado', 'motivo' => $motivo]);
         NotificacaoService::pedidoMudou((int) $pedido['id'], 'recusado', $usuarioId, 'Motivo: ' . $motivo);
+        NotificacaoService::diretoria('problemas', 'Pedido #' . $pedido['id'] . ' recusado pelo Financeiro', '/pedidos/' . $pedido['id'],
+            ['texto' => mb_substr((string) ($pedido['cliente'] ?? '') . ' · ' . $motivo, 0, 300), 'pedido_id' => (int) $pedido['id'], 'cliente_id' => (int) $pedido['cliente_id']], $usuarioId);
         return null;
     }
 

@@ -102,7 +102,7 @@ class CompraService
     public static function aprovadores(): array
     {
         return Banco::todos("SELECT u.id, u.nome, pf.nome AS perfil,
-                (pf.slug = 'admin' OR EXISTS (SELECT 1 FROM perfil_permissoes pp WHERE pp.perfil_id = u.perfil_id AND pp.permissao = 'pedidos.aprovar')) AS sugerido
+                (pf.slug IN ('admin', 'diretoria') OR EXISTS (SELECT 1 FROM perfil_permissoes pp WHERE pp.perfil_id = u.perfil_id AND pp.permissao = 'pedidos.aprovar')) AS sugerido
             FROM usuarios u JOIN perfis pf ON pf.id = u.perfil_id WHERE u.ativo = 1 ORDER BY sugerido DESC, u.nome");
     }
 

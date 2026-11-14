@@ -57,6 +57,25 @@ class NotificacaoService
         return $ids;
     }
 
+    /**
+     * Diretoria: avisos que interessam aos donos (desenvolvimento, estoque acabando, ordens de produção, metas batidas, problemas).
+     * Vai para quem é Diretoria ou Admin E acompanha a área "Diretoria" (Meu perfil). Cada evento liga/desliga em Configurações › Diretoria.
+     * $evento: etapa_dp | estoque | op_criada | op_concluida | meta | problemas
+     */
+    public static function diretoria(string $evento, string $titulo, string $link, array $extra = [], ?int $quemFez = null): int
+    {
+        if (PHP_SAPI === 'cli' || !\App\Core\Config::get('diretoria.aviso_' . $evento, true)) {
+            return 0; // instalação, seeds e cron não enchem o sino dos donos
+        }
+        $ids = [];
+        foreach (Banco::todos("SELECT u.id FROM usuarios u JOIN perfis p ON p.id = u.perfil_id WHERE u.ativo = 1 AND p.slug IN ('diretoria', 'admin')") as $u) {
+            if (in_array('diretoria', Foco::areasDe((int) $u['id']), true)) {
+                $ids[] = (int) $u['id'];
+            }
+        }
+        return self::avisar($ids, 'diretoria_' . $evento, $titulo, $link, $extra, $quemFez);
+    }
+
     private static function nomeCliente(int $clienteId): string
     {
         return (string) Banco::valor('SELECT COALESCE(NULLIF(nome_fantasia, \'\'), razao_social) FROM clientes WHERE id = ?', [$clienteId]);

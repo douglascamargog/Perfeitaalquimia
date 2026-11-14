@@ -70,5 +70,7 @@ return [
         'mensagens.usar'      => 'Usar mensagens prontas na ficha do cliente',
         'marketing.aprovar'   => 'Aprovar posts antes da publicação',
         'midia.gerenciar'     => 'Biblioteca de mídia',
+        'acompanhar.somente'  => 'Diretoria: só acompanha e aprova (vê, mas não altera nada)',
+        'diretoria.vende'     => 'Diretoria que também vende (trabalha a própria carteira, pedidos e orçamentos)',
     ],
 ];
