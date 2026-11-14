@@ -164,6 +164,53 @@ class ClienteController extends Controller
     }
 
     /** Ligação com 1 clique */
+    /** Caixa rápida: anotação com prints (Ctrl+V) ou PDF */
+    public function anotar(string $id): void
+    {
+        $cliente = $this->clienteOuErro($id);
+        try {
+            \App\Services\ClienteAnexoService::anotar((int) $cliente['id'], $this->campo('texto'), $_FILES['anexos'] ?? [], (int) Auth::id());
+            $this->json(['ok' => true, 'mensagem' => 'Anotação salva na linha do tempo.']);
+        } catch (\RuntimeException $e) {
+            $this->json(['ok' => false, 'mensagem' => $e->getMessage()], 422);
+        }
+    }
+
+    /** Caixa rápida: agendar atividade (vira tarefa na Agenda) */
+    public function agendar(string $id): void
+    {
+        $cliente = $this->clienteOuErro($id);
+        $equipe = Auth::pode('carteira.ver_todas') || Auth::pode('setor.gestao') ? array_map('intval', array_column(Listas::vendedores(), 'id')) : [];
+        try {
+            \App\Services\ClienteAnexoService::agendar($cliente, [
+                'atividade' => $this->campo('atividade'), 'data' => $this->campo('data'), 'hora' => $this->campo('hora'),
+                'usuario_id' => $this->campo('usuario_id'), 'notas' => $this->campo('notas'),
+            ], (int) Auth::id(), $equipe);
+            $this->json(['ok' => true, 'mensagem' => 'Atividade agendada: está na Agenda.']);
+        } catch (\RuntimeException $e) {
+            $this->json(['ok' => false, 'mensagem' => $e->getMessage()], 422);
+        }
+    }
+
+    /** Abre o print/arquivo da linha do tempo (só para quem vê o cliente) */
+    public function anexo(string $id, string $anexo): void
+    {
+        $cliente = Cliente::buscar((int) $id);
+        $a = $cliente && Cliente::podeVer($cliente) ? \App\Services\ClienteAnexoService::buscar((int) $cliente['id'], (int) $anexo) : null;
+        $caminho = $a ? \App\Services\ClienteAnexoService::pasta() . '/' . basename((string) $a['arquivo']) : '';
+        if (!$a || !is_file($caminho)) {
+            http_response_code(404);
+            Visao::mostrar('erros/erro', ['titulo' => 'Arquivo', 'codigo' => 404, 'mensagem' => 'Arquivo não encontrado.'], 'base');
+            return;
+        }
+        header('Content-Type: ' . $a['mime']);
+        header('Content-Length: ' . filesize($caminho));
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: private, max-age=86400');
+        header('Content-Disposition: inline; filename="' . str_replace('"', '', preg_replace('/[^\w\-. ]+/u', '', (string) $a['nome']) ?: 'anexo') . '"');
+        readfile($caminho);
+    }
+
     public function ligacao(string $id): void
     {
         $cliente = $this->clienteOuErro($id);

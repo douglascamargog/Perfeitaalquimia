@@ -14,10 +14,16 @@ if (sino) {
   const tituloBase = document.title.replace(/^\(\d+\)\s*/, '');
   const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   let ultima = null;
+  // Último pedido que passou no letreiro (fica no aparelho para não repetir ao trocar de página)
+  const letreiro = document.querySelector('[data-letreiro]');
+  const lerPedido = () => { try { return Number(localStorage.getItem('one:pedido-letreiro')) || 0; } catch { return 0; } };
+  const gravarPedido = (n) => { try { localStorage.setItem('one:pedido-letreiro', String(n)); } catch { /* sem armazenamento */ } };
+  if (letreiro && lerPedido() < Number(letreiro.dataset.pedidoUltimo) - 50) gravarPedido(Number(letreiro.dataset.pedidoUltimo)); // muito tempo fora: não mostra atrasados
+  if (letreiro && !lerPedido()) gravarPedido(Number(letreiro.dataset.pedidoUltimo));
 
   const pedir = async (extra = '') => {
     const onde = encodeURIComponent(location.pathname.slice(BASE.length) || '/');
-    const r = await fetch(`${BASE}/notificacoes/resumo?depois=${ultima ?? 0}&onde=${onde}${extra}`, { headers: { Accept: 'application/json' } }).catch(() => null);
+    const r = await fetch(`${BASE}/notificacoes/resumo?depois=${ultima ?? 0}&onde=${onde}&pedido=${lerPedido()}${extra}`, { headers: { Accept: 'application/json' } }).catch(() => null);
     // Sessão expirada ou senha provisória: o servidor manda uma página, não os dados → ignora até a próxima vez
     if (!r || !r.ok || !(r.headers.get('content-type') || '').includes('json')) return null;
     return r.json().catch(() => null);
@@ -26,6 +32,9 @@ if (sino) {
   const aplicar = (d) => {
     // Comunicado novo aparece na faixa do topo sem recarregar
     if (window.__oneFaixaComunicados) window.__oneFaixaComunicados(d.comunicados);
+    // Pedido novo: passa no letreiro do topo por 30 s
+    if (d.pedido_ultimo) gravarPedido(Math.max(lerPedido(), Number(d.pedido_ultimo)));
+    if (d.letreiro?.length && window.__oneLetreiro) window.__oneLetreiro(d.letreiro);
     // Quem está online (fotinhas do topo)
     const online = document.querySelector('[data-online]');
     if (online && typeof d.online_html === 'string') {

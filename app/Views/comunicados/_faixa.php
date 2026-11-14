@@ -12,7 +12,7 @@ $icones = asset('img/icones.svg');
 ?>
 <button type="button" class="com-faixa <?= $c['prioridade'] === 'importante' ? 'importante' : '' ?>" data-com-abrir="<?= (int) $c['id'] ?>" title="Abrir comunicado">
   <svg class="icone" aria-hidden="true"><use href="<?= $icones ?>#megafone"/></svg>
-  <span class="com-titulo"><?= $c['prioridade'] === 'importante' ? '<b>Importante:</b> ' : '' ?><?= e($c['titulo']) ?></span>
+  <span class="com-titulo"><span class="com-rolar"><?= $c['prioridade'] === 'importante' ? '<b>Importante:</b> ' : '' ?><?= e($c['titulo']) ?></span></span>
   <?php if ($mais > 0): ?><span class="com-mais">+<?= $mais ?></span><?php endif; ?>
   <span class="com-ver">ver</span>
 </button>

@@ -54,6 +54,7 @@ class AgendaController extends Controller
             ClienteEvento::registrar((int) $tarefa['cliente_id'], 'tarefa', 'Concluída: ' . $tarefa['titulo'], Auth::id());
         }
         Sessao::aviso('sucesso', 'Tarefa concluída.');
-        redirecionar('/agenda');
+        $voltar = (string) ($_POST['voltar'] ?? '');
+        redirecionar(preg_match('#^/carteira/clientes/\d+$#', $voltar) ? $voltar : '/agenda');
     }
 }

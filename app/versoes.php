@@ -17,6 +17,23 @@
  */
 return [
     [
+        'versao' => '10.3', 'data' => '2026-11-14', 'titulo' => 'Ficha do cliente mais prática e discador',
+        'novo' => [
+            'Caixa rápida na linha do tempo do cliente: escreva uma anotação e cole o print de tela com Ctrl+V (ou anexe imagem/PDF). O print fica guardado na linha do tempo.',
+            'Agendar atividade direto na ficha (ligar, WhatsApp, visita, reunião, enviar orçamento) com dia e hora: vai para a Agenda e aparece em "Próximas atividades", com o botão Concluir.',
+            'Discador ao lado do sino (Televendas e Cobrança): digite qualquer número e ligue pelo Ligue Talk. Se o número for de um cliente, o One mostra a ficha e a ligação vai para a linha do tempo dele.',
+            'Letreiro no topo: quando entra um pedido, passa "Novo pedido feito por (vendedor)" por 30 segundos para todo mundo.',
+        ],
+        'melhoria' => [
+            'O comunicado do topo passa em movimento até você clicar e marcar "Li e entendi".',
+            'A gestão recebe no sino "Novo pedido feito por (vendedor)" a cada pedido novo.',
+            'O aviso de que o cliente abriu ou aprovou o orçamento vai só para o vendedor que fez o orçamento.',
+        ],
+        'admin' => [
+            'Configurações › Ligue Talk: funções que veem o discador (padrão: televendas e cobranca). Configurações: liga/desliga o letreiro de pedido novo. Os prints da linha do tempo ficam em storage/clientes (fora da web) e só abrem para quem vê o cliente.',
+        ],
+    ],
+    [
         'versao' => '10.2', 'data' => '2026-11-14', 'titulo' => 'Diretoria',
         'novo' => [
             'Novo acesso para a Diretoria: vê todas as áreas do One (vendas, financeiro, marketing, produção, depósito, compras, desenvolvimento) e aprova o que for pedido a ela, sem mexer no dia a dia.',

@@ -1,3 +1,4 @@
+import './compositor.js'; // caixa rápida da linha do tempo (anotação com print, agendar, contato)
 // =====================================================================
 // Carteira: gaveta da ficha do cliente, formulários sem recarregar e filtros.
 // Usado nas telas da Carteira, Agenda, Reativação e Cobrança.

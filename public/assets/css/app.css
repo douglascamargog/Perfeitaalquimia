@@ -459,3 +459,36 @@ a.eq-pessoa { color: inherit; text-decoration: none; }
 /* Usuários: função + "gestor(a) do setor" */
 .us-funcao { display: grid; gap: 0; align-content: start; }
 .us-funcao .us-gestor { margin: -4px 0 8px 26px; color: var(--texto-suave); }
+
+/* Discador do topo (V10.3) */
+.discador { position: relative; }
+.discador-painel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: min(300px, calc(100vw - 24px)); background: #fff; border: 1px solid var(--borda);
+  border-radius: 18px; box-shadow: var(--sombra); padding: 14px; }
+.discador-painel[hidden] { display: none; }
+.discador-painel form { display: grid; gap: 8px; }
+.discador-painel label small { color: var(--texto-suave); font-weight: 400; }
+.discador-painel input[type=tel] { font-size: 1.3rem; text-align: center; letter-spacing: .03em; font-weight: 700; }
+.discador-teclas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.discador-teclas button { border: 1px solid var(--borda); background: var(--primaria-clara); border-radius: 12px; padding: 9px 0; font: inherit; font-size: 1.1rem; font-weight: 700; cursor: pointer; color: var(--primaria-escura); }
+.discador-teclas button:disabled { visibility: hidden; }
+.discador-teclas button:active { background: var(--secundaria-clara); }
+.discador-msg { margin: 0; min-height: 1em; }
+.discador-msg.ok { color: var(--sucesso); }
+.discador-msg.erro { color: var(--perigo); }
+.discador-recentes { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.discador-recentes small { width: 100%; color: var(--texto-suave); }
+.discador-recentes button { border: 1px solid var(--borda); background: #fff; border-radius: 99px; padding: 3px 9px; font: inherit; font-size: .78rem; cursor: pointer; }
+@media (min-width: 900px) { .discador-teclas { display: none; } }
+
+/* Letreiro do topo (V10.3): pedido novo passa 30 s; comunicado passa em movimento até "Li e entendi" */
+.letreiro { flex: 0 1 380px; min-width: 0; overflow: hidden; white-space: nowrap; border-radius: 99px; padding: 8px 0;
+  background: var(--secundaria); color: var(--secundaria-texto); font-weight: 700; font-size: .88rem; box-shadow: var(--sombra);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+.letreiro[hidden] { display: none; }
+.letreiro-rolar { display: inline-block; padding-left: 100%; animation: letreiro-passar 10s linear infinite; }
+.com-titulo { position: relative; mask-image: linear-gradient(90deg, #000 88%, transparent); }
+.com-rolar { display: inline-block; padding-left: 100%; animation: letreiro-passar 14s linear infinite; text-overflow: clip; }
+.com-faixa:hover .com-rolar { animation-play-state: paused; }
+@keyframes letreiro-passar { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) { .letreiro-rolar, .com-rolar { animation: none; padding-left: 0; } }
+@media (max-width: 760px) { .letreiro { flex-basis: 100%; order: 10; } }

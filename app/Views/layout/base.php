@@ -102,6 +102,8 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
       <?php if ($setorAtual): ?><span class="selo-setor" data-selo-setor><svg class="icone"><use href="<?= $icones ?>#<?= e($setorAtual['icone']) ?>"/></svg><?= e($setorAtual['nome']) ?>
         <?php if (Auth::pode('carteira.ver_todas')): ?><a href="<?= url($caminhoAtual) ?>?setor=" title="Ver todos os setores" aria-label="Ver todos os setores">✕</a><?php endif; ?></span><?php endif; ?>
       <?php // Comunicados não lidos: faixa em destaque (some ao clicar em "Li e entendi") ?>
+      <?php // Letreiro: "Novo pedido de Fulana" passa ~30 s quando entra um pedido (o notificacoes.js traz a cada minuto) ?>
+      <div class="letreiro" data-letreiro data-pedido-ultimo="<?= (int) \App\Core\Banco::valor('SELECT COALESCE(MAX(id), 0) FROM pedidos') ?>" hidden aria-live="polite"></div>
       <div class="com-lugar" data-com-lugar><?= \App\Core\Visao::renderizar('comunicados/_faixa', ['comunicados' => \App\Services\ComunicadoService::ativosPara((int) Auth::id())]) ?></div>
       <div class="busca-rapida" data-busca-rapida>
         <svg class="icone" aria-hidden="true"><use href="<?= $icones ?>#lupa"/></svg>
@@ -112,6 +114,7 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
       </div>
       <div class="usuario">
         <details class="online" data-online <?= $online ? '' : 'hidden' ?>><?= \App\Core\Visao::renderizar('layout/_online', ['online' => $online]) ?></details>
+        <?php if (\App\Services\TelefoniaService::veDiscador()): ?><?= \App\Core\Visao::renderizar('layout/_discador') ?><?php endif; ?>
         <div class="sino" data-sino>
           <button class="botao-icone" type="button" aria-label="Notificações" aria-haspopup="true" aria-expanded="false" data-sino-botao>
             <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
@@ -194,6 +197,7 @@ if ($usuarioNov && array_key_exists('versao_vista', $usuarioNov) && empty($usuar
 <script type="module" src="<?= asset('js/app.js') ?>"></script>
 <script type="module" src="<?= asset('js/busca.js') ?>"></script>
 <script type="module" src="<?= asset('js/notificacoes.js') ?>"></script>
+<?php if (\App\Services\TelefoniaService::veDiscador()): ?><script type="module" src="<?= asset('js/discador.js') ?>"></script><?php endif; ?>
 <?php // JS extras da tela: $scripts = ['carteira.js'] (módulos) ou bibliotecas externas (https://...) ?>
 <?php foreach ($scripts ?? [] as $js): ?>
   <?php if (str_starts_with($js, 'https://')): ?>

@@ -101,6 +101,13 @@ class NotificacaoService
         $extra = ['pedido_id' => $pedidoId, 'cliente_id' => (int) $p['cliente_id']];
         self::avisar(self::destinatarios('pedidos.aprovar', 'aprovacao'), 'pedido_aprovar', "Novo pedido #$pedidoId para aprovar", '/aprovacao',
             $extra + ['texto' => $loja . ' · ' . dinheiro((float) $p['total'])], $quemFez);
+        // Gestão: gestor(a) comercial e gestora do setor do cliente ficam sabendo de todo pedido novo
+        $vendedor = $p['vendedor_id'] ? (string) Banco::valor('SELECT nome FROM usuarios WHERE id = ?', [$p['vendedor_id']]) : '';
+        $gestores = array_merge(self::destinatarios('pedidos.ver_todos', 'comercial'), array_map('intval', array_column(Banco::todos(
+            'SELECT uf.usuario_id FROM usuario_funcoes uf JOIN clientes c ON c.funcao_id = uf.funcao_id WHERE c.id = ? AND uf.gestor = 1', [$p['cliente_id']]), 'usuario_id')));
+        $gestores = array_diff($gestores, [(int) $p['vendedor_id']]);
+        self::avisar($gestores, 'pedido_novo', 'Novo pedido feito por ' . ($vendedor !== '' ? $vendedor : ($p['origem'] === 'catalogo' ? 'cliente (catálogo)' : 'equipe')),
+            '/pedidos/' . $pedidoId, $extra + ['texto' => $loja . ' · ' . dinheiro((float) $p['total'])], $quemFez);
         if ($p['origem'] === 'catalogo' && $p['vendedor_id']) { // (orçamento aprovado: o OrcamentoService avisa o vendedor)
             self::avisar([(int) $p['vendedor_id']], 'pedido_catalogo', "$loja fez um pedido pelo catálogo", '/pedidos/' . $pedidoId,
                 $extra + ['texto' => 'Pedido #' . $pedidoId . ' · ' . dinheiro((float) $p['total'])]);

@@ -45,11 +45,14 @@ $diasSemCompra = $c['ultima_compra_em'] ? (int) floor((time() - strtotime($c['ul
   <div class="cl-principal">
     <?php if ($tarefas): ?>
     <section class="card">
-      <h2>Retornos e tarefas abertas</h2>
-      <ul class="cl-tarefas">
+      <h2>Próximas atividades</h2>
+      <ul class="cl-tarefas" data-proximas>
         <?php foreach ($tarefas as $t): $atrasada = $t['vence_em'] < date('Y-m-d'); ?>
-          <li class="<?= $atrasada ? 'atrasada' : '' ?>"><strong><?= e($t['titulo']) ?></strong>
-            <small><?= data_br($t['vence_em']) ?><?= $t['hora'] ? ' ' . substr($t['hora'], 0, 5) : '' ?> · <?= e($t['usuario'] ?? '') ?><?= $atrasada ? ' · atrasada' : '' ?></small></li>
+          <li class="<?= $atrasada ? 'atrasada' : '' ?>" data-tarefa="<?= (int) $t['id'] ?>"><div><strong><?= e($t['titulo']) ?></strong>
+            <small><?= data_br($t['vence_em']) ?><?= $t['hora'] ? ' ' . substr($t['hora'], 0, 5) : '' ?> · <?= e($t['usuario'] ?? '') ?><?= $atrasada ? ' · atrasada' : '' ?></small></div>
+            <?php if (!Auth::somenteAcompanha() && ((int) $t['usuario_id'] === Auth::id() || Auth::pode('carteira.ver_todas'))): ?>
+              <form method="post" action="<?= url('/agenda/' . (int) $t['id'] . '/concluir') ?>"><?= csrf_campo() ?><input type="hidden" name="voltar" value="/carteira/clientes/<?= $id ?>"><button class="botao contorno pequeno" type="submit">Concluir</button></form>
+            <?php endif; ?></li>
         <?php endforeach; ?>
       </ul>
     </section>
@@ -110,17 +113,15 @@ $diasSemCompra = $c['ultima_compra_em'] ? (int) floor((time() - strtotime($c['ul
     </section>
     <?php endif; ?>
 
-    <section class="card">
+    <section class="card" data-pagina-cliente="<?= $id ?>">
       <h2>Linha do tempo</h2>
+      <?php if (!Auth::somenteAcompanha() || Auth::pode('diretoria.vende') && (int) $c['responsavel_id'] === Auth::id()): ?>
+        <?= \App\Core\Visao::renderizar('carteira/_compositor', ['id' => $id, 'canais' => array_keys(\App\Services\CarteiraService::CANAIS)]) ?>
+      <?php endif; ?>
       <?php if (!$linhaDoTempo): ?><p class="suave pequeno">Nenhum registro ainda.</p><?php endif; ?>
+      <?php $anexos = \App\Services\ClienteAnexoService::porEvento($id); ?>
       <ol class="linha-tempo cl-linha-tempo">
-        <?php foreach ($linhaDoTempo as $ev): ?>
-          <li class="tipo-<?= e($ev['tipo']) ?>">
-            <strong><?= e(ClienteEvento::TIPOS[$ev['tipo']] ?? $ev['tipo']) ?><?= $ev['canal'] && $ev['tipo'] !== 'ligacao' ? ' · ' . e($ev['canal']) : '' ?></strong>
-            <?php if ($ev['descricao']): ?><span><?= e($ev['descricao']) ?></span><?php endif; ?>
-            <small><?= data_br($ev['ocorrido_em'], true) ?> · <?= e($ev['usuario_nome'] ?? 'Sistema') ?></small>
-          </li>
-        <?php endforeach; ?>
+        <?php foreach ($linhaDoTempo as $ev): ?><?= \App\Core\Visao::renderizar('carteira/_evento', ['ev' => $ev, 'anexos' => $anexos[(int) $ev['id']] ?? [], 'clienteId' => $id]) ?><?php endforeach; ?>
       </ol>
     </section>
   </div>

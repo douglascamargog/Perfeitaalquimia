@@ -61,6 +61,9 @@ return [
     ['POST', '/carteira/clientes/{id}/contato', 'ClienteController@contato',     'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/ligar',   'ClienteController@ligar',       'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/ligacao', 'ClienteController@ligacao',     'carteira.ver_propria|carteira.ver_todas'],
+    ['POST', '/carteira/clientes/{id}/anotar',  'ClienteController@anotar',      'carteira.ver_propria|carteira.ver_todas'],
+    ['POST', '/carteira/clientes/{id}/agendar', 'ClienteController@agendar',     'carteira.ver_propria|carteira.ver_todas'],
+    ['GET',  '/carteira/clientes/{id}/anexos/{anexo}', 'ClienteController@anexo', 'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/etapa',   'ClienteController@etapa',       'carteira.ver_propria|carteira.ver_todas'],
 
     ['GET',  '/carteira/importar',                    'ImportacaoController@index',     'carteira.importar'],
@@ -180,6 +183,7 @@ return [
     ['GET',  '/acompanhamento/pessoa/{id}',         'AcompanhamentoController@pessoa',   'acompanhamento.ver|setor.gestao'],
     ['GET',  '/acompanhamento/cobranca/{id}',       'AcompanhamentoController@cobranca', 'acompanhamento.ver|cobranca.gerenciar'],
     ['GET',  '/ligacoes/{id}/gravacao',             'AcompanhamentoController@gravacao', 'logado'],
+    ['POST', '/telefonia/ligar',                'TelefoniaController@ligarNumero', 'logado'],
     ['POST', '/telefonia/discador',                 'AcompanhamentoController@discador', 'carteiras.gerenciar|setor.gestao'],
     ['POST', '/telefonia/testar',                   'AcompanhamentoController@testar',   'integracao.gerenciar'],
     ['POST', '/telefonia/sincronizar',              'AcompanhamentoController@sincronizar', 'integracao.gerenciar'],

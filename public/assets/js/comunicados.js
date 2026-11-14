@@ -38,3 +38,32 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && janela &
 
 // Usado pelo notificacoes.js quando o resumo traz a faixa atualizada
 window.__oneFaixaComunicados = (html) => { if (lugar && typeof html === 'string' && (!janela || janela.hidden)) lugar.innerHTML = html; };
+
+// ---------------------------------------------------------------------
+// Letreiro do topo: "Novo pedido feito por Fulana" passa em movimento por 30 segundos
+// (o comunicado também passa em movimento, mas fica até a pessoa clicar em "Li e entendi").
+// ---------------------------------------------------------------------
+const letreiro = document.querySelector('[data-letreiro]');
+let fila = [];
+let rodando = false;
+const DURACAO = 30000;
+
+function proximo() {
+  if (!letreiro) return;
+  const item = fila.shift();
+  if (!item) { rodando = false; letreiro.hidden = true; letreiro.innerHTML = ''; return; }
+  rodando = true;
+  letreiro.hidden = false;
+  letreiro.innerHTML = '';
+  const trilho = document.createElement('span');
+  trilho.className = 'letreiro-rolar';
+  trilho.textContent = item.texto;
+  trilho.dataset.letreiroPedido = item.id;
+  letreiro.append(trilho);
+  setTimeout(proximo, DURACAO);
+}
+
+window.__oneLetreiro = (itens) => {
+  fila.push(...itens.filter((i) => !fila.some((f) => f.id === i.id)));
+  if (!rodando) proximo();
+};

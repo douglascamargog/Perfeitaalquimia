@@ -46,6 +46,60 @@ class TelefoniaService
         return ['ok' => true, 'manual' => false, 'mensagem' => $r['mensagem'] . ($r['duracao'] ? ' Duração: ' . self::duracao((int) $r['duracao']) . '.' : '')];
     }
 
+    /** A pessoa logada vê o discador (telefone ao lado do sino)? Funções configuradas em Configurações › Ligue Talk */
+    public static function veDiscador(): bool
+    {
+        if (!Auth::logado() || Auth::somenteAcompanha()) {
+            return false;
+        }
+        $funcoes = array_map('trim', (array) Config::get('telefonia.discador_funcoes', ['televendas', 'cobranca']));
+        return (bool) array_intersect($funcoes, array_column(Auth::usuario()['funcoes'] ?? [], 'slug'));
+    }
+
+    /**
+     * Discador: liga para QUALQUER número. Se o número for de um cliente que a pessoa vê, a ligação vai para a ficha dele.
+     * Devolve [ok, mensagem, manual, tel, cliente => [id, nome] | null]
+     */
+    public static function ligarNumero(string $digitado): array
+    {
+        $numero = preg_replace('/\D/', '', $digitado);
+        if (strlen($numero) > 11 && str_starts_with($numero, '55')) {
+            $numero = substr($numero, 2);
+        }
+        if (strlen($numero) < 10 || strlen($numero) > 11) {
+            throw new RuntimeException('Digite o número com DDD (10 ou 11 dígitos).');
+        }
+        $cliente = null;
+        foreach (Banco::todos('SELECT * FROM clientes WHERE excluido_em IS NULL AND (telefone = ? OR whatsapp = ?) ORDER BY id LIMIT 5', [$numero, $numero]) as $c) {
+            if (Cliente::podeVer($c)) {
+                $cliente = $c;
+                break;
+            }
+        }
+        $ramal = (string) (Auth::usuario()['ramal'] ?? '');
+        $r = Integracoes::telefonia()->ligar($ramal, $numero);
+        $info = $cliente ? ['id' => (int) $cliente['id'], 'nome' => $cliente['nome_fantasia'] ?: $cliente['razao_social']] : null;
+        if ($r['situacao'] === 'manual') {
+            if ($cliente) {
+                CarteiraService::registrarLigacao((int) $cliente['id'], 'Ligação pelo discador (' . self::formatar($numero) . ')', (int) Auth::id());
+            }
+            return ['ok' => true, 'manual' => true, 'tel' => '+55' . $numero, 'mensagem' => $r['mensagem'], 'cliente' => $info];
+        }
+        self::gravar([
+            'id_externo' => $r['id_externo'], 'usuario_id' => Auth::id(), 'cliente_id' => $cliente ? (int) $cliente['id'] : null, 'numero' => $numero,
+            'situacao' => $r['situacao'], 'inicio' => date('Y-m-d H:i:s'), 'duracao_seg' => (int) $r['duracao'], 'gravacao' => $r['gravacao'],
+            'origem' => self::modo() === 'simulado' ? 'demonstracao' : 'sistema',
+        ]);
+        return ['ok' => true, 'manual' => false, 'cliente' => $info,
+            'mensagem' => $r['mensagem'] . ($r['duracao'] ? ' Duração: ' . self::duracao((int) $r['duracao']) . '.' : '')];
+    }
+
+    public static function formatar(string $numero): string
+    {
+        return strlen($numero) === 11 ? sprintf('(%s) %s-%s', substr($numero, 0, 2), substr($numero, 2, 5), substr($numero, 7))
+            : sprintf('(%s) %s-%s', substr($numero, 0, 2), substr($numero, 2, 4), substr($numero, 6));
+    }
+
     /** Grava a ligação (sem duplicar pelo id do Ligue Talk) e registra o contato na linha do tempo do cliente */
     private static function gravar(array $l): bool
     {

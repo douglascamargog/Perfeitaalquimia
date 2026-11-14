@@ -322,7 +322,7 @@ class OrcamentoService
 
     private static function avisarVendedor(array $o, string $tipo, string $titulo, string $texto, ?string $link = null): void
     {
-        $quem = array_filter([(int) $o['vendedor_id'], (int) $o['criado_por']]);
+        $quem = array_filter([(int) ($o['vendedor_id'] ?: $o['criado_por'])]); // só o vendedor do orçamento
         NotificacaoService::avisar($quem, $tipo, $titulo, $link ?? '/orcamentos/' . (int) $o['id'], ['cliente_id' => (int) $o['cliente_id'], 'texto' => $texto]);
     }
 

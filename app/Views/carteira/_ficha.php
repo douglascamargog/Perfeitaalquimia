@@ -243,15 +243,13 @@ $linkSeguro = function (?string $url): string {
   <!-- Linha do tempo -->
   <section class="ficha-secao">
     <h3>Linha do tempo</h3>
+    <?php if (!\App\Core\Auth::somenteAcompanha() || \App\Core\Auth::pode('diretoria.vende') && (int) $c['responsavel_id'] === \App\Core\Auth::id()): ?>
+      <?= Visao::renderizar('carteira/_compositor', ['id' => $id, 'canais' => $canais]) ?>
+    <?php endif; ?>
     <?php if (!$eventos): ?><p class="suave pequeno">Nenhum registro ainda.</p><?php endif; ?>
+    <?php $anexos = \App\Services\ClienteAnexoService::porEvento($id); ?>
     <ol class="linha-tempo">
-      <?php foreach ($eventos as $ev): ?>
-        <li class="tipo-<?= e($ev['tipo']) ?>">
-          <strong><?= e(ClienteEvento::TIPOS[$ev['tipo']] ?? $ev['tipo']) ?><?= $ev['canal'] && $ev['tipo'] !== 'ligacao' ? ' · ' . e($ev['canal']) : '' ?></strong>
-          <?php if ($ev['descricao']): ?><span><?= e($ev['descricao']) ?></span><?php endif; ?>
-          <small><?= data_br($ev['ocorrido_em'], true) ?> · <?= e($ev['usuario_nome'] ?? 'Sistema') ?></small>
-        </li>
-      <?php endforeach; ?>
+      <?php foreach ($eventos as $ev): ?><?= Visao::renderizar('carteira/_evento', ['ev' => $ev, 'anexos' => $anexos[(int) $ev['id']] ?? [], 'clienteId' => $id]) ?><?php endforeach; ?>
     </ol>
   </section>
   <?php endif; ?>

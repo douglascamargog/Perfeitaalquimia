@@ -291,3 +291,27 @@ details.ficha-secao[open] > summary::before { content: '▾ '; }
 .ficha-msg { display: grid; gap: 8px; }
 .ficha-msg textarea { width: 100%; font: inherit; font-size: .88rem; border: 1px solid var(--borda); border-radius: 12px; padding: 10px; background: var(--secundaria-clara); }
 .ficha-msg .botao { justify-self: start; }
+
+/* Caixa rápida da linha do tempo (V10.3): anotação com print, agendar, contato */
+.cx { border: 1px solid var(--borda); border-radius: 16px; background: var(--card); margin: 8px 0 14px; overflow: hidden; }
+.cx-abas { display: flex; gap: 2px; background: var(--primaria-clara); padding: 4px; }
+.cx-abas button { flex: 1; border: 0; background: transparent; border-radius: 12px; padding: 7px 8px; font: inherit; font-size: .84rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+.cx-abas button.ativo { background: var(--card); color: var(--primaria-escura); box-shadow: var(--sombra); }
+.cx-painel { display: grid; gap: 8px; padding: 10px; }
+.cx-painel[hidden] { display: none; }
+.cx-painel textarea, .cx-painel input[type=text] { width: 100%; }
+.cx-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.cx-grade label { display: grid; gap: 3px; font-size: .78rem; font-weight: 600; }
+.cx-grade small { font-weight: 400; color: var(--texto-suave); }
+.cx-rodape { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.cx-anexar { cursor: pointer; font-size: .82rem; font-weight: 600; color: var(--primaria-escura); background: var(--primaria-clara); padding: 5px 10px; border-radius: 99px; }
+.cx-previas { display: flex; flex-wrap: wrap; gap: 6px; }
+.cx-previas:empty { display: none; }
+.cx-previa { position: relative; background: var(--primaria-clara); border-radius: 10px; padding: 4px; font-size: .75rem; max-width: 140px; }
+.cx-previa img { display: block; height: 70px; max-width: 132px; object-fit: contain; border-radius: 6px; }
+.cx-previa button { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; border: 0; background: var(--perigo); color: #fff; cursor: pointer; line-height: 1; }
+.lt-anexos { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; }
+.lt-anexos img { height: 72px; max-width: 160px; object-fit: cover; border-radius: 8px; border: 1px solid var(--borda); background: #fff; }
+.lt-pdf { font-size: .8rem; }
+.cl-tarefas li { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.cl-tarefas li form { margin: 0; flex: none; }

@@ -35,10 +35,26 @@ class NotificacaoController extends Controller
             'novas' => $depois > 0 ? array_map(fn($n) => ['id' => (int) $n['id'], 'titulo' => $n['titulo'], 'texto' => $n['texto'], 'link' => url('/notificacoes/' . (int) $n['id'])],
                 NotificacaoService::ultimas($id, 5, $depois)) : [],
             'ultima' => (int) (NotificacaoService::ultimas($id, 1)[0]['id'] ?? 0),
+            // Letreiro do topo: pedidos novos desde o último que esta pessoa viu passar (só os dos últimos 10 minutos)
+            'pedido_ultimo' => (int) \App\Core\Banco::valor('SELECT COALESCE(MAX(id), 0) FROM pedidos'),
+            'letreiro' => self::letreiro((int) ($_GET['pedido'] ?? 0)),
             'lista' => array_map(fn($n) => ['id' => (int) $n['id'], 'titulo' => $n['titulo'], 'texto' => $n['texto'], 'lida' => (bool) $n['lida_em'],
                 'quando' => data_br($n['criado_em'], true), 'tipo' => $n['tipo'], 'link' => url('/notificacoes/' . (int) $n['id'])],
                 ($_GET['lista'] ?? '') === '1' ? NotificacaoService::ultimas($id, 12) : []),
         ]);
+    }
+
+    /** Frases do letreiro: "Novo pedido de Fulana · Cidade/UF" (liga/desliga em Configurações › Início) */
+    private static function letreiro(int $depoisDe): array
+    {
+        if ($depoisDe <= 0 || !\App\Core\Config::get('inicio.letreiro_pedidos', true)) {
+            return [];
+        }
+        $pedidos = \App\Core\Banco::todos("SELECT p.id, p.origem, u.nome AS vendedor, u.apelido, c.cidade, c.uf FROM pedidos p JOIN clientes c ON c.id = p.cliente_id
+            LEFT JOIN usuarios u ON u.id = p.vendedor_id WHERE p.id > ? AND p.criado_em >= NOW() - INTERVAL 10 MINUTE AND p.situacao <> 'cancelado'
+            ORDER BY p.id LIMIT 5", [$depoisDe]);
+        return array_map(fn($p) => ['id' => (int) $p['id'], 'texto' => '🎉 Novo pedido feito por ' . ($p['vendedor'] ? \App\Services\EquipeService::comoChamar(['nome' => $p['vendedor'], 'apelido' => $p['apelido']])
+            : 'um cliente pelo catálogo') . ' · ' . $p['cidade'] . '/' . $p['uf']], $pedidos);
     }
 
     /** Abre: marca como lida e leva para o link */
