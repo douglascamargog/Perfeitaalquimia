@@ -47,6 +47,7 @@ use App\Core\Visao;
     <div data-previa-conteudo hidden>
       <table class="tabela pr-tabela"><thead><tr><th>Item</th><th class="direita">Vai usar</th><th class="direita">Em estoque</th><th class="direita">Falta</th></tr></thead><tbody data-previa-linhas></tbody></table>
       <p data-previa-resumo></p>
+      <p class="pequeno suave">O consumo já soma o desperdício medido nas produções anteriores. Produto ainda não produzido usa a média da matéria-prima (ou nenhuma perda, se ela nunca foi medida).</p>
     </div>
   </section>
 </div>

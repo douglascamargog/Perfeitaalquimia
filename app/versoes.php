@@ -17,6 +17,15 @@
  */
 return [
     [
+        'versao' => '9.1', 'data' => '2026-11-14', 'titulo' => 'Produção: máximo e desperdício',
+        'novo' => [
+            'A prévia da ordem de produção mostra quantas unidades dá para produzir com o estoque de hoje e qual item limita.',
+            'Desperdício medido: ao concluir a ordem, preencha "Usado de verdade" com o que foi pesado/contado de cada item. O sistema calcula a perda e passa a somá-la nas próximas ordens daquele produto.',
+            'Produto que ainda não foi produzido usa a perda média já medida da matéria-prima em outros produtos.',
+            'A ordem concluída mostra o desperdício medido de cada item (previsto × usado).',
+        ],
+    ],
+    [
         'versao' => '9.0', 'data' => '2026-11-14', 'titulo' => 'Depósito e Orçamentos',
         'novo' => [
             'Setor novo: Depósito. Os pedidos com nota emitida entram numa fila de separação: urgentes primeiro, depois do mais antigo para o mais novo, com o painel do dia (a separar, para despachar, atrasados).',

@@ -288,7 +288,7 @@ class ProducaoService
     /** Linhas da ficha de um produto, com o custo de cada uma (pelo último custo) */
     public static function ficha(int $produtoId): array
     {
-        return Banco::todos('SELECT ft.materia_prima_id, ft.quantidade, m.nome, m.unidade, m.custo_unitario, m.estoque, m.ativo, m.tipo, m.rotulo,
+        return Banco::todos('SELECT ft.materia_prima_id, ft.quantidade, ft.perda_pct, m.nome, m.unidade, m.custo_unitario, m.estoque, m.ativo, m.tipo, m.rotulo,
                 ROUND(ft.quantidade * m.custo_unitario, 4) AS custo
             FROM ficha_tecnica ft JOIN materias_primas m ON m.id = ft.materia_prima_id WHERE ft.produto_id = ? ORDER BY m.nome', [$produtoId]);
     }
@@ -337,27 +337,78 @@ class ProducaoService
      * Prévia do consumo: para cada matéria-prima da ficha, quanto vai usar, quanto tem e quanto falta.
      * Retorna ['linhas' => [...], 'ok' => bool, 'custo' => float, 'sem_ficha' => bool]
      */
+    /**
+     * Prévia do consumo de uma ordem: cada item da ficha (matérias-primas e embalagens) com a PERDA medida somada,
+     * o que falta e o MÁXIMO de unidades que o estoque permite produzir (e qual item limita).
+     * Perda: a medida neste produto; se ainda não foi medida, a média medida da matéria-prima em outros produtos; senão 0.
+     */
     public static function previa(int $produtoId, int $quantidade): array
     {
         $linhas = [];
         $ok = true;
         $custo = 0.0;
+        $medias = self::perdasPorMateria();
+        $maximo = null;
+        $limita = null;
         foreach (self::ficha($produtoId) as $l) {
-            $precisa = round((float) $l['quantidade'] * $quantidade, 3);
+            $mpId = (int) $l['materia_prima_id'];
+            [$perda, $origem] = $l['perda_pct'] !== null ? [(float) $l['perda_pct'], 'produto'] : (isset($medias[$mpId]) ? [$medias[$mpId], 'materia'] : [0.0, null]);
+            $porUnidade = (float) $l['quantidade'] * (1 + max(0, $perda) / 100);
+            $teorico = round((float) $l['quantidade'] * $quantidade, 3);
+            $precisa = self::arredondar($porUnidade * $quantidade, (string) $l['unidade']);
             $falta = max(0, round($precisa - (float) $l['estoque'], 3));
             $ok = $ok && $falta <= 0;
             $custo += $precisa * (float) $l['custo_unitario'];
-            $linhas[] = ['materia_prima_id' => (int) $l['materia_prima_id'], 'nome' => $l['nome'], 'unidade' => $l['unidade'],
+            $daPara = $porUnidade > 0 ? (int) floor(((float) $l['estoque'] + 1e-9) / $porUnidade) : null;
+            if ($daPara !== null && ($maximo === null || $daPara < $maximo)) {
+                [$maximo, $limita] = [$daPara, $l['nome']];
+            }
+            $linhas[] = ['materia_prima_id' => $mpId, 'nome' => $l['nome'], 'unidade' => $l['unidade'],
                 'tipo' => $l['tipo'] === 'embalagem' ? 'embalagem' : 'materia_prima', 'rotulo' => (bool) ($l['rotulo'] ?? false),
-                'por_unidade' => (float) $l['quantidade'], 'precisa' => $precisa, 'estoque' => (float) $l['estoque'], 'falta' => $falta];
+                'por_unidade' => (float) $l['quantidade'], 'teorico' => $teorico, 'perda_pct' => round($perda, 2), 'perda_origem' => $origem,
+                'precisa' => $precisa, 'estoque' => (float) $l['estoque'], 'falta' => $falta, 'da_para' => $daPara];
         }
         // Matérias-primas primeiro, depois embalagens (pote, tampa, selo, rótulo...)
         usort($linhas, fn($a, $b) => [$a['tipo'] === 'embalagem', $a['nome']] <=> [$b['tipo'] === 'embalagem', $b['nome']]);
         $embalagens = array_filter($linhas, fn($l) => $l['tipo'] === 'embalagem');
         return ['linhas' => $linhas, 'ok' => $ok && $linhas !== [], 'custo' => round($custo, 2), 'sem_ficha' => $linhas === [],
+            'maximo' => $maximo ?? 0, 'limita' => $limita,
             // Só o rótulo (ou nada) nas embalagens: provavelmente faltam pote, tampa, selo... no cadastro
             'sem_embalagem' => $linhas !== [] && !array_filter($embalagens, fn($l) => !$l['rotulo']),
             'slug' => (string) Banco::valor('SELECT slug FROM produtos WHERE id = ?', [$produtoId])];
+    }
+
+    /** Grava a medição e atualiza a perda do item NESTE produto (média das últimas 5 medições, nunca negativa) */
+    private static function medirPerda(array $op, array $linha, int $unidades, float $usado, ?int $usuarioId): void
+    {
+        $perda = round(($usado - $linha['teorico']) / $linha['teorico'] * 100, 2);
+        Banco::inserir('producao_perdas', ['ordem_id' => $op['id'], 'produto_id' => $op['produto_id'], 'materia_prima_id' => $linha['materia_prima_id'],
+            'unidades' => $unidades, 'teorico' => $linha['teorico'], 'usado' => round($usado, 3), 'perda_pct' => max(-99, min(999, $perda)), 'usuario_id' => $usuarioId]);
+        $media = (float) Banco::valor('SELECT AVG(GREATEST(x.perda_pct, 0)) FROM (SELECT perda_pct FROM producao_perdas WHERE produto_id = ? AND materia_prima_id = ?
+            ORDER BY id DESC LIMIT 5) x', [$op['produto_id'], $linha['materia_prima_id']]);
+        Banco::executar('UPDATE ficha_tecnica SET perda_pct = ? WHERE produto_id = ? AND materia_prima_id = ?', [round($media, 2), $op['produto_id'], $linha['materia_prima_id']]);
+    }
+
+    /** Unidade inteira ("un") arredonda para cima; o resto fica com 3 casas */
+    private static function arredondar(float $valor, string $unidade): float
+    {
+        return $unidade === 'un' ? (float) ceil(round($valor, 6)) : round($valor, 3);
+    }
+
+    /** Perda média medida de cada matéria-prima (todas as medições, em qualquer produto) — usada quando o produto ainda não foi medido */
+    public static function perdasPorMateria(): array
+    {
+        $r = [];
+        foreach (Banco::todos('SELECT materia_prima_id, AVG(GREATEST(perda_pct, 0)) AS media FROM producao_perdas GROUP BY materia_prima_id') as $x) {
+            $r[(int) $x['materia_prima_id']] = round((float) $x['media'], 2);
+        }
+        return $r;
+    }
+
+    /** Medições de perda de uma ordem (teórico × usado) */
+    public static function perdasDaOrdem(int $ordemId): array
+    {
+        return Banco::todos('SELECT pp.*, m.nome, m.unidade FROM producao_perdas pp JOIN materias_primas m ON m.id = pp.materia_prima_id WHERE pp.ordem_id = ? ORDER BY m.nome', [$ordemId]);
     }
 
     public static function criarOrdem(array $d, ?int $usuarioId, string $origem = 'manual', ?string $quando = null): int
@@ -397,9 +448,13 @@ class ProducaoService
      * Conclui a ordem: confere o estoque, baixa cada matéria-prima (quantidade × ficha) e soma o produto acabado.
      * $quantidadeReal = unidades que realmente saíram (pode ser diferente do planejado). Tudo ou nada.
      */
-    public static function concluirOrdem(int $id, ?int $usuarioId, ?int $quantidadeReal = null, ?string $quando = null): array
+    /**
+     * Conclui a ordem. $usado = [materia_prima_id => quantidade usada de verdade] (opcional): o que for informado é baixado
+     * como está e vira uma MEDIÇÃO de perda (usado × teórico); o que não for informado baixa a previsão (com a perda já conhecida).
+     */
+    public static function concluirOrdem(int $id, ?int $usuarioId, ?int $quantidadeReal = null, ?string $quando = null, array $usado = []): array
     {
-        return Banco::transacao(function () use ($id, $usuarioId, $quantidadeReal, $quando) {
+        return Banco::transacao(function () use ($id, $usuarioId, $quantidadeReal, $quando, $usado) {
             $op = Banco::um('SELECT * FROM ordens_producao WHERE id = ? FOR UPDATE', [$id]);
             if (!$op) {
                 throw new RuntimeException('Ordem de produção não encontrada.');
@@ -417,6 +472,26 @@ class ProducaoService
             if ($previa['sem_ficha']) {
                 throw new RuntimeException('O produto está sem ficha técnica.');
             }
+            // Consumo informado (medido): substitui a previsão daquele item
+            $medidos = [];
+            foreach ($previa['linhas'] as &$l) {
+                $valor = $usado[$l['materia_prima_id']] ?? '';
+                if ($valor === '' || $valor === null) {
+                    continue;
+                }
+                $real = self::numero((string) $valor);
+                if ($real < 0) {
+                    throw new RuntimeException('O consumo de ' . $l['nome'] . ' não pode ser negativo.');
+                }
+                $medidos[$l['materia_prima_id']] = $real;
+                $l['precisa'] = round($real, 3);
+                $l['falta'] = max(0, round($real - $l['estoque'], 3));
+            }
+            unset($l);
+            if ($medidos) {
+                $previa['ok'] = !array_filter($previa['linhas'], fn($l) => $l['falta'] > 0);
+                $previa['custo'] = round(array_sum(array_map(fn($l) => $l['precisa'] * (float) Banco::valor('SELECT custo_unitario FROM materias_primas WHERE id = ?', [$l['materia_prima_id']]), $previa['linhas'])), 2);
+            }
             if (!$previa['ok']) {
                 $faltas = array_map(fn($l) => $l['nome'] . ': faltam ' . self::qtd($l['falta'], $l['unidade']), array_filter($previa['linhas'], fn($l) => $l['falta'] > 0));
                 throw new RuntimeException('Estoque insuficiente para concluir. ' . implode(' · ', $faltas) . '.');
@@ -433,6 +508,9 @@ class ProducaoService
             }
             foreach ($previa['linhas'] as $l) {
                 self::movimentarMp($l['materia_prima_id'], 'consumo', -$l['precisa'], ['referencia' => "OP $id", 'ordem_id' => $id, 'usuario_id' => $usuarioId], $quando);
+                if (isset($medidos[$l['materia_prima_id']]) && $l['teorico'] > 0) {
+                    self::medirPerda($op, $l, $qtd, $medidos[$l['materia_prima_id']], $usuarioId);
+                }
             }
             self::movimentarAcabado((int) $op['produto_id'], 'producao', $qtd, ['referencia' => "OP $id", 'ordem_id' => $id,
                 'observacao' => $op['lote'] ? 'Lote ' . $op['lote'] : null, 'usuario_id' => $usuarioId], $quando);

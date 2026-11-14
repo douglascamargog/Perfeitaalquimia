@@ -43,11 +43,13 @@ class OrdemProducaoController extends Controller
             $l['precisa_txt'] = ProducaoService::qtd($l['precisa'], $l['unidade']);
             $l['estoque_txt'] = ProducaoService::qtd($l['estoque'], $l['unidade']);
             $l['falta_txt'] = $l['falta'] > 0 ? ProducaoService::qtd($l['falta'], $l['unidade']) : '';
+            $l['perda_txt'] = $l['perda_pct'] > 0 ? '+' . number_format($l['perda_pct'], 1, ',', '.') . '% de perda' . ($l['perda_origem'] === 'materia' ? ' (média da matéria-prima)' : '') : '';
         }
         unset($l);
         $p['embalagens_url'] = $p['slug'] !== '' ? url('/produtos/' . $p['slug']) . '?aba=embalagens' : '';
         $p['ficha_url'] = $p['slug'] !== '' ? url('/produtos/' . $p['slug']) . '?aba=ficha' : '';
         $p['custo_txt'] = dinheiro($p['custo']);
+        $p['maximo_txt'] = number_format((int) $p['maximo'], 0, ',', '.');
         $p['custo_unidade_txt'] = $qtd > 0 ? dinheiro($p['custo'] / $qtd) : '';
         $this->json($p);
     }
@@ -74,6 +76,7 @@ class OrdemProducaoController extends Controller
             'titulo' => 'Ordem de produção nº ' . $o['id'], 'o' => $o,
             'previa' => $o['situacao'] === 'planejada' ? ProducaoService::previa((int) $o['produto_id'], (int) $o['quantidade']) : null,
             'consumo' => $o['situacao'] === 'concluida' ? ProducaoService::consumoDaOrdem((int) $id) : [],
+            'perdas' => $o['situacao'] === 'concluida' ? ProducaoService::perdasDaOrdem((int) $id) : [],
             'pode' => Auth::pode('producao.gerenciar'), 'estilos' => self::ESTILOS, 'scripts' => ['producao.js'],
         ]);
     }
@@ -95,8 +98,10 @@ class OrdemProducaoController extends Controller
     {
         try {
             $real = $this->campo('quantidade_real');
-            ProducaoService::concluirOrdem((int) $id, Auth::id(), $real !== '' ? (int) $real : null);
-            Sessao::aviso('sucesso', 'Ordem concluída: matérias-primas baixadas e produto acabado somado ao estoque.');
+            $usado = array_filter((array) ($_POST['usado'] ?? []), fn($v) => is_string($v) && trim($v) !== '');
+            ProducaoService::concluirOrdem((int) $id, Auth::id(), $real !== '' ? (int) $real : null, null, $usado);
+            Sessao::aviso('sucesso', 'Ordem concluída: matérias-primas baixadas e produto acabado somado ao estoque.'
+                . ($usado ? ' O desperdício medido já vale para as próximas ordens.' : ''));
         } catch (RuntimeException $e) {
             Sessao::aviso('erro', $e->getMessage());
         }

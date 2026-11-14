@@ -78,3 +78,6 @@ details[open] summary { margin-bottom: 14px; }
 .pr-grupo th { background: var(--primaria-clara); color: var(--primaria-escura); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; text-align: left; padding: 6px 10px; }
 .pr-aviso-linha td { background: var(--aviso-fundo); color: var(--aviso); font-size: .85rem; font-weight: 600; }
 .pr-aviso-linha a { color: inherit; }
+.pr-perda { display: block; color: var(--aviso); font-size: .74rem; font-weight: 600; }
+.pr-maximo { display: inline-block; background: var(--primaria-clara); color: var(--primaria-escura); border-radius: 10px; padding: 4px 10px; margin-bottom: 4px; }
+.pr-usado { width: 90px; text-align: right; padding: 5px 8px; }
