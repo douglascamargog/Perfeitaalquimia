@@ -73,6 +73,7 @@ return [
     ['POST', '/carteira/importar/{id}/cancelar',      'ImportacaoController@cancelar',  'carteira.importar'],
 
     ['GET',  '/agenda',                         'AgendaController@index',        'carteira.ver_propria|carteira.ver_todas'],
+    ['POST', '/agenda/{id}/reagendar',          'AgendaController@reagendar',    'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/agenda/{id}/concluir',           'AgendaController@concluir',     'carteira.ver_propria|carteira.ver_todas'],
 
     ['GET',  '/reativacao',                     'ReativacaoController@index',    'carteira.ver_propria|carteira.ver_todas'],

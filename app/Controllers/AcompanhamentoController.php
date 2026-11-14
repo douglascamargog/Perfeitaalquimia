@@ -16,7 +16,7 @@ use RuntimeException;
  */
 class AcompanhamentoController extends Controller
 {
-    private const ESTILOS = ['carteira.css', 'painel.css', 'acompanhamento.css'];
+    private const ESTILOS = ['carteira.css', 'painel.css', 'acompanhamento.css', 'graficos.css'];
 
     public function index(): void
     {
@@ -60,7 +60,6 @@ class AcompanhamentoController extends Controller
             'antes' => A::resumo([$p], $deA, $ateA)[0] ?? [], 'aba' => $aba, 'extra' => A::carteiraEAgenda((int) $p['id'], $de, $ate),
             'meta' => A::meta((int) $p['id'], substr($ate, 0, 7)),
             'de' => $de, 'ate' => $ate, 'periodo' => $periodo, 'estilos' => self::ESTILOS,
-            'scripts' => ['https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js', 'acompanhamento.js'],
         ]);
     }
 

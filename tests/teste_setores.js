@@ -65,8 +65,8 @@ const secoes = (p) => p.$$eval('[data-menu-secao]', (l) => l.map((s) => s.datase
   const recTodos = await ges.$$eval('[data-recompra]', (l) => l.length);
   ok(rec < recTodos, `Recompra do Externo (${rec}) menor que a de todos (${recTodos})`);
   ok(await ges.locator('[data-selo-setor]').count() === 0, '"✕" no selo volta a mostrar todos os setores');
-  await ges.goto(BASE + '/agenda?setor=televendas');
-  const agTv = await ges.locator('table tbody tr').count();
+  await ges.goto(BASE + '/agenda?setor=televendas&ver=lista');
+  const agTv = await ges.locator('[data-tarefa]').count();
   const agEsperado = Number(sql(`select count(*) from tarefas t left join clientes c on c.id=t.cliente_id and c.excluido_em is null where t.concluida_em is null and (t.cliente_id is null or c.funcao_id=${fn('televendas')})`));
   ok(agTv === Math.min(agEsperado, 500), `Agenda de Televendas: ${agTv} tarefas`);
 

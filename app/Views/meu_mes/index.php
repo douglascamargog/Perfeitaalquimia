@@ -45,4 +45,4 @@ $nome = \App\Services\EquipeService::comoChamar(Auth::usuario());
   <?php endforeach; ?>
 </nav>
 
-<?= Visao::renderizar('meu_mes/_' . $aba, compact('mes', 'dia', 'eu', 'equipe', 'tarefas', 'participacao', 'faturadoSistema', 'nomeMes', 'pct', 'ou', 'link', 'clientes')) ?>
+<?= Visao::renderizar('meu_mes/_' . $aba, compact('mes', 'dia', 'eu', 'equipe', 'tarefas', 'participacao', 'faturadoSistema', 'nomeMes', 'pct', 'ou', 'link', 'clientes', 'hoje')) ?>

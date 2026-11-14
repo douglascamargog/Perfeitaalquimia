@@ -47,7 +47,14 @@ class MeuMesController extends Controller
                 'faixas' => $aba === 'clientes' ? \App\Services\VendasService::semCompra(['vendedor' => (int) Auth::id()]) : [],
                 'parados' => $aba === 'clientes' ? \App\Services\EquipeVendasService::semComprar((int) Auth::id(), (int) (\App\Core\Config::get('carteira.faixas_sem_compra', [30])[0] ?? 30), 60, \App\Services\Setores::funcaoIdAtual()) : [],
             ],
-            'estilos'  => ['carteira.css', 'meu_mes.css'],
+            // "Para fazer hoje": retornos atrasados e de hoje + 3 clientes de recompra atrasada
+            'hoje' => $aba === 'painel' ? [
+                'tarefas' => Banco::todos("SELECT t.*, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS cliente, c.whatsapp, c.telefone FROM tarefas t
+                    LEFT JOIN clientes c ON c.id = t.cliente_id WHERE t.usuario_id = ? AND t.concluida_em IS NULL AND t.vence_em <= CURDATE()
+                    ORDER BY t.vence_em, t.hora LIMIT 6", [Auth::id()]),
+                'recompra' => array_slice(\App\Services\VendasService::recompra((int) Auth::id()), 0, 3),
+            ] : null,
+            'estilos'  => ['carteira.css', 'meu_mes.css', 'graficos.css'],
             'scripts'  => $aba === 'clientes' ? ['carteira.js'] : [], // ficha do cliente na lateral
         ]);
     }

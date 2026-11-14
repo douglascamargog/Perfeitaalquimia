@@ -36,3 +36,54 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 .ac-funil i { display: block; height: 14px; border-radius: 6px; min-width: 2px; }
 .ac-funil b { text-align: right; }
 @media (max-width: 600px) { .ac-funil li { grid-template-columns: 100px minmax(0, 1fr) 32px; } }
+
+/* =====================================================================
+   V10.4: Resumo da vendedora (anel da meta, ritmo, pontos de atenção) e equipe em cartões
+   ===================================================================== */
+.ac-hero { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; }
+.ac-hero-corpo { flex: 1 1 360px; display: grid; gap: 12px; min-width: 0; }
+.ac-hero-topo { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+.ac-hero-topo h2 { margin: 0; }
+.ac-hero-corpo p { margin: 0; }
+.ac-hero-numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.ac-hero-numeros div { background: var(--primaria-clara); border-radius: 14px; padding: 10px 12px; display: grid; gap: 2px; }
+.ac-hero-numeros span { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); }
+.ac-hero-numeros strong { font-size: 1.15rem; color: var(--verde-escuro); letter-spacing: -.02em; }
+.ac-sub { margin-top: 18px; font-size: 1rem; }
+.ac-atencao { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ac-atencao li { display: flex; gap: 10px; align-items: center; background: var(--aviso-fundo); border-radius: 12px; padding: 8px 12px; font-size: .9rem; }
+.ac-atencao a { color: var(--texto); }
+.ac-tudo-certo { background: var(--sucesso-fundo); color: var(--sucesso); border-radius: 12px; padding: 8px 12px; margin: 0; font-weight: 600; }
+.ac-canais { display: grid; gap: 6px; }
+.ac-canais div { display: grid; grid-template-columns: 110px minmax(0, 1fr) 40px; gap: 8px; align-items: center; font-size: .85rem; }
+.ac-canais i { height: 10px; background: var(--primaria-clara); border-radius: 99px; overflow: hidden; display: block; }
+.ac-canais b { display: block; height: 100%; background: var(--primaria); border-radius: 0 4px 4px 0; }
+.ac-canais strong { text-align: right; }
+
+.ac-equipe { display: grid; gap: 10px; }
+.ac-pessoa { display: grid; grid-template-columns: minmax(200px, 1.1fr) minmax(180px, 1fr) minmax(0, 2.4fr); gap: 14px 22px; align-items: center; padding: 14px 18px; margin: 0; }
+.ac-pessoa.podio { border-left: 5px solid var(--secundaria); }
+.ac-pessoa.p1 { border-left-color: #f5b301; }
+.ac-pessoa-nome { display: flex; gap: 12px; align-items: center; text-decoration: none; color: var(--texto); min-width: 0; }
+.ac-pessoa-nome span { display: grid; min-width: 0; }
+.ac-pessoa-nome strong { overflow-wrap: anywhere; }
+.ac-pessoa-nome small { color: var(--texto-suave); font-size: .78rem; }
+.ac-pessoa-nome:hover strong { text-decoration: underline; }
+.ac-pessoa-meta { display: grid; gap: 6px; }
+.ac-pessoa-meta-topo { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ac-pessoa-meta-topo strong { font-size: 1.3rem; color: var(--verde-escuro); }
+.ac-pessoa-meta-topo small { color: var(--texto-suave); font-size: .74rem; text-align: right; }
+.ac-pilulas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.ac-pilulas li { background: var(--primaria-clara); border-radius: 12px; padding: 6px 8px; display: grid; gap: 1px; min-width: 0; }
+.ac-pilulas li.alerta { background: var(--aviso-fundo); }
+.ac-pilulas span { font-size: .64rem; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); }
+.ac-pilulas strong { font-size: .98rem; white-space: nowrap; }
+.ac-pilulas small { font-size: .68rem; color: var(--texto-suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 1280px) { .ac-pessoa { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .ac-pilulas { grid-column: 1 / -1; } }
+@media (max-width: 700px) {
+  .ac-pessoa { grid-template-columns: minmax(0, 1fr); }
+  .ac-pilulas { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ac-hero-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ac-hero { justify-content: center; }
+}
+@media print { .ac-pessoa { break-inside: avoid; } }

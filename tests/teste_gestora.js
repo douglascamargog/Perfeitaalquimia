@@ -47,14 +47,14 @@ async function entrar(p, email) {
   const ids = await p.$$eval('table tbody tr td:first-child a', (t) => t.map((x) => x.innerText.replace('#', '').trim()));
   ok(ids.length > 0 && sql(`select count(*) from pedidos p join clientes c on c.id=p.cliente_id where p.id in (${ids.join(',')}) and c.funcao_id<>${tv}`) === '0'
     && sql(`select count(distinct c.responsavel_id) from pedidos p join clientes c on c.id=p.cliente_id where p.id in (${ids.join(',')})`) !== '1', `Pedidos: ${ids.length} da equipe do Televendas (nenhum de outro setor)`);
-  await p.goto(BASE + '/agenda?setor=televendas');
+  await p.goto(BASE + '/agenda?setor=televendas&ver=lista');
   ok(await p.locator('select[name=pessoa]').count() === 1, 'Agenda: escolhe a própria ou a de alguém da equipe');
-  const agEquipe = await p.locator('table tbody tr').count();
-  await p.goto(BASE + `/agenda?setor=televendas&pessoa=${eu}`);
-  const agMinha = await p.locator('table tbody tr').count();
+  const agEquipe = await p.locator('[data-tarefa]').count();
+  await p.goto(BASE + `/agenda?setor=televendas&pessoa=${eu}&ver=lista`);
+  const agMinha = await p.locator('[data-tarefa]').count();
   ok(agEquipe > agMinha, `Agenda da equipe (${agEquipe}) e a própria (${agMinha})`);
-  await p.goto(BASE + `/agenda?pessoa=${sql("select id from usuarios where email='externo1@demo.local'")}`);
-  ok(await p.locator('table tbody tr').count() === agEquipe, 'pessoa de outro setor é ignorada (volta para a equipe)');
+  await p.goto(BASE + `/agenda?ver=lista&pessoa=${sql("select id from usuarios where email='externo1@demo.local'")}`);
+  ok(await p.locator('[data-tarefa]').count() === agEquipe, 'pessoa de outro setor é ignorada (volta para a equipe)');
   await p.goto(BASE + '/recompra?setor=televendas');
   const rec = await p.locator('[data-recompra]').count();
   ok(rec > 0 && (await p.locator('.rc-item').first().innerText()).includes('Televendas'), `Recompra do setor com o nome de quem atende (${rec})`);

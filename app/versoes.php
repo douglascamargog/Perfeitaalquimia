@@ -17,6 +17,19 @@
  */
 return [
     [
+        'versao' => '10.4', 'data' => '2026-11-14', 'titulo' => 'Resultados, Meu mês e Agenda de cara nova',
+        'melhoria' => [
+            'Meu mês: anel da meta, aviso de ritmo ("No ritmo" ou "Atrás do ritmo · precisa de R$ X por dia") e quanto falta por dia de trabalho.',
+            'Meu mês: "Para fazer hoje" junta os retornos atrasados e de hoje com os clientes de recompra, com Abrir e WhatsApp num clique.',
+            'Meu mês: números organizados em três blocos (Minhas vendas, Projeção, Na equipe) e o gráfico de vendas por dia mostra a linha do necessário por dia.',
+            'Agenda em semana: cada dia numa coluna, cartões coloridos por tipo, atrasados em destaque no topo e o progresso de hoje.',
+            'Agenda: botão Reagendar (hoje, amanhã ou outra data) e Concluir direto no cartão. A visão em Lista continua disponível.',
+            'Acompanhamento: cada pessoa da equipe em um cartão com a barra da meta, pódio dos três primeiros e os números lado a lado (nada mais cortado na tela).',
+            'Resumo da vendedora: anel da meta, ritmo, ligações por dia (atendidas e não atendidas), contatos por canal e pontos de atenção.',
+            'Os gráficos aparecem sempre, também no celular, na impressão e sem internet.',
+        ],
+    ],
+    [
         'versao' => '10.3', 'data' => '2026-11-14', 'titulo' => 'Ficha do cliente mais prática e discador',
         'novo' => [
             'Caixa rápida na linha do tempo do cliente: escreva uma anotação e cole o print de tela com Ctrl+V (ou anexe imagem/PDF). O print fica guardado na linha do tempo.',

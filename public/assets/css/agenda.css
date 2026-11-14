@@ -1,0 +1,64 @@
+/* =====================================================================
+   Agenda (V10.4): semana em colunas, faixa de atrasados, cartões por tipo com ações rápidas
+   ===================================================================== */
+.ag-visao { display: inline-flex; background: var(--card); border: 1px solid var(--borda); border-radius: 99px; padding: 3px; }
+.ag-visao a { padding: 6px 14px; border-radius: 99px; text-decoration: none; color: var(--texto-suave); font-weight: 600; font-size: .85rem; }
+.ag-visao a.ativo { background: var(--verde-escuro); color: var(--lima); }
+.ag-resumo .card { display: grid; gap: 4px; }
+.ag-resumo .ag-alerta { border-color: var(--perigo); background: var(--perigo-fundo); }
+.ag-progresso { height: 6px; border-radius: 99px; background: var(--primaria-clara); overflow: hidden; }
+.ag-progresso i { display: block; height: 100%; background: var(--sucesso); border-radius: 99px; }
+.ag-hoje-card small { font-size: .74rem; color: var(--texto-suave); }
+
+.ag-atrasadas { background: var(--perigo-fundo); border: 1px solid #f3c1c1; border-radius: 22px; padding: 14px 16px; margin-bottom: 16px; }
+.ag-atrasadas h2 { margin: 0 0 10px; font-size: 1.05rem; color: var(--perigo); }
+.ag-atrasadas h2 small { color: var(--texto-suave); font-weight: 500; font-size: .8rem; }
+.ag-faixa { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(230px, 260px); gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+
+.ag-semana-caixa { background: var(--card); border: 1px solid var(--borda); border-radius: 22px; padding: 14px; box-shadow: var(--sombra); }
+.ag-semana-topo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.ag-legenda { margin-left: auto; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: .76rem; color: var(--texto-suave); }
+.ag-legenda i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.ag-semana { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.ag-dia { background: var(--primaria-clara); border-radius: 16px; padding: 8px; min-height: 160px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ag-dia.hoje { background: var(--secundaria-clara); outline: 2px solid var(--secundaria); }
+.ag-dia.passado { opacity: .7; }
+.ag-dia h3 { margin: 0 0 2px; font-size: .95rem; display: flex; align-items: baseline; gap: 6px; }
+.ag-dia h3 span { text-transform: uppercase; font-size: .7rem; letter-spacing: .06em; color: var(--texto-suave); }
+.ag-dia h3 em { font-style: normal; font-size: .66rem; background: var(--verde-escuro); color: var(--lima); border-radius: 99px; padding: 1px 7px; }
+.ag-dia h3 b { margin-left: auto; font-size: .72rem; background: var(--card); border-radius: 99px; padding: 0 7px; }
+.ag-vazio { margin: 4px; color: var(--texto-suave); font-size: .8rem; }
+
+.ag-cartao { background: var(--card); border-radius: 12px; padding: 8px 10px; border-left: 4px solid var(--c, var(--primaria)); display: grid; gap: 3px; box-shadow: 0 1px 2px #0001; min-width: 0; }
+.ag-retorno { --c: #2b7fd8; }
+.ag-compromisso { --c: #16a34a; }
+.ag-cobranca { --c: #e08a00; }
+.ag-outro { --c: #8a96a3; }
+.ag-legenda i.ag-retorno, .ag-legenda i.ag-compromisso, .ag-legenda i.ag-cobranca, .ag-legenda i.ag-outro { background: var(--c); }
+.ag-cartao.atrasada { box-shadow: inset 0 0 0 1px #f3c1c1; }
+.ag-cartao header { display: flex; justify-content: space-between; gap: 6px; font-size: .7rem; color: var(--texto-suave); }
+.ag-tipo b { color: var(--texto); }
+.ag-cartao.atrasada .ag-data { color: var(--perigo); font-weight: 700; }
+.ag-titulo { font-size: .86rem; line-height: 1.25; overflow-wrap: anywhere; }
+.ag-cliente { border: 0; background: none; padding: 0; text-align: left; font: inherit; font-size: .82rem; font-weight: 700; color: var(--primaria-escura); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
+.ag-cartao small { font-size: .72rem; }
+.ag-quem { color: var(--texto-suave); }
+.ag-acoes { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; margin-top: 2px; }
+.ag-acoes form { margin: 0; }
+.ag-botao { border: 1px solid var(--borda); background: var(--card); border-radius: 99px; padding: 2px 9px; font: inherit; font-size: .76rem; cursor: pointer; text-decoration: none; color: var(--texto); list-style: none; }
+.ag-botao::-webkit-details-marker { display: none; }
+.ag-concluir { background: var(--sucesso-fundo); color: var(--sucesso); border-color: transparent; font-weight: 700; }
+.ag-reagendar { position: relative; }
+.ag-reagendar[open] form { position: absolute; z-index: 20; left: 0; top: calc(100% + 4px); background: var(--card); border: 1px solid var(--borda); border-radius: 12px; padding: 8px;
+  box-shadow: var(--sombra); display: flex; flex-wrap: wrap; gap: 6px; width: 220px; }
+.ag-reagendar[open] form input[type=date] { flex: 1 1 120px; }
+.ag-lista-secao { margin-bottom: 16px; }
+.ag-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+@media (max-width: 1100px) { .ag-semana { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 700px) {
+  .ag-semana { grid-template-columns: minmax(0, 1fr); }
+  .ag-dia { min-height: 0; }
+  .ag-dia.passado:not(:has(.ag-cartao)) { display: none; }
+  .ag-legenda { margin-left: 0; }
+}
+@media print { .ag-acoes { display: none; } .ag-semana { grid-template-columns: repeat(7, 1fr); } }

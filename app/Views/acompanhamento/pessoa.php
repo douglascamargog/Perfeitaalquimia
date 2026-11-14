@@ -33,24 +33,66 @@ $situacoesPedido = ['aguardando_aprovacao' => 'Aguardando', 'aprovado' => 'Aprov
   <?php foreach ($abas as $k => $nome): ?><a class="<?= $k === $aba ? 'ativa' : '' ?>" href="<?= url('/acompanhamento/pessoa/' . (int) $p['id']) ?>?aba=<?= $k ?>&<?= $q ?>"><?= e($nome) ?></a><?php endforeach; ?>
 </nav>
 <div class="ac-aba">
-<?php if ($aba === 'resumo'): ?>
-  <?php if ($meta && $meta['meta'] > 0): ?>
-  <section class="card ac-meta">
-    <h2>Meta × realizado (<?= e(substr($ate, 5, 2) . '/' . substr($ate, 0, 4)) ?>)</h2>
-    <div class="ac-barra"><i style="width: <?= min(100, round($meta['vendido'] / $meta['meta'] * 100)) ?>%"></i></div>
-    <dl class="pd-dados">
-      <div><dt>Meta</dt><dd><?= dinheiro($meta['meta']) ?></dd></div>
-      <div><dt>Faturado</dt><dd><?= dinheiro($meta['vendido']) ?></dd></div>
-      <div><dt>Falta</dt><dd><?= dinheiro(max(0, $meta['meta'] - $meta['vendido'])) ?></dd></div>
-      <?php if (isset($meta['projecao_mes'])): ?><div><dt>Projeção do mês</dt><dd><?= dinheiro((float) $meta['projecao_mes']) ?></dd></div><?php endif; ?>
-      <?php if (isset($meta['necessario_dia'])): ?><div><dt>Necessário por dia</dt><dd><?= dinheiro((float) $meta['necessario_dia']) ?></dd></div><?php endif; ?>
-    </dl>
+<?php if ($aba === 'resumo'):
+  $temMeta = $meta && $meta['meta'] > 0;
+  $pctMeta = $temMeta ? $meta['vendido'] / $meta['meta'] * 100 : 0;
+  $estado = !$temMeta ? 'neutro' : (!empty($meta['atingida']) ? 'batida' : (($meta['projecao_mes'] ?? null) !== null && $meta['projecao_mes'] < $meta['meta'] ? 'atras' : 'ok'));
+  $canais = $x['canais'] ?? [];
+  $maxCanal = max(1, ...array_map(fn($c) => (int) $c['qtd'], $canais ?: [['qtd' => 1]]));
+  $naoAtendidas = (int) ($r['ligacoes'] ?? 0) ? 100 - (int) ($r['taxa'] ?? 0) : 0;
+  $atencao = array_filter([
+      (int) ($x['agenda']['atrasadas'] ?? 0) ? ['⏰', (int) $x['agenda']['atrasadas'] . ' retorno(s) atrasado(s) na agenda', 'agenda'] : null,
+      $naoAtendidas >= 40 ? ['📵', $naoAtendidas . '% das ligações não foram atendidas', 'ligacoes'] : null,
+      (int) ($x['carteira']['sem_90'] ?? 0) ? ['💤', (int) $x['carteira']['sem_90'] . ' cliente(s) sem comprar há 90 dias ou mais', 'carteira'] : null,
+      !(int) ($r['contatos'] ?? 0) ? ['💬', 'Nenhum contato registrado no período', 'contatos'] : null,
+      $temMeta && $estado === 'atras' && !empty($meta['necessario_dia']) ? ['🎯', 'Precisa de ' . dinheiro((float) $meta['necessario_dia']) . ' por dia para bater a meta', 'pedidos'] : null,
+  ]);
+?>
+  <section class="card ac-hero" data-resumo-meta>
+    <?= Visao::renderizar('graficos/_anel', ['pct' => $pctMeta, 'rotulo' => $temMeta ? 'da meta' : 'sem meta', 'estado' => $estado, 'tamanho' => 150]) ?>
+    <div class="ac-hero-corpo">
+      <div class="ac-hero-topo"><h2>Meta de <?= e(substr($ate, 5, 2) . '/' . substr($ate, 0, 4)) ?></h2><?= Visao::renderizar('graficos/_ritmo', ['m' => $meta ?? []]) ?></div>
+      <?php if ($temMeta): ?>
+        <?= Visao::renderizar('graficos/_barra_meta', ['m' => $meta]) ?>
+        <div class="ac-hero-numeros">
+          <div><span>Faturado</span><strong><?= dinheiro($meta['vendido']) ?></strong></div>
+          <div><span>Meta</span><strong><?= dinheiro($meta['meta']) ?></strong></div>
+          <div><span><?= !empty($meta['atingida']) ? 'Acima da meta' : 'Falta' ?></span><strong><?= dinheiro(!empty($meta['atingida']) ? $meta['vendido'] - $meta['meta'] : max(0, $meta['meta'] - $meta['vendido'])) ?></strong></div>
+          <div><span>Projeção do mês</span><strong><?= isset($meta['projecao_mes']) ? dinheiro((float) $meta['projecao_mes']) : '—' ?></strong></div>
+        </div>
+        <p class="pequeno suave">A marca na barra mostra onde deveria estar hoje (<?= (int) ($meta['decorridos'] ?? 0) ?> de <?= (int) ($meta['dias_trabalho'] ?? 0) ?> dias úteis).</p>
+      <?php else: ?>
+        <p class="suave">Sem meta cadastrada para este mês em Gestão › Metas.</p>
+      <?php endif; ?>
+    </div>
   </section>
-  <?php endif; ?>
-  <section class="card">
-    <h2>Ligações por dia</h2>
-    <div class="ac-grafico"><canvas id="grafico-ligacoes" data-dados="<?= e(json_encode($det['porDia'])) ?>" aria-label="Ligações por dia"></canvas></div>
-  </section>
+
+  <div class="ac-duas">
+    <section class="card">
+      <h2>Ligações por dia</h2>
+      <?= Visao::renderizar('graficos/_barras_dia', [
+          'dias' => array_map(fn($d) => ['dia' => $d['dia'], 'valores' => [(int) $d['atendidas'], (int) $d['total'] - (int) $d['atendidas']]], $det['porDia']),
+          'series' => [['nome' => 'Atendidas', 'classe' => 's1'], ['nome' => 'Não atendidas', 'classe' => 's2']],
+      ]) ?>
+    </section>
+    <section class="card">
+      <h2>Pontos de atenção</h2>
+      <?php if (!$atencao): ?><p class="ac-tudo-certo">✅ Nada fora do lugar neste período.</p><?php endif; ?>
+      <ul class="ac-atencao" data-atencao>
+        <?php foreach ($atencao as [$icone, $texto, $abaLink]): ?>
+          <li><span aria-hidden="true"><?= $icone ?></span><a href="<?= url('/acompanhamento/pessoa/' . (int) $p['id']) ?>?aba=<?= $abaLink ?>&<?= $q ?>"><?= e($texto) ?></a></li>
+        <?php endforeach; ?>
+      </ul>
+      <h2 class="ac-sub">Contatos por canal</h2>
+      <?php if (!$canais): ?><p class="suave pequeno">Nenhum contato registrado no período.</p><?php endif; ?>
+      <div class="ac-canais">
+        <?php foreach ($canais as $c): ?>
+          <div title="<?= e((ClienteEvento::TIPOS[$c['tipo']] ?? $c['tipo']) . ': ' . (int) $c['qtd']) ?>"><span><?= e(ClienteEvento::TIPOS[$c['tipo']] ?? $c['tipo']) ?></span>
+            <i><b style="width: <?= round((int) $c['qtd'] / $maxCanal * 100) ?>%"></b></i><strong><?= (int) $c['qtd'] ?></strong></div>
+        <?php endforeach; ?>
+      </div>
+    </section>
+  </div>
 
 <?php elseif ($aba === 'ligacoes'): ?>
   <section class="card sem-espaco">

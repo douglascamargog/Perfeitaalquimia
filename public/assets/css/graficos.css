@@ -1,0 +1,43 @@
+/* =====================================================================
+   Gráficos do One (V10.4): anel da meta, selo de ritmo, barra da meta e barras por dia.
+   Feitos em HTML/SVG no servidor: aparecem sempre (celular, impressão, sem internet).
+   ===================================================================== */
+.anel { position: relative; flex: none; }
+.anel svg { width: 100%; height: 100%; }
+.anel-trilho { fill: none; stroke: var(--primaria-clara); stroke-width: 12; }
+.anel-valor { fill: none; stroke: var(--primaria); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+.anel-batida .anel-valor { stroke: var(--sucesso); }
+.anel-atras .anel-valor { stroke: #e08a00; }
+.anel-texto { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.anel-texto strong { font-size: 1.9rem; letter-spacing: -.04em; color: var(--verde-escuro); line-height: 1; }
+.anel-texto small { font-size: .72rem; color: var(--texto-suave); margin-top: 3px; }
+
+.ritmo { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 99px; font-size: .8rem; font-weight: 700; }
+.ritmo.ok { background: var(--sucesso-fundo); color: var(--sucesso); }
+.ritmo.batida { background: var(--secundaria); color: var(--secundaria-texto); }
+.ritmo.atras { background: var(--aviso-fundo); color: var(--aviso); }
+.ritmo.neutro { background: var(--primaria-clara); color: var(--texto-suave); }
+
+.barra-ritmo { position: relative; height: 10px; border-radius: 99px; background: var(--primaria-clara); overflow: visible; }
+.barra-ritmo span { display: block; height: 100%; border-radius: 99px; background: var(--primaria); max-width: 100%; }
+.barra-ritmo.batida span { background: var(--sucesso); }
+.barra-ritmo.atras span { background: #e08a00; }
+.barra-ritmo i { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--texto); border-radius: 2px; }
+
+.grafico-legenda { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .78rem; color: var(--texto-suave); margin-bottom: 6px; }
+.grafico-legenda span { display: inline-flex; align-items: center; gap: 6px; }
+.grafico-legenda i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.grafico-legenda i.ref { height: 0; border-top: 2px dashed var(--texto-suave); border-radius: 0; width: 14px; }
+.grafico-barras { position: relative; display: flex; align-items: flex-end; gap: 3px; height: 200px; padding-top: 6px; border-bottom: 1px solid var(--borda); }
+.grafico-coluna { flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; gap: 4px; cursor: default; }
+.grafico-coluna:hover .grafico-pilha { filter: brightness(1.08); }
+.grafico-pilha { display: flex; flex-direction: column; gap: 2px; min-height: 0; }
+.grafico-pilha span { min-height: 2px; }
+.grafico-pilha span:first-child { border-radius: 4px 4px 0 0; }
+.grafico-coluna small { text-align: center; font-size: .66rem; color: var(--texto-suave); height: 18px; line-height: 18px; }
+.grafico-coluna.hoje small { color: var(--verde-escuro); font-weight: 800; }
+.grafico-coluna.hoje .grafico-pilha span { outline: 2px solid var(--lima-escuro, var(--secundaria)); outline-offset: 1px; }
+.s1, .grafico-legenda i.s1, .grafico-pilha .s1 { background: var(--primaria); }
+.s2, .grafico-legenda i.s2, .grafico-pilha .s2 { background: #b9cfc5; }
+.grafico-ref { position: absolute; left: 0; right: 0; height: 0; border-top: 2px dashed var(--texto-suave); z-index: 1; pointer-events: auto; }
+@media print { .grafico-barras { height: 150px; } .anel-valor { transition: none; } }

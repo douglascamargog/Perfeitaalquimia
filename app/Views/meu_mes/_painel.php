@@ -4,26 +4,25 @@ use App\Services\MetaService;
 
 $c = $eu['config'];
 $temMeta = $c['meta'] > 0;
-$maxDia = max(1, ...array_values($eu['por_dia'] ?: [1]));
 $pendentes = array_slice(array_filter($tarefas, fn($t) => !$t['concluida_em']), 0, 4);
 ?>
 <div class="grade-meu-mes">
-  <section class="card meta-individual <?= $eu['atingida'] ? 'atingida' : '' ?>">
-    <div class="meta-equipe-topo">
-      <div>
+  <section class="card meta-individual mm-hero <?= $eu['atingida'] ? 'atingida' : '' ?>" data-mm-hero>
+    <div class="mm-hero-linha">
+      <?= \App\Core\Visao::renderizar('graficos/_anel', ['pct' => $eu['percentual'], 'rotulo' => $temMeta ? 'da minha meta' : 'sem meta', 'tamanho' => 150,
+          'estado' => !$temMeta ? 'neutro' : ($eu['atingida'] ? 'batida' : ($eu['projecao_mes'] !== null && $eu['projecao_mes'] < $c['meta'] && !$eu['passado'] ? 'atras' : 'ok'))]) ?>
+      <div class="mm-hero-corpo">
         <span class="sobretitulo"><?= $eu['atingida'] ? 'META ALCANÇADA' : 'MINHA META DE ' . e(mb_strtoupper($nomeMes($mes))) ?></span>
-        <h2><?= $temMeta ? dinheiro($c['meta']) : 'Defina sua meta' ?></h2>
-        <p class="suave"><?= $eu['atingida'] ? 'Você chegou à meta. Continue registrando suas vendas.' : ($eu['passado'] ? 'Mês encerrado. Consulte seus registros.' : ($eu['futuro'] ? 'Prepare o mês e organize seus próximos contatos.' : 'Cada venda registrada atualiza o seu progresso.')) ?></p>
+        <h2><?= $temMeta ? dinheiro($eu['vendido']) . ' <small>de ' . dinheiro($c['meta']) . '</small>' : 'Defina sua meta' ?></h2>
+        <?= \App\Core\Visao::renderizar('graficos/_ritmo', ['m' => $eu]) ?>
+        <?php if ($temMeta): ?>
+          <?= \App\Core\Visao::renderizar('graficos/_barra_meta', ['m' => $eu]) ?>
+          <p class="mm-hero-frase"><?php if ($eu['atingida']): ?>Você passou da meta em <strong><?= dinheiro($eu['acima']) ?></strong>. Continue registrando as vendas!
+            <?php elseif ($eu['passado']): ?>Mês encerrado: faltaram <strong><?= dinheiro($eu['falta']) ?></strong>.
+            <?php else: ?>Falta <strong><?= dinheiro($eu['falta']) ?></strong><?= $eu['necessario_dia'] ? ' · precisa de <strong>' . dinheiro($eu['necessario_dia']) . '</strong> por dia de trabalho (' . (int) $eu['restantes'] . ' restantes)' : '' ?>.<?php endif; ?></p>
+        <?php else: ?><p class="suave">Cadastre a sua meta para ver o ritmo e quanto falta por dia.</p><?php endif; ?>
       </div>
-      <?php if ($temMeta): ?><div class="meta-equipe-pct"><strong><?= $pct($eu['percentual']) ?></strong><span>da minha meta</span></div><?php endif; ?>
     </div>
-    <?php if ($temMeta): ?>
-      <div class="barra-meta clara"><span style="width: <?= min(100, $eu['percentual']) ?>%"></span>
-        <?php if ($eu['projecao_mes']): ?><i class="marca-projecao" style="left: <?= min(100, $eu['projecao_mes'] / $c['meta'] * 100) ?>%" title="Projeção de fechamento"></i><?php endif; ?></div>
-      <div class="linha-valores"><div><span>Vendido no mês</span><strong><?= dinheiro($eu['vendido']) ?></strong></div>
-        <div><span><?= $eu['atingida'] ? 'Acima da meta' : 'Falta para chegar lá' ?></span><strong><?= dinheiro($eu['atingida'] ? $eu['acima'] : $eu['falta']) ?></strong></div></div>
-    <?php endif; ?>
-
     <details class="form-meta" <?= $temMeta ? '' : 'open' ?>>
       <summary><?= $temMeta ? 'Editar minha meta e dias de trabalho' : 'Cadastrar minha meta' ?></summary>
       <form method="post" action="<?= url('/meu-mes/meta') ?>">
@@ -45,34 +44,63 @@ $pendentes = array_slice(array_filter($tarefas, fn($t) => !$t['concluida_em']), 
   </section>
 </div>
 
-<div class="kpis-meu-mes">
-  <div class="kpi destaque"><span>Vendas no mês</span><strong><?= (int) $eu['qtd_vendas'] ?></strong><small><?= (int) $eu['dias_com_venda'] ?> dia(s) com venda</small></div>
-  <div class="kpi destaque"><span>Ticket médio</span><strong><?= dinheiro($eu['ticket_medio']) ?></strong><small>valor médio por venda</small></div>
-  <div class="kpi"><span>Projeção de fechamento</span><strong><?= $ou($eu['projecao_mes']) ?></strong><small><?= $eu['projecao_mes'] === null ? 'Registre vendas para ver a projeção' : ($temMeta && !$eu['passado'] ? ($eu['projecao_mes'] >= $c['meta'] ? 'No ritmo para bater a meta' : 'Abaixo da meta em ' . dinheiro($c['meta'] - $eu['projecao_mes'])) : 'pelo ritmo das vendas') ?></small></div>
-  <div class="kpi"><span>Projeção do dia (ritmo)</span><strong><?= $ou($eu['ritmo_dia']) ?></strong><small>média por dia de trabalho</small></div>
-  <div class="kpi"><span>Necessário por dia</span><strong><?= $temMeta ? $ou($eu['necessario_dia']) : '—' ?></strong><small><?= (int) $eu['restantes'] ?> de <?= (int) $eu['dias_trabalho'] ?> dias de trabalho restantes</small></div>
-  <div class="kpi"><span>Maior venda</span><strong><?= $eu['maior_venda'] ? dinheiro($eu['maior_venda']) : '—' ?></strong><small><?= $eu['melhor_dia'] ? 'Melhor dia: ' . data_br($eu['melhor_dia']['data']) . ' (' . dinheiro($eu['melhor_dia']['valor']) . ')' : 'sem vendas ainda' ?></small></div>
-  <div class="kpi"><span>Comparado ao mês anterior</span><strong class="<?= ($eu['variacao'] ?? 0) >= 0 ? 'positivo' : 'negativo' ?>"><?= $eu['variacao'] === null ? '—' : ($eu['variacao'] >= 0 ? '+' : '') . $pct($eu['variacao']) ?></strong><small>mês anterior: <?= dinheiro($eu['mes_anterior']) ?></small></div>
-  <?php if (!empty($faturadoSistema)): ?>
-    <div class="kpi"><span>Faturado no sistema</span><strong><?= dinheiro($faturadoSistema['valor']) ?></strong><small><?= (int) $faturadoSistema['pedidos'] ?> pedido(s) faturado(s) com você como vendedor(a)</small></div>
-  <?php endif; ?>
-  <div class="kpi mm-top-clientes" data-top-mes><span>Seus melhores clientes do mês</span>
-    <?php if (!empty($clientes['do_mes'])): ?><ol><?php foreach ($clientes['do_mes'] as $c): ?><li><?= e($c['nome']) ?> <b><?= dinheiro($c['valor']) ?></b></li><?php endforeach; ?></ol>
-    <?php else: ?><small>sem pedidos faturados ainda</small><?php endif; ?>
-    <a class="pequeno" href="<?= $link(['aba' => 'clientes']) ?>">Ver meus clientes →</a></div>
-  <div class="kpi"><span>Minha participação na equipe</span><strong><?= $participacao === null ? '—' : $pct($participacao) ?></strong><small><?= $equipe ? 'do vendido pela equipe' : 'meta da equipe não cadastrada' ?></small></div>
+<?php if (!empty($hoje)): ?>
+<section class="card mm-hoje" data-para-hoje>
+  <h2>Para fazer hoje</h2>
+  <?php if (!$hoje['tarefas'] && !$hoje['recompra']): ?><p class="suave">Tudo em dia por aqui. 🎉 Que tal ligar para um cliente que está parado?</p><?php endif; ?>
+  <ul class="mm-hoje-lista">
+    <?php foreach ($hoje['tarefas'] as $t): $atrasada = $t['vence_em'] < date('Y-m-d'); $wa = preg_replace('/\D/', '', (string) ($t['whatsapp'] ?: $t['telefone'])); ?>
+      <li class="<?= $atrasada ? 'atrasada' : '' ?>"><span class="mm-hoje-icone" aria-hidden="true"><?= $atrasada ? '⏰' : '📞' ?></span>
+        <div><strong><?= e($t['titulo']) ?></strong><small><?= $t['cliente'] ? e($t['cliente']) . ' · ' : '' ?><?= $atrasada ? 'atrasada desde ' . data_br($t['vence_em']) : 'hoje' . ($t['hora'] ? ' às ' . substr($t['hora'], 0, 5) : '') ?></small></div>
+        <span class="mm-hoje-acoes"><?php if ($t['cliente_id']): ?><a class="botao contorno pequeno" href="<?= url('/carteira/clientes/' . (int) $t['cliente_id']) ?>">Abrir</a><?php endif; ?>
+          <?php if ($wa): ?><a class="botao contorno pequeno" href="https://wa.me/55<?= e($wa) ?>" target="_blank" rel="noopener noreferrer">WhatsApp</a><?php endif; ?></span></li>
+    <?php endforeach; ?>
+    <?php foreach ($hoje['recompra'] as $r): $wa = preg_replace('/\D/', '', (string) ($r['whatsapp'] ?: $r['telefone'])); ?>
+      <li class="recompra"><span class="mm-hoje-icone" aria-hidden="true">🔁</span>
+        <div><strong>Recompra: <?= e($r['nome_fantasia'] ?: $r['razao_social']) ?></strong><small>costuma comprar a cada <?= (int) $r['intervalo_medio_dias'] ?> dias · <?= (int) $r['dias_atraso'] ?> dia(s) de atraso<?= $r['ticket'] ? ' · ticket ' . dinheiro($r['ticket']) : '' ?></small></div>
+        <span class="mm-hoje-acoes"><a class="botao contorno pequeno" href="<?= url('/carteira/clientes/' . (int) $r['id']) ?>">Abrir</a>
+          <?php if ($wa): ?><a class="botao contorno pequeno" href="https://wa.me/55<?= e($wa) ?>" target="_blank" rel="noopener noreferrer">WhatsApp</a><?php endif; ?></span></li>
+    <?php endforeach; ?>
+  </ul>
+</section>
+<?php endif; ?>
+
+<div class="kpis-meu-mes mm-grupos">
+  <section class="card mm-grupo">
+    <h3>Minhas vendas</h3>
+    <dl>
+      <div><dt>Vendas no mês</dt><dd><?= (int) $eu['qtd_vendas'] ?> <small><?= (int) $eu['dias_com_venda'] ?> dia(s) com venda</small></dd></div>
+      <div><dt>Ticket médio</dt><dd><?= dinheiro($eu['ticket_medio']) ?></dd></div>
+      <div><dt>Maior venda</dt><dd><?= $eu['maior_venda'] ? dinheiro($eu['maior_venda']) : '—' ?> <small><?= $eu['melhor_dia'] ? 'melhor dia ' . data_br($eu['melhor_dia']['data']) : '' ?></small></dd></div>
+    </dl>
+  </section>
+  <section class="card mm-grupo">
+    <h3>Projeção</h3>
+    <dl>
+      <div><dt>Fechamento previsto</dt><dd><?= $ou($eu['projecao_mes']) ?></dd></div>
+      <div><dt>Ritmo por dia</dt><dd><?= $ou($eu['ritmo_dia']) ?> <small>necessário <?= $temMeta ? $ou($eu['necessario_dia']) : '—' ?></small></dd></div>
+      <div><dt>Mês anterior</dt><dd class="<?= ($eu['variacao'] ?? 0) >= 0 ? 'positivo' : 'negativo' ?>"><?= $eu['variacao'] === null ? '—' : ($eu['variacao'] >= 0 ? '▲ +' : '▼ ') . $pct($eu['variacao']) ?> <small><?= dinheiro($eu['mes_anterior']) ?></small></dd></div>
+    </dl>
+  </section>
+  <section class="card mm-grupo">
+    <h3>Na equipe</h3>
+    <dl>
+      <div><dt>Minha participação</dt><dd><?= $participacao === null ? '—' : $pct($participacao) ?> <small><?= $equipe ? 'do vendido pela equipe' : 'meta da equipe não cadastrada' ?></small></dd></div>
+      <?php if (!empty($faturadoSistema)): ?><div><dt>Faturado no sistema</dt><dd><?= dinheiro($faturadoSistema['valor']) ?> <small><?= (int) $faturadoSistema['pedidos'] ?> pedido(s)</small></dd></div><?php endif; ?>
+    </dl>
+    <div class="mm-top-clientes" data-top-mes><span class="mm-rotulo">Melhores clientes do mês</span>
+      <?php if (!empty($clientes['do_mes'])): ?><ol><?php foreach ($clientes['do_mes'] as $cl): ?><li><?= e($cl['nome']) ?> <b><?= dinheiro($cl['valor']) ?></b></li><?php endforeach; ?></ol>
+      <?php else: ?><small class="suave">sem pedidos faturados ainda</small><?php endif; ?>
+      <a class="pequeno" href="<?= $link(['aba' => 'clientes']) ?>">Ver meus clientes →</a></div>
+  </section>
 </div>
 
 <div class="grade-meu-mes">
   <section class="card">
     <h2>Vendas por dia</h2>
-    <div class="barras-dias">
-      <?php foreach ($eu['trabalho'] as $d): $v = $eu['por_dia'][$d] ?? 0; ?>
-        <div class="<?= $d === date('Y-m-d') ? 'hoje' : '' ?>" title="<?= data_br($d) ?>: <?= dinheiro($v) ?>">
-          <span style="height: <?= $v ? max(4, $v / $maxDia * 100) : 1 ?>%"></span><small><?= (int) substr($d, 8) ?></small>
-        </div>
-      <?php endforeach; ?>
-    </div>
+    <?= \App\Core\Visao::renderizar('graficos/_barras_dia', ['dias' => array_map(fn($d) => ['dia' => $d, 'valores' => [(float) ($eu['por_dia'][$d] ?? 0)]], $eu['trabalho']),
+        'series' => [['nome' => 'Vendido', 'classe' => 's1']], 'dinheiro' => true,
+        'referencia' => $temMeta && !$eu['atingida'] && $eu['necessario_dia'] ? (float) $eu['necessario_dia'] : null, 'refRotulo' => 'Necessário por dia']) ?>
     <p class="pequeno suave">Somente dias de trabalho. Folgas e dias fora da sua escala ficam de fora.</p>
   </section>
   <section class="card">

@@ -41,12 +41,12 @@ const aviso = async (p) => (await p.locator('.aviso').allInnerTexts()).join(' | 
   const linha = g.locator(`[data-pessoa="${tv1}"]`);
   const ini = new Date(); const de = `${ini.getFullYear()}-${String(ini.getMonth() + 1).padStart(2, '0')}-01`;
   const esperadas = sql(`select count(*) from ligacoes where usuario_id=${tv1} and inicio >= '${de}'`);
-  ok(parseInt(await linha.locator('[data-ligacoes]').innerText(), 10) === Number(esperadas), `ligações do mês da Televendas 1 batem com o banco (${esperadas})`);
+  ok(parseInt(await linha.locator('[data-ligacoes] strong').innerText(), 10) === Number(esperadas), `ligações do mês da Televendas 1 batem com o banco (${esperadas})`);
   const contatos = sql(`select count(*) from cliente_eventos where usuario_id=${tv1} and tipo in ('contato','ligacao','whatsapp','visita','email') and ocorrido_em >= '${de}'`);
-  ok(parseInt(await linha.locator('[data-contatos]').innerText(), 10) === Number(contatos), `contatos do mês batem (${contatos})`);
-  ok(Number(await g.locator('[data-reativacoes]').evaluateAll((l) => l.reduce((t, x) => t + Number(x.innerText), 0))) > 0, 'demonstração tem reativações');
+  ok(parseInt(await linha.locator('[data-contatos] strong').innerText(), 10) === Number(contatos), `contatos do mês batem (${contatos})`);
+  ok(Number(await g.locator('[data-reativacoes]').evaluateAll((l) => l.reduce((t, x) => t + Number(x.querySelector('strong')?.innerText || 0), 0))) > 0, 'demonstração tem reativações');
   await g.goto(BASE + '/acompanhamento?periodo=hoje');
-  ok(parseInt(await g.locator(`[data-pessoa="${tv1}"] [data-ligacoes]`).innerText(), 10) >= 1, 'filtro "Hoje"');
+  ok(parseInt(await g.locator(`[data-pessoa="${tv1}"] [data-ligacoes] strong`).innerText(), 10) >= 1, 'filtro "Hoje"');
 
   // ---------- Detalhe e gravação ----------
   await g.goto(BASE + `/acompanhamento/pessoa/${tv1}?aba=ligacoes`);

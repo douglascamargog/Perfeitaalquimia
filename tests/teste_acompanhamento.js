@@ -30,7 +30,7 @@ async function entrar(p, email) {
   const fat = Number(sql(`select coalesce(sum(total),0) from pedidos where vendedor_id=${tv1} and situacao='faturado' and faturado_em >= '${de}'`));
   ok((await linha.locator('[data-meta]').innerText()).includes(Math.round(fat / 10000 * 100) + '%'), `meta do mês: ${Math.round(fat / 100)}% de R$ 10.000 (faturado ÷ meta)`);
   const wpp = sql(`select count(*) from cliente_eventos where usuario_id=${tv1} and tipo='whatsapp' and ocorrido_em >= '${de}'`);
-  ok((await linha.locator('[data-whatsapp]').innerText()).startsWith(wpp), `WhatsApp bate com o banco (${wpp})`);
+  ok((await linha.locator('[data-whatsapp] strong').innerText()) === wpp, `WhatsApp bate com o banco (${wpp})`);
   const atrasadas = sql(`select count(*) from tarefas where usuario_id=${tv1} and concluida_em is null and vence_em < curdate()`);
   ok((await linha.locator('[data-tarefas]').innerText()).includes(`${atrasadas} atrasado`), `retornos atrasados (${atrasadas})`);
   ok(await g.locator('.ac-delta').count() > 0, 'comparação com o período anterior (▲ ▼)');

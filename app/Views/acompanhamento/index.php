@@ -38,28 +38,35 @@ $modos = ['simulado' => 'Demonstração: ligações e gravações simuladas', 'm
   <div class="card"><span>Pedidos</span><strong><?= $tot('pedidos') ?></strong><small><?= dinheiro((float) array_sum(array_column($linhas, 'valor'))) ?> <?= $d(array_sum(array_column($linhas, 'valor')), array_sum(array_column($antes, 'valor'))) ?></small></div>
 </div>
 
-<section class="card sem-espaco">
-  <div class="tabela-rolagem"><table class="tabela ac-tabela">
-    <thead><tr><th>Vendedora</th><th class="direita">Meta do mês</th><th class="direita">Ligações</th><th class="direita">Tempo falado</th>
-      <th class="direita">Contatos</th><th class="direita">WhatsApp</th><th class="direita">Retornos</th><th class="direita">Reativações</th><th class="direita">Pedidos</th><th class="direita">Valor</th></tr></thead>
-    <tbody>
-    <?php foreach ($linhas as $l): $a = $antes[$l['id']] ?? []; ?>
-      <tr data-pessoa="<?= (int) $l['id'] ?>">
-        <td><a href="<?= url('/acompanhamento/pessoa/' . (int) $l['id']) ?>?periodo=<?= e($periodo) ?>&de=<?= e($de) ?>&ate=<?= e($ate) ?>"><strong><?= e($l['nome']) ?></strong></a></td>
-        <td class="direita" data-meta><?php if ($l['pct_meta'] !== null): ?><strong><?= $l['pct_meta'] ?>%</strong><br><small class="suave"><?= dinheiro($l['faturado_mes']) ?> de <?= dinheiro($l['meta']) ?></small><?php else: ?><small class="suave">sem meta</small><?php endif; ?></td>
-        <td class="direita" data-ligacoes><?= $l['ligacoes'] ?><br><small class="suave"><?= $l['taxa'] ?>% atendidas</small></td>
-        <td class="direita"><?= T::duracao($l['falado']) ?><br><small class="suave">média <?= $l['medio'] ? T::duracao($l['medio']) : '—' ?></small></td>
-        <td class="direita" data-contatos><?= $l['contatos'] ?> <?= $d($l['contatos'], $a['contatos'] ?? 0) ?></td>
-        <td class="direita" data-whatsapp><?= $l['whatsapp'] ?><br><small class="suave"><?= $l['mensagens_prontas'] ?> prontas</small></td>
-        <td class="direita" data-tarefas><?= $l['tarefas_feitas'] ?><?= $l['pct_prazo'] !== null ? ' <small class="suave">(' . $l['pct_prazo'] . '% no prazo)</small>' : '' ?><br>
-          <small class="<?= $l['tarefas_atrasadas'] ? 'ac-atraso' : 'suave' ?>"><?= $l['tarefas_atrasadas'] ?> atrasado(s)</small></td>
-        <td class="direita" data-reativacoes><?= $l['reativacoes'] ?></td>
-        <td class="direita"><?= $l['pedidos'] ?></td>
-        <td class="direita"><?= dinheiro($l['valor']) ?> <?= $d($l['valor'], $a['valor'] ?? 0) ?></td>
-      </tr>
-    <?php endforeach; ?>
-    <?php if (!$linhas): ?><tr><td colspan="10" class="suave">Ninguém para acompanhar neste setor.</td></tr><?php endif; ?>
-    </tbody>
-  </table></div>
+<?php
+// Ordem: quem está mais perto (ou acima) da meta primeiro; sem meta no fim
+usort($linhas, fn($x, $y) => [$y['pct_meta'] !== null, $y['pct_meta'] ?? 0, $y['valor']] <=> [$x['pct_meta'] !== null, $x['pct_meta'] ?? 0, $x['valor']]);
+$posicao = 0;
+?>
+<section class="ac-equipe" data-equipe>
+  <?php foreach ($linhas as $l): $a = $antes[$l['id']] ?? []; $temMeta = $l['pct_meta'] !== null; $posicao += $temMeta ? 1 : 0;
+    $link = url('/acompanhamento/pessoa/' . (int) $l['id']) . '?periodo=' . e($periodo) . '&de=' . e($de) . '&ate=' . e($ate); ?>
+    <article class="card ac-pessoa <?= $temMeta && $posicao <= 3 ? 'podio p' . $posicao : '' ?>" data-pessoa="<?= (int) $l['id'] ?>">
+      <a class="ac-pessoa-nome" href="<?= $link ?>">
+        <?= \App\Services\EquipeService::avatar(['nome' => $l['nome'], 'foto' => $l['foto'] ?? null], 44) ?>
+        <span><strong><?= e($l['nome']) ?></strong><small><?= $temMeta && $posicao <= 3 ? ['🥇', '🥈', '🥉'][$posicao - 1] . ' ' : '' ?><?= $l['pedidos'] ?> pedido(s) · <?= dinheiro($l['valor']) ?> <?= $d($l['valor'], $a['valor'] ?? 0) ?></small></span>
+      </a>
+      <div class="ac-pessoa-meta" data-meta>
+        <?php if ($temMeta): ?>
+          <div class="ac-pessoa-meta-topo"><strong><?= $l['pct_meta'] ?>%</strong><small><?= dinheiro($l['faturado_mes']) ?> de <?= dinheiro($l['meta']) ?></small></div>
+          <?= Visao::renderizar('graficos/_barra_meta', ['m' => ['meta' => $l['meta'], 'vendido' => $l['faturado_mes'], 'atingida' => $l['faturado_mes'] >= $l['meta']]]) ?>
+        <?php else: ?><small class="suave">sem meta</small><?php endif; ?>
+      </div>
+      <ul class="ac-pilulas">
+        <li data-ligacoes title="Ligações (% atendidas)"><span>Ligações</span><strong><?= $l['ligacoes'] ?></strong><small><?= $l['taxa'] ?>% atendidas</small></li>
+        <li title="Tempo falado"><span>Falado</span><strong><?= T::duracao($l['falado']) ?></strong><small>média <?= $l['medio'] ? T::duracao($l['medio']) : '—' ?></small></li>
+        <li data-contatos><span>Contatos</span><strong><?= $l['contatos'] ?></strong><small><?= $d($l['contatos'], $a['contatos'] ?? 0) ?></small></li>
+        <li data-whatsapp><span>WhatsApp</span><strong><?= $l['whatsapp'] ?></strong><small><?= $l['mensagens_prontas'] ?> prontas</small></li>
+        <li data-tarefas class="<?= $l['tarefas_atrasadas'] ? 'alerta' : '' ?>"><span>Retornos</span><strong><?= $l['tarefas_feitas'] ?></strong><small class="<?= $l['tarefas_atrasadas'] ? 'ac-atraso' : '' ?>"><?= $l['tarefas_atrasadas'] ?> atrasado(s)</small></li>
+        <li data-reativacoes><span>Reativações</span><strong><?= $l['reativacoes'] ?></strong><small>voltaram</small></li>
+      </ul>
+    </article>
+  <?php endforeach; ?>
+  <?php if (!$linhas): ?><p class="card suave">Ninguém para acompanhar neste setor.</p><?php endif; ?>
 </section>
 <p class="pequeno suave">▲ ▼ comparam com o período anterior do mesmo tamanho. Meta: Gestão › Metas (mês da data final). Reativação: pedido faturado no período de um cliente que estava sem comprar há mais tempo que o limite de inatividade (Configurações). Clique na vendedora para ver as ligações, ouvir as gravações e os contatos.</p>
