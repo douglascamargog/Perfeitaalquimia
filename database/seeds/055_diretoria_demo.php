@@ -19,11 +19,13 @@ $criar = function (string $email, string $nome) use ($perfil, $funcao): int {
     return $id;
 };
 $criar('diretoria@demo.local', 'Diretoria (demo)');
-$vende = $criar('diretoria.vende@demo.local', 'Diretoria que vende (demo)');
+$vende = $criar('diretoria.vende@demo.local', 'Diretoria que vende · Televendas (demo)');
 foreach (['diretoria.vende', 'carteira.ver_propria', 'pedidos.criar', 'meu_mes.usar', 'mensagens.usar', 'catalogo.acessos', 'app.usar'] as $perm) {
     Banco::executar('INSERT IGNORE INTO usuario_permissoes (usuario_id, permissao, concedida) VALUES (?, ?, 1)', [$vende, $perm]);
 }
 $tele = (int) Banco::valor("SELECT id FROM usuarios WHERE email = 'televendas2@demo.local'");
+// O sócio que vende fica também no setor de venda (função Televendas), como qualquer vendedor
+Banco::executar("INSERT IGNORE INTO usuario_funcoes (usuario_id, funcao_id) SELECT ?, id FROM funcoes WHERE slug = 'televendas'", [$vende]);
 // Carteira própria do diretor que vende (cliente e carteira sempre com o mesmo responsável)
 $origem = Banco::um('SELECT * FROM carteiras WHERE responsavel_id = ? ORDER BY id LIMIT 1', [$tele]);
 $carteira = Banco::inserir('carteiras', array_filter(['nome' => 'Carteira da Diretoria (demo)', 'funcao_id' => $origem['funcao_id'] ?? null,
