@@ -288,7 +288,7 @@ class ProducaoService
     /** Linhas da ficha de um produto, com o custo de cada uma (pelo último custo) */
     public static function ficha(int $produtoId): array
     {
-        return Banco::todos('SELECT ft.materia_prima_id, ft.quantidade, m.nome, m.unidade, m.custo_unitario, m.estoque, m.ativo,
+        return Banco::todos('SELECT ft.materia_prima_id, ft.quantidade, m.nome, m.unidade, m.custo_unitario, m.estoque, m.ativo, m.tipo, m.rotulo,
                 ROUND(ft.quantidade * m.custo_unitario, 4) AS custo
             FROM ficha_tecnica ft JOIN materias_primas m ON m.id = ft.materia_prima_id WHERE ft.produto_id = ? ORDER BY m.nome', [$produtoId]);
     }
@@ -348,9 +348,16 @@ class ProducaoService
             $ok = $ok && $falta <= 0;
             $custo += $precisa * (float) $l['custo_unitario'];
             $linhas[] = ['materia_prima_id' => (int) $l['materia_prima_id'], 'nome' => $l['nome'], 'unidade' => $l['unidade'],
+                'tipo' => $l['tipo'] === 'embalagem' ? 'embalagem' : 'materia_prima', 'rotulo' => (bool) ($l['rotulo'] ?? false),
                 'por_unidade' => (float) $l['quantidade'], 'precisa' => $precisa, 'estoque' => (float) $l['estoque'], 'falta' => $falta];
         }
-        return ['linhas' => $linhas, 'ok' => $ok && $linhas !== [], 'custo' => round($custo, 2), 'sem_ficha' => $linhas === []];
+        // Matérias-primas primeiro, depois embalagens (pote, tampa, selo, rótulo...)
+        usort($linhas, fn($a, $b) => [$a['tipo'] === 'embalagem', $a['nome']] <=> [$b['tipo'] === 'embalagem', $b['nome']]);
+        $embalagens = array_filter($linhas, fn($l) => $l['tipo'] === 'embalagem');
+        return ['linhas' => $linhas, 'ok' => $ok && $linhas !== [], 'custo' => round($custo, 2), 'sem_ficha' => $linhas === [],
+            // Só o rótulo (ou nada) nas embalagens: provavelmente faltam pote, tampa, selo... no cadastro
+            'sem_embalagem' => $linhas !== [] && !array_filter($embalagens, fn($l) => !$l['rotulo']),
+            'slug' => (string) Banco::valor('SELECT slug FROM produtos WHERE id = ?', [$produtoId])];
     }
 
     public static function criarOrdem(array $d, ?int $usuarioId, string $origem = 'manual', ?string $quando = null): int

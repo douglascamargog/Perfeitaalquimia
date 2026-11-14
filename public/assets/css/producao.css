@@ -74,3 +74,7 @@ details[open] summary { margin-bottom: 14px; }
 .te-mov select { width: auto; padding: 6px 8px; }
 .te-mov input[type=number] { width: 90px; padding: 6px 8px; }
 .te-mov input[type=text] { width: 170px; padding: 6px 8px; }
+/* Prévia da ordem: grupos (matérias-primas / embalagens) e aviso de embalagem faltando */
+.pr-grupo th { background: var(--primaria-clara); color: var(--primaria-escura); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; text-align: left; padding: 6px 10px; }
+.pr-aviso-linha td { background: var(--aviso-fundo); color: var(--aviso); font-size: .85rem; font-weight: 600; }
+.pr-aviso-linha a { color: inherit; }

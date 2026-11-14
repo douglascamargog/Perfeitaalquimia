@@ -43,9 +43,9 @@ use App\Core\Visao;
   </form>
   <section class="card" data-previa aria-live="polite">
     <h2>Prévia do consumo</h2>
-    <p class="suave" data-previa-vazia>Escolha o produto e a quantidade para ver quanto de cada matéria-prima vai ser usado.</p>
+    <p class="suave" data-previa-vazia>Escolha o produto e a quantidade para ver tudo o que vai ser usado: matérias-primas e embalagens (pote, tampa, selo, rótulo, cápsulas…).</p>
     <div data-previa-conteudo hidden>
-      <table class="tabela pr-tabela"><thead><tr><th>Matéria-prima</th><th class="direita">Vai usar</th><th class="direita">Em estoque</th><th class="direita">Falta</th></tr></thead><tbody data-previa-linhas></tbody></table>
+      <table class="tabela pr-tabela"><thead><tr><th>Item</th><th class="direita">Vai usar</th><th class="direita">Em estoque</th><th class="direita">Falta</th></tr></thead><tbody data-previa-linhas></tbody></table>
       <p data-previa-resumo></p>
     </div>
   </section>

@@ -85,8 +85,15 @@ if (form) {
     const p = await r.json();
     vazia.hidden = true;
     conteudo.hidden = false;
-    linhas.innerHTML = p.linhas.map((l) => `<tr class="${l.falta > 0 ? 'pr-falta' : ''}"><td>${escapar(l.nome)}</td><td class="direita"><strong>${escapar(l.precisa_txt)}</strong></td>
-      <td class="direita">${escapar(l.estoque_txt)}</td><td class="direita">${l.falta > 0 ? `<strong class="pn-vermelho">${escapar(l.falta_txt)}</strong>` : '<span class="pn-verde">ok</span>'}</td></tr>`).join('');
+    // Tudo o que vai ser usado, em dois grupos: matérias-primas e embalagens (pote, tampa, selo, rótulo...)
+    const linha = (l) => `<tr class="${l.falta > 0 ? 'pr-falta' : ''}"><td>${escapar(l.nome)}</td><td class="direita"><strong>${escapar(l.precisa_txt)}</strong></td>
+      <td class="direita">${escapar(l.estoque_txt)}</td><td class="direita">${l.falta > 0 ? `<strong class="pn-vermelho">${escapar(l.falta_txt)}</strong>` : '<span class="pn-verde">ok</span>'}</td></tr>`;
+    const grupo = (titulo, itens) => itens.length ? `<tr class="pr-grupo"><th colspan="4">${titulo}</th></tr>` + itens.map(linha).join('') : '';
+    const mps = p.linhas.filter((l) => l.tipo !== 'embalagem');
+    const embs = p.linhas.filter((l) => l.tipo === 'embalagem');
+    linhas.innerHTML = grupo('Matérias-primas', mps) + grupo('Embalagens (pote, tampa, selo, rótulo…)', embs)
+      + (p.sem_embalagem ? `<tr class="pr-aviso-linha" data-sem-embalagem><td colspan="4">Nenhuma embalagem cadastrada além do rótulo: pote, tampa, selo, lacre e cápsulas não vão aparecer aqui nem sair do estoque.
+        ${p.embalagens_url ? `<a href="${escapar(p.embalagens_url)}">Cadastrar as embalagens do produto →</a>` : ''}</td></tr>` : '');
     resumo.innerHTML = p.sem_ficha ? 'Este produto não tem ficha técnica.'
       : `Custo de matéria-prima: <strong>${escapar(p.custo_txt)}</strong> (${escapar(p.custo_unidade_txt)} por unidade). `
         + (p.ok ? '<span class="pn-verde">Há estoque para produzir.</span>' : '<span class="pn-vermelho">Falta matéria-prima: a ordem pode ser planejada, mas só conclui depois da compra.</span>');

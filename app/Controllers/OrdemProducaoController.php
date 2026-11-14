@@ -45,6 +45,8 @@ class OrdemProducaoController extends Controller
             $l['falta_txt'] = $l['falta'] > 0 ? ProducaoService::qtd($l['falta'], $l['unidade']) : '';
         }
         unset($l);
+        $p['embalagens_url'] = $p['slug'] !== '' ? url('/produtos/' . $p['slug']) . '?aba=embalagens' : '';
+        $p['ficha_url'] = $p['slug'] !== '' ? url('/produtos/' . $p['slug']) . '?aba=ficha' : '';
         $p['custo_txt'] = dinheiro($p['custo']);
         $p['custo_unidade_txt'] = $qtd > 0 ? dinheiro($p['custo'] / $qtd) : '';
         $this->json($p);
