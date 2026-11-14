@@ -47,3 +47,119 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 .ct-dialogo::backdrop { background: rgba(0, 0, 0, .35); }
 .ac-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: .85rem; }
 .ac-lista time { color: var(--texto-suave); font-size: .78rem; }
+
+/* ---------- O "jogo": tipo de embalagem, palco 3D e balões ---------- */
+.dp-tipos { border: 0; padding: 0; margin: 0 0 4px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.dp-tipos legend { font-weight: 700; color: var(--primaria-escura); margin-bottom: 8px; font-size: .9rem; }
+.dp-tipo { position: relative; display: grid; justify-items: center; gap: 2px; padding: 12px 8px; border: 2px solid var(--borda); border-radius: 14px; cursor: pointer; text-align: center; background: #fff; transition: border-color .15s, transform .15s; }
+.dp-tipo:hover { transform: translateY(-2px); }
+.dp-tipo input { position: absolute; opacity: 0; pointer-events: none; }
+.dp-tipo:has(input:checked) { border-color: var(--primaria-escura); background: var(--primaria-clara); box-shadow: 0 0 0 3px var(--lima); }
+.dp-tipo:has(input:focus-visible) { outline: 3px solid var(--secundaria); outline-offset: 2px; }
+.dp-tipo .dp-ilustra { width: 74px; height: 96px; }
+.dp-tipo strong { font-size: .88rem; color: var(--primaria-escura); }
+.dp-tipo small { font-size: .7rem; color: var(--texto-suave); }
+
+.dp-cartao-topo { display: flex; gap: 8px; align-items: center; }
+.dp-ilustra.mini { width: 26px; height: 34px; flex: none; }
+.dp-barra { display: block; height: 6px; border-radius: 99px; background: var(--primaria-clara); overflow: hidden; }
+.dp-barra i { display: block; height: 100%; background: linear-gradient(90deg, var(--secundaria), var(--lima)); border-radius: inherit; }
+.dp-barra.grande { height: 10px; flex: 1; min-width: 120px; background: rgba(255, 255, 255, .14); }
+
+/* Ilustração SVG: cores das peças */
+.dp-ilustra { overflow: visible; }
+.dp-ilustra .pc-fantasma { fill: none; stroke: #caff4d; stroke-width: 1.6; stroke-dasharray: 4 3; }
+.dp-ilustra .pc-conteudo { fill: #efdcb4; }
+.dp-ilustra[data-tipo="frasco"] .pc-conteudo { fill: #e0962e; }
+.dp-ilustra[data-tipo="caixinha"] .pc-conteudo rect { fill: #d9dde0; } .dp-ilustra[data-tipo="caixinha"] .pc-conteudo circle { fill: #caff4d; }
+.dp-ilustra .pc-corpo, .dp-ilustra .pc-corpo path { fill: #f6f6f1; stroke: #1f4d3a; stroke-width: 1.5; }
+.dp-ilustra[data-tipo="frasco"] .pc-corpo { fill: #8a4a12; fill-opacity: .9; }
+.dp-ilustra[data-tipo="caixinha"] .pc-corpo .lado { fill: #ddd6c6; }
+.dp-ilustra .pc-rotulo { fill: #1f4d3a; }
+.dp-ilustra .pc-arte { fill: #9aa39e; }
+.dp-ilustra .pc-codigo { fill: #111; }
+.dp-ilustra .pc-tampa, .dp-ilustra .pc-tampa * { fill: #1f4d3a; }
+.dp-ilustra .pc-lacre { fill: #caff4d; }
+.dp-ilustra .pc-selo circle { fill: #caff4d; stroke: #1f4d3a; stroke-width: 1.5; }
+.dp-ilustra .pc-selo path { fill: none; stroke: #1f4d3a; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.dp-ilustra.completo .pc-fantasma { display: none; }
+.dp-ilustra.completo .pc-arte { fill: #caff4d; }
+.dp-ilustra.completo .pc-selo { display: none; }
+/* Reserva do palco (sem 3D): cada peça só aparece com a etapa dela concluída */
+.dp-ilustra.reserva [class^="pc-"] { opacity: 0; transition: opacity .6s; }
+.dp-ilustra.reserva .pc-fantasma { opacity: 1; }
+.tem-compras .reserva .pc-fantasma { opacity: 0; }
+.tem-ficha .reserva .pc-conteudo, .tem-compras .reserva .pc-corpo, .tem-composicao .reserva .pc-rotulo, .tem-arte .reserva .pc-arte,
+.tem-codigo .reserva .pc-codigo, .tem-aprovacao .reserva .pc-selo, .tem-recebimento .reserva .pc-tampa, .tem-piloto .reserva .pc-lacre { opacity: 1; }
+.tem-arte .reserva .pc-rotulo { opacity: 1; }
+.tem-grafica .reserva .pc-arte { fill: #caff4d; }
+
+/* Palco */
+.dp-jogo { position: relative; background: radial-gradient(ellipse at 50% 45%, #2f6b52 0%, #1f4d3a 45%, #10291f 100%); color: #fff; border-radius: 22px; padding: 16px 18px 18px; margin: 0 0 16px; overflow: hidden; }
+.dp-jogo-topo { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; position: relative; z-index: 3; }
+.dp-jogo-topo .sobretitulo { color: #b9d9c6; display: block; }
+.dp-pct { font-size: 1.35rem; color: var(--lima); }
+.dp-trocar-tipo label { display: flex; gap: 8px; align-items: center; font-size: .78rem; color: #d7e8de; }
+.dp-trocar-tipo select { background: rgba(255, 255, 255, .1); color: #fff; border: 1px solid rgba(255, 255, 255, .25); border-radius: 10px; padding: 5px 8px; }
+.dp-trocar-tipo option { color: #000; }
+.dp-palco { position: relative; display: grid; gap: 14px; margin-top: 10px; }
+.dp-cena { position: relative; height: 340px; display: grid; place-items: center; }
+.dp-cena canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; cursor: grab; }
+.dp-cena canvas:active { cursor: grabbing; }
+.dp-cena .dp-ilustra { height: 86%; width: auto; filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .35)); }
+.dp-cena.com-3d .dp-ilustra { display: none; }
+.dp-cena::after { content: ""; position: absolute; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, rgba(202, 255, 77, .22), transparent 70%); z-index: -1; }
+
+/* Balões: no celular, uma faixa que rola de lado; no computador, em círculo em volta da embalagem */
+.dp-baloes { list-style: none; margin: 0; padding: 0 0 6px; display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; }
+.dp-balao { flex: 0 0 auto; scroll-snap-align: center; }
+.dp-balao > div, .dp-balao > button { display: grid; gap: 3px; text-align: left; min-width: 130px; max-width: 170px; padding: 9px 12px; border-radius: 18px; font: inherit; color: inherit; }
+.dp-balao b { font-size: .78rem; line-height: 1.2; }
+.dp-balao small { font-size: .68rem; opacity: .8; }
+.dp-balao.pendente > div { background: rgba(255, 255, 255, .06); border: 1px dashed rgba(255, 255, 255, .3); color: #cfe0d6; }
+.dp-balao.concluida > div { background: rgba(255, 255, 255, .92); color: #1f4d3a; border: 0; transform: scale(.88); }
+.dp-balao.concluida b { color: #2e7d4f; }
+.dp-balao.andamento > div, .dp-balao.andamento > button { background: var(--lima); color: #10291f; border: 0; max-width: 250px; min-width: 200px; box-shadow: 0 0 0 0 rgba(202, 255, 77, .6); animation: dp-pulsar 2s infinite; cursor: pointer; }
+.dp-balao.andamento ul { margin: 4px 0 2px; padding-left: 16px; font-size: .72rem; line-height: 1.3; }
+.dp-balao.andamento em { font-size: .74rem; font-weight: 700; font-style: normal; }
+.dp-balao-acao { justify-self: start; margin-top: 4px; background: #10291f; color: var(--lima); border-radius: 99px; padding: 3px 10px; font-size: .7rem; font-weight: 700; }
+.dp-balao.andamento > button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+@keyframes dp-pulsar { 0% { box-shadow: 0 0 0 0 rgba(202, 255, 77, .55); } 70% { box-shadow: 0 0 0 16px rgba(202, 255, 77, 0); } 100% { box-shadow: 0 0 0 0 rgba(202, 255, 77, 0); } }
+.dp-balao.estourou > div { animation: dp-estourar .9s ease-out .2s both; }
+@keyframes dp-estourar { 0% { transform: scale(1.25); background: var(--lima); } 40% { transform: scale(.7); } 100% { transform: scale(.88); } }
+
+.dp-palco.circulo { height: 600px; display: block; margin-top: 0; }
+.dp-palco.circulo .dp-cena { position: absolute; left: 30%; right: 30%; top: 16%; bottom: 16%; height: auto; }
+.dp-palco.circulo .dp-baloes { display: block; overflow: visible; padding: 0; }
+.dp-palco.circulo .dp-balao { position: absolute; transform: translate(-50%, -50%); z-index: 2; }
+.dp-palco.circulo .dp-balao.andamento { z-index: 3; }
+.dp-fios { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; display: none; }
+.dp-palco.circulo .dp-fios { display: block; }
+.dp-fios line { stroke: rgba(255, 255, 255, .14); stroke-width: 1.2; stroke-dasharray: 3 5; }
+.dp-fios line.feito { stroke: rgba(202, 255, 77, .45); stroke-dasharray: none; }
+.dp-fios line.atual { stroke: var(--lima); stroke-width: 2; stroke-dasharray: 6 4; animation: dp-fio 1s linear infinite; }
+@keyframes dp-fio { to { stroke-dashoffset: -20; } }
+
+.dp-conquista { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); z-index: 5; background: #fff; color: #1f4d3a; font-weight: 700; padding: 10px 18px; border-radius: 99px; box-shadow: 0 8px 26px rgba(0, 0, 0, .3); animation: dp-chegar .5s ease-out; max-width: 90%; text-align: center; font-size: .88rem; }
+.dp-conquista.saindo { opacity: 0; transition: opacity .6s; }
+@keyframes dp-chegar { from { transform: translate(-50%, -20px); opacity: 0; } }
+.dp-confete { position: absolute; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+.dp-confete i { position: absolute; top: -12px; width: 8px; height: 13px; border-radius: 2px; animation: dp-cair linear forwards; }
+@keyframes dp-cair { to { top: 105%; transform: rotate(720deg) translateX(40px); } }
+.dp-jogo.lancado .dp-pct::after { content: " · lançado 🎉"; color: #fff; font-size: .9rem; }
+
+/* Gaveta da etapa atual */
+.dp-gaveta { border: 0; padding: 0; margin: 0 0 0 auto; height: 100vh; max-height: 100vh; width: min(560px, 100vw); border-radius: 22px 0 0 22px; animation: dp-gaveta .25s ease-out; }
+.dp-gaveta::backdrop { background: rgba(10, 30, 20, .45); }
+.dp-gaveta .dp-atual { margin: 0; border-radius: 0; box-shadow: none; padding: 22px 22px 30px; min-height: 100%; align-content: start; gap: 12px; }
+.dp-gaveta-fechar { position: absolute; right: 14px; top: 10px; z-index: 2; border: 0; background: var(--primaria-clara); width: 34px; height: 34px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; }
+@keyframes dp-gaveta { from { transform: translateX(40px); opacity: 0; } }
+
+.so-impressao { display: none; }
+@media print {
+  .dp-jogo, .dp-gaveta-fechar { display: none !important; }
+  .so-impressao { display: grid; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dp-balao.andamento > div, .dp-balao.andamento > button, .dp-fios line.atual, .dp-balao.estourou > div { animation: none; }
+}

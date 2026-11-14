@@ -17,6 +17,19 @@
  */
 return [
     [
+        'versao' => '8.1', 'data' => '2026-11-14', 'titulo' => 'Desenvolvimento de Produto virou jogo',
+        'novo' => [
+            'Ao criar um projeto, você escolhe o que vai fabricar: pote, frasco ou caixinha.',
+            'A página do projeto mostra a embalagem em 3D no centro, com balões em volta: o que já foi feito, o que está faltando agora e o que vem depois. Dá para girar a embalagem com o mouse ou o dedo.',
+            'A cada etapa concluída a embalagem vai se formando: aparece o conteúdo, o rótulo com a tabela nutricional, o código de barras, a arte do Marketing (a imagem enviada vira o rótulo), a tampa, o selo de aprovado… até a festa do lançamento.',
+            'Quando você abre um projeto que avançou desde a sua última visita, a peça nova chega com animação e um aviso de quem fez.',
+            'Clique no balão da etapa atual para abrir o que precisa ser feito nela.',
+        ],
+        'melhoria' => [
+            'O quadro de projetos mostra o desenho da embalagem e quanto o produto já está "formado".',
+        ],
+    ],
+    [
         'versao' => '8.0', 'data' => '2026-11-14', 'titulo' => 'Desenvolvimento de Produto',
         'novo' => [
             'Setor novo no menu: Desenvolvimento de Produto. Cada produto novo vira um projeto que passa por etapas, do briefing ao lançamento.',

@@ -130,6 +130,11 @@ class ProdutoController extends Controller
     public function baixar(string $id): void
     {
         $doc = PS::documento((int) $id);
+        // Quem só acompanha o Desenvolvimento de Produto vê apenas a arte/prova de produto em desenvolvimento (palco 3D)
+        $veProdutos = Auth::pode('produtos.ver') || Auth::pode('catalogo.editar') || Auth::pode('produtos.tecnico');
+        if ($doc && !$veProdutos && !\App\Services\DesenvolvimentoService::documentoDoDesenvolvimento((int) $id)) {
+            $doc = null;
+        }
         if (!$doc) {
             http_response_code(404);
             Sessao::aviso('erro', 'Documento não encontrado ou sem acesso.');

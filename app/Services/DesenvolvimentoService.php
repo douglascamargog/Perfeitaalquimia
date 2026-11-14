@@ -20,6 +20,17 @@ class DesenvolvimentoService
         'aprovacao' => 'Prova aprovada', 'recebimento' => 'Rótulos recebidos', 'piloto' => 'Lote piloto', 'lancamento' => 'Lançamento',
     ];
 
+    /** Tipos de embalagem do "jogo": cada um tem o seu modelo 3D (public/assets/js/dp-jogo.js) */
+    public const TIPOS = ['pote' => 'Pote', 'frasco' => 'Frasco', 'caixinha' => 'Caixinha'];
+
+    /** Peça que cada etapa acrescenta na embalagem (pela checagem, para continuar certo se o admin renomear as etapas) */
+    public const PECAS = [
+        'ficha' => 'o conteúdo', 'composicao' => 'o rótulo de trás com a tabela nutricional', 'codigo' => 'o código de barras',
+        'arte' => 'a arte do rótulo', 'compras' => 'a embalagem de verdade', 'grafica' => 'as cores da impressão',
+        'aprovacao' => 'o selo de aprovado', 'recebimento' => 'o rótulo colado e a tampa', 'piloto' => 'o lacre de produto pronto',
+        'lancamento' => 'a festa do lançamento',
+    ];
+
     // ------------------------------------------------------------------
     // Consulta
     // ------------------------------------------------------------------
@@ -129,12 +140,13 @@ class DesenvolvimentoService
         $prazo = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($d['prazo'] ?? '')) ? $d['prazo'] : null;
         $categoria = (int) ($d['categoria_id'] ?? 0) ?: null;
         $embalagem = mb_substr(trim((string) ($d['embalagem'] ?? '')), 0, 120) ?: null;
-        return Banco::transacao(function () use ($nome, $d, $clienteId, $etapas, $prazo, $categoria, $embalagem, $usuarioId) {
+        $tipo = isset(self::TIPOS[$d['tipo'] ?? '']) ? $d['tipo'] : 'pote';
+        return Banco::transacao(function () use ($nome, $d, $clienteId, $etapas, $prazo, $categoria, $embalagem, $tipo, $usuarioId) {
             // O produto nasce oculto (fora do catálogo e da lista de Produtos) e vai sendo preenchido pelas áreas
             $produto = Banco::inserir('produtos', ['slug' => 'dev-' . bin2hex(random_bytes(5)), 'nome' => $nome, 'embalagem' => $embalagem,
                 'categoria_id' => $categoria, 'ativo' => 0, 'visivel_catalogo' => 0, 'ordem' => 9999, 'ficha_json' => '{}']);
             $id = Banco::inserir('dp_projetos', ['nome' => $nome, 'briefing' => mb_substr(trim((string) ($d['briefing'] ?? '')), 0, 5000) ?: null,
-                'categoria_id' => $categoria, 'embalagem' => $embalagem, 'cliente_id' => $clienteId, 'produto_id' => $produto,
+                'categoria_id' => $categoria, 'embalagem' => $embalagem, 'tipo' => $tipo, 'cliente_id' => $clienteId, 'produto_id' => $produto,
                 'etapa_id' => (int) $etapas[0]['id'], 'prazo' => $prazo, 'criado_por' => $usuarioId]);
             foreach ($etapas as $i => $e) {
                 Banco::inserir('dp_projeto_etapas', ['projeto_id' => $id, 'etapa_id' => (int) $e['id'], 'situacao' => $i === 0 ? 'andamento' : 'pendente']);
@@ -298,6 +310,71 @@ class DesenvolvimentoService
         Banco::executar("UPDATE dp_projetos SET situacao = ? WHERE id = ? AND situacao <> 'lancado'", [$situacao, $id]);
         self::registrar($id, $usuarioId, 'sistema', ['andamento' => 'Projeto retomado.', 'pausado' => 'Projeto pausado.', 'cancelado' => 'Projeto cancelado.'][$situacao]);
         Auditoria::registrar('desenvolvimento', $id, $situacao);
+    }
+
+    /** Troca o tipo de embalagem (quem gerencia) */
+    public static function trocarTipo(int $id, string $tipo, ?int $usuarioId): void
+    {
+        if (!isset(self::TIPOS[$tipo])) {
+            throw new RuntimeException('Tipo de embalagem inválido.');
+        }
+        Banco::executar('UPDATE dp_projetos SET tipo = ? WHERE id = ?', [$tipo, $id]);
+        self::registrar($id, $usuarioId, 'sistema', 'Tipo de embalagem: ' . self::TIPOS[$tipo] . '.');
+        Auditoria::registrar('desenvolvimento', $id, 'tipo', null, ['tipo' => $tipo]);
+    }
+
+    /** % do produto "formado" (etapas concluídas sobre as etapas ativas) */
+    public static function progresso(array $linha): int
+    {
+        $total = count($linha);
+        $feitas = count(array_filter($linha, fn($e) => ($e['situacao'] ?? '') === 'concluida'));
+        return $total ? (int) round($feitas * 100 / $total) : 0;
+    }
+
+    /** Progresso de vários projetos de uma vez (para o quadro): [projeto_id => %] */
+    public static function progressos(array $ids): array
+    {
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+        if (!$ids) {
+            return [];
+        }
+        $total = (int) Banco::valor('SELECT COUNT(*) FROM dp_etapas WHERE ativa = 1') ?: 1;
+        $r = [];
+        foreach (Banco::todos("SELECT pe.projeto_id, COUNT(*) AS n FROM dp_projeto_etapas pe JOIN dp_etapas e ON e.id = pe.etapa_id AND e.ativa = 1
+            WHERE pe.situacao = 'concluida' AND pe.projeto_id IN (" . implode(',', $ids) . ') GROUP BY pe.projeto_id') as $x) {
+            $r[(int) $x['projeto_id']] = (int) round(min(100, $x['n'] * 100 / $total));
+        }
+        return $r;
+    }
+
+    /**
+     * Dados para o palco 3D (vão embutidos na página como JSON; nada de dado de cliente em endereço).
+     * Cada etapa diz a sua checagem; o JS liga a peça correspondente quando a etapa está concluída.
+     */
+    public static function dadosDoJogo(array $p, array $linha, array $falta): array
+    {
+        $prod = (int) $p['produto_id'];
+        $arte = $prod ? Banco::um("SELECT id, mime FROM produto_documentos WHERE produto_id = ? AND tipo = 'rotulo' AND arquivado_em IS NULL
+            ORDER BY id DESC LIMIT 1", [$prod]) : null;
+        return [
+            'id' => (int) $p['id'], 'tipo' => isset(self::TIPOS[$p['tipo'] ?? '']) ? $p['tipo'] : 'pote', 'nome' => $p['nome'],
+            'situacao' => $p['situacao'], 'progresso' => self::progresso($linha),
+            'ean' => $prod ? (string) Banco::valor('SELECT ean FROM produto_tecnico WHERE produto_id = ?', [$prod]) : '',
+            'arte' => $arte && str_starts_with((string) $arte['mime'], 'image/') ? url('/produtos/documentos/' . (int) $arte['id']) : null,
+            'falta' => array_values($falta),
+            'etapas' => array_map(fn($e) => [
+                'id' => (int) $e['id'], 'nome' => $e['nome'], 'checagem' => (string) $e['checagem'], 'situacao' => $e['situacao'] ?: 'pendente',
+                'funcao' => $e['funcao'] ?: 'Gestão', 'por' => $e['concluida_por'], 'em' => $e['concluida_em'] ? data_br($e['concluida_em']) : null,
+                'peca' => self::PECAS[(string) $e['checagem']] ?? null,
+            ], $linha),
+        ];
+    }
+
+    /** Arte/prova de um produto em desenvolvimento: quem acompanha o desenvolvimento pode ver (para o palco 3D) */
+    public static function documentoDoDesenvolvimento(int $docId): bool
+    {
+        return (bool) Banco::valor("SELECT 1 FROM produto_documentos d JOIN dp_projetos p ON p.produto_id = d.produto_id
+            WHERE d.id = ? AND d.tipo IN ('rotulo','prova') AND d.arquivado_em IS NULL", [$docId]);
     }
 
     // ------------------------------------------------------------------

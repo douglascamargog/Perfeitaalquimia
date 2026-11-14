@@ -19,7 +19,8 @@ class DesenvolvimentoController extends Controller
     {
         $f = ['tipo' => (string) ($_GET['tipo'] ?? ''), 'situacao' => (string) ($_GET['situacao'] ?? ''), 'atrasados' => !empty($_GET['atrasados'])];
         $this->tela('desenvolvimento/index', [
-            'titulo' => 'Desenvolvimento de Produto', 'etapas' => D::etapas(), 'projetos' => D::projetos($f), 'f' => $f,
+            'titulo' => 'Desenvolvimento de Produto', 'etapas' => D::etapas(), 'projetos' => $projetos = D::projetos($f), 'f' => $f,
+            'progressos' => D::progressos(array_column($projetos, 'id')),
             'categorias' => Banco::todos('SELECT id, nome FROM categorias ORDER BY nome'),
             'clientesTerc' => Banco::todos("SELECT DISTINCT c.id, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS nome FROM clientes c
                 JOIN funcoes f ON f.id = c.funcao_id WHERE f.slug = 'terceirizacao' AND c.excluido_em IS NULL ORDER BY nome LIMIT 500"),
@@ -29,15 +30,20 @@ class DesenvolvimentoController extends Controller
 
     public function minhas(): void
     {
-        $this->tela('desenvolvimento/minhas', ['titulo' => 'Minhas tarefas · Desenvolvimento', 'projetos' => D::minhas(), 'estilos' => self::ESTILOS]);
+        $projetos = D::minhas();
+        $this->tela('desenvolvimento/minhas', ['titulo' => 'Minhas tarefas · Desenvolvimento', 'projetos' => $projetos,
+            'progressos' => D::progressos(array_column($projetos, 'id')), 'estilos' => self::ESTILOS]);
     }
 
     public function ver(string $id): void
     {
         $p = $this->projeto($id);
+        $linha = D::linhaDoProjeto((int) $p['id']);
+        $falta = $p['situacao'] === 'andamento' ? D::pendencias($p) : [];
         $this->tela('desenvolvimento/ver', [
-            'titulo' => $p['nome'], 'p' => $p, 'linha' => D::linhaDoProjeto((int) $p['id']), 'historico' => D::historico((int) $p['id']),
-            'falta' => $p['situacao'] === 'andamento' ? D::pendencias($p) : [], 'podeConcluir' => $p['situacao'] === 'andamento' && D::podeConcluir($p),
+            'titulo' => $p['nome'], 'p' => $p, 'linha' => $linha, 'historico' => D::historico((int) $p['id']),
+            'jogo' => D::dadosDoJogo($p, $linha, $falta), 'scripts' => ['dp-jogo.js'],
+            'falta' => $falta, 'podeConcluir' => $p['situacao'] === 'andamento' && D::podeConcluir($p),
             'aprovacoes' => $p['checagem'] === 'aprovacao' ? D::aprovacoesDaRodada((int) $p['id'], (int) $p['etapa_id']) : [],
             'ficha' => Banco::todos('SELECT ft.materia_prima_id, m.nome, m.unidade, m.tipo, m.estoque FROM ficha_tecnica ft JOIN materias_primas m ON m.id = ft.materia_prima_id
                 WHERE ft.produto_id = ? ORDER BY m.tipo, m.nome', [$p['produto_id']]),
@@ -76,6 +82,7 @@ class DesenvolvimentoController extends Controller
                 'piloto'    => (function () use ($pid, $uid) { $this->exigirFuncao('producao'); D::criarPiloto($pid, (int) $this->campo('quantidade'), $uid); return 'Ordem do lote piloto criada.'; })(),
                 'voltar'    => (function () use ($pid, $uid) { $this->exigirGerenciar(); D::voltar($pid, $uid, $this->campo('motivo')); return 'Projeto voltou uma etapa.'; })(),
                 'situacao'  => (function () use ($pid, $uid) { $this->exigirGerenciar(); D::situacao($pid, $this->campo('situacao'), $uid); return 'Situação atualizada.'; })(),
+                'tipo'      => (function () use ($pid, $uid) { $this->exigirGerenciar(); D::trocarTipo($pid, $this->campo('tipo'), $uid); return 'Tipo de embalagem trocado.'; })(),
                 'comentar'  => (function () use ($pid, $uid) { D::comentar($pid, $this->campo('texto'), $uid); return 'Comentário registrado.'; })(),
                 default     => throw new RuntimeException('Ação inválida.'),
             };

@@ -131,7 +131,7 @@ return [
     ['POST', '/produtos/catalogo/{id}',              'CatalogoAdminController@salvar',    'catalogo.editar'],
     // Produtos (tudo sobre o produto, para a equipe)
     ['GET',  '/produtos',                            'ProdutoController@index',           'produtos.ver|catalogo.editar|produtos.tecnico'],
-    ['GET',  '/produtos/documentos/{id}',            'ProdutoController@baixar',          'produtos.ver|catalogo.editar|produtos.tecnico'],
+    ['GET',  '/produtos/documentos/{id}',            'ProdutoController@baixar',          'produtos.ver|catalogo.editar|produtos.tecnico|desenvolvimento.ver|desenvolvimento.gerenciar'],
     ['POST', '/produtos/documentos/{id}/arquivar',   'ProdutoController@arquivarDocumento', 'produtos.tecnico'],
     ['GET',  '/produtos/{slug}',                     'ProdutoController@ver',             'produtos.ver|catalogo.editar|produtos.tecnico'],
     ['POST', '/produtos/{slug}/conteudo',            'ProdutoController@salvarConteudo',  'academia.editar|catalogo.editar'],

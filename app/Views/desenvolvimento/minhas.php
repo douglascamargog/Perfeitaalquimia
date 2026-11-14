@@ -9,7 +9,7 @@
 <?php else: ?>
   <div class="dp-grade">
     <?php foreach ($projetos as $p): ?>
-      <div class="dp-tarefa"><span class="selo lima"><?= e($p['etapa']) ?></span><?= Visao::renderizar('desenvolvimento/_cartao', ['p' => $p]) ?></div>
+      <div class="dp-tarefa"><span class="selo lima"><?= e($p['etapa']) ?></span><?= Visao::renderizar('desenvolvimento/_cartao', ['p' => $p, 'progresso' => $progressos[(int) $p['id']] ?? 0]) ?></div>
     <?php endforeach; ?>
   </div>
 <?php endif; ?>

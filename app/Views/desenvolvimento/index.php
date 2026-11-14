@@ -1,5 +1,5 @@
 <?php
-/** Desenvolvimento de Produto: quadro por etapa. Variáveis: $etapas, $projetos, $f, $categorias, $clientesTerc, $podeGerenciar */
+/** Desenvolvimento de Produto: quadro por etapa. Variáveis: $etapas, $projetos, $progressos, $f, $categorias, $clientesTerc, $podeGerenciar */
 use App\Core\Visao;
 
 $icones = asset('img/icones.svg');
@@ -27,14 +27,14 @@ $link = fn(array $x) => url('/desenvolvimento') . '?' . e(http_build_query(array
 </div>
 
 <?php if ($f['situacao'] === 'lancado'): ?>
-  <div class="dp-grade"><?php foreach ($projetos as $p): ?><?= Visao::renderizar('desenvolvimento/_cartao', ['p' => $p]) ?><?php endforeach; ?></div>
+  <div class="dp-grade"><?php foreach ($projetos as $p): ?><?= Visao::renderizar('desenvolvimento/_cartao', ['p' => $p, 'progresso' => $progressos[(int) $p['id']] ?? 0]) ?><?php endforeach; ?></div>
   <?php if (!$projetos): ?><div class="card vazio"><p>Nenhum produto lançado ainda.</p></div><?php endif; ?>
 <?php else: ?>
 <div class="dp-quadro" aria-label="Projetos por etapa">
   <?php foreach ($etapas as $e): $lista = $porEtapa[(int) $e['id']] ?? []; ?>
     <section class="dp-coluna" data-etapa="<?= (int) $e['id'] ?>">
       <header><strong><?= e($e['nome']) ?></strong><small><?= e($e['funcao'] ?: 'gestão') ?> · <?= count($lista) ?></small></header>
-      <?php foreach ($lista as $p): ?><?= Visao::renderizar('desenvolvimento/_cartao', ['p' => $p]) ?><?php endforeach; ?>
+      <?php foreach ($lista as $p): ?><?= Visao::renderizar('desenvolvimento/_cartao', ['p' => $p, 'progresso' => $progressos[(int) $p['id']] ?? 0]) ?><?php endforeach; ?>
     </section>
   <?php endforeach; ?>
 </div>
@@ -45,11 +45,18 @@ $link = fn(array $x) => url('/desenvolvimento') . '?' . e(http_build_query(array
   <form method="post" action="<?= url('/desenvolvimento') ?>" class="pd-form">
     <?= csrf_campo() ?>
     <h2>Novo projeto de produto</h2>
+    <fieldset class="dp-tipos"><legend>O que vamos fabricar?</legend>
+      <?php foreach (\App\Services\DesenvolvimentoService::TIPOS as $slug => $nomeTipo): ?>
+        <label class="dp-tipo"><input type="radio" name="tipo" value="<?= e($slug) ?>" <?= $slug === 'pote' ? 'checked' : '' ?>>
+          <?= Visao::renderizar('desenvolvimento/_tipos', ['tipo' => $slug, 'classe' => 'completo']) ?>
+          <strong><?= e($nomeTipo) ?></strong><small><?= ['pote' => 'pó ou cápsulas', 'frasco' => 'líquido ou gotas', 'caixinha' => 'cartucho, chás, blister'][$slug] ?></small></label>
+      <?php endforeach; ?>
+    </fieldset>
     <label>Nome do produto<input type="text" name="nome" maxlength="160" required placeholder="Ex.: Colágeno + Vitamina C 300 g"></label>
     <label>Briefing <small>objetivo, público, diferenciais, apresentação</small><textarea name="briefing" rows="4"></textarea></label>
     <div class="pd-duas">
       <label>Apresentação<select name="categoria_id"><option value="">—</option><?php foreach ($categorias as $c): ?><option value="<?= (int) $c['id'] ?>"><?= e($c['nome']) ?></option><?php endforeach; ?></select></label>
-      <label>Embalagem<input type="text" name="embalagem" maxlength="120" placeholder="Ex.: Pote 300 g"></label>
+      <label>Tamanho / embalagem<input type="text" name="embalagem" maxlength="120" placeholder="Ex.: 300 g, 30 ml, 60 cápsulas"></label>
     </div>
     <div class="pd-duas">
       <label>Cliente de terceirização <small>se for com a marca de um cliente</small><select name="cliente_id"><option value="">— Produto nosso</option>

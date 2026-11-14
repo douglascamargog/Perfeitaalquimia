@@ -73,7 +73,7 @@ if ($marketing) {
 $cliente = (int) Banco::valor("SELECT c.id FROM clientes c JOIN funcoes f ON f.id = c.funcao_id WHERE f.slug = 'terceirizacao' AND c.excluido_em IS NULL ORDER BY c.id LIMIT 1");
 if ($cliente) {
     $p3 = D::criar(['nome' => 'Chá Detox Marca do Cliente 60 g', 'briefing' => 'Chá com a marca do cliente, mesma base do nosso chá verde.', 'cliente_id' => $cliente,
-        'embalagem' => 'Sachê 60 g', 'prazo' => date('Y-m-d', strtotime('-2 days'))], $gestor);
+        'embalagem' => 'Caixinha 60 g', 'tipo' => 'caixinha', 'prazo' => date('Y-m-d', strtotime('-2 days'))], $gestor);
     $irAte($p3, 'arte');
 }
 return 'Desenvolvimento (demonstração): usuário Qualidade e 3 projetos em etapas diferentes.';
