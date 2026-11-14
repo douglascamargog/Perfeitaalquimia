@@ -55,10 +55,26 @@ $origens = ['catalogo' => 'Catálogo (cliente)', 'sistema' => 'Sistema (equipe)'
       <?= \App\Core\Visao::renderizar('aprovacao/_credito', ['cr' => $credito]) ?>
       <?= \App\Core\Visao::renderizar('aprovacao/_acoes', ['p' => $p, 'voltar' => 'pedido']) ?>
     <?php endif; ?>
+    <?php if (!empty($p['expedicao'])): [$er, $ec] = \App\Services\DepositoService::ETAPAS[$p['expedicao']] ?? [$p['expedicao'], 'cinza'];
+      $lotesPed = \App\Core\Banco::todos('SELECT l.lote, l.validade, l.quantidade, i.nome FROM pedido_item_lotes l JOIN pedido_itens i ON i.id = l.pedido_item_id WHERE l.pedido_id = ? ORDER BY l.id', [$p['id']]); ?>
+    <section class="card ped-expedicao" data-expedicao="<?= e($p['expedicao']) ?>">
+      <h2>Expedição <span class="selo <?= $ec ?>"><?= e($er) ?></span></h2>
+      <?php if ($p['expedicao_aguarda_produto']): ?><p class="aviso alerta">Esperando produto no depósito.</p><?php endif; ?>
+      <?php if ($p['falta']): ?><p class="aviso alerta">Saiu sem alguns itens<?= $p['expedicao_obs'] ? ': ' . e($p['expedicao_obs']) : '' ?>.</p><?php endif; ?>
+      <dl class="ped-dados">
+        <?php if ($p['separado_em']): ?><div><dt>Separado</dt><dd><?= data_br($p['separado_em'], true) ?></dd></div><?php endif; ?>
+        <?php if ($p['despachado_em']): ?><div><dt>Despachado</dt><dd><?= data_br($p['despachado_em'], true) ?></dd></div>
+          <div><dt>Transportadora</dt><dd><?= e($p['transportadora']) ?> · <?= (int) $p['volumes'] ?> vol.</dd></div>
+          <?php if ($p['rastreio']): ?><div><dt>Rastreio</dt><dd data-rastreio><?= e($p['rastreio']) ?></dd></div><?php endif; ?><?php endif; ?>
+      </dl>
+      <?php if ($lotesPed): ?><p class="pequeno suave">Lotes: <?= e(implode(' · ', array_map(fn($l) => $l['nome'] . ' ' . $l['lote'] . ' (' . $l['quantidade'] . ')', $lotesPed))) ?></p><?php endif; ?>
+      <?php if (\App\Core\Auth::pode('deposito.ver') || \App\Core\Auth::pode('deposito.operar')): ?><a class="botao contorno pequeno" href="<?= url('/deposito/' . (int) $p['id']) ?>">Abrir no depósito</a><?php endif; ?>
+    </section>
+    <?php endif; ?>
     <section class="card">
       <h2>Histórico</h2>
       <ol class="linha-tempo">
-        <?php foreach ($historico as $h): ?><li><strong><?= e(PedidoService::SITUACOES[$h['situacao']][0] ?? $h['situacao']) ?></strong><span><?= e($h['texto']) ?></span><small><?= data_br($h['criado_em'], true) ?> · <?= e($h['usuario_nome'] ?? 'Sistema') ?></small></li><?php endforeach; ?>
+        <?php foreach ($historico as $h): ?><li><strong><?= e(PedidoService::SITUACOES[$h['situacao']][0] ?? ($h['situacao'] === 'deposito' ? 'Depósito' : $h['situacao'])) ?></strong><span><?= e($h['texto']) ?></span><small><?= data_br($h['criado_em'], true) ?> · <?= e($h['usuario_nome'] ?? 'Sistema') ?></small></li><?php endforeach; ?>
       </ol>
     </section>
   </aside>

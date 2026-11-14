@@ -86,6 +86,7 @@ class SimuladorService
         $antes = self::contagem();
         Banco::transacao(function () {
             $simulados = 'SELECT id FROM clientes WHERE simulado = 1';
+            Banco::executar("DELETE FROM pedido_item_lotes WHERE pedido_id IN (SELECT id FROM pedidos WHERE simulado = 1 OR cliente_id IN ($simulados))");
             Banco::executar("DELETE FROM pedidos WHERE simulado = 1 OR cliente_id IN ($simulados)");      // itens e histórico vão junto
             Banco::executar("DELETE FROM cobrancas WHERE simulado = 1 OR cliente_id IN ($simulados)");    // títulos vão junto
             Banco::executar("DELETE FROM ligacoes WHERE simulado = 1 OR cliente_id IN ($simulados)");
@@ -94,6 +95,9 @@ class SimuladorService
             Banco::executar('DELETE FROM ordens_producao WHERE simulado = 1 AND situacao = \'planejada\'');
             Banco::executar('DELETE FROM mkt_posts WHERE simulado = 1');
             Banco::executar('DELETE FROM metas WHERE simulado = 1');
+            Banco::executar('DELETE FROM compra_cotacoes WHERE compra_id IN (SELECT id FROM compras WHERE simulado = 1)');
+            Banco::executar('DELETE FROM compra_historico WHERE compra_id IN (SELECT id FROM compras WHERE simulado = 1)');
+            Banco::executar('DELETE FROM compras WHERE simulado = 1');
             Banco::executar('DELETE FROM clientes WHERE simulado = 1');                                 // eventos e tarefas deles vão junto
         });
         Auditoria::registrar('simulador', null, 'apagar', $antes, null);
@@ -206,7 +210,10 @@ class SimuladorService
         $id = Banco::inserir('pedidos', ['uuid' => self::uuid(), 'cliente_id' => $clienteId, 'vendedor_id' => $uid, 'origem' => ['sistema', 'catalogo', 'app'][mt_rand(0, 2)],
             'tabela_preco_id' => $tabela, 'forma_pagamento_id' => $forma, 'subtotal' => round($total, 2), 'total' => round($total, 2), 'situacao' => $situacao,
             'faturado_em' => $situacao === 'faturado' ? date('Y-m-d 15:00:00', strtotime("$data +1 day")) : null,
-            'motivo_recusa' => $situacao === 'recusado' ? 'Crédito em análise (simulado)' : null, 'criado_por_usuario' => $uid, 'simulado' => 1, 'criado_em' => $criado]);
+            'motivo_recusa' => $situacao === 'recusado' ? 'Crédito em análise (simulado)' : null, 'criado_por_usuario' => $uid, 'simulado' => 1, 'criado_em' => $criado,
+            // Faturados dos últimos dias entram na fila do depósito (separar e despachar)
+            'expedicao' => $situacao === 'faturado' && $diasAtras <= 4 ? 'aguardando' : null,
+            'expedicao_desde' => $situacao === 'faturado' && $diasAtras <= 4 ? date('Y-m-d 15:00:00', strtotime("$data +1 day")) : null]);
         foreach ($itens as $it) {
             Banco::inserir('pedido_itens', $it + ['pedido_id' => $id]);
         }

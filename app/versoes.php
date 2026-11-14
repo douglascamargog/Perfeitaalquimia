@@ -17,6 +17,22 @@
  */
 return [
     [
+        'versao' => '9.0', 'data' => '2026-11-14', 'titulo' => 'Depósito e Orçamentos',
+        'novo' => [
+            'Setor novo: Depósito. Os pedidos com nota emitida entram numa fila de separação: urgentes primeiro, depois do mais antigo para o mais novo, com o painel do dia (a separar, para despachar, atrasados).',
+            'Separar o pedido: item por item, com leitor de código de barras, quantidade separada e o lote e a validade de cada item (o sistema sugere o lote que vence primeiro).',
+            'Se faltar produto, o depósito escolhe: aguardar (o vendedor e a Produção são avisados) ou despachar sem o que falta (o vendedor e o Financeiro são avisados).',
+            'Despacho com transportadora, volumes, peso e código de rastreio. O vendedor recebe aviso, o pedido mostra a expedição e o cliente vê "Enviado" com o rastreio no catálogo.',
+            'Rastrear lote: digite o lote e veja para quais clientes ele foi (lista pronta para um recolhimento).',
+            'Orçamentos e compras: a Qualidade monta o orçamento de matéria-prima, rótulo, embalagem ou item avulso, com uma ou mais cotações e o anexo do fornecedor, e escolhe quem vai aprovar.',
+            'Quem foi escolhido aprova, pede outra cotação ou recusa, pelo sino. Depois de aprovado, a Qualidade registra a compra e o Depósito confere a chegada: matéria-prima e rótulo entram sozinhos no estoque.',
+            'Sugestões de orçamento: matérias-primas abaixo do mínimo e produtos novos do Desenvolvimento na etapa de compras.',
+        ],
+        'admin' => [
+            'Crie o login de quem trabalha no depósito com o perfil novo "Depósito" e a função "Separação e Expedição". Os orçamentos são feitos por quem tem a função Qualidade. Em Configurações › Depósito: lote obrigatório, transportadoras sugeridas e dias para considerar atrasado.',
+        ],
+    ],
+    [
         'versao' => '8.5', 'data' => '2026-11-14', 'titulo' => 'Ajuste no Desenvolvimento',
         'correcao' => [
             'O painel "Embalagem e cores" do projeto abre por cima dos balões (antes ficava atrás deles) e fecha ao clicar fora.',

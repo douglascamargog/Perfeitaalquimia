@@ -21,12 +21,14 @@ class Foco
         'producao'  => 'Produção',
         'terceirizacao' => 'Terceirização (produtos dos clientes e rótulos)',
         'desenvolvimento' => 'Desenvolvimento de Produto (projetos esperando a sua etapa)',
+        'deposito'  => 'Depósito (pedidos para separar e despachar, compras para receber)',
+        'compras'   => 'Compras (orçamentos para comprar ou refazer)',
         'diretoria' => 'Diretoria (resumo da empresa: faturado, aprovação, cobrança, produção)',
     ];
 
     /** Padrão de quem não tem função */
     private const POR_PERFIL = ['admin' => ['diretoria'], 'gestor' => ['comercial', 'diretoria'], 'vendedor' => ['comercial'],
-        'financeiro' => ['aprovacao', 'cobranca'], 'marketing' => ['marketing'], 'producao' => ['producao']];
+        'financeiro' => ['aprovacao', 'cobranca'], 'marketing' => ['marketing'], 'producao' => ['producao'], 'deposito' => ['deposito']];
 
     private static array $cache = [];
 

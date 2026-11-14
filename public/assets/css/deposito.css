@@ -1,0 +1,73 @@
+/* Depósito (separação e expedição) e Compras (orçamentos da Qualidade) */
+.selo.laranja { background: var(--aviso-fundo); color: var(--aviso); }
+.selo.verde { background: var(--sucesso-fundo); color: var(--sucesso); }
+.selo.azul { background: #e6effc; color: #24508f; }
+.ac-duas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.ac-duas .card { margin: 0; }
+.ac-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: .85rem; }
+.ac-lista time { color: var(--texto-suave); font-size: .78rem; }
+.dp-inline { display: flex !important; flex-wrap: wrap; gap: 10px; align-items: end; }
+.pr-titulo-tabela { margin: 0; padding: 14px 16px 6px; font-size: 1rem; }
+.te-mov { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 0; }
+.te-mov input[type=text] { width: 150px; padding: 6px 8px; }
+.te-mov input[name=quantidade] { width: 90px; }
+
+/* Painel do dia */
+.dep-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 0 0 14px; }
+.dep-resumo > a, .dep-resumo > span { display: grid; gap: 2px; background: var(--fundo-card, #fff); border: 1px solid var(--borda); border-radius: 14px; padding: 10px 14px; text-decoration: none; color: var(--texto); }
+.dep-resumo b { font-size: 1.6rem; line-height: 1.1; color: var(--primaria-escura); font-variant-numeric: tabular-nums; }
+.dep-resumo span span, .dep-resumo a span { font-size: .78rem; color: var(--texto-suave); }
+.dep-resumo .ativo { border-color: var(--primaria-escura); box-shadow: 0 0 0 2px var(--lima); }
+.dep-resumo .alerta b { color: var(--perigo); }
+
+/* Fila em cartões */
+.dep-fila { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.dep-cartao { background: var(--fundo-card, #fff); border: 1px solid var(--borda); border-radius: 16px; padding: 12px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.dep-cartao.urgente { border-left: 5px solid var(--perigo); }
+.dep-cartao.atrasado { background: var(--aviso-fundo); }
+.dep-cartao-link { display: grid; gap: 4px; text-decoration: none; color: var(--texto); }
+.dep-cartao-topo { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.dep-cartao-topo strong { font-size: 1.05rem; color: var(--primaria-escura); }
+.dep-cliente { font-weight: 700; color: var(--primaria-escura); overflow-wrap: anywhere; }
+.dep-cartao small { font-size: .76rem; }
+.dep-urgente { margin: 0; justify-self: start; }
+
+/* Separar */
+.dep-separar { display: grid; gap: 14px; }
+.dep-leitor { display: grid; gap: 4px; background: var(--primaria-clara); border-radius: 14px; padding: 12px; }
+.dep-leitor label { font-weight: 700; color: var(--primaria-escura); }
+.dep-leitor input { font-size: 1.1rem; padding: 10px 12px; }
+.dep-leitor-msg { font-size: .85rem; font-weight: 600; min-height: 1.2em; }
+.dep-leitor-msg.ok { color: var(--sucesso); }
+.dep-leitor-msg.erro { color: var(--perigo); }
+.dep-itens td { vertical-align: top; }
+.dep-itens td small { display: block; }
+.dep-qtd { width: 80px; font-size: 1.05rem; font-weight: 700; text-align: right; }
+.dep-tudo, .dep-outro-lote { border: 0; background: none; color: var(--secundaria); font-weight: 700; cursor: pointer; padding: 2px 4px; font-size: .78rem; text-decoration: underline; }
+.dep-lotes { display: grid; gap: 6px; }
+.dep-lote { display: flex; flex-wrap: wrap; gap: 6px; }
+.dep-lote input[type=text] { width: 130px; }
+.dep-lote input[type=date] { width: 150px; }
+.dep-lote input[type=number] { width: 80px; }
+.dep-itens tr.completo td:first-child strong::before { content: "✓ "; color: var(--sucesso); }
+.dep-itens tr.lido { animation: dep-lido .9s ease-out; }
+@keyframes dep-lido { from { background: var(--lima); } }
+.dep-falta { border: 1px dashed var(--borda); border-radius: 12px; padding: 10px 14px; display: grid; gap: 6px; }
+.dep-falta legend { font-weight: 700; color: var(--primaria-escura); padding: 0 6px; }
+.dep-despacho { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; align-items: end; }
+.dep-despacho .acoes-form { grid-column: 1 / -1; }
+.dep-despacho-obs { grid-column: span 2; }
+@media (max-width: 600px) { .dep-despacho-obs { grid-column: 1 / -1; } .dep-lote input[type=text], .dep-lote input[type=date] { width: 100%; } }
+
+/* Compras */
+.cp-sugestoes ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.cp-sugestoes li { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--borda); padding-bottom: 8px; }
+.cp-sugestoes li small { display: block; }
+.cp-escolhida td { background: var(--sucesso-fundo); }
+.cp-anteriores { padding: 0 16px 14px; margin: 0; }
+.cp-decidir { border: 2px solid var(--lima); }
+.cp-duas { margin-bottom: 14px; }
+.cp-editar summary { cursor: pointer; font-weight: 700; color: var(--primaria-escura); }
+.cp-editar[open] summary { margin-bottom: 12px; }
+.botao.perigo { color: var(--perigo); border-color: var(--perigo); }
+@media print { .dep-urgente, .dep-leitor { display: none !important; } }

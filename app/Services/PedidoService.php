@@ -283,6 +283,7 @@ class PedidoService
         ProducaoService::baixarVenda((int) $pedido['id'], $quando); // estoque acabado da fábrica (se configurado)
         if (strtotime($quando) >= strtotime('-1 day')) { // faturamento de agora (não o histórico da importação)
             NotificacaoService::pedidoMudou((int) $pedido['id'], 'faturado', null, 'NF ' . $numeroNf);
+            DepositoService::entrarNaFila((int) $pedido['id'], $quando); // nota emitida → vai para a separação no depósito
         }
     }
 

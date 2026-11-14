@@ -10,7 +10,10 @@ use App\Services\PedidoService;
   </form>
 <?php endif; ?>
 <div class="cat-pedidos">
-  <?php foreach ($pedidos as $p): [$rotulo, $cor] = PedidoService::SITUACOES[$p['situacao']] ?? [$p['situacao'], 'cinza']; ?>
+  <?php foreach ($pedidos as $p): [$rotulo, $cor] = PedidoService::SITUACOES[$p['situacao']] ?? [$p['situacao'], 'cinza'];
+    // Andamento no depósito (depois da nota): "Em separação" e "Enviado"
+    if (($p['expedicao'] ?? '') === 'despachado') { [$rotulo, $cor] = ['Enviado', 'verde']; }
+    elseif (in_array($p['expedicao'] ?? '', ['aguardando', 'separando', 'separado'], true)) { [$rotulo, $cor] = ['Em separação', 'lima']; } ?>
     <details class="cat-pedido">
       <summary>
         <div><strong>Pedido #<?= (int) $p['id'] ?></strong><small><?= data_br($p['criado_em'], true) ?> · <?= (int) $p['qtd_itens'] ?> item(ns) · <?= e($p['forma']) ?></small></div>
@@ -18,6 +21,8 @@ use App\Services\PedidoService;
       </summary>
       <?php if ($p['situacao'] === 'recusado' && $p['motivo_recusa']): ?><p class="aviso erro">Motivo: <?= e($p['motivo_recusa']) ?></p><?php endif; ?>
       <?php if ($p['numero_nf']): ?><p class="pequeno">Nota fiscal nº <?= e($p['numero_nf']) ?> · faturado em <?= data_br($p['faturado_em']) ?></p><?php endif; ?>
+      <?php if (($p['expedicao'] ?? '') === 'despachado'): ?><p class="pequeno" data-enviado><strong>Enviado em <?= data_br($p['despachado_em']) ?></strong> · <?= e($p['transportadora']) ?><?= $p['rastreio'] ? ' · rastreio <strong>' . e($p['rastreio']) . '</strong>' : '' ?></p>
+      <?php elseif (in_array($p['expedicao'] ?? '', ['aguardando', 'separando', 'separado'], true)): ?><p class="pequeno">Em separação no nosso depósito.</p><?php endif; ?>
       <ul class="cat-itens compacto">
         <?php foreach ($itens[$p['id']] as $i): ?><li><span><?= (int) $i['quantidade'] ?>×</span><span><?= !empty($i['codigo']) ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><?= e($i['nome']) ?></span><b><?= dinheiro((float) $i['total']) ?></b></li><?php endforeach; ?>
       </ul>

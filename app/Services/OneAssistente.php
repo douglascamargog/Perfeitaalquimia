@@ -78,6 +78,24 @@ class OneAssistente
             $falas[] = ['humor' => 'ideia', 'texto' => count($dp) . ' projeto(s) de produto novo esperando você (ex.: "' . $dp[0]['nome'] . '", etapa ' . $dp[0]['etapa'] . ').',
                 'link' => '/desenvolvimento/minhas', 'acao' => 'Ver minhas tarefas'];
         }
+        // Depósito: pedidos para separar e compras chegando
+        if (Auth::pode('deposito.operar') && Foco::tem('deposito')) {
+            $dep = DepositoService::resumo();
+            if ($dep['a_separar'] + $dep['separando'] + $dep['separados'] > 0) {
+                $falas[] = ['humor' => $dep['atrasados'] ? 'ops' : 'ideia', 'texto' => ($dep['a_separar'] + $dep['separando']) . ' pedido(s) para separar e ' . $dep['separados'] . ' para despachar'
+                    . ($dep['atrasados'] ? ' · ' . $dep['atrasados'] . ' atrasado(s)' : '') . '.', 'link' => '/deposito', 'acao' => 'Abrir a separação'];
+            }
+            if ($dep['receber']) {
+                $falas[] = ['humor' => 'ideia', 'texto' => $dep['receber'] . ' compra(s) da Qualidade para chegar: confira e dê entrada quando chegar.', 'link' => '/deposito/recebimento', 'acao' => 'Recebimento'];
+            }
+        }
+        // Compras: orçamentos esperando a minha aprovação; para a Qualidade, o que comprar ou refazer
+        if ($n = CompraService::qtdParaAprovar((int) Auth::id())) {
+            $falas[] = ['humor' => 'ideia', 'texto' => "$n orçamento(s) de compra esperando a sua aprovação.", 'link' => '/compras?aba=minhas', 'acao' => 'Ver orçamentos'];
+        }
+        if (Auth::pode('compras.solicitar') && Foco::tem('compras') && ($n = CompraService::qtdParaAgir())) {
+            $falas[] = ['humor' => 'ideia', 'texto' => "$n orçamento(s) aprovado(s) para comprar ou com pedido de outra cotação.", 'link' => '/compras', 'acao' => 'Ver orçamentos'];
+        }
         // Terceirização: rótulos de clientes que não dão para produzir
         if ((Auth::pode('terceirizacao.ver') || Auth::pode('terceirizacao.editar')) && Foco::tem('terceirizacao')
             && ($rot = \App\Services\TerceirizacaoService::alertas())) {

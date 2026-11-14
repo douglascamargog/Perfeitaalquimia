@@ -214,3 +214,4 @@ table.tabela { width: 100%; border-collapse: collapse; }
 .aviso-flut.saindo { opacity: 0; transform: translateY(-8px); }
 .avisos-fechar { position: absolute; top: 8px; right: 8px; border: 0; background: transparent; font: inherit; cursor: pointer; color: inherit; opacity: .7; }
 @media (prefers-reduced-motion: reduce) { .aviso-flut { transition: none; } }
+.aviso.alerta  { background: var(--aviso-fundo);   color: var(--aviso); }

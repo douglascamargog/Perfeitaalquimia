@@ -113,6 +113,11 @@ class Auth
             // Não é uma permissão da grade: vale para quem é "gestor(a) do setor" (Administração › Usuários › Funções)
             return \App\Services\Setores::gerenciados() !== [];
         }
+        if ($permissao === 'compras.solicitar') {
+            // Orçamentos e compras: quem é da função configurada (padrão: Qualidade) ou tem compras.gerenciar
+            return in_array('*', $permissoes, true) || in_array('compras.gerenciar', $permissoes, true)
+                || self::temFuncao((string) \App\Core\Config::get('compras.funcao', 'qualidade'));
+        }
         return in_array('*', $permissoes, true) || in_array($permissao, $permissoes, true);
     }
 

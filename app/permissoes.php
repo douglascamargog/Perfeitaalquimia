@@ -59,4 +59,8 @@ return [
     'auditoria.ver'           => ['Ver o log de auditoria', []],
     'sistema.atualizar'       => ['Aplicar atualizações do sistema e baixar backup do banco', []],
     'integracao.gerenciar'    => ['Ver e disparar a sincronização com o Omie', []],
+    'deposito.ver'            => ['Ver o Depósito (fila de separação, despachos, lotes e recebimento) sem operar', ['gestor', 'financeiro']],  // + perfil Depósito (seed 048)
+    'deposito.operar'         => ['Separar e despachar pedidos, anotar lotes e receber compras', []],     // perfil Depósito (seed 048)
+    'compras.ver'             => ['Ver os orçamentos e compras da Qualidade', ['gestor', 'financeiro']],
+    'compras.gerenciar'       => ['Fazer orçamentos e compras (além da função Qualidade)', []],
 ];

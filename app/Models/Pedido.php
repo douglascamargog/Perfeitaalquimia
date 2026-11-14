@@ -95,7 +95,8 @@ class Pedido
     /** A equipe pode ver este pedido? */
     public static function podeVer(array $p): bool
     {
-        return Auth::pode('pedidos.ver_todos') || Auth::pode('pedidos.aprovar') || (int) $p['vendedor_id'] === Auth::id() || (int) $p['responsavel_id'] === Auth::id();
+        return Auth::pode('pedidos.ver_todos') || Auth::pode('pedidos.aprovar') || (int) $p['vendedor_id'] === Auth::id() || (int) $p['responsavel_id'] === Auth::id()
+            || (($p['expedicao'] ?? null) !== null && (Auth::pode('deposito.ver') || Auth::pode('deposito.operar'))); // pedido na fila do depósito
     }
 
     public static function itens(int $pedidoId): array

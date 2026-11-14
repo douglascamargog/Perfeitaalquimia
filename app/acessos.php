@@ -46,6 +46,10 @@ return [
         'Produção' => [
             ['Produção e matérias-primas', 'producao.ver', 'producao.gerenciar', ''],
         ],
+        'Depósito e compras' => [
+            ['Depósito (separação, despacho, lotes, recebimento)', 'deposito.ver', 'deposito.operar', 'Ver: a fila e os despachos · Editar: separar, despachar e receber'],
+            ['Orçamentos e compras', 'compras.ver', 'compras.gerenciar', 'Quem é da função Qualidade já faz orçamentos. Quem é escolhido para aprovar recebe o orçamento no sino.'],
+        ],
         'Administração' => [
             ['Usuários, Funções e Acessos', null, 'usuarios.gerenciar', 'Cuidado: quem tem isto pode mudar os acessos de todos'],
             ['Comunicados (emitir)', null, 'comunicados.emitir', 'Todos recebem; aqui é quem pode enviar'],

@@ -82,6 +82,15 @@ class PendenciasService
         if (($pode('desenvolvimento.ver') || $pode('desenvolvimento.gerenciar')) && Foco::tem('desenvolvimento')) {
             $r['/desenvolvimento/minhas'] = DesenvolvimentoService::qtdMinhas($id);
         }
+        // Depósito: pedidos com nota para separar e compras para receber
+        if ($pode('deposito.operar') && Foco::tem('deposito')) {
+            $dep = DepositoService::resumo();
+            $r['/deposito'] = $dep['a_separar'] + $dep['separando'] + $dep['separados'];
+            $r['/deposito/recebimento'] = $dep['receber'];
+        }
+        // Compras: a Qualidade vê o que comprar ou refazer; quem foi escolhido para aprovar vê os seus
+        $paraAprovar = CompraService::qtdParaAprovar($id);
+        $r['/compras'] = $paraAprovar + ($pode('compras.solicitar') && Foco::tem('compras') ? CompraService::qtdParaAgir() : 0);
         // Terceirização: rótulos de clientes abaixo do mínimo ou que não dão para as ordens planejadas
         if (($pode('terceirizacao.ver') || $pode('terceirizacao.editar')) && Foco::tem('terceirizacao')) {
             $r['/terceirizacao'] = count(\App\Services\TerceirizacaoService::alertas());
