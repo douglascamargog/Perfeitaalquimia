@@ -19,6 +19,7 @@ return [
     [
         'versao' => '12.7', 'data' => '2026-11-16', 'titulo' => 'Ligue Talk de verdade',
         'novo' => ['Com o Ligue Talk ligado, as suas ligações e gravações aparecem sozinhas no Acompanhamento e na ficha do cliente, sem precisar registrar à mão.'],
+        'correcao' => ['Previsão do tempo no Início: o "hoje" agora mostra só as horas que ainda faltam (antes contava a chuva que já tinha passado), e à noite a dica fala do tempo de amanhã.'],
         'admin' => 'O Ligue Talk agora é configurado pela tela: ⚙️ Administração › Ligue Talk. Cole o código da empresa (company_id) e o token da API (pedidos ao suporte do Ligue Talk), escolha o modo "API do Ligue Talk" e clique em "Testar conexão": aparece a lista dos usuários do Ligue Talk e quem já está ligado a alguém do One. Para cada pessoa, preencha o "Usuário no Ligue Talk" em Pessoas e acessos. O token fica em config/segredos.php (protegido, fora do banco e dos pacotes) e não aparece de novo. "Remover" volta ao registro manual.',
     ],
     [

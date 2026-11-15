@@ -29,7 +29,7 @@ const icone = (nome, classe = 'icone-tempo') => `<svg class="${classe}" viewBox=
 const DIAS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
 async function previsao(lat, lng) {
-  const chave = `one-clima-${lat},${lng}`;
+  const chave = `one-clima2-${lat},${lng}`; // "2": agora guarda também a previsão por hora
   try {
     const guardado = JSON.parse(localStorage.getItem(chave) || 'null');
     if (guardado && Date.now() - guardado.quando < 10 * 60 * 1000) return guardado.dados;
@@ -38,6 +38,7 @@ async function previsao(lat, lng) {
     latitude: lat, longitude: lng, timezone: 'America/Sao_Paulo', forecast_days: '5',
     current: 'temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m',
     daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+    hourly: 'weather_code,precipitation_probability',
   });
   const resposta = await fetch(url);
   if (!resposta.ok) throw new Error('sem previsão');
@@ -55,23 +56,36 @@ async function mostrarClima() {
     $('[data-clima-temp]').textContent = Math.round(d.current.temperature_2m) + '°';
     $('[data-clima-texto]').textContent = texto;
     // hora da leitura (o serviço atualiza a cada 15 min): deixa claro de quando é o dado
-    const hora = String(d.current.time || '').slice(11, 16);
-    $('[data-clima-extra]').textContent = `Sensação ${Math.round(d.current.apparent_temperature)}° · umidade ${d.current.relative_humidity_2m}% · vento ${Math.round(d.current.wind_speed_10m)} km/h${hora ? ` · atualizado às ${hora}` : ''}`;
+    const lida = String(d.current.time || '').slice(11, 16);
+    $('[data-clima-extra]').textContent = `Sensação ${Math.round(d.current.apparent_temperature)}° · umidade ${d.current.relative_humidity_2m}% · vento ${Math.round(d.current.wind_speed_10m)} km/h${lida ? ` · atualizado às ${lida}` : ''}`;
     $('[data-clima-icone]').innerHTML = icone(nome);
+
+    // "Hoje" considera só as horas que AINDA FALTAM (o resumo do dia inteiro incluía a chuva da manhã/tarde que já passou).
+    // Pior tempo previsto e maior chance de chuva das próximas horas até 23h.
+    const agora = String(d.current.time || '').slice(0, 13); // aaaa-mm-ddThh
+    const hojeData = d.daily.time[0];
+    const resto = (d.hourly?.time || []).map((t, i) => i).filter((i) => d.hourly.time[i].slice(0, 10) === hojeData && d.hourly.time[i].slice(0, 13) >= agora);
+    const codigoHoje = resto.length ? Math.max(...resto.map((i) => d.hourly.weather_code[i] ?? 0)) : d.current.weather_code;
+    const chuvaHoje = resto.length ? Math.max(...resto.map((i) => d.hourly.precipitation_probability[i] ?? 0)) : 0;
 
     // Próximos 4 dias (o primeiro é hoje)
     $('[data-clima-dias]').innerHTML = d.daily.time.slice(0, 4).map((dia, i) => {
-      const [, nomeDia] = TEMPO[d.daily.weather_code[i]] || ['', 'nuvem'];
+      const [, nomeDia] = TEMPO[i === 0 ? codigoHoje : d.daily.weather_code[i]] || ['', 'nuvem'];
       const rotulo = i === 0 ? 'hoje' : DIAS[new Date(dia + 'T12:00').getDay()];
       return `<li>${rotulo}${icone(nomeDia)}<b>${Math.round(d.daily.temperature_2m_max[i])}°</b>${Math.round(d.daily.temperature_2m_min[i])}°</li>`;
     }).join('');
 
-    // Dica do dia para a equipe comercial
-    const chuva = d.daily.precipitation_probability_max[0] ?? 0;
+    // Dica para a equipe: até as 17h fala do resto de hoje; depois, de amanhã (o expediente de hoje já acabou)
+    const hora = Number(agora.slice(11, 13)) || 0;
+    const deAmanha = hora >= 17;
+    const k = deAmanha ? 1 : 0;
+    const quando = deAmanha ? 'amanhã' : 'nas próximas horas';
+    const chuva = deAmanha ? (d.daily.precipitation_probability_max[1] ?? 0) : chuvaHoje;
     const dica = $('[data-clima-dica]');
-    if (chuva >= 60) dica.textContent = `☔ ${chuva}% de chance de chuva hoje: bom dia para televendas; visitas externas podem atrasar.`;
-    else if (d.daily.temperature_2m_max[0] >= 32) dica.textContent = '🥵 Dia quente: lembre o cliente de hidratação e eletrólitos.';
-    else if (d.daily.temperature_2m_min[0] <= 10) dica.textContent = '🧣 Dia frio: boa hora para falar de imunidade e vitaminas.';
+    dica.textContent = '';
+    if (chuva >= 60) dica.textContent = `☔ ${chuva}% de chance de chuva ${quando}: bom para televendas; visitas externas podem atrasar.`;
+    else if (d.daily.temperature_2m_max[k] >= 32) dica.textContent = `🥵 ${deAmanha ? 'Amanhã será um dia' : 'Dia'} quente: lembre o cliente de hidratação e eletrólitos.`;
+    else if (d.daily.temperature_2m_min[k] <= 10) dica.textContent = `🧣 ${deAmanha ? 'Amanhã será um dia' : 'Dia'} frio: boa hora para falar de imunidade e vitaminas.`;
     dica.hidden = !dica.textContent;
   } catch {
     $('[data-clima-texto]').textContent = 'Previsão indisponível agora';
