@@ -177,6 +177,7 @@ function bolha(quem, html) {
 async function perguntar(texto) {
   if (!texto.trim()) return;
   document.querySelector('[data-one-sugestoes]')?.setAttribute('hidden', '');
+  abrirAba('perguntar');
   bolha('pessoa', formatar(texto));
   const pensando = bolha('one pensando', '<p>Deixa eu ver…</p>');
   pensando.querySelector('img').src = img('pensando');
@@ -206,9 +207,20 @@ document.addEventListener('click', (ev) => {
   const ex = ev.target.closest('[data-one-exemplo]');
   if (ex) perguntar(ex.textContent);
   if (ev.target.closest('[data-one-limpar]') && conversa) {
-    conversa.replaceChildren();
+    conversa.querySelectorAll('.one-msg').forEach((m) => m.remove());
     document.querySelector('[data-one-sugestoes]')?.removeAttribute('hidden');
     const corpo = new FormData(); corpo.append('esquecer', '1'); corpo.append('_csrf', CSRF);
     fetch(`${BASE}/one/perguntar`, { method: 'POST', body: corpo, headers: { 'X-CSRF-Token': CSRF } }).catch(() => {});
   }
+});
+
+// Abas do painel: "Para você" (dicas) e "Perguntar" (conversa)
+function abrirAba(nome) {
+  document.querySelectorAll('[data-one-aba]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.oneAba === nome)));
+  document.querySelectorAll('[data-one-aba-painel]').forEach((p) => { p.hidden = p.dataset.oneAbaPainel !== nome; });
+  if (nome === 'perguntar') setTimeout(() => formPergunta?.pergunta.focus(), 50);
+}
+document.addEventListener('click', (ev) => {
+  const aba = ev.target.closest('[data-one-aba]');
+  if (aba) abrirAba(aba.dataset.oneAba);
 });

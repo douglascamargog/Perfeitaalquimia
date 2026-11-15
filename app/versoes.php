@@ -17,6 +17,14 @@
  */
 return [
     [
+        'versao' => '12.6', 'data' => '2026-11-16', 'titulo' => 'One para todos os setores',
+        'novo' => [
+            'O One agora dá dicas para todos os setores: Diretoria (faturado do mês, pedidos parados, cobrança), Marketing (tarefas atrasadas e pedidos novos), Produção e Técnica (ordens atrasadas e para aprovar), Financeiro, Depósito e Gestão.',
+            'Para todo mundo: aviso quando o Marketing termina um pedido seu, recados novos no seu perfil e um "Você sabia?" por dia.',
+        ],
+        'melhoria' => ['O painel do One ficou organizado em duas abas: "Para você" (as dicas) e "Perguntar" (a conversa, com o campo de escrever embaixo, como num chat).'],
+    ],
+    [
         'versao' => '12.5', 'data' => '2026-11-15', 'titulo' => 'Chave da IA pela tela',
         'melhoria' => ['Ajustes internos para ligar a IA do One com mais facilidade.'],
         'admin' => 'A chave da Anthropic agora é cadastrada pela tela: ⚙️ Administração › Pergunte ao One › "Chave da IA" (não precisa mais editar o config.php). Ela fica em config/segredos.php, protegida, fora do banco e dos pacotes, e nunca aparece de novo. Depois use "Testar a IA agora".',

@@ -119,6 +119,12 @@ class OneAssistente
             $falas[] = ['humor' => 'piscando', 'texto' => 'Gente nova na equipe? Crie o login em Usuários e marque a função da pessoa: as filas e regras seguem a função.', 'link' => '/usuarios', 'acao' => 'Usuários'];
         }
 
+        // Dicas de todos os setores (V12.6): cada um recebe as da sua área, mais as que valem para todo mundo
+        $falas = array_merge($falas, self::setores($id), self::paraTodos($id));
+        if ($comercial === false && Auth::pode('academia.ver')) {
+            $falas[] = self::academia($id); // Treinamento também para quem não é do Comercial
+        }
+
         $falas = array_values(array_filter($falas));
         // Agenda e recompra ganham botões que já fazem a coisa (abrir o cliente, ligar, WhatsApp, deixar para amanhã)
         foreach ($falas as &$f) {
@@ -130,6 +136,117 @@ class OneAssistente
         // Dicas da tela atual aparecem primeiro
         usort($falas, fn($a, $b) => (int) self::daPagina($b, $pagina) <=> (int) self::daPagina($a, $pagina));
         return $falas ?: [['humor' => 'feliz', 'texto' => 'Tudo em ordem por aqui. Quando houver algo importante, eu aviso!']];
+    }
+
+    /** Dicas por setor (além das que já existiam): Marketing, Produção, Técnica, Financeiro, Depósito, Diretoria, Gestão */
+    private static function setores(int $id): array
+    {
+        $f = [];
+        // Marketing: pedidos dos outros setores e tarefas atrasadas
+        if (Auth::pode('marketing.ver') && Foco::tem('marketing')) {
+            $r = MarketingTarefaService::resumo();
+            if ($r['atrasadas']) {
+                $f[] = ['humor' => 'ops', 'texto' => "{$r['atrasadas']} tarefa(s) do Marketing passaram do prazo. Que tal começar por elas?", 'link' => '/marketing/inicio', 'acao' => 'Ver tarefas'];
+            }
+            if ($r['pedidos_novos']) {
+                $f[] = ['humor' => 'ideia', 'texto' => "{$r['pedidos_novos']} pedido(s) de outros setores esperando o Marketing começar.", 'link' => '/marketing/inicio', 'acao' => 'Ver pedidos'];
+            }
+            if (!$r['posts_semana'] && Auth::pode('marketing.editar')) {
+                $f[] = ['humor' => 'pensando', 'texto' => 'Ainda não há posts marcados para esta semana no mural. Bora planejar?', 'link' => '/marketing', 'acao' => 'Abrir o mural'];
+            }
+        }
+        // Produção: ordens atrasadas / de hoje
+        if ((Auth::pode('producao.gerenciar') || Auth::pode('producao.ver')) && Foco::tem('producao')) {
+            $op = Banco::um("SELECT SUM(previsto_para < CURDATE()) AS atrasadas, SUM(previsto_para = CURDATE()) AS hoje FROM ordens_producao WHERE situacao = 'planejada'");
+            if ((int) ($op['atrasadas'] ?? 0)) {
+                $f[] = ['humor' => 'ops', 'texto' => (int) $op['atrasadas'] . ' ordem(ns) de produção passaram da data prevista' . ((int) $op['hoje'] ? ' e ' . (int) $op['hoje'] . ' estão marcadas para hoje' : '') . '.', 'link' => '/producao/ordens', 'acao' => 'Ver ordens'];
+            } elseif ((int) ($op['hoje'] ?? 0)) {
+                $f[] = ['humor' => 'ideia', 'texto' => (int) $op['hoje'] . ' ordem(ns) de produção marcadas para hoje.', 'link' => '/producao/ordens', 'acao' => 'Ver ordens'];
+            }
+        }
+        // Técnica: ordens concluídas esperando a aprovação dela
+        if (Auth::pode('produtos.tecnico') && ($n = (int) Banco::valor("SELECT COUNT(*) FROM ordens_producao WHERE situacao = 'concluida' AND aprovada_em IS NULL AND concluida_em >= CURDATE() - INTERVAL 30 DAY"))) {
+            $f[] = ['humor' => 'ideia', 'texto' => "$n ordem(ns) de produção concluída(s) esperando a aprovação da Responsável Técnica.", 'link' => '/producao/ordens', 'acao' => 'Aprovar ordens'];
+        }
+        // Financeiro: pedidos com desconto acima do limite e itens de notas do Omie para ligar
+        if (Auth::pode('pedidos.aprovar') && Foco::tem('aprovacao', 'diretoria')
+            && ($n = (int) Banco::valor("SELECT COUNT(*) FROM pedidos WHERE situacao = 'aguardando_aprovacao' AND desconto_acima_limite = 1"))) {
+            $f[] = ['humor' => 'ops', 'texto' => "$n pedido(s) com desconto da vendedora acima do limite: confira antes de aprovar.", 'link' => '/aprovacao', 'acao' => 'Ver na Aprovação'];
+        }
+        if (Auth::pode('compras.lancar') && ($n = count(CompraLancamentoService::pendentes()))) {
+            $f[] = ['humor' => 'ideia', 'texto' => "$n item(ns) de notas de compra do Omie esperando você dizer a qual item do One correspondem.", 'link' => '/financeiro/compras?aba=omie', 'acao' => 'Ligar itens'];
+        }
+        // Depósito: e-commerce com horário hoje
+        if (Auth::pode('deposito.operar') && Foco::tem('deposito') && ($b = OneTela::balao('/deposito', [], false))) {
+            $f[] = $b + ['link' => '/deposito?tipo=ecommerce', 'acao' => 'Ver o e-commerce'];
+        }
+        // Diretoria e admin: um resumo do mês
+        if (Foco::tem('diretoria') && (Auth::pode('painel.ver') || Auth::somenteAcompanha() || Auth::pode('config.gerenciar'))) {
+            $m = Banco::um("SELECT COALESCE(SUM(CASE WHEN faturado_em >= DATE_FORMAT(CURDATE(), '%Y-%m-01') THEN total END), 0) AS mes,
+                COALESCE(SUM(CASE WHEN faturado_em >= DATE_FORMAT(CURDATE() - INTERVAL 1 MONTH, '%Y-%m-01') AND faturado_em < CURDATE() - INTERVAL 1 MONTH + INTERVAL 1 DAY THEN total END), 0) AS anterior
+                FROM pedidos WHERE situacao = 'faturado' AND faturado_em >= DATE_FORMAT(CURDATE() - INTERVAL 1 MONTH, '%Y-%m-01')");
+            $mes = (float) $m['mes'];
+            $ant = (float) $m['anterior'];
+            $comp = $ant > 0 ? ' (' . ($mes >= $ant ? '+' : '') . number_format(($mes / $ant - 1) * 100, 0, ',', '.') . '% em relação ao mesmo ponto do mês passado)' : '';
+            $f[] = ['humor' => $mes >= $ant ? 'feliz' : 'pensando', 'texto' => 'Faturado no mês até agora: ' . dinheiro($mes) . $comp . '.', 'link' => Auth::pode('painel.ver') ? '/resultados' : '/', 'acao' => 'Ver resultados'];
+            $parados = (int) Banco::valor("SELECT COUNT(*) FROM pedidos WHERE situacao = 'aguardando_aprovacao' AND criado_em < NOW() - INTERVAL 24 HOUR");
+            if ($parados) {
+                $f[] = ['humor' => 'ops', 'texto' => "$parados pedido(s) esperando aprovação há mais de 24 horas. Cliente esperando é venda em risco.", 'link' => '/aprovacao', 'acao' => 'Ver aprovação'];
+            }
+            $cob = (float) Banco::valor("SELECT COALESCE(SUM(valor_total), 0) FROM cobrancas WHERE situacao = 'aberta'");
+            if ($cob > 0) {
+                $f[] = ['humor' => 'pensando', 'texto' => 'Em cobrança agora: ' . dinheiro($cob) . ' em títulos atrasados.', 'link' => '/cobranca', 'acao' => 'Ver cobrança'];
+            }
+        }
+        // Gestão comercial: vendedoras com muitos retornos atrasados
+        if ((Auth::pode('carteira.ver_todas') || Setores::gerenciados()) && Foco::tem('comercial', 'diretoria')) {
+            $setor = Setores::sqlGerenciados('c.funcao_id');
+            $p = Banco::um("SELECT u.nome, COUNT(*) AS n FROM tarefas t JOIN usuarios u ON u.id = t.usuario_id LEFT JOIN clientes c ON c.id = t.cliente_id
+                WHERE t.concluida_em IS NULL AND t.vence_em < CURDATE() - INTERVAL 2 DAY AND u.ativo = 1 AND u.id <> ?"
+                . (!Auth::pode('carteira.ver_todas') && $setor ? " AND $setor" : '') . ' GROUP BY u.id, u.nome ORDER BY n DESC LIMIT 1', [$id]);
+            if ($p && (int) $p['n'] >= 10) {
+                $f[] = ['humor' => 'pensando', 'texto' => EquipeService::comoChamar(['nome' => $p['nome']]) . ' está com ' . (int) $p['n'] . ' retornos atrasados há mais de 2 dias. Talvez valha uma conversa ou redistribuir.', 'link' => '/acompanhamento', 'acao' => 'Acompanhamento'];
+            }
+        }
+        return $f;
+    }
+
+    /** Dicas que valem para todo mundo: pedidos ao Marketing, recados no perfil e uma dica do sistema */
+    private static function paraTodos(int $id): array
+    {
+        $f = [];
+        $prontos = (int) Banco::valor("SELECT COUNT(*) FROM mkt_tarefas WHERE solicitante_id = ? AND setor IS NOT NULL AND situacao = 'feito' AND concluido_em >= NOW() - INTERVAL 3 DAY", [$id]);
+        $andando = (int) Banco::valor("SELECT COUNT(*) FROM mkt_tarefas WHERE solicitante_id = ? AND setor IS NOT NULL AND situacao NOT IN ('feito', 'cancelado')", [$id]);
+        if ($prontos) {
+            $f[] = ['humor' => 'feliz', 'texto' => "O Marketing terminou $prontos pedido(s) seu(s) nos últimos dias. 🎉", 'link' => '/marketing/pedir', 'acao' => 'Ver meus pedidos'];
+        } elseif ($andando) {
+            $f[] = ['humor' => 'piscando', 'texto' => "Você tem $andando pedido(s) com o Marketing em andamento. Eu aviso quando ficar pronto.", 'link' => '/marketing/pedir', 'acao' => 'Acompanhar'];
+        }
+        $recados = (int) Banco::valor('SELECT COUNT(*) FROM perfil_recados WHERE perfil_id = ? AND autor_id <> ? AND oculto_em IS NULL AND criado_em >= NOW() - INTERVAL 3 DAY', [$id, $id]);
+        if ($recados) {
+            $f[] = ['humor' => 'feliz', 'texto' => "Você recebeu $recados recado(s) no seu perfil. 💬", 'link' => '/pessoas/' . $id, 'acao' => 'Ver recados'];
+        }
+        $f[] = self::dicaDoDia();
+        return $f;
+    }
+
+    /** "Você sabia?": uma dica do sistema por dia, das telas que a pessoa pode abrir */
+    private static function dicaDoDia(): ?array
+    {
+        $dicas = array_values(array_filter([
+            [null, 'Você sabia? Aperte a tecla / em qualquer tela para buscar um cliente, produto ou código.', null],
+            [null, 'Você sabia? Dá para me perguntar coisas, aqui em cima, em "Perguntar". Ex.: "como faço um orçamento?".', null],
+            ['academia.ver', 'Você sabia? Em Treinamento › Como usar o One tem aulas curtinhas de cada tela.', '/academia/sistema'],
+            [null, 'Você sabia? Em Meu perfil › Aparência você escolhe as cores do sistema só para você.', '/meu-perfil'],
+            [null, 'Você sabia? Em Pessoas você deixa recados e elogios no perfil dos colegas.', '/pessoas'],
+            ['pedidos.criar', 'Você sabia? "Gerar orçamento" manda um link pro cliente aprovar pelo WhatsApp: aprovou, vira pedido sozinho.', '/orcamentos'],
+            ['producao.gerenciar', 'Você sabia? Concluir uma ordem de produção já dá baixa nas matérias-primas e soma no estoque acabado.', '/producao/ordens'],
+            ['marketing.editar', 'Você sabia? Os pedidos dos outros setores chegam no Início do Marketing, com prazo e quem pediu.', '/marketing/inicio'],
+            ['deposito.operar', 'Você sabia? Na separação, registrar as caixas usadas já baixa o estoque delas.', '/deposito'],
+            ['pedidos.aprovar', 'Você sabia? Na Aprovação, ao lado de cada pedido aparecem crédito, títulos em aberto e compras de 12 meses.', '/aprovacao'],
+        ], fn($d) => $d[0] === null || Auth::pode($d[0])));
+        $d = $dicas[(int) date('z') % count($dicas)];
+        return ['humor' => 'piscando', 'texto' => $d[1]] + ($d[2] ? ['link' => $d[2], 'acao' => 'Abrir'] : []);
     }
 
     /** Aniversário de hoje (o próprio ou de colegas) */

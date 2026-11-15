@@ -17,6 +17,8 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
   if (await p.locator('[data-novidades-ok]').count()) { await p.click('[data-novidades-ok]'); await p.waitForLoadState(); }
   await p.evaluate(() => localStorage.setItem('one-balao:/:' + new Date().toISOString().slice(0, 10), 'nao'));
   await p.click('[data-one-abrir]');
+  ok(await p.locator('[data-one-aba="dicas"][aria-selected="true"]').count() === 1 && await p.locator('[data-one-aba-painel="perguntar"]').isHidden(), 'painel abre na aba "Para você" (dicas); a conversa fica na aba "Perguntar"');
+  await p.click('[data-one-aba="perguntar"]');
   ok((await p.locator('.one-pergunte-nota').innerText()).includes('aulas'), 'sem IA ligada (padrão): o One avisa que responde com as aulas e os dados do sistema');
   const respostas = () => p.locator('.one-msg.one:not(.pensando)');
   const perguntar = async (t) => { const n = await respostas().count(); await p.fill('[data-one-pergunte] input', t); await p.press('[data-one-pergunte] input', 'Enter'); await p.waitForFunction((x) => document.querySelectorAll('.one-msg.one:not(.pensando)').length > x, n); return respostas().last().innerText(); };

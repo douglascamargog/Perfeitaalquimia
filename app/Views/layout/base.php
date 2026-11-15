@@ -167,20 +167,27 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
 <section class="one-painel" id="one-painel" hidden aria-label="One, seu ajudante">
   <header><img src="<?= asset('img/one/one-piscando-invertido.svg') ?>" alt="" width="36" height="40"><div><strong>One</strong><small>Seu ajudante no sistema</small></div>
     <button type="button" class="botao-icone escuro" data-one-fechar aria-label="Fechar">✕</button></header>
-  <div class="one-pergunte-caixa">
-    <div class="one-conversa" data-one-conversa aria-live="polite"></div>
-    <div class="one-sugestoes" data-one-sugestoes>
-      <button type="button" data-one-exemplo>Como faço um orçamento?</button>
-      <button type="button" data-one-exemplo>Quanto falta para a minha meta?</button>
-      <button type="button" data-one-exemplo>Quais campanhas estão no ar?</button>
+  <div class="one-abas" role="tablist" aria-label="One">
+    <button type="button" role="tab" aria-selected="true" data-one-aba="dicas">💡 Para você</button>
+    <button type="button" role="tab" aria-selected="false" data-one-aba="perguntar">💬 Perguntar</button>
+  </div>
+  <div class="one-painel-corpo" data-one-corpo data-one-aba-painel="dicas"><p class="one-carregando"><img src="<?= asset('img/one/one-pensando-padrao.svg') ?>" alt="" width="40">Um instante, estou olhando seus dados…</p></div>
+  <div class="one-chat" data-one-aba-painel="perguntar" hidden>
+    <div class="one-conversa" data-one-conversa aria-live="polite">
+      <div class="one-chat-vazio" data-one-sugestoes>
+        <img src="<?= asset('img/one/one-ola-padrao.svg') ?>" alt="" width="54" height="60">
+        <p>Pergunte do seu jeito, como falaria com um colega. Por exemplo:</p>
+        <button type="button" data-one-exemplo>Como faço um orçamento?</button>
+        <button type="button" data-one-exemplo>Quanto falta para a minha meta?</button>
+        <button type="button" data-one-exemplo>Quais campanhas estão no ar?</button>
+      </div>
     </div>
     <form class="one-pergunte" data-one-pergunte>
-      <input type="text" name="pergunta" maxlength="500" autocomplete="off" placeholder="Pergunte ao One…" aria-label="Pergunte ao One">
+      <input type="text" name="pergunta" maxlength="500" autocomplete="off" placeholder="Escreva sua pergunta…" aria-label="Pergunte ao One">
       <button type="submit" aria-label="Perguntar">➤</button>
     </form>
-    <p class="one-pergunte-nota"><?= \App\Services\OnePergunta::comIa() ? '✨ Respostas com IA' : 'Respostas com as aulas e os dados do sistema' ?> · <button type="button" data-one-limpar>limpar conversa</button></p>
+    <p class="one-pergunte-nota"><?= \App\Services\OnePergunta::comIa() ? '✨ Respostas com IA' : 'Respostas com as aulas e os dados do sistema' ?> · <button type="button" data-one-limpar>nova conversa</button></p>
   </div>
-  <div class="one-painel-corpo" data-one-corpo><p class="one-carregando"><img src="<?= asset('img/one/one-pensando-padrao.svg') ?>" alt="" width="40">Um instante, estou olhando seus dados…</p></div>
 </section>
 <?php // Novidades da versão: aparece uma vez para quem ainda não viu a versão atual
 $usuarioNov = Auth::usuario();
