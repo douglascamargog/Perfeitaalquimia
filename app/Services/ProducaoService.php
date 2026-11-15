@@ -139,8 +139,14 @@ class ProducaoService
             'fornecedor'     => mb_substr(trim((string) ($d['fornecedor'] ?? '')), 0, 160) ?: null,
             'custo_unitario' => max(0, self::numero((string) ($d['custo_unitario'] ?? '0'))),
             'observacoes'    => trim((string) ($d['observacoes'] ?? '')) ?: null,
+
             'ativo'          => !empty($d['ativo']) ? 1 : 0,
         ];
+        foreach (['fabricante' => 120, 'cas_ins' => 80] as $campo => $max) { // só mexe se veio no formulário
+            if (array_key_exists($campo, $d)) {
+                $dados[$campo] = mb_substr(trim((string) $d[$campo]), 0, $max) ?: null;
+            }
+        }
         if ($dados['nome'] === '') {
             throw new RuntimeException('Informe o nome do item.');
         }
@@ -190,6 +196,17 @@ class ProducaoService
                 'referencia' => $nota !== '' ? mb_substr("NF $nota", 0, 80) : null, 'observacao' => $observacao, 'usuario_id' => $usuarioId,
                 'fornecedor_id' => $extra['fornecedor_id'] ?? null, 'lancamento_id' => $extra['lancamento_id'] ?? null], $quando);
             $movimento = (int) Banco::valor('SELECT MAX(id) FROM mp_movimentos WHERE materia_prima_id = ?', [$mpId]);
+            // Lote do fabricante (fabricante, lote, fabricação, validade): soma no saldo do lote (V11.5)
+            $lote = mb_substr(trim((string) ($extra['lote'] ?? '')), 0, 60);
+            if ($lote !== '') {
+                $data = fn($v) => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $v) ? $v : null;
+                $fab = mb_substr(trim((string) ($extra['fabricante'] ?? '')), 0, 120) ?: (Banco::valor('SELECT fabricante FROM materias_primas WHERE id = ?', [$mpId]) ?: null);
+                Banco::executar('INSERT INTO mp_lotes (materia_prima_id, lote, fabricante, fabricacao, validade, quantidade, saldo, movimento_id, criado_por, criado_em)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, NOW()))
+                    ON DUPLICATE KEY UPDATE quantidade = quantidade + VALUES(quantidade), saldo = saldo + VALUES(saldo),
+                        fabricante = COALESCE(VALUES(fabricante), fabricante), fabricacao = COALESCE(VALUES(fabricacao), fabricacao), validade = COALESCE(VALUES(validade), validade)',
+                    [$mpId, $lote, $fab, $data($extra['fabricacao'] ?? null), $data($extra['validade'] ?? null), round($quantidade, 3), round($quantidade, 3), $movimento, $usuarioId, $quando]);
+            }
             if ($custoUnitario > 0) {
                 Banco::executar('UPDATE materias_primas SET custo_unitario = ? WHERE id = ?', [$custoUnitario, $mpId]);
             }
@@ -198,6 +215,104 @@ class ProducaoService
             }
             return $movimento;
         });
+    }
+
+    /** Lotes de uma matéria-prima com saldo, o que vence primeiro no topo (FEFO) */
+    public static function lotesMp(int $mpId, bool $soComSaldo = true): array
+    {
+        return Banco::todos('SELECT * FROM mp_lotes WHERE materia_prima_id = ?' . ($soComSaldo ? ' AND saldo > 0' : '') . '
+            ORDER BY saldo > 0 DESC, validade IS NULL, validade, criado_em', [$mpId]);
+    }
+
+    /** O lote da MP precisa ser informado na entrada? (Configurações › Produção; só matéria-prima, não embalagem/consumo) */
+    public static function exigeLote(int $mpId): bool
+    {
+        return (bool) Config::get('producao.lote_mp_obrigatorio', true) && Banco::valor('SELECT tipo FROM materias_primas WHERE id = ?', [$mpId]) === 'materia_prima';
+    }
+
+    /**
+     * Lotes de MP de uma ordem: os escolhidos (ordem_mp_lotes) ou a sugestão FEFO para cobrir a quantidade de cada MP.
+     * Devolve [materia_prima_id => [['lote_id', 'lote', 'fabricante', 'fabricacao', 'validade', 'quantidade'], ...]]
+     */
+    public static function lotesDaOrdem(int $ordemId, array $linhas): array
+    {
+        $escolhidos = [];
+        foreach (Banco::todos('SELECT o.*, l.lote, l.fabricante, l.fabricacao, l.validade FROM ordem_mp_lotes o LEFT JOIN mp_lotes l ON l.id = o.mp_lote_id WHERE o.ordem_id = ? ORDER BY o.id', [$ordemId]) as $r) {
+            $escolhidos[(int) $r['materia_prima_id']][] = ['lote_id' => $r['mp_lote_id'], 'lote' => $r['lote'], 'fabricante' => $r['fabricante'], 'fabricacao' => $r['fabricacao'], 'validade' => $r['validade'], 'quantidade' => (float) $r['quantidade']];
+        }
+        $r = [];
+        foreach ($linhas as $l) {
+            $mp = (int) $l['materia_prima_id'];
+            if (isset($escolhidos[$mp])) {
+                $r[$mp] = $escolhidos[$mp];
+                continue;
+            }
+            $falta = (float) ($l['precisa'] ?? $l['quantidade'] ?? 0);
+            foreach (self::lotesMp($mp) as $lote) {
+                if ($falta <= 0.0005) {
+                    break;
+                }
+                $usa = min($falta, (float) $lote['saldo']);
+                $r[$mp][] = ['lote_id' => (int) $lote['id'], 'lote' => $lote['lote'], 'fabricante' => $lote['fabricante'], 'fabricacao' => $lote['fabricacao'], 'validade' => $lote['validade'], 'quantidade' => round($usa, 3)];
+                $falta -= $usa;
+            }
+        }
+        return $r;
+    }
+
+    /** Escolha manual do lote de cada MP na OP: $escolha = [materia_prima_id => mp_lote_id] (0 = sugestão automática) */
+    public static function escolherLotes(int $ordemId, array $escolha, ?int $usuarioId): void
+    {
+        $op = Banco::um('SELECT * FROM ordens_producao WHERE id = ?', [$ordemId]);
+        if (!$op || $op['situacao'] !== 'planejada') {
+            throw new RuntimeException('Só dá para escolher os lotes de uma ordem planejada.');
+        }
+        $linhas = array_column(self::previa((int) $op['produto_id'], (int) $op['quantidade'])['linhas'], null, 'materia_prima_id');
+        Banco::transacao(function () use ($ordemId, $escolha, $linhas) {
+            Banco::executar('DELETE FROM ordem_mp_lotes WHERE ordem_id = ? AND baixado = 0', [$ordemId]);
+            foreach ($escolha as $mp => $loteId) {
+                $mp = (int) $mp;
+                $loteId = (int) $loteId;
+                if (!isset($linhas[$mp]) || $loteId <= 0 || !Banco::valor('SELECT 1 FROM mp_lotes WHERE id = ? AND materia_prima_id = ?', [$loteId, $mp])) {
+                    continue;
+                }
+                Banco::inserir('ordem_mp_lotes', ['ordem_id' => $ordemId, 'materia_prima_id' => $mp, 'mp_lote_id' => $loteId, 'quantidade' => round((float) $linhas[$mp]['precisa'], 3)]);
+            }
+        });
+        Auditoria::registrar('ordem_producao', $ordemId, 'lotes_mp', null, $escolha);
+    }
+
+    /** Ao concluir: grava os lotes usados e baixa o saldo de cada lote */
+    private static function baixarLotesDaOrdem(int $ordemId, array $linhas): void
+    {
+        $usados = self::lotesDaOrdem($ordemId, $linhas);
+        Banco::executar('DELETE FROM ordem_mp_lotes WHERE ordem_id = ?', [$ordemId]);
+        foreach ($linhas as $l) {
+            $mp = (int) $l['materia_prima_id'];
+            $precisa = (float) $l['precisa'];
+            foreach ($usados[$mp] ?? [] as $u) {
+                $q = min($precisa, max((float) $u['quantidade'], $precisa)); // um lote escolhido cobre a MP toda
+                if (count($usados[$mp]) > 1) {
+                    $q = (float) $u['quantidade'];
+                }
+                if ($u['lote_id']) {
+                    Banco::executar('UPDATE mp_lotes SET saldo = GREATEST(0, saldo - ?) WHERE id = ?', [$q, $u['lote_id']]);
+                }
+                Banco::inserir('ordem_mp_lotes', ['ordem_id' => $ordemId, 'materia_prima_id' => $mp, 'mp_lote_id' => $u['lote_id'], 'quantidade' => round($q, 3), 'baixado' => 1]);
+                $precisa -= $q;
+            }
+        }
+    }
+
+    /** Aprovação da OP pela Responsável Técnica (revisado e aprovado por) */
+    public static function aprovarOrdem(int $id, int $usuarioId): void
+    {
+        $op = Banco::um('SELECT situacao, aprovada_em FROM ordens_producao WHERE id = ?', [$id]);
+        if (!$op || $op['situacao'] === 'cancelada') {
+            throw new RuntimeException('Ordem não encontrada.');
+        }
+        Banco::executar('UPDATE ordens_producao SET aprovada_por = ?, aprovada_em = NOW() WHERE id = ?', [$usuarioId, $id]);
+        Auditoria::registrar('ordem_producao', $id, 'aprovar', null, ['aprovada_por' => $usuarioId]);
     }
 
     /** Ajuste de inventário: informa a contagem física; o sistema grava a diferença (motivo obrigatório) */
@@ -449,6 +564,28 @@ class ProducaoService
         return Banco::todos('SELECT pp.*, m.nome, m.unidade FROM producao_perdas pp JOIN materias_primas m ON m.id = pp.materia_prima_id WHERE pp.ordem_id = ? ORDER BY m.nome', [$ordemId]);
     }
 
+    /** Formas do produto (campo "Forma" da OP) */
+    public const FORMAS = ['capsula' => 'Cápsula', 'pote' => 'Frasco/pote', 'sache' => 'Sachê', 'liquido' => 'Líquido'];
+
+    /** Forma pelo produto (categoria e apresentação): cápsula, sachê, líquido ou frasco/pote */
+    public static function formaDoProduto(int $produtoId): string
+    {
+        $t = mb_strtolower((string) Banco::valor("SELECT CONCAT_WS(' ', p.nome, p.embalagem, c.nome) FROM produtos p LEFT JOIN categorias c ON c.id = p.categoria_id WHERE p.id = ?", [$produtoId]));
+        return match (true) {
+            str_contains($t, 'cápsula') || str_contains($t, 'capsula') => 'capsula',
+            str_contains($t, 'sachê') || str_contains($t, 'sache') => 'sache',
+            str_contains($t, 'gota') || str_contains($t, 'líquido') || str_contains($t, 'liquido') || str_contains($t, ' ml') => 'liquido',
+            default => 'pote',
+        };
+    }
+
+    /** Cápsulas (ou sachês) por frasco, pela apresentação do produto ("60 cápsulas" → 60) */
+    public static function unidadesPorFrasco(int $produtoId): ?int
+    {
+        $t = (string) Banco::valor('SELECT CONCAT_WS(" ", embalagem, nome) FROM produtos WHERE id = ?', [$produtoId]);
+        return preg_match('/(\d+)\s*(c[aá]psulas|caps|sach[eê]s|unidades|tabletes|comprimidos)/iu', $t, $m) ? (int) $m[1] : null;
+    }
+
     public static function criarOrdem(array $d, ?int $usuarioId, string $origem = 'manual', ?string $quando = null): int
     {
         $produtoId = (int) ($d['produto_id'] ?? 0);
@@ -473,6 +610,10 @@ class ProducaoService
             'produto_id' => $produtoId, 'quantidade' => $qtd, 'cliente_id' => $clienteId, 'origem' => $origem === 'reabastecimento' ? 'reabastecimento' : 'manual',
             'lote' => mb_substr(trim((string) ($d['lote'] ?? '')), 0, 40) ?: null, 'validade' => $data($d['validade'] ?? null),
             'previsto_para' => $data($d['previsto_para'] ?? null), 'observacoes' => trim((string) ($d['observacoes'] ?? '')) ?: null,
+            'forma' => in_array($d['forma'] ?? '', array_keys(self::FORMAS), true) ? $d['forma'] : self::formaDoProduto($produtoId),
+            'unidades_por_frasco' => (int) ($d['unidades_por_frasco'] ?? 0) ?: self::unidadesPorFrasco($produtoId),
+            'amostra' => !empty($d['amostra']) ? 1 : null, 'fornecedor_mp' => ($d['fornecedor_mp'] ?? '') === 'cliente' ? 'cliente' : null,
+            'entrada_producao' => $data($d['entrada_producao'] ?? null),
             'criado_por' => $usuarioId, 'criado_em' => $quando,
         ], fn($v) => $v !== null);
         $id = Banco::inserir('ordens_producao', $dados);
@@ -578,6 +719,7 @@ class ProducaoService
                     self::medirPerda($op, $l, $qtd, $medidos[$l['materia_prima_id']], $usuarioId);
                 }
             }
+            self::baixarLotesDaOrdem($id, $previa['linhas']); // rastreio: quais lotes de MP foram usados
             self::movimentarAcabado((int) $op['produto_id'], 'producao', $qtd, ['referencia' => "OP $id", 'ordem_id' => $id,
                 'observacao' => $op['lote'] ? 'Lote ' . $op['lote'] : null, 'usuario_id' => $usuarioId], $quando);
             $depois = ['situacao' => 'concluida', 'quantidade' => $qtd, 'custo_total' => $previa['custo'], 'concluida_por' => $usuarioId, 'concluida_em' => $quando ?? date('Y-m-d H:i:s')];
@@ -602,10 +744,11 @@ class ProducaoService
 
     public static function ordem(int $id): ?array
     {
-        return Banco::um('SELECT o.*, p.codigo, p.nome AS produto, p.embalagem, uc.nome AS criador, uf.nome AS concluidor,
+        return Banco::um('SELECT o.*, p.codigo, p.nome AS produto, p.embalagem, uc.nome AS criador, uf.nome AS concluidor, ua.nome AS aprovador,
                 COALESCE(NULLIF(cl.nome_fantasia, ""), cl.razao_social) AS cliente_nome, tp.nome_rotulo, tp.rotulos_estoque
             FROM ordens_producao o
             JOIN produtos p ON p.id = o.produto_id LEFT JOIN usuarios uc ON uc.id = o.criado_por LEFT JOIN usuarios uf ON uf.id = o.concluida_por
+            LEFT JOIN usuarios ua ON ua.id = o.aprovada_por
             LEFT JOIN clientes cl ON cl.id = o.cliente_id LEFT JOIN terceirizacao_produtos tp ON tp.cliente_id = o.cliente_id AND tp.produto_id = o.produto_id
             WHERE o.id = ?', [$id]);
     }
@@ -613,7 +756,7 @@ class ProducaoService
     /** Matérias-primas que a ordem concluída realmente usou (dos movimentos) */
     public static function consumoDaOrdem(int $id): array
     {
-        return Banco::todos('SELECT m.nome, m.unidade, -mv.quantidade AS quantidade FROM mp_movimentos mv JOIN materias_primas m ON m.id = mv.materia_prima_id
+        return Banco::todos('SELECT m.id AS materia_prima_id, m.nome, m.unidade, m.tipo, -mv.quantidade AS quantidade FROM mp_movimentos mv JOIN materias_primas m ON m.id = mv.materia_prima_id
             WHERE mv.ordem_id = ? AND mv.tipo = \'consumo\' ORDER BY m.nome', [$id]);
     }
 

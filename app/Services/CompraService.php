@@ -253,19 +253,23 @@ class CompraService
     }
 
     /** Chegou (Depósito ou Produção): matéria-prima/rótulo ligado dá entrada no estoque com o valor da cotação escolhida */
-    public static function receber(int $id, float $quantidade, string $observacao, int $usuarioId, string $numeroNf = '', ?array $nf = null): void
+    public static function receber(int $id, float $quantidade, string $observacao, int $usuarioId, string $numeroNf = '', ?array $nf = null, array $lote = []): void
     {
         $c = self::exigir($id, ['comprado']);
         if ($quantidade <= 0) {
             throw new RuntimeException('Informe a quantidade que chegou.');
         }
-        Banco::transacao(function () use ($c, $quantidade, $observacao, $usuarioId, $numeroNf, $nf) {
+        // Matéria-prima: o lote do fabricante e a validade entram no estoque por lote (a OP puxa daqui)
+        if ($c['materia_prima_id'] && ProducaoService::exigeLote((int) $c['materia_prima_id']) && (trim((string) ($lote['lote'] ?? '')) === '' || trim((string) ($lote['validade'] ?? '')) === '')) {
+            throw new RuntimeException('Informe o lote do fabricante e a validade da matéria-prima que chegou.');
+        }
+        Banco::transacao(function () use ($c, $quantidade, $observacao, $usuarioId, $numeroNf, $nf, $lote) {
             $cot = $c['cotacao_id'] ? Banco::um('SELECT * FROM compra_cotacoes WHERE id = ?', [$c['cotacao_id']]) : null;
             if ($c['materia_prima_id']) {
                 // Vira um lançamento de compra (Financeiro › Compras): estoque, fornecedor do item e a NF nos documentos
                 CompraLancamentoService::lancar(['fornecedor' => $cot['fornecedor'] ?? 'Fornecedor do orçamento', 'numero_nf' => $numeroNf, 'emissao' => date('Y-m-d'),
                     'origem' => 'orcamento', 'compra_id' => (int) $c['id'], 'observacoes' => trim('Orçamento #' . $c['id'] . ($observacao !== '' ? ' · ' . $observacao : ''))],
-                    [['materia_prima_id' => (int) $c['materia_prima_id'], 'quantidade' => $quantidade, 'valor_unitario' => (float) ($cot['valor_unitario'] ?? 0)]], $nf, $usuarioId);
+                    [['materia_prima_id' => (int) $c['materia_prima_id'], 'quantidade' => $quantidade, 'valor_unitario' => (float) ($cot['valor_unitario'] ?? 0)] + $lote], $nf, $usuarioId);
             }
             Banco::atualizar('compras', (int) $c['id'], ['situacao' => 'recebido', 'recebido_em' => date('Y-m-d H:i:s'), 'recebido_por' => $usuarioId, 'recebido_qtd' => $quantidade]);
             $texto = 'Chegou: ' . ProducaoService::qtd($quantidade, (string) $c['unidade']) . ($c['materia_prima_id'] ? ' (entrou no estoque)' : '') . ($observacao !== '' ? ' · ' . $observacao : '') . '.';

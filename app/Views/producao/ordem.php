@@ -1,5 +1,5 @@
 <?php
-/** Página da ordem de produção. Variáveis: $o, $previa (planejada), $consumo e $perdas (concluída), $pode */
+/** Página da ordem de produção. Variáveis: $o, $previa (planejada), $consumo e $perdas (concluída), $pode, $podeAprovar, $lotes (lotes de MP) */
 use App\Core\Visao;
 use App\Services\ProducaoService as P;
 
@@ -16,6 +16,45 @@ $icones = asset('img/icones.svg');
   <div class="acoes"><a class="botao contorno" href="<?= url('/producao/ordens/' . (int) $o['id'] . '/imprimir') ?>" target="_blank" rel="noopener"><svg class="icone"><use href="<?= $icones ?>#imprimir"/></svg>Imprimir ordem</a></div>
 </div>
 <?= Visao::renderizar('producao/_abas', ['atual' => '/producao/ordens']) ?>
+
+<?php // Revisão/aprovação (Responsável Técnica) ?>
+<section class="card pr-aprovacao" data-aprovacao>
+  <?php if ($o['aprovada_em']): ?>
+    <p>✅ Revisada e aprovada por <?= pessoa($o['aprovador'] ?? null, null, false, 20) ?> em <?= data_br($o['aprovada_em'], true) ?></p>
+  <?php else: ?>
+    <p>⏳ Aguardando a revisão e aprovação da Responsável Técnica.</p>
+    <?php if (!empty($podeAprovar) && $o['situacao'] !== 'cancelada'): ?>
+      <form method="post" action="<?= url('/producao/ordens/' . (int) $o['id'] . '/aprovar') ?>"><?= csrf_campo() ?><button class="botao lima pequeno" type="submit" data-aprovar-op>Revisar e aprovar</button></form>
+    <?php endif; ?>
+  <?php endif; ?>
+</section>
+
+<?php if ($o['situacao'] !== 'cancelada' && ($lotes || $o['situacao'] === 'planejada')):
+  $linhasLote = $o['situacao'] === 'planejada' && $previa ? $previa['linhas'] : array_map(fn($c) => ['materia_prima_id' => $c['materia_prima_id'] ?? 0, 'nome' => $c['nome'], 'unidade' => $c['unidade'], 'precisa' => $c['quantidade']], $consumo); ?>
+<section class="card" data-lotes-mp>
+  <h2>Lotes das matérias-primas</h2>
+  <p class="ajuda">O One sugere o lote que vence primeiro. Para usar outro, escolha e salve. Na conclusão, o saldo do lote baixa e fica registrado de qual lote veio cada matéria-prima.</p>
+  <form method="post" action="<?= url('/producao/ordens/' . (int) $o['id'] . '/lotes') ?>"><?= csrf_campo() ?>
+  <div class="tabela-rolagem"><table class="tabela">
+    <thead><tr><th>Matéria-prima</th><th>Precisa</th><th>Lote</th><th>Fabricante</th><th>Fabricação</th><th>Validade</th></tr></thead>
+    <tbody>
+    <?php foreach ($linhasLote as $l): $mp = (int) $l['materia_prima_id']; $sel = $lotes[$mp] ?? []; $primeiro = $sel[0] ?? null; ?>
+      <tr data-mp="<?= $mp ?>"><td><?= e($l['nome']) ?></td><td><?= P::qtd((float) $l['precisa'], (string) $l['unidade']) ?></td>
+        <td><?php if ($pode && $o['situacao'] === 'planejada'): $opcoes = P::lotesMp($mp); ?>
+          <?php if ($opcoes): ?><select name="lote[<?= $mp ?>]" aria-label="Lote de <?= e($l['nome']) ?>">
+            <?php foreach ($opcoes as $op): ?><option value="<?= (int) $op['id'] ?>" <?= $primeiro && (int) $primeiro['lote_id'] === (int) $op['id'] ? 'selected' : '' ?>><?= e($op['lote']) ?> · saldo <?= P::qtd((float) $op['saldo'], (string) $l['unidade']) ?><?= $op['validade'] ? ' · vence ' . data_br($op['validade']) : '' ?></option><?php endforeach; ?>
+          </select><?= count($sel) > 1 ? '<small class="suave"> + ' . (count($sel) - 1) . ' lote(s) para completar</small>' : '' ?>
+          <?php else: ?><span class="selo laranja">sem lote em estoque</span><?php endif; ?>
+        <?php else: ?><?= e(implode(', ', array_map(fn($x) => (string) $x['lote'], $sel)) ?: '—') ?><?php endif; ?></td>
+        <td><?= e((string) ($primeiro['fabricante'] ?? '—')) ?></td><td><?= $primeiro && $primeiro['fabricacao'] ? data_br($primeiro['fabricacao']) : '—' ?></td>
+        <td><?= $primeiro && $primeiro['validade'] ? data_br($primeiro['validade']) : '—' ?></td></tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table></div>
+  <?php if ($pode && $o['situacao'] === 'planejada'): ?><button class="botao contorno pequeno" type="submit">Salvar lotes</button><?php endif; ?>
+  </form>
+</section>
+<?php endif; ?>
 
 <?php if ($o['situacao'] === 'planejada' && $previa): ?>
   <section class="card">

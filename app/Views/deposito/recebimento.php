@@ -26,6 +26,12 @@ use App\Services\ProducaoService as P;
               <input type="text" name="quantidade" inputmode="decimal" required value="<?= e(rtrim(rtrim(number_format((float) $c['quantidade'], 3, ',', ''), '0'), ',')) ?>" aria-label="Quantidade que chegou de <?= e($c['titulo']) ?>">
               <input type="text" name="nf" maxlength="30" placeholder="nº da NF" aria-label="Número da nota fiscal" style="max-width:110px">
               <label class="botao contorno pequeno" title="Anexar a nota fiscal (PDF, imagem ou XML)">📎 NF<input type="file" name="arquivo_nf" accept="application/pdf,image/*,.xml,text/xml" hidden></label>
+              <?php if ($c['materia_prima_id'] && ($c['mp_tipo'] ?? 'materia_prima') === 'materia_prima'): // lote do fabricante (a OP puxa daqui) ?>
+                <input type="text" name="lote" maxlength="60" placeholder="lote do fabricante" aria-label="Lote do fabricante" style="max-width:150px" data-lote-recebimento>
+                <label class="pequeno">validade <input type="date" name="validade" aria-label="Validade do lote"></label>
+                <label class="pequeno">fabricação <input type="date" name="fabricacao" aria-label="Fabricação do lote"></label>
+                <input type="text" name="fabricante" maxlength="120" placeholder="fabricante" aria-label="Fabricante" style="max-width:140px">
+              <?php endif; ?>
               <input type="text" name="observacao" maxlength="255" placeholder="obs. (conferência…)" aria-label="Observação">
               <button class="botao contorno pequeno" type="submit">Chegou</button></form></td><?php endif; ?>
         </tr>

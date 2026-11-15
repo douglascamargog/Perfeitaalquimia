@@ -62,6 +62,8 @@ class CompraLancamentoService
                     'total' => round((float) $l['quantidade'] * (float) ($l['valor_unitario'] ?? 0), 2),
                 ], fn($v) => $v !== null));
                 if ($item) {
+                    // lote do fabricante informado na linha (fabricante, lote, fabricação, validade) segue para a entrada
+                    self::$loteDaLinha[$linha] = array_intersect_key($l, array_flip(['lote', 'fabricante', 'fabricacao', 'validade']));
                     self::efetivarLinha($linha, $usuarioId, $quando);
                 }
             }
@@ -69,6 +71,9 @@ class CompraLancamentoService
             return $id;
         });
     }
+
+    /** Lote do fabricante de cada linha que está sendo lançada agora (passa para a entrada no estoque) */
+    private static array $loteDaLinha = [];
 
     /** Uma linha ligada a um item: entra no estoque, atualiza o fornecedor do item e anexa a NF nos documentos */
     private static function efetivarLinha(int $linhaId, ?int $usuarioId, ?string $quando = null): void
@@ -84,7 +89,7 @@ class CompraLancamentoService
             [(float) $l['valor_unitario'] ?: null, $l['emissao'], $l['emissao'], $fornecedor]);
         $obs = trim($l['fornecedor'] . ($l['origem'] === 'omie' ? ' · nota do Omie' : ''));
         ProducaoService::entrada($item, (float) $l['quantidade'], (float) $l['valor_unitario'], (string) $l['numero_nf'], $obs, $usuarioId,
-            $quando ?? ($l['emissao'] < date('Y-m-d') ? $l['emissao'] . ' ' . date('H:i:s') : null), ['fornecedor_id' => $fornecedor, 'lancamento_id' => (int) $l['lancamento_id']]);
+            $quando ?? ($l['emissao'] < date('Y-m-d') ? $l['emissao'] . ' ' . date('H:i:s') : null), ['fornecedor_id' => $fornecedor, 'lancamento_id' => (int) $l['lancamento_id']] + (self::$loteDaLinha[$linhaId] ?? []));
         if ($l['arquivo']) {
             ItemCompraService::anexarNf($item, ['arquivo' => $l['arquivo'], 'nome' => (string) $l['arquivo_nome'], 'mime' => (string) $l['arquivo_mime']],
                 (int) $l['lancamento_id'], $fornecedor, $usuarioId, 'NF ' . ($l['numero_nf'] ?: '') . ' · ' . $l['fornecedor'] . ' · ' . data_br($l['emissao']));

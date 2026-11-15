@@ -117,7 +117,7 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
   const compra = sql("select id from compras where situacao='comprado' and materia_prima_id is not null order by id limit 1");
   if (compra) {
     const dep = await como('deposito@demo.local');
-    await post(dep, `/deposito/recebimento/${compra}`, { quantidade: sql(`select replace(quantidade,'.',',') from compras where id=${compra}`), nf: '4455' },
+    await post(dep, `/deposito/recebimento/${compra}`, { quantidade: sql(`select replace(quantidade,'.',',') from compras where id=${compra}`), nf: '4455', lote: 'LT-4455', validade: '2028-12-31' },
       { arquivo_nf: { name: 'nf4455.pdf', mimeType: 'application/pdf', buffer: PDF } });
     ok(sql(`select count(*) from compras_lancadas where compra_id=${compra} and origem='orcamento' and numero_nf='4455' and arquivo is not null`) === '1', 'orçamento recebido no Depósito vira lançamento com a NF');
   } else ok(true, 'sem orçamento "comprado" com matéria-prima na demonstração (pulado)');

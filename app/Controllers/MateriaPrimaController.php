@@ -77,6 +77,10 @@ class MateriaPrimaController extends Controller
             $qtd = ProducaoService::numero($this->campo('quantidade'));
             $arquivo = $_FILES['arquivo_nf'] ?? null;
             $temArquivo = $arquivo && ($arquivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+            $lote = ['lote' => $this->campo('lote'), 'fabricante' => $this->campo('fabricante'), 'fabricacao' => $this->campo('fabricacao'), 'validade' => $this->campo('validade')];
+            if (ProducaoService::exigeLote((int) $id) && ($lote['lote'] === '' || $lote['validade'] === '')) {
+                throw new RuntimeException('Informe o lote do fabricante e a validade da matéria-prima.');
+            }
             if ($this->campo('fornecedor') !== '' || $temArquivo) {
                 // Com fornecedor/NF: vira um lançamento de compra (histórico de compras, fornecedor do item e NF nos documentos)
                 if ($qtd <= 0) {
@@ -84,10 +88,10 @@ class MateriaPrimaController extends Controller
                 }
                 \App\Services\CompraLancamentoService::lancar(['fornecedor' => $this->campo('fornecedor') ?: 'Fornecedor não informado', 'numero_nf' => $this->campo('nota'),
                     'emissao' => date('Y-m-d'), 'observacoes' => $this->campo('observacao'), 'origem' => 'manual'],
-                    [['materia_prima_id' => (int) $id, 'quantidade' => $qtd, 'valor_unitario' => ProducaoService::numero($this->campo('custo_unitario'))]],
+                    [['materia_prima_id' => (int) $id, 'quantidade' => $qtd, 'valor_unitario' => ProducaoService::numero($this->campo('custo_unitario'))] + $lote],
                     $temArquivo ? \App\Services\ItemCompraService::guardar($arquivo) : null, Auth::id());
             } else {
-                ProducaoService::entrada((int) $id, $qtd, ProducaoService::numero($this->campo('custo_unitario')), $this->campo('nota'), $this->campo('observacao'), Auth::id());
+                ProducaoService::entrada((int) $id, $qtd, ProducaoService::numero($this->campo('custo_unitario')), $this->campo('nota'), $this->campo('observacao'), Auth::id(), null, $lote);
             }
             Sessao::aviso('sucesso', 'Entrada de compra registrada: +' . ProducaoService::qtd($qtd) . '.');
         } catch (RuntimeException $e) {

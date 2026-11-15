@@ -38,6 +38,17 @@ use App\Core\Visao;
       <div class="campo"><label for="lote">Lote</label><input type="text" id="lote" name="lote" maxlength="40" value="<?= antigo('lote', 'L' . date('ymd')) ?>"></div>
       <div class="campo"><label for="validade">Validade</label><input id="validade" name="validade" type="date" value="<?= antigo('validade', date('Y-m-d', strtotime('+24 months'))) ?>"></div>
     </div>
+    <fieldset class="pr-op-modelo">
+      <legend>Dados da ficha de produção <small>(saem na OP impressa)</small></legend>
+      <div class="grade-campos">
+        <div class="campo"><label for="forma">Forma</label><select id="forma" name="forma"><option value="">Pelo produto</option>
+          <?php foreach (\App\Services\ProducaoService::FORMAS as $k => $nome): ?><option value="<?= $k ?>" <?= antigo('forma') === $k ? 'selected' : '' ?>><?= $nome ?></option><?php endforeach; ?></select></div>
+        <div class="campo"><label for="unidades_por_frasco">Cápsulas (ou sachês) por frasco</label><input id="unidades_por_frasco" name="unidades_por_frasco" type="number" min="1" max="10000" value="<?= antigo('unidades_por_frasco') ?>" placeholder="pela apresentação (ex.: 60)"></div>
+        <div class="campo"><label for="entrada_producao">Entrada na produção</label><input id="entrada_producao" name="entrada_producao" type="date" value="<?= antigo('entrada_producao') ?>"></div>
+        <div class="campo"><label for="fornecedor_mp">Fornecedor da matéria-prima</label><select id="fornecedor_mp" name="fornecedor_mp"><option value="pa">P.A. (nós)</option><option value="cliente" <?= antigo('fornecedor_mp') === 'cliente' ? 'selected' : '' ?>>Cliente</option></select></div>
+      </div>
+      <label class="opcao"><input type="checkbox" name="amostra" value="1" <?= antigo('amostra') ? 'checked' : '' ?>> Amostra</label>
+    </fieldset>
     <div class="campo"><label for="observacoes">Observações</label><textarea id="observacoes" name="observacoes" rows="2"><?= antigo('observacoes') ?></textarea></div>
     <div class="acoes-form"><button class="botao" type="submit">Planejar ordem</button><a class="botao contorno" href="<?= url('/producao/ordens') ?>">Voltar</a></div>
   </form>

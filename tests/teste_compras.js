@@ -77,7 +77,11 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
   await d.p.goto(BASE + '/deposito/recebimento');
   ok(await d.p.locator(`tr[data-compra="${id}"]`).count() === 1, 'aparece no Recebimento do Depósito');
   const antes = Number(sql(`select estoque from materias_primas where id=${mp}`));
-  await post(d, `/deposito/recebimento/${id}`, { quantidade: sql(`select quantidade from compras where id=${id}`).replace('.', ','), observacao: 'NF 123' });
+  const semLote = await post(d, `/deposito/recebimento/${id}`, { quantidade: sql(`select quantidade from compras where id=${id}`).replace('.', ','), observacao: 'NF 123' });
+  ok(sit(id) === 'comprado', 'matéria-prima sem lote e validade não dá entrada (o lote é obrigatório)');
+  await post(d, `/deposito/recebimento/${id}`, { quantidade: sql(`select quantidade from compras where id=${id}`).replace('.', ','), observacao: 'NF 123',
+    lote: 'LT-REC-9', validade: '2028-01-31', fabricacao: '2026-01-31', fabricante: 'Fabricante Teste' });
+  ok(sql(`select concat(fabricante,'|',validade) from mp_lotes where materia_prima_id=${mp} and lote='LT-REC-9'`) === 'Fabricante Teste|2028-01-31', 'recebimento registra o lote do fabricante');
   const qtd = Number(sql(`select quantidade from compras where id=${id}`));
   ok(sit(id) === 'recebido' && Math.abs(Number(sql(`select estoque from materias_primas where id=${mp}`)) - (antes + qtd)) < 0.001, 'chegou: entrou no estoque da matéria-prima');
   ok(sql(`select custo_unitario from materias_primas where id=${mp}`) === '1.5000', 'custo da matéria-prima atualizado com a cotação');

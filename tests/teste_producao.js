@@ -40,16 +40,19 @@ const aviso = async (p) => (await p.locator('.aviso').allInnerTexts()).join(' | 
   // ---------- 2. entrada de compra ----------
   await p.goto(BASE + `/producao/materias/${a}`);
   await p.fill('#e-qtd', '3,5'); await p.fill('#e-custo', '12,40'); await p.fill('#e-nota', '12345');
+  await p.fill('#e-lote', 'LT-FAB-01'); await p.fill('#e-validade', '2028-06-30'); await p.fill('#e-fabricacao', '2026-06-30');
   await Promise.all([p.waitForNavigation(), p.click('[data-form-entrada] button')]);
   ok(sql(`select estoque from materias_primas where id=${a}`) === '5.500', 'entrada soma ao estoque (2 + 3,5)');
   ok(sql(`select concat(tipo,'|',quantidade,'|',saldo,'|',referencia) from mp_movimentos where materia_prima_id=${a} order by id desc limit 1`) === 'entrada|3.500|5.500|NF 12345', 'movimento de entrada com saldo e nota');
   ok(sql(`select custo_unitario from materias_primas where id=${a}`) === '12.4000', 'entrada atualiza o último custo');
+  ok(sql(`select concat(saldo,'|',validade) from mp_lotes where materia_prima_id=${a} and lote='LT-FAB-01'`) === '3.500|2028-06-30', 'lote do fabricante registrado com saldo e validade');
   // entrada rápida pela lista
   await p.goto(BASE + '/producao/materias?q=Teste');
   const linhaA = p.locator(`tr[data-mp="${a}"]`);
   await linhaA.locator('input[name=quantidade]').fill('0,5');
+  await linhaA.locator('input[name=lote]').fill('LT-FAB-01'); await linhaA.locator('input[name=validade]').fill('2028-06-30');
   await Promise.all([p.waitForNavigation(), linhaA.locator('button').click()]);
-  ok(sql(`select estoque from materias_primas where id=${a}`) === '6.000', 'entrada rápida pela lista');
+  ok(sql(`select estoque from materias_primas where id=${a}`) === '6.000' && sql(`select saldo from mp_lotes where materia_prima_id=${a} and lote='LT-FAB-01'`) === '4.000', 'entrada rápida pela lista (mesmo lote soma no saldo)');
 
   // ---------- 3. ajuste exige motivo ----------
   await p.goto(BASE + `/producao/materias/${a}`);
@@ -127,7 +130,10 @@ const aviso = async (p) => (await p.locator('.aviso').allInnerTexts()).join(' | 
   // impressão
   const imp = await ctx.newPage(); await imp.addInitScript(() => { window.print = () => {}; });
   await imp.goto(BASE + `/producao/ordens/${op1}/imprimir`);
-  ok((await imp.locator('.pr-imp-numero').innerText()).includes('OP ' + op1) && await imp.locator('.pr-imp-tabela tbody tr').count() === 3, 'ordem para imprimir (A4)');
+  ok((await imp.locator('.op-titulo').innerText()).includes('OP nº ' + op1) && (await imp.locator('.op-titulo').innerText()).includes('ORDEM DE PRODUÇÃO'), 'ordem para imprimir no modelo da empresa (PLA08.1)');
+  ok((await imp.locator('.op-mp').innerText()).includes('TESTE PÓ A') && (await imp.locator('.op-mp').innerText()).includes('LT-FAB-01'), 'impressão traz a matéria-prima com o lote do fabricante');
+  ok(await imp.locator('.op-pesagem .op-campo').count() === 50 && await imp.locator('.op-assin td').count() === 3, 'teste de pesagem (50) e assinaturas (preenchido, revisado, aprovado)');
+  ok(sql(`select count(*) from ordem_mp_lotes o join mp_lotes l on l.id=o.mp_lote_id where o.ordem_id=${op1} and o.baixado=1 and l.lote='LT-FAB-01'`) === '1', 'conclusão registra de qual lote veio a matéria-prima');
   await imp.close();
 
   // ---------- 7. cancelar não mexe no estoque ----------

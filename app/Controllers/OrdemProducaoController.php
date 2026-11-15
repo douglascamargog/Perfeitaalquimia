@@ -77,8 +77,34 @@ class OrdemProducaoController extends Controller
             'previa' => $o['situacao'] === 'planejada' ? ProducaoService::previa((int) $o['produto_id'], (int) $o['quantidade']) : null,
             'consumo' => $o['situacao'] === 'concluida' ? ProducaoService::consumoDaOrdem((int) $id) : [],
             'perdas' => $o['situacao'] === 'concluida' ? ProducaoService::perdasDaOrdem((int) $id) : [],
-            'pode' => Auth::pode('producao.gerenciar'), 'estilos' => self::ESTILOS, 'scripts' => ['producao.js'],
+            'pode' => Auth::pode('producao.gerenciar'), 'podeAprovar' => Auth::pode('produtos.tecnico'), 'estilos' => self::ESTILOS, 'scripts' => ['producao.js'],
+            'lotes' => $o['situacao'] !== 'cancelada' ? ProducaoService::lotesDaOrdem((int) $id, $o['situacao'] === 'planejada'
+                ? ProducaoService::previa((int) $o['produto_id'], (int) $o['quantidade'])['linhas'] : ProducaoService::consumoDaOrdem((int) $id)) : [],
         ]);
+    }
+
+    /** Escolher o lote de cada matéria-prima (o padrão é o que vence primeiro) */
+    public function lotes(string $id): void
+    {
+        try {
+            ProducaoService::escolherLotes((int) $id, (array) ($_POST['lote'] ?? []), Auth::id());
+            Sessao::aviso('sucesso', 'Lotes das matérias-primas salvos.');
+        } catch (RuntimeException $e) {
+            Sessao::aviso('erro', $e->getMessage());
+        }
+        redirecionar('/producao/ordens/' . (int) $id);
+    }
+
+    /** Responsável Técnica revisa e aprova a ordem */
+    public function aprovar(string $id): void
+    {
+        try {
+            ProducaoService::aprovarOrdem((int) $id, (int) Auth::id());
+            Sessao::aviso('sucesso', 'Ordem revisada e aprovada.');
+        } catch (RuntimeException $e) {
+            Sessao::aviso('erro', $e->getMessage());
+        }
+        redirecionar('/producao/ordens/' . (int) $id);
     }
 
     /** Versão A4 para o chão de fábrica (abre direto a janela de impressão) */
@@ -88,10 +114,21 @@ class OrdemProducaoController extends Controller
         if (!$o) {
             redirecionar('/producao/ordens');
         }
+        // A ficha (peso por unidade, perda) vem da prévia; na ordem concluída, as quantidades são as que realmente saíram
+        $linhas = ProducaoService::previa((int) $o['produto_id'], (int) $o['quantidade'])['linhas'];
+        if ($o['situacao'] === 'concluida') {
+            $real = array_column(ProducaoService::consumoDaOrdem((int) $id), 'quantidade', 'materia_prima_id');
+            foreach ($linhas as &$l) {
+                $l['precisa'] = (float) ($real[$l['materia_prima_id']] ?? $l['precisa']);
+            }
+            unset($l);
+        }
+        $ids = array_map('intval', array_column($linhas, 'materia_prima_id')) ?: [0];
         \App\Core\Visao::mostrar('producao/ordem_imprimir', [
-            'titulo' => 'OP ' . $o['id'], 'o' => $o,
-            'linhas' => $o['situacao'] === 'concluida' ? ProducaoService::consumoDaOrdem((int) $id) : ProducaoService::previa((int) $o['produto_id'], (int) $o['quantidade'])['linhas'],
-        ], null); // página própria, sem menu (A4)
+            'titulo' => 'OP ' . $o['id'], 'o' => $o, 'linhas' => $linhas,
+            'lotes' => ProducaoService::lotesDaOrdem((int) $id, $linhas),
+            'mps' => array_column(\App\Core\Banco::todos('SELECT id, fabricante, cas_ins FROM materias_primas WHERE id IN (' . implode(',', $ids) . ')'), null, 'id'),
+        ], null); // página própria, sem menu (A4 deitado, modelo PLA08.1)
     }
 
     public function concluir(string $id): void

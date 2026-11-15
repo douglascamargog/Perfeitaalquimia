@@ -1,0 +1,60 @@
+/* =====================================================================
+   Ordem de produção impressa · modelo PLA08.1 (A4 deitado)
+   ===================================================================== */
+@page { size: A4 landscape; margin: 8mm; }
+* { box-sizing: border-box; }
+body.op { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #111; background: #e9ecea; font-size: 10.5px; }
+.op-demo { margin: 0; padding: 4px; text-align: center; background: #caff4d; font-size: 11px; }
+.op-folha { width: 281mm; min-height: 190mm; margin: 10px auto; background: #fff; padding: 6mm; box-shadow: 0 2px 14px rgba(0, 0, 0, .15); }
+table { width: 100%; border-collapse: collapse; }
+td, th { border: 1px solid #333; padding: 2px 4px; vertical-align: middle; }
+th { background: #eef1ef; font-weight: 700; text-align: center; font-size: 9.5px; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+small { font-size: 8.5px; font-weight: 400; }
+
+/* Cabeçalho */
+.op-cab td { height: 7mm; }
+.op-logo { width: 34mm; text-align: center; }
+.op-logo img { max-width: 30mm; max-height: 22mm; }
+.op-titulo { text-align: center; }
+.op-titulo h1 { margin: 0; font-family: 'Times New Roman', Times, serif; font-size: 30px; letter-spacing: .02em; }
+.op-titulo p { margin: 2px 0 0; font-weight: 700; font-size: 11px; letter-spacing: .04em; }
+.op-titulo small { color: #555; }
+.op-doc { width: 56mm; font-size: 10px; }
+
+/* Dados do lote */
+.op-dados { margin-top: -1px; }
+.op-dados td { height: 6.5mm; font-size: 10.5px; }
+.op-prod { font-size: 12px; }
+.op-marcas span { margin-right: 8px; white-space: nowrap; }
+.op-alerta { color: #c0141c; font-weight: 700; }
+
+/* Matérias-primas + check list */
+.op-mp { margin-top: -1px; }
+.op-mp td { height: 5mm; font-size: 10px; }
+.op-mp .op-desc { text-align: left; width: 50mm; }
+.op-mp td.op-desc { font-weight: 600; }
+.op-destaque { color: #c0141c; font-weight: 700; }
+th.op-destaque { text-decoration: underline; }
+.op-obs-cab { width: 30mm; }
+.op-obs { text-align: center; vertical-align: top; padding-top: 10mm; font-size: 11px; line-height: 1.5; }
+.op-obs p { font-weight: 400; font-size: 9.5px; text-align: left; }
+.op-total td { font-weight: 700; background: #f6f8f7; }
+
+/* Embalagens + teste de pesagem */
+.op-baixo { display: grid; grid-template-columns: 78mm minmax(0, 1fr); gap: 3mm; margin-top: 3mm; align-items: start; }
+.op-emb td { height: 5.4mm; }
+.op-pesagem td { height: 5.4mm; }
+.op-pesagem thead th { background: #d9dedb; letter-spacing: .04em; }
+.op-n { width: 7mm; font-size: 8.5px; text-align: right; color: #444; background: #fafbfa; }
+.op-resumo td { font-weight: 700; font-size: 9.5px; background: #f2f4f3; }
+
+/* Assinaturas */
+.op-assin { margin-top: 3mm; }
+.op-assin td { height: 13mm; vertical-align: top; width: 33.3%; }
+
+@media print {
+  body.op { background: #fff; }
+  .op-folha { margin: 0; box-shadow: none; padding: 0; width: auto; min-height: 0; }
+  .op-demo { display: none; }
+}

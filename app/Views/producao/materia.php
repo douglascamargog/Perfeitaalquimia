@@ -38,6 +38,16 @@ $formsEstoque = function () use ($pode, $m, $u, $num, $fornecedores, $id) {
               <datalist id="forn-<?= $id ?>"><?php foreach ($fornecedores as $f): ?><option value="<?= e($f['fornecedor']) ?>"><?php endforeach; ?></datalist></div>
             <div class="campo"><label for="e-nota">Nº da nota fiscal</label><input type="text" id="e-nota" name="nota" maxlength="60"></div>
           </div>
+          <?php $exigeLote = \App\Services\ProducaoService::exigeLote($id); ?>
+          <fieldset class="it-lote" data-lote-entrada>
+            <legend>Lote do fabricante<?= $exigeLote ? ' <small>(obrigatório)</small>' : ' <small>(opcional)</small>' ?></legend>
+            <div class="grade-campos">
+              <div class="campo"><label for="e-lote">Lote</label><input type="text" id="e-lote" name="lote" maxlength="60" <?= $exigeLote ? 'required' : '' ?>></div>
+              <div class="campo"><label for="e-fabricante">Fabricante</label><input type="text" id="e-fabricante" name="fabricante" maxlength="120" value="<?= e((string) ($m['fabricante'] ?? '')) ?>"></div>
+              <div class="campo"><label for="e-fabricacao">Fabricação</label><input type="date" id="e-fabricacao" name="fabricacao"></div>
+              <div class="campo"><label for="e-validade">Validade</label><input type="date" id="e-validade" name="validade" <?= $exigeLote ? 'required' : '' ?>></div>
+            </div>
+          </fieldset>
           <div class="grade-campos">
             <div class="campo"><label for="e-arq">Arquivo da NF <small>PDF, imagem ou XML</small></label><input type="file" id="e-arq" name="arquivo_nf" accept="application/pdf,image/*,.xml,text/xml"></div>
             <div class="campo"><label for="e-obs">Observação</label><input type="text" id="e-obs" name="observacao" maxlength="200"></div>

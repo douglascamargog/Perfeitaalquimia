@@ -35,5 +35,9 @@ $num = fn($valor) => rtrim(rtrim(number_format((float) $valor, 4, ',', ''), '0')
     <div class="campo"><label for="fornecedor">Fornecedor principal</label><input type="text" id="fornecedor" name="fornecedor" maxlength="160" value="<?= $v('fornecedor') ?>"><div class="ajuda">Outros fornecedores ficam na aba Fornecedores do item.</div></div>
   <?php endif; ?>
 </div>
+<div class="grade-campos">
+  <div class="campo"><label for="fabricante-mp">Fabricante <small>matéria-prima</small></label><input type="text" id="fabricante-mp" name="fabricante" maxlength="120" value="<?= $v('fabricante') ?>" placeholder="Ex.: Valdequímica"></div>
+  <div class="campo"><label for="cas-ins">CAS / INS</label><input type="text" id="cas-ins" name="cas_ins" maxlength="80" value="<?= $v('cas_ins') ?>" placeholder="Ex.: CAS 36687-82-8 ou INS 551"></div>
+</div>
 <div class="campo"><label for="observacoes">Observações</label><textarea id="observacoes" name="observacoes" rows="2"><?= $v('observacoes') ?></textarea></div>
 <label class="opcao"><input type="checkbox" name="ativo" value="1" <?= ($m === null || $m['ativo']) ? 'checked' : '' ?>> Ativa</label>

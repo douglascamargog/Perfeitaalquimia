@@ -306,6 +306,8 @@ return [
     ['GET',  '/producao/ordens/{id}/imprimir',   'OrdemProducaoController@imprimir',     'producao.gerenciar|producao.ver'],
     ['POST', '/producao/ordens/{id}/concluir',   'OrdemProducaoController@concluir',     'producao.gerenciar'],
     ['POST', '/producao/ordens/{id}/cancelar',   'OrdemProducaoController@cancelar',     'producao.gerenciar'],
+    ['POST', '/producao/ordens/{id}/lotes',      'OrdemProducaoController@lotes',        'producao.gerenciar'],
+    ['POST', '/producao/ordens/{id}/aprovar',    'OrdemProducaoController@aprovar',      'produtos.tecnico'],
 
     // ---------- Notificações (sino do topo) ----------
     ['GET',  '/notificacoes',                   'NotificacaoController@index',       'logado'],

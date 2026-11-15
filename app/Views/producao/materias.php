@@ -53,6 +53,10 @@ $icones = asset('img/icones.svg');
                 <?= csrf_campo() ?><input type="hidden" name="voltar" value="lista">
                 <input type="text" name="quantidade" inputmode="decimal" placeholder="qtd (<?= e($m['unidade']) ?>)" aria-label="Quantidade comprada de <?= e($m['nome']) ?>" required>
                 <input type="text" name="custo_unitario" inputmode="decimal" placeholder="R$/<?= e($m['unidade']) ?>" aria-label="Custo por unidade" value="<?= $m['custo_unitario'] > 0 ? rtrim(rtrim(number_format((float) $m['custo_unitario'], 4, ',', ''), '0'), ',') : '' ?>">
+                <?php if (\App\Services\ProducaoService::exigeLote((int) $m['id'])): // matéria-prima: lote do fabricante e validade ?>
+                  <input type="text" name="lote" maxlength="60" placeholder="lote" aria-label="Lote do fabricante de <?= e($m['nome']) ?>" required style="max-width:90px">
+                  <input type="date" name="validade" aria-label="Validade do lote de <?= e($m['nome']) ?>" required>
+                <?php endif; ?>
                 <button class="botao contorno pequeno" type="submit">+ Entrada</button>
               </form>
             </td>

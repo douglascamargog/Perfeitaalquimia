@@ -17,6 +17,20 @@
  */
 return [
     [
+        'versao' => '11.5', 'data' => '2026-11-15', 'titulo' => 'Ordem de produção no modelo da empresa e lotes das matérias-primas',
+        'novo' => [
+            'Ordem de produção impressa no modelo da empresa (PLA08.1 · Check list – Elaboração produto), em A4 deitado e numa folha só.',
+            'A OP impressa já sai preenchida: peso unitário e peso em gramas de cada matéria-prima, fabricante, CAS/INS, lote do fabricante, fabricação, validade, embalagens, total de pó e perda.',
+            'Na OP impressa ficam em branco, para anotar na fábrica: hora e responsável de cada etapa, teste de pesagem das 50 cápsulas, peso médio e tempo de fabricação.',
+            'Lotes das matérias-primas: na entrada da compra (Produção ou recebimento no Depósito) informe o lote do fabricante, a fabricação e a validade.',
+            'A OP sugere sozinha o lote que vence primeiro. Dá para escolher outro, e na conclusão fica registrado de qual lote veio cada matéria-prima.',
+            'A Responsável Técnica revisa e aprova a OP no One, e o nome dela sai impresso em "Revisado por" e "Aprovado por".',
+            'Na OP nova: forma (cápsula, frasco/pote, sachê, líquido), cápsulas por frasco, amostra, fornecedor da matéria-prima e data de entrada na produção.',
+            'No cadastro da matéria-prima: fabricante e CAS/INS.',
+        ],
+        'admin' => 'Configurações › Produção: código, elaboração e revisão do documento da OP e se o lote é obrigatório na entrada de matéria-prima (ligado por padrão; embalagens e itens de consumo não pedem lote).',
+    ],
+    [
         'versao' => '11.4', 'data' => '2026-11-15', 'titulo' => 'Pedidos do e-commerce na separação',
         'novo' => [
             'Depósito: os pedidos do e-commerce (Mercado Livre, Shopee, Amazon e loja própria) chegam sozinhos da Tray e entram na fila de separação assim que a nota fiscal é emitida.',
