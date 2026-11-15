@@ -17,6 +17,28 @@
  */
 return [
     [
+        'versao' => '11.0', 'data' => '2026-11-15', 'titulo' => 'Perfil com a sua cara, fornecedores e menu organizado',
+        'novo' => [
+            'Seu perfil com a sua cara: status do dia ("☕ focada em ligações hoje", some sozinho), frase, cor e capa do perfil, interesses e "pergunte-me sobre".',
+            'Personalize o perfil em Meu perfil › Personalizar: escolha a ordem dos blocos e esconda os que não quiser mostrar.',
+            'Recados: deixe um recado no perfil de um colega a qualquer hora (não só no aniversário). A pessoa recebe o aviso no sino.',
+            'Elogios entre colegas: "Ajudou muito", "Arrasou na venda", "Salvou o dia"… Cada um aparece no perfil e avisa quem foi elogiado.',
+            'Conquistas no perfil: tempo de casa, metas batidas, elogios recebidos e perfil completo (sem valores de venda).',
+            'Fornecedores: cada fornecedor com o que ele fornece, o preço comparado com os outros fornecedores, as NFs, o prazo de entrega e os documentos.',
+            'Laudos e documentos das matérias-primas vencendo aparecem no painel da Produção, e o One avisa a Produção e a Qualidade.',
+        ],
+        'melhoria' => [
+            'Meu mês: as vendas entram sozinhas pelos pedidos faturados no Omie. Não precisa mais registrar venda.',
+            'Meta da equipe: mostra para quais setores vale (Televendas + Prospecção e Reativação) e só esses setores veem a participação no Meu mês.',
+            'Gráfico da meta da equipe: mostra todos os dias do mês (inclusive sábado e feriado com lançamento), marca os dias sem expediente e a linha não "despenca" por um valor digitado errado.',
+            'Menu mais organizado: Compras num lugar só (Pedidos de compra, Compras da empresa e Fornecedores), Estoque separado da Produção e Metas dentro de Resultados.',
+            'Telas longas mais leves: Produtos, Catálogo, Fichas técnicas e Pedidos da Terceirização mostram uma parte por vez, com "Mostrar mais".',
+            'Os gráficos da Equipe de vendas e da Produção aparecem sempre, também sem internet.',
+            'Equipe: cartões com status, frase e elogios de cada pessoa.',
+        ],
+        'admin' => 'Perfis novos em Pessoas e acessos: Qualidade e Gestor de setor (passe as pessoas para eles; ninguém muda sozinho). Configurações › Metas: setores da meta da equipe e de onde vêm as vendas do Meu mês (omie ou manual). Configurações › Pessoas: tipos de elogio e horas do status do dia.',
+    ],
+    [
         'versao' => '10.5', 'data' => '2026-11-15', 'titulo' => 'Compras da empresa e página completa de cada item',
         'novo' => [
             'Financeiro › Compras da empresa: tudo que é comprado (matéria-prima, potes, rótulos, material de escritório, limpeza…) fica anotado num lugar só, com o total do mês por categoria.',
