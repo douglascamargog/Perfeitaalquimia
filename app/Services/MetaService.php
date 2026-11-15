@@ -98,12 +98,44 @@ class MetaService
             ['texto' => 'Vendido ' . dinheiro($depois) . ' · meta ' . dinheiro($meta)], $usuarioId);
     }
 
+    /**
+     * De onde vêm as vendas do Meu mês (Configurações › Metas):
+     * 'omie' = pedidos FATURADOS em que a pessoa é a vendedora (chegam do Omie, ninguém digita); 'manual' = a pessoa registra.
+     */
+    public static function vendasDoOmie(): bool
+    {
+        return \App\Core\Config::get('metas.vendas_origem', 'omie') !== 'manual';
+    }
+
+    /** Vendas da pessoa no mês: [['id','data','valor','descricao','pedido_id'?], ...] (mais recentes primeiro) */
+    public static function vendas(int $usuarioId, string $mes): array
+    {
+        if (self::vendasDoOmie()) {
+            return Banco::todos("SELECT p.id, p.id AS pedido_id, DATE(p.faturado_em) AS data, p.total AS valor, p.numero_nf,
+                    CONCAT(COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social), ' · pedido #', p.id) AS descricao
+                FROM pedidos p JOIN clientes c ON c.id = p.cliente_id
+                WHERE p.vendedor_id = ? AND p.situacao = 'faturado' AND p.faturado_em >= ? AND p.faturado_em < ? + INTERVAL 1 MONTH
+                ORDER BY p.faturado_em DESC, p.id DESC", [$usuarioId, "$mes-01", "$mes-01"]);
+        }
+        return Banco::todos('SELECT * FROM vendas_registradas WHERE usuario_id = ? AND data LIKE ? ORDER BY data DESC, id DESC', [$usuarioId, "$mes-%"]);
+    }
+
+    /** Total vendido pela pessoa no mês (mesma origem do Meu mês) */
+    public static function totalMes(int $usuarioId, string $mes): float
+    {
+        if (self::vendasDoOmie()) {
+            return (float) Banco::valor("SELECT COALESCE(SUM(total), 0) FROM pedidos WHERE vendedor_id = ? AND situacao = 'faturado'
+                AND faturado_em >= ? AND faturado_em < ? + INTERVAL 1 MONTH", [$usuarioId, "$mes-01", "$mes-01"]);
+        }
+        return (float) Banco::valor('SELECT COALESCE(SUM(valor), 0) FROM vendas_registradas WHERE usuario_id = ? AND data LIKE ?', [$usuarioId, "$mes-%"]);
+    }
+
     /** Indicadores individuais do mês */
     public static function indicadores(int $usuarioId, string $mes): array
     {
         $cfg = self::meuMes($usuarioId, $mes);
         $hoje = date('Y-m-d');
-        $vendas = Banco::todos('SELECT * FROM vendas_registradas WHERE usuario_id = ? AND data LIKE ? ORDER BY data DESC, id DESC', [$usuarioId, "$mes-%"]);
+        $vendas = self::vendas($usuarioId, $mes);
         $ateHoje = array_filter($vendas, fn($v) => $v['data'] <= $hoje);
         $total = array_sum(array_column($ateHoje, 'valor'));
         $calc = self::calcular($mes, (float) $cfg['meta'], $total, $cfg['dias_semana'], $cfg['folgas'], (bool) $ateHoje);
@@ -114,7 +146,7 @@ class MetaService
         }
         arsort($porDia);
         $mesAnterior = date('Y-m', strtotime("$mes-01 -1 month"));
-        $totalAnterior = (float) Banco::valor('SELECT COALESCE(SUM(valor), 0) FROM vendas_registradas WHERE usuario_id = ? AND data LIKE ?', [$usuarioId, "$mesAnterior-%"]);
+        $totalAnterior = self::totalMes($usuarioId, $mesAnterior);
 
         return $calc + [
             'config'          => $cfg,

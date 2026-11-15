@@ -53,14 +53,27 @@ function diasTrabalho(ate) {
   const r = await p.request.post(BASE + '/meu-mes/equipe', { form: { _csrf: csrf, mes: '2026-11', meta: '1', vendido: '1', 'dias_semana[]': '1' } });
   ok(r.status() === 403, 'vendedor recebe 403 ao tentar alterar a meta da equipe');
 
+  // Modo padrão (Omie): as vendas são os pedidos FATURADOS da vendedora — não há formulário para digitar
+  ok(await p.locator('.form-venda').count() === 0 && await p.locator('[data-vendas-omie]').count() === 1, 'Meu mês: sem "Registrar venda" (vendas vêm do Omie)');
+  const [qtdF, somaF] = sql("select concat(count(*),'|',coalesce(sum(p.total),0)) from pedidos p join usuarios u on u.id=p.vendedor_id where u.email='televendas1@demo.local' and p.situacao='faturado' and p.faturado_em >= date_format(curdate(),'%Y-%m-01')").split('|');
+  let kpis = await p.locator('.kpis-meu-mes').innerText();
+  ok(Number(qtdF) === 0 || kpis.includes(brl(Number(somaF) / Number(qtdF))), `ticket médio dos pedidos faturados = ${Number(qtdF) ? brl(Number(somaF) / Number(qtdF)) : '—'}`);
+  await p.goto(BASE + '/meu-mes?aba=vendas');
+  ok(await p.locator('table tbody tr a[href*="/pedidos/"]').count() === Number(qtdF), `Minhas vendas lista os ${qtdF} pedido(s) faturado(s), com link para o pedido`);
+  const csrfV = await p.evaluate(() => document.querySelector('meta[name=csrf]').content);
+  await p.request.post(BASE + '/meu-mes/vendas', { form: { _csrf: csrfV, valor: '999,00', data: new Date().toLocaleDateString('sv') } });
+  ok(sql("select count(*) from vendas_registradas where valor=999") === '0', 'no modo Omie não dá para registrar venda à mão');
+  // Modo manual (Configurações › Metas) continua funcionando
+  sql("update configuracoes set valor='manual' where chave='metas.vendas_origem'");
+  await p.goto(BASE + '/meu-mes');
   const qtdAntes = Number(sql("select count(*) from vendas_registradas v join usuarios u on u.id=v.usuario_id where u.email='televendas1@demo.local' and v.data like concat(date_format(curdate(),'%Y-%m'),'%')"));
   await p.fill('#v-valor', '2.500,00');
   await p.fill('#v-desc', 'Empório Teste');
   await Promise.all([p.waitForNavigation(), p.click('.form-venda button')]);
-  const kpis = await p.locator('.kpis-meu-mes').innerText();
-  ok(kpis.includes(String(qtdAntes + 1)), `quantidade de vendas no mês: ${qtdAntes + 1}`);
+  kpis = await p.locator('.kpis-meu-mes').innerText();
+  ok(kpis.includes(String(qtdAntes + 1)), `modo manual: quantidade de vendas no mês: ${qtdAntes + 1}`);
   const [soma, qtd] = sql("select concat(sum(valor),'|',count(*)) from vendas_registradas v join usuarios u on u.id=v.usuario_id where u.email='televendas1@demo.local' and v.data like concat(date_format(curdate(),'%Y-%m'),'%')").split('|');
-  ok(kpis.includes(brl(Number(soma) / Number(qtd))), `ticket médio = ${brl(Number(soma) / Number(qtd))}`);
+  ok(kpis.includes(brl(Number(soma) / Number(qtd))), `modo manual: ticket médio = ${brl(Number(soma) / Number(qtd))}`);
   ok(kpis.includes('participação') || kpis.toLowerCase().includes('participação'), 'mostra a participação na equipe');
   await p.screenshot({ path: DIR + '/meu-mes-vendedor.png', fullPage: true });
 

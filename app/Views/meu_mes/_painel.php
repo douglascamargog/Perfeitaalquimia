@@ -17,7 +17,7 @@ $pendentes = array_slice(array_filter($tarefas, fn($t) => !$t['concluida_em']), 
         <?= \App\Core\Visao::renderizar('graficos/_ritmo', ['m' => $eu]) ?>
         <?php if ($temMeta): ?>
           <?= \App\Core\Visao::renderizar('graficos/_barra_meta', ['m' => $eu]) ?>
-          <p class="mm-hero-frase"><?php if ($eu['atingida']): ?>Você passou da meta em <strong><?= dinheiro($eu['acima']) ?></strong>. Continue registrando as vendas!
+          <p class="mm-hero-frase"><?php if ($eu['atingida']): ?>Você passou da meta em <strong><?= dinheiro($eu['acima']) ?></strong>. Continue assim!
             <?php elseif ($eu['passado']): ?>Mês encerrado: faltaram <strong><?= dinheiro($eu['falta']) ?></strong>.
             <?php else: ?>Falta <strong><?= dinheiro($eu['falta']) ?></strong><?= $eu['necessario_dia'] ? ' · precisa de <strong>' . dinheiro($eu['necessario_dia']) . '</strong> por dia de trabalho (' . (int) $eu['restantes'] . ' restantes)' : '' ?>.<?php endif; ?></p>
         <?php else: ?><p class="suave">Cadastre a sua meta para ver o ritmo e quanto falta por dia.</p><?php endif; ?>
@@ -37,11 +37,21 @@ $pendentes = array_slice(array_filter($tarefas, fn($t) => !$t['concluida_em']), 
     </details>
   </section>
 
+  <?php if (!MetaService::vendasDoOmie()): // modo manual (Configurações › Metas): a pessoa registra as vendas ?>
   <section class="card registrar-venda">
     <h2>Registrar venda</h2>
     <?= \App\Core\Visao::renderizar('meu_mes/_form_venda', ['mes' => $mes, 'voltar' => 'painel']) ?>
     <?php if ($c['anotacoes']): ?><p class="nota-mes"><strong>Anotações:</strong> <?= nl2br(e($c['anotacoes'])) ?></p><?php endif; ?>
   </section>
+  <?php else: // vendas = pedidos faturados (Omie): nada para digitar ?>
+  <section class="card registrar-venda mm-origem" data-vendas-omie>
+    <h2>Minhas vendas</h2>
+    <p>As vendas entram sozinhas: cada pedido seu <strong>faturado no Omie</strong> conta para a meta, no dia do faturamento.</p>
+    <p class="suave pequeno"><?= (int) $eu['qtd_vendas'] ?> pedido(s) faturado(s) neste mês<?= $eu['qtd_vendas'] ? ' · última: ' . data_br($eu['vendas'][0]['data']) : '' ?>.</p>
+    <a class="botao contorno pequeno" href="<?= $link(['aba' => 'vendas']) ?>">Ver minhas vendas →</a>
+    <?php if ($c['anotacoes']): ?><p class="nota-mes"><strong>Anotações:</strong> <?= nl2br(e($c['anotacoes'])) ?></p><?php endif; ?>
+  </section>
+  <?php endif; ?>
 </div>
 
 <?php if (!empty($hoje)): ?>

@@ -101,6 +101,7 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
   await post(f, `/aprovacao/${ped2}/recusar`, { motivo: 'Crédito estourado' });
   ok(avisos('diretoria_problemas') === 1, 'pedido recusado: Diretoria avisada (problema)');
   // meta batida
+  sql("update configuracoes set valor='manual' where chave='metas.vendas_origem'"); // modo manual: a vendedora registra (o modo Omie é testado no teste_meu_mes)
   const t = await como('televendas1@demo.local');
   const mes = new Date().toLocaleDateString('sv').slice(0, 7);
   const t1 = uid('televendas1@demo.local');

@@ -306,6 +306,11 @@ class PedidoService
         if (strtotime($quando) >= strtotime('-1 day')) { // faturamento de agora (não o histórico da importação)
             NotificacaoService::pedidoMudou((int) $pedido['id'], 'faturado', null, 'NF ' . $numeroNf);
             DepositoService::entrarNaFila((int) $pedido['id'], $quando); // nota emitida → vai para a separação no depósito
+            if (!empty($pedido['vendedor_id']) && MetaService::vendasDoOmie()) { // venda do Meu mês vem do faturamento: bateu a meta?
+                $mes = substr($quando, 0, 7);
+                $depois = MetaService::totalMes((int) $pedido['vendedor_id'], $mes);
+                MetaService::avisarSeBateuMeta((int) $pedido['vendedor_id'], $mes, $depois - (float) $pedido['total'], $depois);
+            }
         }
     }
 

@@ -106,6 +106,10 @@ class MeuMesController extends Controller
 
     public function registrarVenda(): void
     {
+        if (MetaService::vendasDoOmie()) {
+            Sessao::aviso('erro', 'As vendas entram sozinhas pelos pedidos faturados no Omie.');
+            redirecionar('/meu-mes?aba=vendas');
+        }
         $data = $this->campo('data');
         $mes = substr($data, 0, 7);
         $valor = self::valor($this->campo('valor'));
