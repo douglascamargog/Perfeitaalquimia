@@ -17,6 +17,14 @@
  */
 return [
     [
+        'versao' => '11.1', 'data' => '2026-11-15', 'titulo' => 'Foto de quem é responsável em todo o One',
+        'melhoria' => [
+            'A foto (ou as iniciais) aparece junto do nome de quem é responsável em todo o sistema: Agenda, Pedidos de compra (quem pediu, quem aprovou, quem recebeu), ordens de produção, Depósito (separação e despacho), tarefas do Marketing, Desenvolvimento, documentos, históricos e linhas do tempo.',
+            'Painel de vendas e Metas: cada vendedor com a foto no ranking.',
+            'Orçamento por link: o cliente vê a foto de quem preparou o orçamento.',
+        ],
+    ],
+    [
         'versao' => '11.0', 'data' => '2026-11-15', 'titulo' => 'Perfil com a sua cara, fornecedores e menu organizado',
         'novo' => [
             'Seu perfil com a sua cara: status do dia ("☕ focada em ligações hoje", some sozinho), frase, cor e capa do perfil, interesses e "pergunte-me sobre".',
