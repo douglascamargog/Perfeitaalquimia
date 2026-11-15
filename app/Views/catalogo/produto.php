@@ -9,10 +9,15 @@ $lista = fn($v) => array_values(array_filter(is_array($v) ? array_map(fn($x) => 
   <div class="cat-produto-info">
     <small><?= !empty($p['codigo']) ? '<span class="cod-produto">' . e($p['codigo']) . '</span> ' : '' ?><?= e($p['categoria']) ?></small>
     <h1><?= e($p['nome']) ?></h1>
+    <?php if ($p['promo_pct'] > 0): ?><span class="cat-promo-aviso">-<?= e(\App\Services\CampanhaService::pct((float) $p['promo_pct'])) ?> · <?= e((string) $p['promo_campanha']) ?></span><?php endif; ?>
     <p class="cat-embalagem"><?= e($p['embalagem']) ?></p>
     <?php if ($p['chamada']): ?><p class="cat-chamada"><?= e($p['chamada']) ?></p><?php endif; ?>
     <?php if ($logado && $p['preco'] !== null): ?>
-      <div class="cat-preco grande"><?= dinheiro((float) $p['preco']) ?> <small>/ unidade</small></div>
+      <?php if ($p['preco_promo'] !== null): ?>
+        <div class="vt-precos"><s><?= dinheiro((float) $p['preco']) ?></s><strong class="grande"><?= dinheiro((float) $p['preco_promo']) ?> <small>/ unidade</small></strong></div>
+      <?php else: ?>
+        <div class="cat-preco grande"><?= dinheiro((float) $p['preco']) ?> <small>/ unidade</small></div>
+      <?php endif; ?>
       <div class="cat-qtd grande" data-produto="<?= (int) $p['id'] ?>">
         <button type="button" data-menos aria-label="Diminuir">−</button>
         <input type="number" min="0" max="9999" value="<?= (int) $noCarrinho ?>" aria-label="Quantidade">

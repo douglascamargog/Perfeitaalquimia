@@ -6,6 +6,7 @@ use App\Core\Config;
 use App\Core\Sessao;
 use App\Models\Pedido;
 use App\Models\Produto;
+use App\Services\CampanhaService;
 use App\Services\CatalogoAcesso;
 use App\Services\PedidoService;
 
@@ -22,7 +23,9 @@ class CatalogoController extends Controller
     private function tela2(string $pagina, array $dados = []): void
     {
         $cliente = CatalogoAcesso::cliente();
+        $campanhas = CampanhaService::paraCliente($cliente);
         $this->tela($pagina, $dados + [
+            'campanhasCatalogo' => $campanhas, 'visualCatalogo' => CampanhaService::visual($campanhas),
             'clienteCatalogo' => $cliente,
             'tabelaCatalogo' => $cliente ? PedidoService::tabelaDoCliente($cliente)['nome'] : null,
             'vendedorCatalogo' => CatalogoAcesso::vendedor(),
@@ -48,9 +51,19 @@ class CatalogoController extends Controller
         $tabela = $cliente ? PedidoService::tabelaDoCliente($cliente) : null;
         $busca = mb_substr(trim((string) ($_GET['q'] ?? '')), 0, 80);
         $categoria = ctype_digit((string) ($_GET['categoria'] ?? '')) ? (int) $_GET['categoria'] : null;
+        $campanhas = CampanhaService::paraCliente($cliente);
+        $promo = CampanhaService::promocoes($campanhas);
+        $comPromo = fn(array $p) => $p + ['promo_pct' => $promo[$p['id']]['pct'] ?? 0, 'promo_destaque' => $promo[$p['id']]['destaque'] ?? false,
+            'preco_promo' => isset($promo[$p['id']]) && $p['preco'] !== null ? CampanhaService::precoPromo((float) $p['preco'], $promo[$p['id']]['pct']) : null];
+        $produtos = array_map($comPromo, Produto::vitrine($busca, $categoria, $tabela ? (int) $tabela['id'] : null, (bool) Config::get('catalogo.mostrar_sem_preco', false)));
+        $c = $cliente ? PedidoService::calcular($cliente, CatalogoAcesso::carrinho()) : null;
         $this->tela2('catalogo/vitrine', [
             'titulo' => 'Produtos', 'busca' => $busca, 'categoria' => $categoria, 'categorias' => Produto::categorias(),
-            'produtos' => Produto::vitrine($busca, $categoria, $tabela ? (int) $tabela['id'] : null, (bool) Config::get('catalogo.mostrar_sem_preco', false)),
+            'produtos' => $produtos, 'campanhas' => $campanhas,
+            // destaques: produtos em promoção marcados como destaque (só na vitrine "inteira", sem busca e sem categoria)
+            'destaques' => $busca === '' && !$categoria ? array_values(array_filter($produtos, fn($p) => $p['promo_destaque'])) : [],
+            'emPromocao' => array_values(array_filter($produtos, fn($p) => $p['promo_pct'] > 0)),
+            'resumo' => $c ? self::resumoCampanha($c) : null,
             'carrinho' => CatalogoAcesso::carrinho(), 'logado' => (bool) $cliente,
             // Produtos com a marca do cliente (Terceirização): só ele vê, no alto da vitrine
             'meusProdutos' => $cliente && $busca === '' && !$categoria ? \App\Services\TerceirizacaoService::linhasDoPedido((int) $cliente['id']) : [],
@@ -71,6 +84,10 @@ class CatalogoController extends Controller
             $this->tela2('catalogo/nao_encontrado', ['titulo' => 'Produto não encontrado']);
             return;
         }
+        $promo = CampanhaService::promocoes(CampanhaService::paraCliente($cliente))[$produto['id']] ?? null;
+        $produto['promo_pct'] = $promo['pct'] ?? 0;
+        $produto['preco_promo'] = $promo && $produto['preco'] !== null ? CampanhaService::precoPromo((float) $produto['preco'], $promo['pct']) : null;
+        $produto['promo_campanha'] = $promo['campanha'] ?? null;
         $this->tela2('catalogo/produto', ['titulo' => $produto['nome'], 'p' => $produto, 'logado' => (bool) $cliente,
             'noCarrinho' => CatalogoAcesso::carrinho()[$produto['id']] ?? 0]);
     }
@@ -83,6 +100,16 @@ class CatalogoController extends Controller
             $_SESSION['catalogo']['vendedor_id'] = (int) $vendedor['id'];
         }
         redirecionar('/catalogo');
+    }
+
+    /** Resumo da campanha para a barra do carrinho: mensagem "faltam…", o que já ganhou e o progresso até a próxima faixa */
+    private static function resumoCampanha(array $c): array
+    {
+        $b = $c['campanha'];
+        $prox = $b['proximas'][0] ?? null;
+        return ['campanha_msg' => CampanhaService::mensagem($b), 'campanha_ganhou' => implode(' · ', CampanhaService::conquistas($b)),
+            'campanha_pct' => $prox ? (int) min(100, round($c['subtotal'] / max(0.01, $prox['a_partir_de']) * 100)) : ($b['nomes'] ? 100 : 0),
+            'subtotal_valor' => $c['subtotal'], 'quantidade_total' => $c['quantidade']];
     }
 
     // ---------------- Carrinho ----------------
@@ -113,7 +140,7 @@ class CatalogoController extends Controller
         $c = PedidoService::calcular($cliente, CatalogoAcesso::carrinho());
         $this->json(['ok' => true, 'quantidade' => $c['quantidade'], 'subtotal' => dinheiro($c['subtotal']), 'falta' => $c['falta'],
             'falta_texto' => $c['falta'] > 0 ? 'Faltam ' . dinheiro($c['falta']) . ' para o pedido mínimo da sua região' : 'Pedido mínimo atingido ✓',
-            'percentual' => $c['minimo'] > 0 ? min(100, round($c['subtotal'] / $c['minimo'] * 100)) : 100]);
+            'percentual' => $c['minimo'] > 0 ? min(100, round($c['subtotal'] / $c['minimo'] * 100)) : 100] + self::resumoCampanha($c));
     }
 
     public function carrinho(): void

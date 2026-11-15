@@ -9,13 +9,16 @@ use App\Core\Sessao;
 
 $cli = $clienteCatalogo ?? null;
 $icones = asset('img/icones.svg');
+// Visual do catálogo: o da campanha no ar (cores, fundo claro/escuro), senão o padrão (Comercial › Campanhas › Visual do catálogo)
+$visualCatalogo ??= \App\Services\CampanhaService::visual([]);
+$campanhaTopo = $visualCatalogo['campanha'] ?? null;
 ?>
 <!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="<?= e(\App\Services\Aparencia::padrao()[0]) ?>">
+  <meta name="theme-color" content="<?= e($visualCatalogo['primaria']) ?>">
   <title><?= e($titulo ?? 'Catálogo') ?> · <?= e(Config::get('catalogo.titulo', 'Catálogo')) ?></title>
   <link rel="icon" type="image/png" href="<?= asset('img/logo.png') ?>">
   <link rel="stylesheet" href="<?= asset('css/base.css') ?>">
@@ -24,12 +27,13 @@ $icones = asset('img/icones.svg');
   <?php if (!empty($semMenu)): ?><meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer"><?php endif; ?>
   <meta name="csrf" content="<?= e(\App\Core\Csrf::token()) ?>">
   <meta name="base" content="<?= e(url_base()) ?>">
-  <?= \App\Services\Aparencia::estilo(null, true) /* cores do sistema */ ?>
+  <?= \App\Services\CampanhaService::estilo($visualCatalogo) /* cores do catálogo (da campanha ou o padrão) */ ?>
 </head>
-<body class="cat">
+<body class="cat <?= $visualCatalogo['tema'] === 'escuro' ? 'cat-escuro' : 'cat-claro' ?>">
 <?php if (config('modo_demo')): ?><div class="faixa-demo">Ambiente de demonstração — dados simulados</div><?php endif; ?>
 <header class="cat-topo">
   <a class="cat-marca" href="<?= url('/catalogo') ?>"><img src="<?= asset('img/logo.png') ?>" alt="Perfeita Alquimia" width="44" height="44"><span><?= e(Config::get('catalogo.titulo', 'Catálogo')) ?></span></a>
+  <?php if ($campanhaTopo && empty($semMenu)): ?><span class="cat-topo-chip"><?= e($campanhaTopo['titulo'] ?: $campanhaTopo['nome']) ?><?= $campanhaTopo['selo'] ? ' · <b>' . e($campanhaTopo['selo']) . '</b>' : '' ?></span><?php endif; ?>
   <?php if (empty($semMenu)): ?>
   <nav class="cat-nav" aria-label="Catálogo">
     <?php if ($cli): ?>

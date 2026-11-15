@@ -34,6 +34,11 @@ function atualizarResumo(d) {
     barra.querySelector('[data-subtotal]').textContent = d.subtotal;
     barra.querySelector('[data-falta]').textContent = d.falta > 0 ? d.falta_texto : '';
   }
+  // Campanha: "Faltam R$ X para você ganhar…", o que já ganhou e a barrinha até a próxima faixa
+  document.querySelectorAll('[data-camp-msg]').forEach((el) => { el.textContent = d.campanha_msg || (d.campanha_ganhou ? 'Você já ganhou tudo desta campanha! 🎉' : ''); });
+  document.querySelectorAll('[data-camp-ganhou]').forEach((el) => { el.textContent = d.campanha_ganhou ? 'Você ganhou: ' + d.campanha_ganhou : ''; el.hidden = !d.campanha_ganhou; });
+  document.querySelectorAll('[data-camp-barra]').forEach((el) => { el.style.width = (d.campanha_pct || 0) + '%'; });
+  document.querySelectorAll('[data-camp-subtotal]').forEach((el) => { el.textContent = d.subtotal; });
 }
 
 let espera = null;
@@ -56,6 +61,8 @@ document.addEventListener('change', (evento) => {
     try {
       const d = await salvar(caixa, quantidade);
       atualizarResumo(d);
+      // o mesmo produto pode aparecer nos destaques e na lista: deixa as duas caixas iguais
+      document.querySelectorAll(`[data-produto="${caixa.dataset.produto}"] input`).forEach((i) => { if (i !== evento.target) i.value = quantidade; });
       if (caixa.hasAttribute('data-recarregar')) window.location.reload(); // no carrinho, recalcula totais e pagamento
       else avisar(quantidade ? 'Carrinho atualizado' : 'Removido do carrinho');
     } catch (erro) {
@@ -64,12 +71,6 @@ document.addEventListener('change', (evento) => {
   }, 350);
 });
 
-// Primeira carga: mostra a barra com o subtotal certo
-const barra = document.querySelector('[data-barra-carrinho]');
-if (barra && !barra.hidden) {
-  const primeiro = document.querySelector('[data-produto]');
-  if (primeiro) salvar(primeiro, primeiro.querySelector('input').value).then(atualizarResumo).catch(() => {});
-}
 
 // "Tem certeza?" (cancelar pedido)
 document.addEventListener('submit', (evento) => {
