@@ -40,7 +40,7 @@ class Integracoes
 
     public static function telefonia(): TelefoniaInterface
     {
-        // Configurações › Ligue Talk › Modo: manual | simulado (demonstração) | api (chaves no config.php)
+        // Configurações › Ligue Talk › Modo: manual | simulado (demonstração) | api (company_id e token em Administração › Ligue Talk)
         return self::$telefonia ??= match (\App\Core\Config::get('telefonia.modo', 'simulado')) {
             'api'    => (string) config('integracoes.ligue_talk.token', '') !== ''
                 ? new \App\Integrations\LigueTalk\LigueTalkClient(

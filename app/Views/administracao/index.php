@@ -36,3 +36,45 @@ $icones = asset('img/icones.svg');
       <span class="pequeno suave">faz uma pergunta curtinha com a chave cadastrada (custa menos de 1 centavo)</span></form>
   </section>
 <?php endif; ?>
+<?php if (\App\Core\Auth::pode('config.gerenciar')):
+  $ltEmpresa = (string) config('integracoes.ligue_talk.company_id', '');
+  $ltToken = (string) config('integracoes.ligue_talk.token', '');
+  $ltModo = (string) \App\Core\Config::get('telefonia.modo', 'simulado');
+  $ltUsuarios = \App\Core\Sessao::get('ligue_usuarios'); \App\Core\Sessao::remover('ligue_usuarios');
+  $ramais = $ltUsuarios ? array_column(\App\Core\Banco::todos("SELECT nome, ramal FROM usuarios WHERE ativo = 1 AND ramal IS NOT NULL AND ramal <> ''"), 'nome', 'ramal') : [];
+?>
+  <section class="card adm-one" id="ligue-talk" data-ligue-talk style="margin-top:16px">
+    <h2 style="margin:0 0 6px;font-size:1rem">📞 Ligue Talk <small class="suave"><?= ['manual' => 'registro manual das ligações', 'simulado' => 'demonstração (ligações de exemplo)', 'api' => 'ligado à API do Ligue Talk'][$ltModo] ?? e($ltModo) ?></small></h2>
+    <p class="pequeno" style="margin:0">Ligado à API, as ligações e gravações das vendedoras aparecem sozinhas no Acompanhamento e na ficha do cliente, e dá para mandar listas de clientes para o discador. Os dados (código da empresa e token da API) são pedidos ao suporte do Ligue Talk.</p>
+    <form method="post" action="<?= url('/administracao/ligue-talk') ?>" class="adm-chave" autocomplete="off"><?= csrf_campo() ?>
+      <div class="adm-chave-linha">
+        <label style="flex:1;min-width:160px">Código da empresa (company_id)<input type="text" name="company_id" value="<?= e($ltEmpresa) ?>" placeholder="ex.: 1234" data-lt-empresa></label>
+        <label style="flex:2;min-width:220px">Token da API <small class="suave"><?= $ltToken ? '(cadastrado: …' . e(mb_substr($ltToken, -4)) . '; para trocar, cole o novo)' : '(nenhum cadastrado)' ?></small><input type="password" name="token" placeholder="token X-LTK-VND" autocomplete="new-password" spellcheck="false" data-lt-token></label>
+      </div>
+      <div class="adm-chave-linha">
+        <label>Modo das ligações
+          <select name="modo" data-lt-modo>
+            <option value="manual" <?= $ltModo === 'manual' ? 'selected' : '' ?>>Manual (registrar com 1 clique)</option>
+            <option value="api" <?= $ltModo === 'api' ? 'selected' : '' ?>>API do Ligue Talk (automático)</option>
+            <?php if (config('modo_demo')): ?><option value="simulado" <?= $ltModo === 'simulado' ? 'selected' : '' ?>>Demonstração</option><?php endif; ?>
+          </select></label>
+        <button class="botao pequeno" type="submit">Guardar</button>
+        <?php if ($ltToken || $ltEmpresa): ?><button class="botao contorno pequeno" type="submit" name="remover" value="1" data-confirmar="Remover os dados do Ligue Talk? As ligações voltam ao registro manual.">Remover</button><?php endif; ?>
+      </div>
+      <small class="suave">O token fica guardado só no servidor, no mesmo arquivo protegido da chave da IA, e não aparece de novo.</small>
+    </form>
+    <form method="post" action="<?= url('/administracao/ligue-talk/testar') ?>" style="margin-top:10px"><?= csrf_campo() ?>
+      <button class="botao contorno pequeno" type="submit" data-testar-ligue>Testar conexão</button>
+      <span class="pequeno suave">consulta a lista de usuários do Ligue Talk</span></form>
+    <?php if ($ltUsuarios): ?>
+      <div class="pequeno" style="margin-top:10px" data-lt-usuarios>
+        <strong>Usuários do Ligue Talk</strong> — para as ligações caírem na pessoa certa, preencha o "Usuário no Ligue Talk" de cada pessoa em <a href="<?= url('/usuarios') ?>">Pessoas e acessos</a>:
+        <ul style="margin:6px 0 0;padding-left:18px">
+          <?php foreach ($ltUsuarios as $lu): $dono = $ramais[$lu['id']] ?? null; ?>
+            <li><?= e($lu['nome'] ?: '(sem nome)') ?> · id <code><?= e($lu['id']) ?></code> — <?= $dono ? '✅ ligado a ' . e($dono) : '⚠️ ainda não ligado a ninguém do One' ?></li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+    <?php endif; ?>
+  </section>
+<?php endif; ?>

@@ -94,15 +94,59 @@ class LigueTalkClient extends LigueTalkManual
         return $codigo === 200 && $corpo !== '' ? (string) $corpo : null;
     }
 
-    /** Teste de conexão (Configurações): lista os usuários */
+    /** Teste de conexão (botão do Acompanhamento): mesmo teste da Administração, no formato ok/mensagem */
     public function testar(): array
     {
-        $r = $this->chamar('GET', 'users_report_v1');
-        return $r === null ? ['ok' => false, 'mensagem' => 'Sem resposta do Ligue Talk: confira o company_id e o token no config.php.']
-            : ['ok' => true, 'mensagem' => 'Conectado ao Ligue Talk: ' . count(self::registros($r)) . ' usuário(s) na empresa.'];
+        [$ok, $mensagem] = $this->testarConexao();
+        return ['ok' => $ok, 'mensagem' => $mensagem];
     }
 
     // ------------------------------------------------------------------
+
+    /**
+     * Teste da ligação (Administração › Ligue Talk › "Testar conexão"): pede a lista de usuários.
+     * Devolve [deu_certo, mensagem em português, usuários do Ligue Talk (nome + id/ramal)].
+     */
+    public function testarConexao(): array
+    {
+        if ($this->empresa === '' || $this->token === '') {
+            return [false, 'Falta o código da empresa (company_id) ou o token. Cole os dois e guarde.', []];
+        }
+        $ch = curl_init(rtrim($this->url, '/') . '/users_report_v1?' . http_build_query(['company_id' => $this->empresa]));
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 20, CURLOPT_HTTPHEADER => ['X-LTK-VND: ' . $this->token]]);
+        $resposta = curl_exec($ch);
+        $codigo = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $erroRede = curl_errno($ch);
+        curl_close($ch);
+        if ($erroRede || $codigo === 0) {
+            return [false, 'O servidor não conseguiu falar com o Ligue Talk (sistema.liguetalk.com.br). Peça à hospedagem para liberar conexões HTTPS de saída.', []];
+        }
+        if (in_array($codigo, [401, 403], true)) {
+            return [false, 'O Ligue Talk recusou o token ou o código da empresa. Confira com o suporte do Ligue Talk (eles geram o token da API).', []];
+        }
+        if ($codigo === 429) {
+            return [false, 'Limite de consultas do Ligue Talk (10 por minuto). Espere um minuto e teste de novo.', []];
+        }
+        if ($codigo < 200 || $codigo >= 300) {
+            return [false, "O Ligue Talk respondeu com erro (código $codigo). Tente de novo mais tarde ou fale com o suporte deles.", []];
+        }
+        $usuarios = [];
+        foreach (self::registros(json_decode((string) $resposta, true)) as $u) {
+            if (!is_array($u)) {
+                continue;
+            }
+            $nome = '';
+            foreach (['usr_nome', 'nome', 'name', 'user_name', 'usuario'] as $k) {
+                if (!empty($u[$k]) && is_scalar($u[$k])) { $nome = (string) $u[$k]; break; }
+            }
+            $idExterno = '';
+            foreach (['usr_id', 'user_id', 'id', 'ramal', 'usuario_id'] as $k) {
+                if (isset($u[$k]) && is_scalar($u[$k]) && (string) $u[$k] !== '') { $idExterno = (string) $u[$k]; break; }
+            }
+            $usuarios[] = ['nome' => $nome, 'id' => $idExterno];
+        }
+        return [true, 'Conectado ao Ligue Talk! ' . count($usuarios) . ' usuário(s) encontrados.', $usuarios];
+    }
 
     private function chamar(string $metodo, string $recurso, array $params = [], ?array $corpo = null): ?array
     {
