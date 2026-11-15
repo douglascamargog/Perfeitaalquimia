@@ -140,6 +140,9 @@ async function sair(p) { await p.goto(BASE + '/'); await p.click('form[action$="
   await ultima.scrollIntoViewIfNeeded();
   const yAntes = await p.evaluate(() => window.scrollY);
   await ultima.locator('input[name=quantidade]').fill('1');
+  if (await ultima.locator('input[name=lote]').count()) { // matéria-prima pede lote e validade na entrada (V11.5)
+    await ultima.locator('input[name=lote]').fill('L-TESTE'); await ultima.locator('input[name=validade]').fill('2030-01-01');
+  }
   await Promise.all([p.waitForNavigation(), ultima.locator('button').click()]);
   await p.waitForTimeout(300);
   const yDepois = await p.evaluate(() => window.scrollY);

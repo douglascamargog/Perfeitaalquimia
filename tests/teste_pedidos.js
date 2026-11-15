@@ -14,6 +14,7 @@ async function sairCliente(p) { await p.goto(BASE + '/catalogo'); const b = p.lo
 async function qtd(p, produtoId, n) { await p.request.post(BASE + '/catalogo/carrinho/quantidade', { form: { produto_id: produtoId, quantidade: n, _csrf: await p.locator('meta[name=csrf]').getAttribute('content') } }); }
 
 (async () => {
+  sql('update campanhas set ativa = 0'); // este teste confere preços de tabela: sem campanhas (elas têm o próprio teste)
   const b = await chromium.launch(); const erros = [];
   const cel = await b.newContext({ viewport: { width: 390, height: 844 } }); const c = await cel.newPage();
   c.on('pageerror', e => erros.push('cliente: ' + e.message)); c.on('dialog', d => d.accept());

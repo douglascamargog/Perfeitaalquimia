@@ -9,6 +9,7 @@ let falhas = 0; const ok = (c, m) => { console.log((c ? 'OK   ' : 'FALHA') + ' '
 const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -e "${q.replace(/"/g, '\\"')}"`).toString().trim();
 
 (async () => {
+  sql('update campanhas set ativa = 0'); // este teste confere preços de tabela: sem campanhas (elas têm o próprio teste)
   const b = await chromium.launch();
   const erros = [];
   const pagina = async (opcoes = {}) => {

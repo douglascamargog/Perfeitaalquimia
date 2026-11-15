@@ -17,6 +17,23 @@
  */
 return [
     [
+        'versao' => '12.0', 'data' => '2026-11-15', 'titulo' => 'Campanhas comerciais e catálogo novo',
+        'novo' => [
+            'Comercial › Campanhas: campanhas do mês ou da semana com faixas pelo valor do pedido. Exemplos: "acima de R$ 2.000, 10% de desconto", "acima de R$ 10.000, ganha uma bicicleta" ou "frete grátis".',
+            'Produtos em promoção na campanha: o cliente vê o preço antigo riscado e o novo, com o selo "-X%".',
+            'Cada campanha escolhe para quem vale: todos os clientes, uma tabela de preço, uma região, um estado ou um setor.',
+            'Catálogo do cliente com visual novo: banner grande, as faixas da campanha, as ofertas em destaque e a lista de produtos. As cores e o banner mudam com a campanha.',
+            'Enquanto compra, o cliente vê quanto falta para a próxima faixa ("Faltam R$ 200 para você ganhar 10% de desconto") e o que já ganhou.',
+            'Novo pedido da equipe: o resumo mostra a campanha, o que o cliente já ganhou e quanto falta, e os preços promocionais aparecem na lista.',
+            'O pedido guarda o que a campanha deu: desconto, brinde e frete grátis aparecem na página do pedido, na Aprovação e na separação ("colocar o brinde na caixa").',
+        ],
+        'melhoria' => [
+            'Com duas campanhas ao mesmo tempo, o cliente ganha o melhor de cada uma: o maior desconto, todos os brindes conquistados e o frete grátis.',
+            'Duplicar uma campanha cria a do mês seguinte com tudo pronto. Dá para desligar e ligar sem apagar.',
+        ],
+        'admin' => 'Gestor cria e muda campanhas (permissão campanhas.gerenciar); vendedores, Financeiro e Marketing só veem. Visual padrão do catálogo em Comercial › Campanhas › Visual do catálogo.',
+    ],
+    [
         'versao' => '11.8', 'data' => '2026-11-15', 'titulo' => 'Desconto da vendedora no pedido',
         'novo' => [
             'Novo pedido: coluna "Desc. %" em cada produto e o campo "Desconto no pedido (%)". O total é recalculado na hora.',
