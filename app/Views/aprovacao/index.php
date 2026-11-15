@@ -28,4 +28,8 @@
       <?= \App\Core\Visao::renderizar('aprovacao/_acoes', ['p' => $p, 'voltar' => 'fila']) ?>
     </article>
   <?php endforeach; ?>
+<?php if (($paginas ?? 1) > 1): ?>
+  <div class="paginacao-barra"><span><?= (int) $total ?> pedido(s) esperando · página <?= (int) $pagina ?> de <?= (int) $paginas ?></span>
+    <nav class="paginacao"><?php for ($n = 1; $n <= $paginas; $n++): ?><a class="botao <?= $n === $pagina ? '' : 'contorno' ?> pequeno" href="<?= url('/aprovacao') ?>?pagina=<?= $n ?>"><?= $n ?></a><?php endfor; ?></nav></div>
+<?php endif; ?>
 </div>

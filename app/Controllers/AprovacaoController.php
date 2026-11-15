@@ -14,13 +14,19 @@ class AprovacaoController extends Controller
 {
     public function index(): void
     {
-        $pedidos = Pedido::aguardandoAprovacao();
+        // Fila em páginas de 30 (os mais antigos primeiro): a tela não pesa mesmo com muitos pedidos esperando
+        $todos = Pedido::aguardandoAprovacao();
+        $porPagina = 30;
+        $paginas = max(1, (int) ceil(count($todos) / $porPagina));
+        $pagina = min($paginas, max(1, (int) ($_GET['pagina'] ?? 1)));
+        $pedidos = array_slice($todos, ($pagina - 1) * $porPagina, $porPagina);
         $credito = $itens = [];
         foreach ($pedidos as $p) {
             $credito[$p['id']] = Pedido::credito((int) $p['cliente_id']);
             $itens[$p['id']] = Pedido::itens((int) $p['id']);
         }
         $this->tela('aprovacao/index', ['titulo' => 'Aprovação de pedidos', 'pedidos' => $pedidos, 'credito' => $credito, 'itens' => $itens,
+            'total' => count($todos), 'pagina' => $pagina, 'paginas' => $paginas,
             'estilos' => ['carteira.css', 'pedidos.css']]);
     }
 

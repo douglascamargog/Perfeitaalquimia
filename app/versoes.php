@@ -17,6 +17,14 @@
  */
 return [
     [
+        'versao' => '12.2', 'data' => '2026-11-15', 'titulo' => 'Mais rápido com muitos clientes',
+        'melhoria' => [
+            'O sistema ficou mais rápido para carteiras grandes: o Início dos gestores, o sino, a Recompra, as Carteiras e o Acompanhamento abrem bem mais depressa.',
+            'Aprovação de pedidos: a fila mostra 30 pedidos por página (os mais antigos primeiro), sem demora mesmo com muitos pedidos esperando.',
+        ],
+        'admin' => 'Teste de carga com 30 pessoas e 20 mil clientes: dia normal com metade das telas abrindo em até 0,02 s e 95% em até 0,14 s, sem nenhum erro. Novos índices no banco (migration 044). O teste pode ser repetido: tests/carga/LEIA-ME.md.',
+    ],
+    [
         'versao' => '12.1', 'data' => '2026-11-15', 'titulo' => 'Menu mais enxuto',
         'novo' => [
             'Comercial: Televendas, Externo, Terceirização e Prospecção agora ficam juntos no grupo Comercial. Quem trabalha em mais de um setor escolhe o setor no alto do grupo.',

@@ -164,6 +164,38 @@ class VendasService
      */
     public static function recompra(?int $vendedor = null, ?int $setor = null): array
     {
+        [$where, $par] = self::filtroRecompra($vendedor, $setor);
+        $clientes = Banco::todos('SELECT c.id, c.razao_social, c.nome_fantasia, c.cidade, c.uf, c.telefone, c.whatsapp, c.ultima_compra_em, c.intervalo_medio_dias,
+                DATEDIFF(CURDATE(), c.ultima_compra_em + INTERVAL c.intervalo_medio_dias DAY) AS dias_atraso, DATEDIFF(CURDATE(), c.ultima_compra_em) AS dias_desde,
+                u.nome AS responsavel, u.foto AS responsavel_foto,
+                (SELECT AVG(total) FROM pedidos p WHERE p.cliente_id = c.id AND p.situacao = \'faturado\') AS ticket,
+                (SELECT MAX(id) FROM pedidos p WHERE p.cliente_id = c.id AND p.situacao IN (\'faturado\', \'aprovado\')) AS ultimo_pedido,
+                (SELECT COUNT(*) FROM tarefas t WHERE t.cliente_id = c.id AND t.concluida_em IS NULL) AS tarefas_abertas
+            FROM clientes c LEFT JOIN usuarios u ON u.id = c.responsavel_id WHERE ' . $where, $par);
+        // O que cada cliente mais compra (3 produtos): UMA consulta para a lista toda (e não uma por cliente)
+        $produtos = [];
+        foreach (array_chunk(array_map('intval', array_column($clientes, 'id')), 1000) as $ids) {
+            foreach (Banco::todos('SELECT p.cliente_id, i.nome, SUM(i.quantidade) AS q FROM pedido_itens i JOIN pedidos p ON p.id = i.pedido_id
+                    WHERE p.cliente_id IN (' . implode(',', $ids) . ') AND p.situacao = \'faturado\' GROUP BY p.cliente_id, i.nome ORDER BY p.cliente_id, q DESC') as $l) {
+                if (count($produtos[$l['cliente_id']] ?? []) < 3) {
+                    $produtos[$l['cliente_id']][] = $l['nome'];
+                }
+            }
+        }
+        foreach ($clientes as &$c) {
+            $c['ticket'] = (float) $c['ticket'];
+            // Prioridade: valor do cliente × atraso proporcional ao intervalo
+            $c['prioridade'] = $c['ticket'] * (1 + (int) $c['dias_atraso'] / max(1, (int) $c['intervalo_medio_dias']));
+            $c['produtos'] = $produtos[$c['id']] ?? [];
+        }
+        unset($c);
+        usort($clientes, fn($a, $b) => $b['prioridade'] <=> $a['prioridade']);
+        return $clientes;
+    }
+
+    /** Filtro da recompra (o mesmo para a lista e para a contagem): [where, parâmetros] */
+    private static function filtroRecompra(?int $vendedor, ?int $setor): array
+    {
         $tolerancia = max(0, (int) Config::get('recompra.tolerancia_dias', 3));
         $w = ["c.excluido_em IS NULL", "c.tipo = 'cliente'", 'c.intervalo_medio_dias > 0',
             'c.ultima_compra_em + INTERVAL (c.intervalo_medio_dias + ?) DAY < CURDATE()',
@@ -182,27 +214,13 @@ class VendasService
             $w[] = 'c.funcao_id = ?';
             $par[] = $setor;
         }
-        $clientes = Banco::todos('SELECT c.id, c.razao_social, c.nome_fantasia, c.cidade, c.uf, c.telefone, c.whatsapp, c.ultima_compra_em, c.intervalo_medio_dias,
-                DATEDIFF(CURDATE(), c.ultima_compra_em + INTERVAL c.intervalo_medio_dias DAY) AS dias_atraso, DATEDIFF(CURDATE(), c.ultima_compra_em) AS dias_desde,
-                u.nome AS responsavel, u.foto AS responsavel_foto,
-                (SELECT AVG(total) FROM pedidos p WHERE p.cliente_id = c.id AND p.situacao = \'faturado\') AS ticket,
-                (SELECT MAX(id) FROM pedidos p WHERE p.cliente_id = c.id AND p.situacao IN (\'faturado\', \'aprovado\')) AS ultimo_pedido,
-                (SELECT COUNT(*) FROM tarefas t WHERE t.cliente_id = c.id AND t.concluida_em IS NULL) AS tarefas_abertas
-            FROM clientes c LEFT JOIN usuarios u ON u.id = c.responsavel_id WHERE ' . implode(' AND ', $w), $par);
-        foreach ($clientes as &$c) {
-            $c['ticket'] = (float) $c['ticket'];
-            // Prioridade: valor do cliente × atraso proporcional ao intervalo
-            $c['prioridade'] = $c['ticket'] * (1 + (int) $c['dias_atraso'] / max(1, (int) $c['intervalo_medio_dias']));
-            $c['produtos'] = array_column(Banco::todos('SELECT i.nome, SUM(i.quantidade) AS q FROM pedido_itens i JOIN pedidos p ON p.id = i.pedido_id
-                WHERE p.cliente_id = ? AND p.situacao = \'faturado\' GROUP BY i.nome ORDER BY q DESC LIMIT 3', [$c['id']]), 'nome');
-        }
-        usort($clientes, fn($a, $b) => $b['prioridade'] <=> $a['prioridade']);
-        return $clientes;
+        return [implode(' AND ', $w), $par];
     }
 
     /** Quantos clientes da carteira do usuário estão na recompra (Início/One) */
     public static function qtdRecompra(): int
     {
-        return count(self::recompra());
+        [$where, $par] = self::filtroRecompra(null, null); // só conta (o sino e o One perguntam a cada minuto)
+        return (int) Banco::valor('SELECT COUNT(*) FROM clientes c WHERE ' . $where, $par);
     }
 }
