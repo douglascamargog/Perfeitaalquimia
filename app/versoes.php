@@ -17,6 +17,23 @@
  */
 return [
     [
+        'versao' => '10.5', 'data' => '2026-11-15', 'titulo' => 'Compras da empresa e página completa de cada item',
+        'novo' => [
+            'Financeiro › Compras da empresa: tudo que é comprado (matéria-prima, potes, rótulos, material de escritório, limpeza…) fica anotado num lugar só, com o total do mês por categoria.',
+            'Lançar compra: fornecedor, número e arquivo da NF e os itens com quantidade e valor. Ao salvar, entra no estoque e a NF vai para os documentos de cada item.',
+            'Notas do Omie entram sozinhas no estoque. Quem compra, a Produção (quando é matéria-prima, embalagem ou rótulo) e a Diretoria recebem o aviso no sino. Um item que o One ainda não conhece aparece em "Do Omie" para ligar uma vez só.',
+            'Cada item tem uma página própria: estoque, quanto dura em média, de quantos em quantos dias é comprado, próxima compra prevista, preço médio e gasto dos últimos 12 meses.',
+            'Vários fornecedores para o mesmo item, com o último preço de cada um, o menor preço em destaque e a escolha do fornecedor principal.',
+            'Documentos do item (laudo, ficha técnica, FISPQ, certificado e NF), com validade e lote. Os que estão vencendo ficam marcados.',
+            'Os orçamentos da Qualidade recebidos no Depósito viram compra lançada, com a NF anexada no recebimento.',
+        ],
+        'melhoria' => [
+            'Página da matéria-prima com cartões, abas (Resumo, Fornecedores, Compras, Documentos, Estoque) e gráfico de compras por mês.',
+            'Desenvolvimento de Produto com visual futurista: balões e janelas de vidro com brilho neon, fundo quadriculado e fios de luz.',
+        ],
+        'admin' => 'Permissão nova "Lançar compras da empresa" (perfil Financeiro; a função Qualidade também lança). Categorias dos itens em Configurações › Compras. Aviso de compras para a Diretoria em Configurações › Diretoria.',
+    ],
+    [
         'versao' => '10.4', 'data' => '2026-11-14', 'titulo' => 'Resultados, Meu mês e Agenda de cara nova',
         'melhoria' => [
             'Meu mês: anel da meta, aviso de ritmo ("No ritmo" ou "Atrás do ritmo · precisa de R$ X por dia") e quanto falta por dia de trabalho.',

@@ -64,7 +64,7 @@ $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceiriza
               <?php foreach (array_values($lotes) as $n => $l): ?>
                 <div class="dep-lote" data-lote>
                   <input type="text" name="item[<?= $iid ?>][lotes][<?= $n ?>][lote]" value="<?= e((string) $l['lote']) ?>" list="lotes-<?= $iid ?>" maxlength="40" placeholder="Lote" aria-label="Lote" data-lote-nome>
-                  <input type="date" name="item[<?= $iid ?>][lotes][<?= $n ?>][validade]" value="<?= e((string) $l['validade']) ?>" aria-label="Validade" data-lote-validade>
+                  <input type="date" name="item[<?= $iid ?>][lotes][<?= $n ?>][validade]" value="<?= e((string) ($l['validade'] ?? '')) ?>" aria-label="Validade" data-lote-validade>
                   <input type="number" name="item[<?= $iid ?>][lotes][<?= $n ?>][qtd]" value="<?= e((string) $l['qtd']) ?>" min="0" placeholder="qtd" aria-label="Quantidade deste lote" data-lote-qtd>
                 </div>
               <?php endforeach; ?>

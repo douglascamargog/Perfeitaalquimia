@@ -253,17 +253,19 @@ class CompraService
     }
 
     /** Chegou (Depósito ou Produção): matéria-prima/rótulo ligado dá entrada no estoque com o valor da cotação escolhida */
-    public static function receber(int $id, float $quantidade, string $observacao, int $usuarioId): void
+    public static function receber(int $id, float $quantidade, string $observacao, int $usuarioId, string $numeroNf = '', ?array $nf = null): void
     {
         $c = self::exigir($id, ['comprado']);
         if ($quantidade <= 0) {
             throw new RuntimeException('Informe a quantidade que chegou.');
         }
-        Banco::transacao(function () use ($c, $quantidade, $observacao, $usuarioId) {
+        Banco::transacao(function () use ($c, $quantidade, $observacao, $usuarioId, $numeroNf, $nf) {
             $cot = $c['cotacao_id'] ? Banco::um('SELECT * FROM compra_cotacoes WHERE id = ?', [$c['cotacao_id']]) : null;
             if ($c['materia_prima_id']) {
-                ProducaoService::entrada((int) $c['materia_prima_id'], $quantidade, (float) ($cot['valor_unitario'] ?? 0), '',
-                    trim('Compra #' . $c['id'] . ($cot ? ' · ' . $cot['fornecedor'] : '') . ($observacao !== '' ? ' · ' . $observacao : '')), $usuarioId);
+                // Vira um lançamento de compra (Financeiro › Compras): estoque, fornecedor do item e a NF nos documentos
+                CompraLancamentoService::lancar(['fornecedor' => $cot['fornecedor'] ?? 'Fornecedor do orçamento', 'numero_nf' => $numeroNf, 'emissao' => date('Y-m-d'),
+                    'origem' => 'orcamento', 'compra_id' => (int) $c['id'], 'observacoes' => trim('Orçamento #' . $c['id'] . ($observacao !== '' ? ' · ' . $observacao : ''))],
+                    [['materia_prima_id' => (int) $c['materia_prima_id'], 'quantidade' => $quantidade, 'valor_unitario' => (float) ($cot['valor_unitario'] ?? 0)]], $nf, $usuarioId);
             }
             Banco::atualizar('compras', (int) $c['id'], ['situacao' => 'recebido', 'recebido_em' => date('Y-m-d H:i:s'), 'recebido_por' => $usuarioId, 'recebido_qtd' => $quantidade]);
             $texto = 'Chegou: ' . ProducaoService::qtd($quantidade, (string) $c['unidade']) . ($c['materia_prima_id'] ? ' (entrou no estoque)' : '') . ($observacao !== '' ? ' · ' . $observacao : '') . '.';

@@ -1,5 +1,6 @@
 <?php
-/** Campos do cadastro de matéria-prima. Variáveis: $m (null = nova), $unidades */
+/** Campos do cadastro do item (matéria-prima, embalagem, rótulo ou uso e consumo). Variáveis: $m (null = novo), $unidades, $categorias (opcional) */
+$categorias = $categorias ?? \App\Services\ItemCompraService::categorias();
 $v = fn(string $campo, $padrao = '') => $m === null ? antigo($campo, $padrao) : e((string) ($m[$campo] ?? $padrao));
 $num = fn($valor) => rtrim(rtrim(number_format((float) $valor, 4, ',', ''), '0'), ',');
 ?>
@@ -16,8 +17,9 @@ $num = fn($valor) => rtrim(rtrim(number_format((float) $valor, 4, ',', ''), '0')
   <div class="campo"><label for="tipo">Tipo</label>
     <select id="tipo" name="tipo">
       <?php $tipo = $m['tipo'] ?? (string) \App\Core\Sessao::antigo('tipo', 'materia_prima'); ?>
-      <option value="materia_prima" <?= $tipo !== 'embalagem' ? 'selected' : '' ?>>Matéria-prima</option>
+      <option value="materia_prima" <?= !in_array($tipo, ['embalagem', 'consumo'], true) ? 'selected' : '' ?>>Matéria-prima</option>
       <option value="embalagem" <?= $tipo === 'embalagem' ? 'selected' : '' ?>>Embalagem (pote, tampa, rótulo, lacre...)</option>
+      <option value="consumo" <?= $tipo === 'consumo' ? 'selected' : '' ?>>Uso e consumo (escritório, limpeza...)</option>
     </select>
     <div class="ajuda">Embalagens aparecem na aba Embalagens do produto.</div>
     <label class="caixa-marcar"><input type="checkbox" name="rotulo" value="1" <?= !empty($m['rotulo']) || \App\Core\Sessao::antigo('rotulo') ? 'checked' : '' ?>> É rótulo de produto (aparece em Produção › Rótulos)</label></div>
@@ -26,7 +28,11 @@ $num = fn($valor) => rtrim(rtrim(number_format((float) $valor, 4, ',', ''), '0')
   <div class="campo"><label for="custo_unitario">Custo por unidade (R$)</label>
     <input type="text" id="custo_unitario" name="custo_unitario" inputmode="decimal" value="<?= $m ? $num($m['custo_unitario']) : antigo('custo_unitario') ?>">
     <div class="ajuda">Atualiza sozinho a cada entrada de compra.</div></div>
-  <div class="campo"><label for="fornecedor">Fornecedor</label><input type="text" id="fornecedor" name="fornecedor" maxlength="160" value="<?= $v('fornecedor') ?>"></div>
+  <div class="campo"><label for="categoria">Categoria <small>uso e consumo</small></label><input type="text" id="categoria" name="categoria" maxlength="60" list="lista-categorias" value="<?= $v('categoria') ?>">
+    <datalist id="lista-categorias"><?php foreach ($categorias as $cat): ?><option value="<?= e($cat) ?>"><?php endforeach; ?></datalist></div>
+  <?php if ($m === null): ?>
+    <div class="campo"><label for="fornecedor">Fornecedor principal</label><input type="text" id="fornecedor" name="fornecedor" maxlength="160" value="<?= $v('fornecedor') ?>"><div class="ajuda">Outros fornecedores ficam na aba Fornecedores do item.</div></div>
+  <?php endif; ?>
 </div>
 <div class="campo"><label for="observacoes">Observações</label><textarea id="observacoes" name="observacoes" rows="2"><?= $v('observacoes') ?></textarea></div>
 <label class="opcao"><input type="checkbox" name="ativo" value="1" <?= ($m === null || $m['ativo']) ? 'checked' : '' ?>> Ativa</label>

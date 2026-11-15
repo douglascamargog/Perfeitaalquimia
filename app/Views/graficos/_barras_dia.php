@@ -22,14 +22,14 @@ $hoje = date('Y-m-d');
 <div class="grafico-barras" data-grafico-barras>
   <?php if ($referencia): ?><div class="grafico-ref" style="bottom: calc(<?= round($referencia / $max * 100, 2) ?>% * .86 + 22px)" title="<?= e(($refRotulo ?? 'Referência') . ': ' . $fmt($referencia)) ?>"></div><?php endif; ?>
   <?php foreach ($dias as $d): $total = array_sum($d['valores']);
-    $dica = data_br($d['dia']) . ': ' . implode(' · ', array_map(fn($s, $v) => $s['nome'] . ' ' . $fmt($v), $series, $d['valores'])); ?>
+    $dica = ($d['dica'] ?? data_br($d['dia'])) . ': ' . implode(' · ', array_map(fn($s, $v) => $s['nome'] . ' ' . $fmt($v), $series, $d['valores'])); ?>
     <div class="grafico-coluna <?= $d['dia'] === $hoje ? 'hoje' : '' ?>" title="<?= e($dica) ?>" data-coluna="<?= e($d['dia']) ?>">
       <div class="grafico-pilha" style="height: calc(<?= round($total / $max * 100, 2) ?>% * .86)">
         <?php foreach (array_reverse($d['valores'], true) as $i => $v): if ($v <= 0) continue; ?>
           <span class="<?= e($series[$i]['classe'] ?? 's1') ?>" style="flex: <?= (float) $v ?>"></span>
         <?php endforeach; ?>
       </div>
-      <small><?= (int) substr($d['dia'], 8) ?></small>
+      <small><?= e($d['rotulo'] ?? (string) (int) substr($d['dia'], 8)) ?></small>
     </div>
   <?php endforeach; ?>
   <?php if (!$dias): ?><p class="suave pequeno">Sem dados no período.</p><?php endif; ?>

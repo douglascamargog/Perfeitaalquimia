@@ -63,6 +63,7 @@ return [
     'deposito.operar'         => ['Separar e despachar pedidos, anotar lotes e receber compras', []],     // perfil Depósito (seed 048)
     'compras.ver'             => ['Ver os orçamentos e compras da Qualidade', ['gestor', 'financeiro']],
     'compras.gerenciar'       => ['Fazer orçamentos e compras (além da função Qualidade)', []],
+    'compras.lancar'          => ['Financeiro › Compras: lançar compras e NFs, cuidar dos itens, fornecedores e documentos', ['financeiro']],
     'acompanhar.somente'      => ['Diretoria: vê as áreas e aprova, mas não altera nada (modo leitura)', []],   // perfil Diretoria (seed 054)
     'diretoria.vende'         => ['Diretoria que também vende: trabalha a própria carteira, pedidos e orçamentos', []],
 ];

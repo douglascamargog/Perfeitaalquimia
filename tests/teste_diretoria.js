@@ -102,11 +102,11 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
   ok(avisos('diretoria_problemas') === 1, 'pedido recusado: Diretoria avisada (problema)');
   // meta batida
   const t = await como('televendas1@demo.local');
-  const mes = new Date().toISOString().slice(0, 7);
+  const mes = new Date().toLocaleDateString('sv').slice(0, 7);
   const t1 = uid('televendas1@demo.local');
   sql(`insert into meu_mes (usuario_id, mes, meta, dias_semana, folgas) values (${t1}, '${mes}', 1000, '1,2,3,4,5', '[]') on duplicate key update meta=1000`);
   sql(`delete from vendas_registradas where usuario_id=${t1} and data like '${mes}-%'`);
-  const hoje = new Date().toISOString().slice(0, 10);
+  const hoje = new Date().toLocaleDateString('sv');
   await post(t, '/meu-mes/vendas', { data: hoje, valor: '600,00' });
   ok(avisos('diretoria_meta') === 0, 'abaixo da meta: sem aviso');
   await post(t, '/meu-mes/vendas', { data: hoje, valor: '500,00' });

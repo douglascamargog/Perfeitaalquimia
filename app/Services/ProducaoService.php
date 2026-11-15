@@ -72,6 +72,17 @@ class ProducaoService
     {
         $w = [($f['inativas'] ?? false) ? '1 = 1' : 'm.ativo = 1'];
         $par = [self::diasConsumo()];
+        // Itens de uso e consumo (escritório, limpeza...) são do Financeiro › Compras: a Produção não vê, a não ser que peça
+        if (($f['tipo'] ?? '') !== '') {
+            $w[] = 'm.tipo = ?';
+            $par[] = $f['tipo'];
+        } elseif (empty($f['todos'])) {
+            $w[] = "m.tipo <> 'consumo'";
+        }
+        if (($f['categoria'] ?? '') !== '') {
+            $w[] = 'm.categoria = ?';
+            $par[] = $f['categoria'];
+        }
         if (!empty($f['rotulos'])) {
             $w[] = 'm.rotulo = 1';
         }
@@ -120,7 +131,9 @@ class ProducaoService
             'nome'           => mb_substr(trim((string) ($d['nome'] ?? '')), 0, 160),
             'codigo'         => mb_substr(trim((string) ($d['codigo'] ?? '')), 0, 40) ?: null,
             'unidade'        => (string) ($d['unidade'] ?? ''),
-            'tipo'           => ($d['tipo'] ?? '') === 'embalagem' ? 'embalagem' : 'materia_prima', // embalagem: pote, tampa, rótulo, lacre...
+            // embalagem: pote, tampa, rótulo, lacre... · consumo: uso e consumo da empresa (escritório, limpeza...)
+            'tipo'           => in_array($d['tipo'] ?? '', ['embalagem', 'consumo'], true) ? $d['tipo'] : 'materia_prima',
+            'categoria'      => mb_substr(trim((string) ($d['categoria'] ?? '')), 0, 60) ?: null,
             'rotulo'         => ($d['tipo'] ?? '') === 'embalagem' && !empty($d['rotulo']) ? 1 : 0,  // aparece em Produção › Rótulos
             'estoque_minimo' => max(0, self::numero((string) ($d['estoque_minimo'] ?? '0'))),
             'fornecedor'     => mb_substr(trim((string) ($d['fornecedor'] ?? '')), 0, 160) ?: null,
@@ -129,14 +142,17 @@ class ProducaoService
             'ativo'          => !empty($d['ativo']) ? 1 : 0,
         ];
         if ($dados['nome'] === '') {
-            throw new RuntimeException('Informe o nome da matéria-prima.');
+            throw new RuntimeException('Informe o nome do item.');
         }
         if (!in_array($dados['unidade'], self::unidades(), true)) {
             throw new RuntimeException('Escolha uma unidade da lista.');
         }
         $repetida = Banco::valor('SELECT id FROM materias_primas WHERE nome = ? AND id <> ?', [$dados['nome'], (int) $id]);
         if ($repetida) {
-            throw new RuntimeException('Já existe uma matéria-prima com esse nome.');
+            throw new RuntimeException('Já existe um item com esse nome.');
+        }
+        if ($id && !array_key_exists('fornecedor', $d)) {
+            unset($dados['fornecedor']); // os fornecedores do item ficam na aba Fornecedores (vários)
         }
         if ($id) {
             $antes = Banco::um('SELECT * FROM materias_primas WHERE id = ?', [$id]);
@@ -152,6 +168,9 @@ class ProducaoService
         }
         $novo = Banco::inserir('materias_primas', $dados);
         Auditoria::registrar('materia_prima', $novo, 'criar', null, $dados);
+        if ($dados['fornecedor']) {
+            ItemCompraService::fornecedorPorNome($novo, $dados['fornecedor']); // vira o fornecedor principal
+        }
         // Estoque inicial (opcional) entra como ajuste de inventário, para ficar no histórico
         $inicial = self::numero((string) ($d['estoque_inicial'] ?? '0'));
         if ($inicial > 0) {
@@ -161,20 +180,23 @@ class ProducaoService
     }
 
     /** Entrada de compra: soma ao estoque e atualiza o último custo */
-    public static function entrada(int $mpId, float $quantidade, float $custoUnitario, string $nota, string $observacao, ?int $usuarioId, ?string $quando = null): void
+    public static function entrada(int $mpId, float $quantidade, float $custoUnitario, string $nota, string $observacao, ?int $usuarioId, ?string $quando = null, array $extra = []): int
     {
         if ($quantidade <= 0) {
             throw new RuntimeException('A quantidade da compra precisa ser maior que zero.');
         }
-        Banco::transacao(function () use ($mpId, $quantidade, $custoUnitario, $nota, $observacao, $usuarioId, $quando) {
+        return Banco::transacao(function () use ($mpId, $quantidade, $custoUnitario, $nota, $observacao, $usuarioId, $quando, $extra) {
             self::movimentarMp($mpId, 'entrada', $quantidade, ['custo_unitario' => $custoUnitario > 0 ? $custoUnitario : null,
-                'referencia' => $nota !== '' ? mb_substr("NF $nota", 0, 80) : null, 'observacao' => $observacao, 'usuario_id' => $usuarioId], $quando);
+                'referencia' => $nota !== '' ? mb_substr("NF $nota", 0, 80) : null, 'observacao' => $observacao, 'usuario_id' => $usuarioId,
+                'fornecedor_id' => $extra['fornecedor_id'] ?? null, 'lancamento_id' => $extra['lancamento_id'] ?? null], $quando);
+            $movimento = (int) Banco::valor('SELECT MAX(id) FROM mp_movimentos WHERE materia_prima_id = ?', [$mpId]);
             if ($custoUnitario > 0) {
                 Banco::executar('UPDATE materias_primas SET custo_unitario = ? WHERE id = ?', [$custoUnitario, $mpId]);
             }
             if ($quando === null) {
                 Auditoria::registrar('materia_prima', $mpId, 'entrada', null, ['quantidade' => $quantidade, 'custo_unitario' => $custoUnitario, 'nota' => $nota]);
             }
+            return $movimento;
         });
     }
 
@@ -258,6 +280,7 @@ class ProducaoService
                 'custo_unitario' => $extra['custo_unitario'] ?? null, 'referencia' => $extra['referencia'] ?? null,
                 'ordem_id' => $extra['ordem_id'] ?? null, 'observacao' => isset($extra['observacao']) ? mb_substr((string) $extra['observacao'], 0, 255) : null,
                 'usuario_id' => $extra['usuario_id'] ?? null, 'criado_em' => $quando,
+                'fornecedor_id' => $extra['fornecedor_id'] ?? null, 'lancamento_id' => $extra['lancamento_id'] ?? null,
             ], fn($v) => $v !== null && $v !== ''));
             return $saldo;
         });

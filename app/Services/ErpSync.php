@@ -105,6 +105,11 @@ class ErpSync
     {
         [$enviados, $faturados] = self::pedidos();
         $r = ['codigos' => self::codigos(), 'precos' => self::precos(), 'estoque' => self::estoque(), 'enviados' => $enviados, 'faturados' => $faturados];
+        try {
+            [$r['notas_entrada'], $r['itens_para_ligar']] = CompraLancamentoService::sincronizarOmie(); // compras: notas de entrada → estoque
+        } catch (\LogicException $e) {
+            $r['notas_entrada'] = 0; // Omie real ainda sem as notas de entrada implementadas
+        }
         // Guarda a última sincronização para a tela Administração › Integração Omie
         @file_put_contents(self::ARQUIVO_ULTIMA, json_encode($r + ['em' => date('Y-m-d H:i:s')]));
         return $r;

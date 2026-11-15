@@ -35,6 +35,9 @@ interface ErpInterface
     /** Notas faturadas: [omie_codigo, omie_codigo_pedido, cnpj, numero_nf, valor, emitido_em] */
     public function listarFaturamento(?string $alteradoDesde = null): array;
 
+    /** Notas de entrada (compras): [codigo, numero, serie, fornecedor, cnpj, emissao, itens => [[codigo, descricao, quantidade, valor_unitario]]] */
+    public function listarNotasEntrada(?string $emitidasDesde = null): array;
+
     /**
      * Envia um pedido como orçamento / etapa "a aprovar".
      * $pedido: [uuid, cnpj, itens => [[omie_codigo_produto, quantidade, preco_unitario]], forma_pagamento, condicao, observacoes]

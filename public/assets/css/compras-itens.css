@@ -1,0 +1,62 @@
+/* =====================================================================
+   V10.5: página do item comprado e Financeiro › Compras da empresa
+   ===================================================================== */
+.it-numeros { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+.it-num { display: grid; gap: 4px; margin: 0; align-content: start; }
+.it-num span { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); }
+.it-num strong { font-size: 1.5rem; letter-spacing: -.03em; color: var(--verde-escuro); }
+.it-num small { font-size: .76rem; color: var(--texto-suave); }
+.it-num.escuro { background: var(--verde-escuro); border-color: var(--verde-escuro); }
+.it-num.escuro strong { color: var(--lima); }
+.it-num.escuro span, .it-num.escuro small { color: #c7d6cc; }
+.it-num.escuro small b { color: #ffb4a8; }
+.it-num.alerta { background: #fff4ec; }
+.it-num.alerta strong { color: #c2410c; }
+.it-num.lima { background: var(--secundaria-clara); }
+.it-barra { height: 8px; border-radius: 99px; background: #ffffff30; overflow: hidden; }
+.it-barra i { display: block; height: 100%; background: var(--lima); border-radius: 99px; }
+.it-barra.baixo i { background: #ff8a76; }
+.it-abas { margin: 4px 0 14px; }
+.it-duas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; margin-bottom: 14px; }
+.it-duas > .card { margin: 0; }
+.it-sub { margin-top: 16px; font-size: 1rem; }
+.it-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.it-lista li { background: var(--primaria-clara); border-radius: 12px; padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.it-lista small { color: var(--texto-suave); margin-left: auto; }
+.it-form h2 { margin-top: 0; }
+.it-acoes { display: flex; flex-wrap: wrap; gap: 4px; align-items: flex-start; }
+.it-acoes form { margin: 0; }
+.it-editar { position: relative; }
+.it-editar summary { list-style: none; cursor: pointer; }
+.it-editar summary::-webkit-details-marker { display: none; }
+.it-editar[open] form { position: absolute; right: 0; top: calc(100% + 4px); z-index: 20; width: min(520px, 90vw); background: var(--card); border: 1px solid var(--borda);
+  border-radius: 14px; padding: 12px; box-shadow: var(--sombra); }
+.it-form-forn { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; align-items: end; }
+.it-form-forn label { display: grid; gap: 4px; font-size: .82rem; font-weight: 600; }
+.it-form-forn label small { font-weight: 400; color: var(--texto-suave); }
+.it-largo { grid-column: 1 / -1; }
+.it-vencido td { background: var(--perigo-fundo); }
+.it-cadastro { margin-top: 14px; }
+.it-cadastro summary { cursor: pointer; }
+.it-filtros { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.it-filtros label { display: grid; gap: 4px; font-size: .8rem; font-weight: 600; }
+.it-filtros .it-largo { flex: 1 1 220px; grid-column: auto; }
+.it-topo { grid-template-columns: minmax(0, 320px) minmax(0, 1fr); }
+.it-total { display: grid; gap: 4px; align-content: center; background: var(--verde-escuro) !important; color: #c7d6cc; }
+.it-total strong { font-size: 2rem; color: var(--lima); letter-spacing: -.03em; }
+.it-cats div { grid-template-columns: 150px minmax(0, 1fr) 110px; }
+.it-lancar h2 { margin: 18px 0 8px; }
+.it-linhas select { min-width: 220px; width: 100%; }
+.it-linhas input { width: 110px; text-align: right; }
+.it-lancar-rodape { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-top: 10px; }
+.it-lancar-rodape strong { font-size: 1.2rem; color: var(--verde-escuro); }
+.it-ligar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 0; }
+.it-ligar select { min-width: 200px; }
+@media (max-width: 1200px) { .it-numeros { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 800px) { .it-duas, .it-topo { grid-template-columns: minmax(0, 1fr); } .it-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ac-canais { display: grid; gap: 6px; }
+.ac-canais div { display: grid; grid-template-columns: 110px minmax(0, 1fr) 40px; gap: 8px; align-items: center; font-size: .85rem; }
+.ac-canais i { height: 10px; background: var(--primaria-clara); border-radius: 99px; overflow: hidden; display: block; }
+.ac-canais b { display: block; height: 100%; background: var(--primaria); border-radius: 0 4px 4px 0; }
+.ac-canais strong { text-align: right; }
+.it-cats div { grid-template-columns: 150px minmax(0, 1fr) 110px; }

@@ -100,7 +100,9 @@ class DepositoController extends Controller
             if (!CompraService::podeReceber()) {
                 throw new RuntimeException('Só o Depósito ou a Produção registram a chegada.');
             }
-            CompraService::receber((int) $id, ProducaoService::numero($this->campo('quantidade')), $this->campo('observacao'), (int) Auth::id());
+            $arquivo = $_FILES['arquivo_nf'] ?? null;
+            $nf = $arquivo && ($arquivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE ? \App\Services\ItemCompraService::guardar($arquivo) : null;
+            CompraService::receber((int) $id, ProducaoService::numero($this->campo('quantidade')), $this->campo('observacao'), (int) Auth::id(), $this->campo('nf'), $nf);
             Sessao::aviso('sucesso', 'Chegada registrada.');
         } catch (RuntimeException $e) {
             Sessao::aviso('erro', $e->getMessage());

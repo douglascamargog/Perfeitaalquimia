@@ -198,6 +198,14 @@ class OmieFake implements ErpInterface
         throw new \RuntimeException("Pedido $omieCodigo não encontrado no Omie (simulado).");
     }
 
+    /** Notas de entrada simuladas: storage/omie_fake/notas_entrada.json (criado pela demonstração) */
+    public function listarNotasEntrada(?string $emitidasDesde = null): array
+    {
+        $arquivo = RAIZ . '/storage/omie_fake/notas_entrada.json';
+        $notas = is_file($arquivo) ? (json_decode((string) file_get_contents($arquivo), true) ?: []) : [];
+        return array_values(array_filter($notas, fn($n) => $emitidasDesde === null || ($n['emissao'] ?? '') >= $emitidasDesde));
+    }
+
     public function testarConexao(): array
     {
         return ['ok' => true, 'mensagem' => 'Usando dados simulados (OmieFake). Nenhuma conexão real com o Omie.'];

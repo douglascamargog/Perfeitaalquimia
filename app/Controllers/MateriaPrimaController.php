@@ -12,7 +12,7 @@ use RuntimeException;
  */
 class MateriaPrimaController extends Controller
 {
-    private const ESTILOS = ['carteira.css', 'painel.css', 'producao.css'];
+    private const ESTILOS = ['carteira.css', 'painel.css', 'inicio.css', 'producao.css', 'graficos.css', 'compras-itens.css'];
 
     public function index(): void
     {
@@ -46,10 +46,17 @@ class MateriaPrimaController extends Controller
             Sessao::aviso('erro', 'Matéria-prima não encontrada.');
             redirecionar('/producao/materias');
         }
+        $aba = in_array($_GET['aba'] ?? '', ['fornecedores', 'compras', 'documentos', 'estoque'], true) ? $_GET['aba'] : 'resumo';
+        $leitura = Auth::somenteAcompanha();
         $this->tela('producao/materia', [
-            'titulo' => $m['nome'], 'm' => $m, 'movimentos' => ProducaoService::movimentosMp((int) $id), 'unidades' => ProducaoService::unidades(),
+            'titulo' => $m['nome'], 'm' => $m, 'aba' => $aba, 'movimentos' => ProducaoService::movimentosMp((int) $id), 'unidades' => ProducaoService::unidades(),
             'produtos' => \App\Core\Banco::todos('SELECT p.id, p.nome, ft.quantidade FROM ficha_tecnica ft JOIN produtos p ON p.id = ft.produto_id WHERE ft.materia_prima_id = ? ORDER BY p.nome', [(int) $id]),
-            'pode' => Auth::pode('producao.gerenciar'), 'estilos' => self::ESTILOS,
+            'fornecedores' => \App\Services\ItemCompraService::fornecedores((int) $id), 'documentos' => \App\Services\ItemCompraService::documentos((int) $id),
+            'compras' => \App\Services\ItemCompraService::compras((int) $id), 'numeros' => \App\Services\ItemCompraService::numeros($m),
+            'categorias' => \App\Services\ItemCompraService::categorias(),
+            // Estoque (entrada/ajuste): Produção · Cadastro, fornecedores e documentos: Financeiro, Qualidade e Produção
+            'pode' => Auth::pode('producao.gerenciar') && !$leitura, 'podeCadastro' => (Auth::pode('compras.itens') || Auth::pode('producao.gerenciar')) && !$leitura,
+            'estilos' => self::ESTILOS,
         ]);
     }
 
@@ -68,7 +75,20 @@ class MateriaPrimaController extends Controller
     {
         try {
             $qtd = ProducaoService::numero($this->campo('quantidade'));
-            ProducaoService::entrada((int) $id, $qtd, ProducaoService::numero($this->campo('custo_unitario')), $this->campo('nota'), $this->campo('observacao'), Auth::id());
+            $arquivo = $_FILES['arquivo_nf'] ?? null;
+            $temArquivo = $arquivo && ($arquivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+            if ($this->campo('fornecedor') !== '' || $temArquivo) {
+                // Com fornecedor/NF: vira um lançamento de compra (histórico de compras, fornecedor do item e NF nos documentos)
+                if ($qtd <= 0) {
+                    throw new RuntimeException('A quantidade da compra precisa ser maior que zero.');
+                }
+                \App\Services\CompraLancamentoService::lancar(['fornecedor' => $this->campo('fornecedor') ?: 'Fornecedor não informado', 'numero_nf' => $this->campo('nota'),
+                    'emissao' => date('Y-m-d'), 'observacoes' => $this->campo('observacao'), 'origem' => 'manual'],
+                    [['materia_prima_id' => (int) $id, 'quantidade' => $qtd, 'valor_unitario' => ProducaoService::numero($this->campo('custo_unitario'))]],
+                    $temArquivo ? \App\Services\ItemCompraService::guardar($arquivo) : null, Auth::id());
+            } else {
+                ProducaoService::entrada((int) $id, $qtd, ProducaoService::numero($this->campo('custo_unitario')), $this->campo('nota'), $this->campo('observacao'), Auth::id());
+            }
             Sessao::aviso('sucesso', 'Entrada de compra registrada: +' . ProducaoService::qtd($qtd) . '.');
         } catch (RuntimeException $e) {
             Sessao::aviso('erro', $e->getMessage());

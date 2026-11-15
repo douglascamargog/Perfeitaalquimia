@@ -193,3 +193,73 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 .dp-balao.concluida > button:hover { transform: scale(.92); }
 .dp-gaveta .dp-atual .dp-ok { margin: 0; }
 .dp-cor[hidden] { display: none; }
+
+/* =====================================================================
+   V10.5: visual futurista dos balões e das janelas (o 3D continua igual)
+   Vidro escuro com borda de luz, cantos marcados, brilho neon nas linhas e grade tecnológica no fundo.
+   ===================================================================== */
+.dp-jogo {
+  background:
+    linear-gradient(rgba(202, 255, 77, .045) 1px, transparent 1px) 0 0 / 34px 34px,
+    linear-gradient(90deg, rgba(202, 255, 77, .045) 1px, transparent 1px) 0 0 / 34px 34px,
+    radial-gradient(ellipse at 50% 45%, #1f5a45 0%, #123528 48%, #07170f 100%);
+  box-shadow: inset 0 0 0 1px rgba(202, 255, 77, .12), inset 0 0 80px rgba(0, 0, 0, .45);
+}
+.dp-jogo::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .018) 0 1px, transparent 1px 4px); }
+.dp-jogo-topo .sobretitulo { letter-spacing: .18em; color: #9fe8c0; }
+.dp-pct { text-shadow: 0 0 14px rgba(202, 255, 77, .55); letter-spacing: -.02em; }
+
+/* Balões: cápsulas de vidro */
+.dp-balao > div, .dp-balao > button {
+  position: relative; border-radius: 14px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+.dp-balao b { letter-spacing: .01em; }
+.dp-balao small { font-size: .64rem; letter-spacing: .04em; text-transform: uppercase; }
+.dp-balao.pendente > div {
+  background: linear-gradient(160deg, rgba(120, 220, 255, .08), rgba(255, 255, 255, .02));
+  border: 1px solid rgba(140, 220, 255, .28); color: #cfe7f2;
+  box-shadow: inset 0 0 18px rgba(120, 220, 255, .06);
+}
+.dp-balao.concluida > div, .dp-balao.concluida > button {
+  background: linear-gradient(160deg, rgba(202, 255, 77, .16), rgba(202, 255, 77, .04)); color: #eaffc2;
+  border: 1px solid rgba(202, 255, 77, .45); box-shadow: 0 0 16px rgba(202, 255, 77, .18), inset 0 0 14px rgba(202, 255, 77, .08);
+}
+.dp-balao.concluida b, .dp-balao.concluida > button b { color: var(--lima); }
+.dp-balao.concluida small, .dp-balao.concluida > button small { color: #c4dca4; opacity: .9; }
+.dp-balao.concluida a { color: #eaffc2; }
+.dp-balao.andamento > div, .dp-balao.andamento > button {
+  background: linear-gradient(150deg, rgba(202, 255, 77, .95), rgba(150, 230, 90, .88)); color: #08180f;
+  border: 1px solid #e9ffb0; box-shadow: 0 0 0 1px rgba(202, 255, 77, .35), 0 0 26px rgba(202, 255, 77, .45);
+}
+.dp-balao.andamento > div::after, .dp-balao.andamento > button::after { /* brilho que passa pela cápsula */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .45) 50%, transparent 70%) -200% 0 / 200% 100% no-repeat;
+  animation: dp-reflexo 3.2s ease-in-out infinite;
+}
+@keyframes dp-reflexo { to { background-position: 200% 0; } }
+.dp-balao-acao { background: #07170f; color: var(--lima); box-shadow: 0 0 10px rgba(202, 255, 77, .35); letter-spacing: .04em; text-transform: uppercase; font-size: .64rem; }
+
+/* Linhas que ligam os balões à embalagem: luz neon */
+.dp-fios line { stroke: rgba(140, 220, 255, .22); }
+.dp-fios line.feito { stroke: rgba(202, 255, 77, .6); filter: drop-shadow(0 0 3px rgba(202, 255, 77, .7)); }
+.dp-fios line.atual { filter: drop-shadow(0 0 4px rgba(202, 255, 77, .95)); }
+.dp-cena::after { background: radial-gradient(circle, rgba(202, 255, 77, .26), rgba(120, 220, 255, .06) 45%, transparent 70%); width: 320px; height: 320px; }
+
+/* Botões do topo (Embalagem e cores) e a conquista */
+.dp-jogo-topo .botao, .dp-jogo-topo button { backdrop-filter: blur(6px); }
+.dp-conquista { background: linear-gradient(135deg, #eaffc2, var(--lima)); box-shadow: 0 0 30px rgba(202, 255, 77, .55), 0 10px 30px rgba(0, 0, 0, .35); }
+
+/* Janelas (gaveta da etapa): vidro claro com barra de luz no topo */
+.dp-gaveta { background: transparent; box-shadow: -20px 0 60px rgba(0, 0, 0, .35); }
+.dp-gaveta::backdrop { background: radial-gradient(ellipse at 30% 50%, rgba(18, 53, 40, .35), rgba(4, 14, 9, .7)); backdrop-filter: blur(3px); }
+.dp-gaveta .dp-atual {
+  background: linear-gradient(180deg, #ffffff, #f2f8f4);
+  border-left: 1px solid rgba(202, 255, 77, .6); position: relative;
+}
+.dp-gaveta .dp-atual::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px;
+  background: linear-gradient(90deg, var(--lima), #6be0b8, #78d4ff); box-shadow: 0 0 14px rgba(202, 255, 77, .8); }
+.dp-gaveta .dp-atual h2 { letter-spacing: -.02em; }
+.dp-gaveta-fechar { background: #07170f; color: var(--lima); box-shadow: 0 0 12px rgba(202, 255, 77, .45); }
+@media (prefers-reduced-motion: reduce) { .dp-balao.andamento > div::after, .dp-balao.andamento > button::after { animation: none; } }

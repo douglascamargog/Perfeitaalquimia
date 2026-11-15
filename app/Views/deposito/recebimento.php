@@ -22,9 +22,11 @@ use App\Services\ProducaoService as P;
           <td class="direita"><?= e(P::qtd((float) $c['quantidade'], (string) $c['unidade'])) ?></td>
           <td class="<?= $atrasada ? 'pn-vermelho' : '' ?>"><?= $c['previsto_em'] ? data_br($c['previsto_em']) . ($atrasada ? ' · atrasada' : '') : '—' ?></td>
           <?php if ($pode): ?><td class="nao-imprimir">
-            <form method="post" action="<?= url('/deposito/recebimento/' . (int) $c['id']) ?>" class="te-mov"><?= csrf_campo() ?>
+            <form method="post" action="<?= url('/deposito/recebimento/' . (int) $c['id']) ?>" class="te-mov" enctype="multipart/form-data"><?= csrf_campo() ?>
               <input type="text" name="quantidade" inputmode="decimal" required value="<?= e(rtrim(rtrim(number_format((float) $c['quantidade'], 3, ',', ''), '0'), ',')) ?>" aria-label="Quantidade que chegou de <?= e($c['titulo']) ?>">
-              <input type="text" name="observacao" maxlength="255" placeholder="obs. (NF, conferência…)" aria-label="Observação">
+              <input type="text" name="nf" maxlength="30" placeholder="nº da NF" aria-label="Número da nota fiscal" style="max-width:110px">
+              <label class="botao contorno pequeno" title="Anexar a nota fiscal (PDF, imagem ou XML)">📎 NF<input type="file" name="arquivo_nf" accept="application/pdf,image/*,.xml,text/xml" hidden></label>
+              <input type="text" name="observacao" maxlength="255" placeholder="obs. (conferência…)" aria-label="Observação">
               <button class="botao contorno pequeno" type="submit">Chegou</button></form></td><?php endif; ?>
         </tr>
       <?php endforeach; ?>
