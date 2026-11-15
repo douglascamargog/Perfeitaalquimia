@@ -17,6 +17,13 @@
  */
 return [
     [
+        'versao' => '11.6', 'data' => '2026-11-15', 'titulo' => 'Pedir ao Marketing mais enxuto',
+        'melhoria' => [
+            'Pedir ao Marketing: saíram da lista de assuntos "Rótulo ou embalagem", "Campanha de desconto ou oferta relâmpago" e "Envio FULL". Os pedidos antigos desses assuntos continuam guardados.',
+        ],
+        'admin' => 'Os assuntos podem ser religados em Configurações › Listas › Tipos de tarefa do Marketing.',
+    ],
+    [
         'versao' => '11.5', 'data' => '2026-11-15', 'titulo' => 'Ordem de produção no modelo da empresa e lotes das matérias-primas',
         'novo' => [
             'Ordem de produção impressa no modelo da empresa (PLA08.1 · Check list – Elaboração produto), em A4 deitado e numa folha só.',

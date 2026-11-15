@@ -48,10 +48,14 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
   ok(sql(`select count(*) from notificacoes where tipo='mkt_tarefa' and usuario_id=${social} and link='/marketing/tarefas/${t1}'`) === '1', 'Social Media avisada no sino');
   ok(sql(`select count(*) from notificacoes where tipo='mkt_tarefa' and usuario_id=${ecom} and link='/marketing/tarefas/${t1}'`) === '0', 'E-commerce não recebe o pedido de arte');
   ok(await v.p.locator(`tr[data-pedido="${t1}"]`).count() === 1, 'aparece em "Meus pedidos"');
-  // FULL → E-commerce
-  await post(v, '/marketing/tarefas', { pedido: '1', tipo_id: tipo('Envio FULL'), titulo: 'FULL de dezembro' });
-  const t2 = sql("select id from mkt_tarefas where titulo='FULL de dezembro'");
-  ok(sql(`select funcao_slug from mkt_tarefas where id=${t2}`) === 'ecommerce', 'envio FULL vai para E-commerce e Marketplaces');
+  // Cadastro de produto → E-commerce
+  await post(v, '/marketing/tarefas', { pedido: '1', tipo_id: tipo('Cadastrar produto'), titulo: 'Cadastrar o Ozen X na Shopee' });
+  const t2 = sql("select id from mkt_tarefas where titulo='Cadastrar o Ozen X na Shopee'");
+  ok(sql(`select funcao_slug from mkt_tarefas where id=${t2}`) === 'ecommerce', 'cadastro de produto vai para E-commerce e Marketplaces');
+  // Assuntos que saíram da lista (V11.6)
+  await v.p.goto(BASE + '/marketing/pedir');
+  const assuntos = (await v.p.locator('select[name=tipo_id] option').allInnerTexts()).join(' | ');
+  ok(!/Rótulo ou embalagem|oferta relâmpago|Envio FULL/.test(assuntos) && assuntos.includes('Arte ou post'), 'sem "Rótulo ou embalagem", "Campanha de desconto" e "Envio FULL" na lista de assuntos');
   ok((await post(v, '/marketing/tarefas', { pedido: '1', tipo_id: tipo('Arte'), titulo: 'Ontem', prazo: '2000-01-01' })).includes('já passou'), 'prazo no passado não passa');
 
   // ---------- Anexo protegido ----------
