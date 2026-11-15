@@ -51,7 +51,7 @@ class OneIALocal implements OneIAInterface
                     $texto .= "\n\nVeja também:\n" . implode("\n", array_map(fn($x) => '- [' . $x['titulo'] . '](' . $x['link'] . ')', array_slice($r, 1, 2)));
                 }
             } else {
-                $texto = 'Não achei isso nas aulas do sistema. Tente com outras palavras, ou veja [Treinamento › Como usar o One](/academia/sistema).';
+                $texto = 'Não achei isso no treinamento. Tente com outras palavras, ou veja o seu [Treinamento](/treinamento). Para entender a tela em que você está, clique em "O que dá pra fazer aqui?".';
             }
         }
         return ['texto' => $texto, 'consultas' => $consultas, 'tokens_entrada' => 0, 'tokens_saida' => 0, 'custo' => 0.0, 'situacao' => 'ok'];

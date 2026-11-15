@@ -36,8 +36,9 @@ return [
     'marketing.aprovar'       => ['Aprovar posts antes da publicação', []],
     'ecommerce.ver'           => ['Ver o desempenho do e-commerce (Tray)', ['marketing', 'gestor', 'financeiro']],
     'catalogo.editar'         => ['Editar conteúdo dos produtos e do catálogo', ['marketing']],
-    'academia.ver'            => ['Acessar a Academia', ['gestor', 'vendedor', 'marketing']],
-    'academia.editar'         => ['Editar conteúdo da Academia', ['marketing']],
+    'academia.ver'            => ['Acessar a Academia (antiga; desde a V13.0 o Treinamento é para todos)', ['gestor', 'vendedor', 'marketing']],
+    'academia.editar'         => ['Editar o Treinamento (módulos, provas e tutoriais das telas)', ['marketing']],
+    'treinamento.equipe'      => ['Acompanhar o treinamento da equipe (e reiniciar o tutorial de alguém)', ['gestor']], // gestor_setor e diretoria: seed 077
     'midia.gerenciar'         => ['Biblioteca de mídia', ['marketing']],
     'mensagens.gerenciar'     => ['Editar mensagens prontas de WhatsApp', ['gestor', 'marketing']],
     'mensagens.usar'          => ['Usar mensagens prontas na ficha do cliente', ['gestor', 'vendedor', 'financeiro']],

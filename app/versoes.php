@@ -17,6 +17,17 @@
  */
 return [
     [
+        'versao' => '13.0', 'data' => '2026-11-16', 'titulo' => 'Treinamento novo, feito para cada setor',
+        'novo' => [
+            'Treinamento refeito: cada setor tem a sua trilha (Televendas, Externo, Produção, Marketing, Depósito, Qualidade, Financeiro e todos os outros), mais a Integração para todo mundo e "Áreas com que você tem contato", que explica como trabalham os setores que conversam com o seu.',
+            'Cada módulo termina com uma provinha: acertou 70%, está concluído (pode refazer quantas vezes quiser). Terminou a trilha do seu setor? Ganha um selo no perfil.',
+            'O One agora ensina cada tela: quem é novo vê o passo a passo, com a tela apontando cada parte, até clicar em "Aprendi tudo desta tela".',
+            'Para todo mundo: chame o One e clique em "O que dá pra fazer aqui?" para ver o passo a passo da tela em que você está.',
+        ],
+        'melhoria' => ['As fichas dos produtos agora ficam na Biblioteca de produtos, dentro do Treinamento, abertas para todos os setores.'],
+        'admin' => 'Gestores, Gestor de setor e Diretoria acompanham em Treinamento › Equipe (módulos, notas e telas aprendidas) e podem "Reiniciar tutorial" de alguém. Admin e Marketing editam módulos, provas e o passo a passo de cada tela em Treinamento › Editar; o que for editado lá não é trocado pelas atualizações. Quem já usava o sistema não é interrompido pelo tutorial; quem for criado em Usuários a partir de agora recebe. A nota mínima da prova fica em Configurações › Treinamento. As aulas antigas da Academia saíram da tela e continuam guardadas no banco.',
+    ],
+    [
         'versao' => '12.7', 'data' => '2026-11-16', 'titulo' => 'Ligue Talk de verdade',
         'novo' => ['Com o Ligue Talk ligado, as suas ligações e gravações aparecem sozinhas no Acompanhamento e na ficha do cliente, sem precisar registrar à mão.'],
         'correcao' => ['Previsão do tempo no Início: o "hoje" agora mostra só as horas que ainda faltam (antes contava a chuva que já tinha passado), e à noite a dica fala do tempo de amanhã.'],

@@ -370,18 +370,27 @@ return [
     ['POST', '/meu-perfil/one',                 'MeuPerfilController@one',    'logado'],
     ['POST', '/meu-perfil/aparencia',           'MeuPerfilController@aparencia', 'logado'],
 
-    // ---------- Academia (Central de Televendas) ----------
-    ['GET',  '/academia',                       'AcademiaController@inicio',      'academia.ver'],
-    ['GET',  '/academia/trilha',                'AcademiaController@trilha',      'academia.ver'],
-    ['GET',  '/academia/trilha/{id}',           'AcademiaController@modulo',      'academia.ver'],
-    ['GET',  '/academia/produtos',              'AcademiaController@produtos',    'academia.ver'],
-    ['GET',  '/academia/produtos/{slug}',       'AcademiaController@produto',     'academia.ver'],
-    ['GET',  '/academia/atendimento',           'AcademiaController@atendimento', 'academia.ver'],
-    ['GET',  '/academia/sistema',               'AcademiaController@sistema',     'academia.ver'],
-    ['GET',  '/academia/sistema/{id}',          'AcademiaController@sistema',     'academia.ver'],
-    ['GET',  '/academia/crm',                   'AcademiaController@crm',         'academia.ver'],
-    ['GET',  '/academia/crm/{id}',              'AcademiaController@crm',         'academia.ver'],
-    ['POST', '/academia/progresso',             'AcademiaController@marcar',      'academia.ver'],
+    // ---------- Treinamento por setor (V13.0) ----------
+    ['GET',  '/treinamento',                    'TreinamentoController@index',     'logado'],
+    ['GET',  '/treinamento/trilhas',            'TreinamentoController@trilhas',   'logado'],
+    ['GET',  '/treinamento/modulo/{id}',        'TreinamentoController@modulo',    'logado'],
+    ['POST', '/treinamento/modulo/{id}/prova',  'TreinamentoController@prova',     'logado'],
+    ['GET',  '/treinamento/equipe',             'TreinamentoController@equipe',    'treinamento.equipe'],
+    ['POST', '/treinamento/equipe/{id}/reiniciar', 'TreinamentoController@reiniciarTutorial', 'treinamento.equipe'],
+    ['GET',  '/treinamento/editar',             'TreinamentoController@editar',    'academia.editar'],
+    ['GET',  '/treinamento/editar/modulo/{id}', 'TreinamentoController@editarModulo', 'academia.editar'],
+    ['POST', '/treinamento/editar/modulo/{id}', 'TreinamentoController@salvarModulo', 'academia.editar'],
+    ['POST', '/treinamento/editar/trilha/{id}/modulo', 'TreinamentoController@novoModulo', 'academia.editar'],
+    ['GET',  '/treinamento/editar/tutorial/{id}', 'TreinamentoController@editarTutorial', 'academia.editar'],
+    ['POST', '/treinamento/editar/tutorial/{id}', 'TreinamentoController@salvarTutorial', 'academia.editar'],
+    ['POST', '/tutorial/aprendi',               'TreinamentoController@aprendi',   'logado'],
+
+    // ---------- Biblioteca de produtos (fichas para estudar) e endereços antigos da Academia ----------
+    ['GET',  '/academia/produtos',              'AcademiaController@produtos',    'logado'],
+    ['GET',  '/academia/produtos/{slug}',       'AcademiaController@produto',     'logado'],
+    ['GET',  '/academia',                       'AcademiaController@paraTreinamento', 'logado'],
+    ['GET',  '/academia/{a}',                   'AcademiaController@paraTreinamento', 'logado'],
+    ['GET',  '/academia/{a}/{b}',               'AcademiaController@paraTreinamento', 'logado'],
 
     // ---------- Administração ----------
     ['GET',  '/usuarios',               'UsuarioController@index',    'usuarios.gerenciar'],

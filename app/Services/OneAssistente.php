@@ -112,18 +112,13 @@ class OneAssistente
             $falas[] = self::metaIndividual($id);
             $falas[] = self::metaEquipe();
         }
-        if ($comercial && Auth::pode('academia.ver')) {
-            $falas[] = self::academia($id);
-        }
         if (Auth::pode('usuarios.gerenciar') && Foco::tem('diretoria')) {
             $falas[] = ['humor' => 'piscando', 'texto' => 'Gente nova na equipe? Crie o login em Usuários e marque a função da pessoa: as filas e regras seguem a função.', 'link' => '/usuarios', 'acao' => 'Usuários'];
         }
 
         // Dicas de todos os setores (V12.6): cada um recebe as da sua área, mais as que valem para todo mundo
         $falas = array_merge($falas, self::setores($id), self::paraTodos($id));
-        if ($comercial === false && Auth::pode('academia.ver')) {
-            $falas[] = self::academia($id); // Treinamento também para quem não é do Comercial
-        }
+        $falas[] = self::academia($id); // próximo módulo do Treinamento (todos os setores)
 
         $falas = array_values(array_filter($falas));
         // Agenda e recompra ganham botões que já fazem a coisa (abrir o cliente, ligar, WhatsApp, deixar para amanhã)
@@ -236,7 +231,8 @@ class OneAssistente
         $dicas = array_values(array_filter([
             [null, 'Você sabia? Aperte a tecla / em qualquer tela para buscar um cliente, produto ou código.', null],
             [null, 'Você sabia? Dá para me perguntar coisas, aqui em cima, em "Perguntar". Ex.: "como faço um orçamento?".', null],
-            ['academia.ver', 'Você sabia? Em Treinamento › Como usar o One tem aulas curtinhas de cada tela.', '/academia/sistema'],
+            [null, 'Você sabia? Em Treinamento você tem uma trilha feita para o seu setor, com provinha no fim de cada módulo.', '/treinamento'],
+            [null, 'Você sabia? Esqueceu como funciona uma tela? Me chame e clique em "O que dá pra fazer aqui?": eu mostro passo a passo.', null],
             [null, 'Você sabia? Em Meu perfil › Aparência você escolhe as cores do sistema só para você.', '/meu-perfil'],
             [null, 'Você sabia? Em Pessoas você deixa recados e elogios no perfil dos colegas.', '/pessoas'],
             ['pedidos.criar', 'Você sabia? "Gerar orçamento" manda um link pro cliente aprovar pelo WhatsApp: aprovou, vira pedido sozinho.', '/orcamentos'],
@@ -396,12 +392,11 @@ class OneAssistente
 
     private static function academia(int $id): ?array
     {
-        $feitos = AcademiaService::progresso($id);
-        foreach (AcademiaService::modulos() as $m) {
-            if (!isset($feitos['modulo:' . $m['id']])) {
-                return ['humor' => 'piscando', 'texto' => "Próximo passo na Academia: \"{$m['title']}\" ({$m['time']}).", 'link' => '/academia/trilha/' . $m['id'], 'acao' => 'Estudar'];
-            }
+        $usuario = \App\Core\Auth::usuario();
+        if (!$usuario) {
+            return null;
         }
-        return null;
+        [, , $proximo] = \App\Services\TreinamentoService::resumo(\App\Services\TreinamentoService::daPessoa($usuario), \App\Services\TreinamentoService::progresso($id));
+        return $proximo ? ['humor' => 'piscando', 'texto' => "Próximo passo no Treinamento: \"{$proximo['titulo']}\" ({$proximo['tempo_min']} min).", 'link' => '/treinamento/modulo/' . $proximo['id'], 'acao' => 'Estudar'] : null;
     }
 }

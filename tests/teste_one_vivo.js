@@ -45,7 +45,9 @@ const esperaBalao = async (p) => { await p.waitForSelector('[data-one-balao]', {
   await p.goto(BASE + '/recompra'); await esperaBalao(p);
   ok((await balao(p).innerText().catch(() => '')).includes('Comece pelo'), 'Recompra: o One indica por qual cliente começar');
   await balao(p).locator('[data-one-ajuda]').click();
-  ok((await balao(p).innerText()).includes('Nesta tela: Recompra') && await balao(p).locator('li').count() >= 3 && await balao(p).locator('a:has-text("aula")').count() === 1, '"O que dá pra fazer aqui?" explica a tela em passos, com a aula');
+  await p.waitForSelector('[data-tut-balao]');
+  ok((await p.locator('[data-tut-balao]').innerText()).includes('Recompra') && await balao(p).count() === 0, '"O que dá pra fazer aqui?" abre o passo a passo da tela (V13.0)');
+  await p.click('[data-tut-balao] [data-tut-pular]');
   await p.goto(BASE + '/carteira'); await esperaBalao(p);
   if (await balao(p).count()) { await balao(p).locator('[data-one-hoje-nao]').click(); await p.waitForTimeout(300); }
   await p.goto(BASE + '/carteira'); await p.waitForTimeout(2000);

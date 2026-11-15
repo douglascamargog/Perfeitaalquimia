@@ -38,7 +38,8 @@ return [
         'Conteúdo' => [
             ['Produtos', 'produtos.ver', 'produtos.tecnico', 'Ver: produtos e documentos (também o Catálogo, só leitura) · Editar: parte técnica (composição, ficha técnica, embalagens e documentos)'],
             ['Catálogo e conteúdo dos produtos (editar)', null, 'catalogo.editar', 'Vitrine do cliente (visível, chamada, ordem, códigos) e o texto dos produtos'],
-            ['Academia', 'academia.ver', 'academia.editar', ''],
+            ['Treinamento (editar)', null, 'academia.editar', 'Todos fazem o próprio treinamento. Editar: módulos, provas e o passo a passo do One em cada tela'],
+            ['Treinamento da equipe', null, 'treinamento.equipe', 'Ver o progresso de cada pessoa e reiniciar o tutorial das telas'],
             ['Mensagens prontas', 'mensagens.ver', 'mensagens.gerenciar', 'Usar as mensagens na ficha do cliente fica nas ações especiais'],
         ],
         'Desenvolvimento de Produto' => [

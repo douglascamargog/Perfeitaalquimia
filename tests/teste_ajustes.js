@@ -123,14 +123,10 @@ async function sair(p) { await p.goto(BASE + '/'); await p.click('form[action$="
   ok(sql(`select concat(data_admissao,'|',observacoes,'|',apelido) from usuarios where id=${vend}`) === '2024-02-01|Teste de observação|Tati', 'admin edita a ficha do funcionário sem perder o que a pessoa preencheu');
   await sair(p);
 
-  // ---------- Academia ----------
+  // ---------- Academia (V13.0: virou Treinamento) ----------
   await entrar(p, 'televendas1@demo.local');
-  await p.goto(BASE + '/academia/sistema');
-  ok(await p.locator('.crm-indice a').count() === 10 && !(await p.content()).toLowerCase().includes('leads2b'), 'Academia: 10 aulas "Como usar o One", sem citar o Leads2b');
   const r2 = await p.request.get(BASE + '/academia/crm', { maxRedirects: 0 });
-  ok(r2.status() === 302 && (r2.headers()['location'] || '').endsWith('/academia/sistema'), 'endereço antigo das aulas do Leads2b leva ao treinamento do One');
-  await p.goto(BASE + '/academia/trilha/crm');
-  ok((await p.content()).includes('Rotina no One'), 'trilha: módulo "Rotina no One"');
+  ok(r2.status() === 302 && (r2.headers()['location'] || '').endsWith('/treinamento'), 'endereço antigo das aulas leva ao Treinamento');
   await sair(p);
 
   // ---------- Depois de salvar, a página continua onde estava ----------

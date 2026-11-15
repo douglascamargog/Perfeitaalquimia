@@ -13,7 +13,7 @@ class OneController extends Controller
     {
         $pagina = '/' . trim((string) ($_GET['pagina'] ?? '/'), '/');
         echo Visao::renderizar('one/_falas', ['saudacao' => OneAssistente::saudacao(), 'falas' => OneAssistente::falas($pagina),
-            'ajuda' => \App\Services\OneTela::ajuda($pagina)]);
+            'ajuda' => \App\Services\OneTela::ajuda($pagina), 'tutorial' => \App\Services\TutorialService::daRota($pagina)]);
     }
 
     /** O One na tela atual (JSON): balão importante (se a pessoa deixa o One puxar conversa) e a ajuda da tela */
@@ -23,7 +23,8 @@ class OneController extends Controller
         parse_str((string) parse_url((string) ($_GET['pagina'] ?? ''), PHP_URL_QUERY), $query);
         $usuario = \App\Core\Auth::usuario();
         $balao = (int) ($usuario['one_balao'] ?? 1) ? \App\Services\OneTela::balao($pagina, $query) : null;
-        $this->json(['balao' => $balao, 'ajuda' => \App\Services\OneTela::ajuda($pagina)]);
+        $tutorial = \App\Services\TutorialService::daTela($pagina);
+        $this->json(['balao' => $tutorial['automatico'] ?? false ? null : $balao, 'ajuda' => \App\Services\OneTela::ajuda($pagina), 'tutorial' => $tutorial]);
     }
 
     /** Pergunte ao One (JSON). A resposta vem em markdown simples; a tela converte só negrito, links internos e listas. */

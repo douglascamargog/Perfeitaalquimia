@@ -5,8 +5,11 @@
 //  - "O que dá pra fazer aqui?": a tela explicada em poucos passos.
 //  - Comemoração: confete + One feliz (pedido enviado, agenda zerada, meta batida...).
 //  - window.One.dizer(humor, texto): outras telas podem fazer o One falar (ex.: faixa da campanha no pedido).
+//  - Tutorial da tela (V13.0, one-tutorial.js): para pessoas novas abre sozinho até ela marcar "Aprendi";
+//    para todos, abre em "O que dá pra fazer aqui?".
 // Quem desligou em Meu perfil › One não recebe balões sozinhos (a ajuda e as comemorações continuam).
 // =====================================================================
+import { iniciarTutorial } from './one-tutorial.js';
 const BASE = document.querySelector('meta[name="base"]')?.content || '';
 const CSRF = document.querySelector('meta[name="csrf"]')?.content || '';
 const botao = document.querySelector('[data-one-abrir]');
@@ -19,6 +22,7 @@ const lido = (k) => { try { return localStorage.getItem(k); } catch { return nul
 
 let balao = null;
 let ajuda = null;
+let tutorial = null;
 
 function el(tag, attrs = {}, ...filhos) {
   const e = document.createElement(tag);
@@ -71,7 +75,21 @@ function mostrarBalao(b) {
   mostrar(b.humor || 'ideia', [el('p', {}, b.texto), acoes, rodape]);
 }
 
+function abrirTutorial() {
+  fechar();
+  const painel = document.getElementById('one-painel'); // o painel do One fecha para a tela aparecer
+  if (painel && !painel.hidden) { painel.hidden = true; botao?.setAttribute('aria-expanded', 'false'); }
+  iniciarTutorial(tutorial, {
+    aoAprender: (d) => {
+      if (d && d.terminou) { location.reload(); return; } // a comemoração vem na próxima tela
+      const falta = d ? d.total - d.feitas : null;
+      mostrar('feliz', [el('p', {}, falta > 0 ? `Boa! Você já aprendeu ${d.feitas} de ${d.total} telas. Faltam ${falta}.` : 'Boa! Anotado que você aprendeu esta tela.')]);
+    },
+  });
+}
+
 function mostrarAjuda() {
+  if (tutorial) { abrirTutorial(); return; }
   if (!ajuda) return;
   const lista = el('ol', {}, ajuda.passos.filter(Boolean).map((p) => el('li', {}, p)));
   mostrar('piscando', [el('strong', { class: 'one-ajuda-titulo' }, 'Nesta tela: ' + ajuda.titulo), lista,
@@ -123,7 +141,7 @@ if (festa) {
 }
 
 // ---------------------------------------------------------------- balão da tela
-window.One = { dizer: (humor, texto) => mostrar(humor, [el('p', {}, texto)]) };
+window.One = { dizer: (humor, texto) => mostrar(humor, [el('p', {}, texto)]), tutorial: () => mostrarAjuda() };
 
 (async () => {
   if (!botao) return;
@@ -132,6 +150,15 @@ window.One = { dizer: (humor, texto) => mostrar(humor, [el('p', {}, texto)]) };
     if (!r.ok) return;
     const d = await r.json();
     ajuda = d.ajuda;
+    tutorial = d.tutorial || null;
+    if (tutorial?.automatico) {
+      // pessoa nova: o tutorial da tela abre sozinho (espera a janela de novidades/comunicado fechar)
+      const aberta = () => [...document.querySelectorAll('[data-novidades], .com-janela-fundo')].some((j) => !j.hidden && j.getClientRects().length);
+      let tentativas = 0;
+      const tentar = () => { if (aberta() && tentativas++ < 120) setTimeout(tentar, 1000); else abrirTutorial(); };
+      setTimeout(tentar, festejou ? 3500 : 700);
+      return;
+    }
     if (d.balao) {
       botao.classList.add('tem-dica'); // pontinho: o One tem algo para falar
       botao.dataset.dica = d.balao.texto;

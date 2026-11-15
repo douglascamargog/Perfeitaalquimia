@@ -1,0 +1,77 @@
+/* =====================================================================
+   Treinamento por setor (V13.0)
+   ===================================================================== */
+.tr-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 14px 0 20px; }
+.tr-numero { display: flex; gap: 14px; align-items: center; }
+.tr-numero > div { display: grid; gap: 6px; }
+.tr-numero .botao { justify-self: start; }
+.tr-anel { --p: 0; --cor: var(--primaria); width: 64px; height: 64px; border-radius: 50%; flex: none; display: grid; place-items: center;
+  background: conic-gradient(var(--cor) calc(var(--p) * 1%), var(--borda) 0); }
+.tr-anel.azul { --cor: #3b82f6; }
+.tr-anel b { width: 50px; height: 50px; border-radius: 50%; background: var(--card); display: grid; place-items: center; font-size: .8rem; color: var(--primaria-escura); }
+.tr-selos { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tr-selo { background: var(--primaria-suave); color: var(--primaria-escura); border-radius: 999px; padding: 4px 10px; font-size: .8rem; font-weight: 600; }
+
+.tr-bloco { margin: 0 0 22px; }
+.tr-bloco > header { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+.tr-bloco > header h2 { margin: 0; font-size: 1.1rem; }
+.tr-bloco > header p { margin: 2px 0 0; font-size: .85rem; }
+.tr-bloco > header .selo { margin-left: auto; }
+.tr-etapa { width: 32px; height: 32px; border-radius: 50%; background: var(--primaria-escura); color: var(--lima); display: grid; place-items: center; font-weight: 700; flex: none; }
+.tr-modulos { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tr-modulos a { display: flex; gap: 12px; align-items: center; background: var(--card); border: 1px solid var(--borda); border-radius: var(--raio); padding: 12px 14px; color: inherit; text-decoration: none; }
+.tr-modulos a:hover { border-color: var(--primaria); }
+.tr-check { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--borda); display: grid; place-items: center; flex: none; font-size: .9rem; color: var(--texto-suave); }
+.tr-modulos li.feito .tr-check { background: var(--primaria); border-color: var(--primaria); color: #fff; }
+.tr-modulos li.comecado .tr-check { border-color: var(--primaria); }
+.tr-texto { display: grid; gap: 2px; min-width: 0; }
+.tr-texto small { color: var(--texto-suave); }
+.tr-info { margin-left: auto; font-size: .78rem; color: var(--texto-suave); white-space: nowrap; }
+
+.tr-conteudo { line-height: 1.6; max-width: 820px; }
+.tr-conteudo h3 { margin: 18px 0 6px; font-size: 1.05rem; color: var(--primaria-escura); }
+.tr-conteudo h3:first-child { margin-top: 0; }
+.tr-conteudo h4 { margin: 14px 0 4px; font-size: .95rem; }
+.tr-conteudo img { max-width: 100%; border-radius: var(--raio-pequeno); }
+.tr-destaque { background: var(--primaria-suave); border-left: 4px solid var(--primaria); padding: 10px 14px; border-radius: 0 var(--raio-pequeno) var(--raio-pequeno) 0; }
+.tr-atencao { background: var(--aviso-fundo); border-left: 4px solid var(--aviso); padding: 10px 14px; border-radius: 0 var(--raio-pequeno) var(--raio-pequeno) 0; }
+
+.tr-prova { margin-top: 16px; max-width: 820px; }
+.tr-prova h2 { margin-top: 0; }
+.tr-pergunta { border: 1px solid var(--borda); border-radius: var(--raio-pequeno); padding: 10px 14px; margin: 0 0 12px; }
+.tr-pergunta legend { font-weight: 600; padding: 0 4px; }
+.tr-pergunta label { display: flex; gap: 8px; align-items: flex-start; padding: 5px 0; cursor: pointer; font-weight: 400; }
+.tr-pergunta.certa { border-color: var(--sucesso); background: var(--sucesso-fundo); }
+.tr-pergunta.errada { border-color: var(--perigo); background: var(--perigo-fundo); }
+.tr-pergunta .tr-correta { font-weight: 600; }
+.tr-explicacao { margin: 6px 0 0; font-size: .88rem; }
+.tr-nota { font-weight: 600; padding: 10px 14px; border-radius: var(--raio-pequeno); }
+.tr-nota.ok { background: var(--sucesso-fundo); color: var(--sucesso); }
+.tr-nota.nao { background: var(--aviso-fundo); color: var(--texto); }
+.tr-sem-prova { margin-top: 16px; }
+.tr-navegar { display: flex; justify-content: space-between; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+
+.tr-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; align-items: start; }
+.tr-trilha summary { display: flex; gap: 10px; align-items: center; cursor: pointer; list-style: none; }
+.tr-trilha summary::-webkit-details-marker { display: none; }
+.tr-trilha summary > span:nth-child(2) { display: grid; gap: 2px; flex: 1; }
+.tr-trilha summary small { color: var(--texto-suave); font-size: .8rem; }
+.tr-icone { font-size: 1.5rem; }
+.tr-lista { margin: 10px 0 6px; padding-left: 20px; display: grid; gap: 6px; }
+.tr-h2 { font-size: 1.05rem; margin: 22px 0 10px; }
+.tr-barra { height: 8px; background: var(--borda); border-radius: 999px; overflow: hidden; min-width: 90px; }
+.tr-barra span { display: block; height: 100%; background: var(--primaria); }
+.tr-editor label { display: grid; gap: 4px; margin-bottom: 10px; }
+.tr-editor label.check { display: flex; align-items: center; gap: 6px; }
+.tr-editor textarea { font-family: inherit; }
+.tr-editor .card + .card { margin-top: 14px; }
+.tr-editor > .acoes { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+.tr-pergunta-editar { border: 1px dashed var(--borda); border-radius: var(--raio-pequeno); padding: 10px 12px; margin: 0 0 12px; }
+
+@media (max-width: 600px) {
+  .tr-info { display: none; }
+  .tr-navegar .botao { flex: 1; text-align: center; }
+}
+@media print {
+  .abas, .tr-navegar, .sem-impressao, .filtros { display: none !important; }
+}

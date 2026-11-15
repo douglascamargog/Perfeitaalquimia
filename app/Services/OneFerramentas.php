@@ -79,12 +79,23 @@ class OneFerramentas
     {
         $palavras = self::palavras($pergunta);
         $achados = [];
-        $aulas = json_decode((string) Banco::valor("SELECT conteudo_json FROM academia_conteudo WHERE chave = 'sistema_one'"), true) ?: [];
-        foreach ($aulas as $a) {
-            $texto = self::textoAula($a);
-            $pontos = self::pontos($palavras, ($a['title'] ?? '') . ' ' . ($a['short'] ?? '') . ' ' . $texto, ($a['title'] ?? ''));
+        // Módulos do Treinamento (V13.0) e os tutoriais das telas
+        $modulos = Banco::todos('SELECT id, titulo, resumo, conteudo FROM trein_modulos WHERE ativo = 1');
+        foreach ($modulos as $m) {
+            $texto = trim(preg_replace('/\s+/u', ' ', strip_tags(\App\Services\TreinamentoService::html($m['conteudo']))));
+            $pontos = self::pontos($palavras, $m['titulo'] . ' ' . $m['resumo'] . ' ' . $texto, $m['titulo']);
             if ($pontos > 0) {
-                $achados[] = ['pontos' => $pontos, 'titulo' => 'Aula: ' . ($a['title'] ?? ''), 'resumo' => mb_strimwidth($texto, 0, 900, '…'), 'link' => '/academia/sistema/' . ($a['id'] ?? '')];
+                $achados[] = ['pontos' => $pontos, 'titulo' => 'Treinamento: ' . $m['titulo'], 'resumo' => mb_strimwidth($texto, 0, 900, '…'), 'link' => '/treinamento/modulo/' . $m['id']];
+            }
+        }
+        foreach (\App\Services\TutorialService::telas() as $rota => $t) {
+            if (!\App\Services\TutorialService::podeVer($rota)) {
+                continue;
+            }
+            $texto = implode(' ', array_column($t['passos'], 'texto'));
+            $pontos = self::pontos($palavras, $t['titulo'] . ' ' . $texto, $t['titulo']);
+            if ($pontos > 0) {
+                $achados[] = ['pontos' => $pontos, 'titulo' => 'Tela: ' . $t['titulo'], 'resumo' => mb_strimwidth($texto, 0, 900, '…'), 'link' => $rota];
             }
         }
         foreach (self::PERGUNTAS_COMUNS as [$chaves, $titulo, $resposta, $link]) {
@@ -202,18 +213,7 @@ class OneFerramentas
         ['sair logout deslogar', 'Sair do sistema', 'O botão de sair fica no canto de cima, à direita (a seta saindo da porta).', '/'],
     ];
 
-    // ---------------------------------------------------------------- ajudantes da busca nas aulas
-
-    private static function textoAula(array $a): string
-    {
-        $partes = [$a['goal'] ?? ''];
-        foreach ($a['blocks'] ?? [] as $b) {
-            if (is_array($b)) {
-                $partes[] = ($b[0] ?? '') . ': ' . (is_array($b[1] ?? null) ? implode(' ', array_map(fn($x) => is_array($x) ? implode(' ', $x) : (string) $x, $b[1])) : (string) ($b[1] ?? ''));
-            }
-        }
-        return trim(preg_replace('/\s+/', ' ', implode(' ', $partes)));
-    }
+    // ---------------------------------------------------------------- ajudantes da busca
 
     private static function palavras(string $texto): array
     {

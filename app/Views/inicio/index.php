@@ -45,7 +45,7 @@ $atalhos = $principal && isset($atalhosFoco[$principal])
     Auth::pode('carteira.ver_propria') || Auth::pode('carteira.ver_todas') ? ['Novo estabelecimento', '/carteira/clientes/novo', 'mais'] : null,
     Auth::pode('meu_mes.usar') ? ['Registrar venda', '/meu-mes', 'grafico'] : null,
     Auth::pode('cobranca.ver') ? ['Cobrança', '/cobranca', 'alerta'] : null,
-    Auth::pode('academia.ver') ? ['Academia', '/academia', 'livro'] : null,
+    ['Treinamento', '/treinamento', 'livro'],
 ]);
 ?>
 <div class="bento">

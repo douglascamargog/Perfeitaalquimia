@@ -292,6 +292,10 @@ class PerfilSocialService
         if ($deu >= 5) {
             $selos[] = ['🤗', 'Espalha elogios', "Elogiou os colegas $deu vezes"];
         }
+        // Treinamento (V13.0): um selo por trilha concluída
+        foreach (TreinamentoService::trilhasConcluidas($id) as $t) {
+            $selos[] = [$t['icone'] ?: '🎓', 'Treinamento: ' . $t['titulo'], 'Concluído em ' . data_br($t['em'])];
+        }
         $preenchidos = count(array_filter(['sobre_mim', 'hobbies', 'comida', 'musica', 'frase', 'interesses'], fn($c) => !empty($p[$c])));
         if ($preenchidos >= 5 && !empty($p['foto'])) {
             $selos[] = ['✨', 'Perfil completo', 'Contou tudo sobre si'];

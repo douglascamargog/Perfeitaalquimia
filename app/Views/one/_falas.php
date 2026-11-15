@@ -1,7 +1,7 @@
 <?php
 /**
  * Falas do One (usado no painel flutuante e no card do Início).
- * Variáveis: $saudacao, $falas, $ajuda (opcional: a tela atual explicada)
+ * Variáveis: $saudacao, $falas, $ajuda (opcional: a tela atual explicada), $tutorial (o passo a passo da tela, se houver)
  */
 $img = fn(string $humor, string $variacao = 'padrao') => asset("img/one/one-$humor-$variacao.svg");
 ?>
@@ -10,11 +10,12 @@ $img = fn(string $humor, string $variacao = 'padrao') => asset("img/one/one-$hum
     <img src="<?= $img($saudacao['humor']) ?>" alt="" width="44" height="48">
     <div><p><?= e($saudacao['texto']) ?></p></div>
   </div>
-  <?php if (!empty($ajuda)): ?>
+  <?php if (!empty($tutorial)): ?>
+    <button type="button" class="one-fala one-ajuda-painel" data-one-ajuda>💡 O que dá pra fazer aqui? <small>Passo a passo de "<?= e($tutorial['titulo']) ?>"</small></button>
+  <?php elseif (!empty($ajuda)): ?>
     <details class="one-fala one-ajuda-painel">
       <summary>💡 O que dá pra fazer aqui? <small><?= e($ajuda['titulo']) ?></small></summary>
       <ol><?php foreach (array_filter($ajuda['passos']) as $passo): ?><li><?= e($passo) ?></li><?php endforeach; ?></ol>
-      <?php if ($ajuda['aula']): ?><a href="<?= url($ajuda['aula']) ?>">Ver a aula completa →</a><?php endif; ?>
     </details>
   <?php endif; ?>
   <?php foreach ($falas as $f): ?>

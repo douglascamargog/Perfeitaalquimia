@@ -191,7 +191,7 @@ class OneTela
         '/producao' => ['Produção', ['Matérias-primas abaixo do mínimo e produtos para reabastecer.', 'Ordens de produção planejadas e o que foi produzido no mês.', 'Concluir uma ordem baixa as matérias-primas automaticamente.'], null],
         '/producao/fichas' => ['Fichas técnicas', ['O que vai em cada unidade fabricada e o custo.', 'A tabela nutricional vai sendo montada enquanto você preenche.', 'Imprima a ficha técnica ou baixe a tabela em PDF/imagem.'], null],
         '/marketing/pedir' => ['Pedir ao Marketing', ['Escolha o assunto (arte, material, cadastro, pergunta de cliente).', 'Descreva o que precisa e a data.', 'Você acompanha o andamento e recebe aviso quando ficar pronto.'], null],
-        '/academia' => ['Academia', ['Trilha de treinamento, fichas dos produtos, falas e objeções.', 'Comece pela trilha se você é nova na equipe.', '"Como usar o One" explica cada tela do sistema.'], 'primeiro-acesso'],
+        '/treinamento' => ['Treinamento', ['A trilha do seu setor, com uma provinha no fim de cada módulo.', 'Comece pela Integração se você é nova na equipe.', 'Em cada tela, eu mostro o passo a passo.'], null],
         '/pessoas' => ['Pessoas', ['Conheça a equipe: perfis, gostos e aniversários.', 'Deixe recados e elogios no perfil dos colegas.', 'Personalize o seu em Meu perfil.'], null],
     ];
 
@@ -209,7 +209,7 @@ class OneTela
             return $item ? ['titulo' => $item['titulo'], 'passos' => [$item['descricao'] ?? ''], 'aula' => null] : null;
         }
         [$titulo, $passos, $aula] = $melhor;
-        return ['titulo' => $titulo, 'passos' => $passos, 'aula' => $aula && Auth::pode('academia.ver') ? '/academia/sistema/' . $aula : null];
+        return ['titulo' => $titulo, 'passos' => $passos, 'aula' => null];
     }
 
     // ---------------------------------------------------------------- comemorações
