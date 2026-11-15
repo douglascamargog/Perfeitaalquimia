@@ -1,5 +1,5 @@
 <?php
-/** Fila de reativação. Variáveis: $resultado, $dias, $aguardando, $vendedores */
+/** Reativação. Variáveis: $comVendedora, $resultado, $dias, $aguardando, $vendedores */
 use App\Core\Auth;
 use App\Core\Visao;
 
@@ -7,11 +7,17 @@ $r = $resultado;
 ?>
 <div class="cabecalho-secao">
   <div>
-    <div class="sobretitulo">FUNÇÃO PROSPECÇÃO E REATIVAÇÃO</div>
-    <h1>Fila de reativação</h1>
-    <p>Clientes sem compra há mais de <strong><?= (int) $dias ?> dias</strong> (configurável). Reativou? Devolva para um vendedor.</p>
+    <?php if ($comVendedora): ?>
+      <div class="sobretitulo">MINHA CARTEIRA</div>
+      <h1>Reativação</h1>
+      <p>Seus clientes sem compra há mais de <strong><?= (int) $dias ?> dias</strong> (configurável). Eles continuam com você: ligue, mande uma mensagem ou ofereça a campanha do mês.</p>
+    <?php else: ?>
+      <div class="sobretitulo">FUNÇÃO PROSPECÇÃO E REATIVAÇÃO</div>
+      <h1>Fila de reativação</h1>
+      <p>Clientes sem compra há mais de <strong><?= (int) $dias ?> dias</strong> (configurável). Reativou? Devolva para um vendedor.</p>
+    <?php endif; ?>
   </div>
-  <?php if (Auth::pode('carteira.ver_todas')): ?>
+  <?php if (!$comVendedora && Auth::pode('carteira.ver_todas')): ?>
     <form method="post" action="<?= url('/reativacao/processar') ?>" class="acoes">
       <?= csrf_campo() ?>
       <button class="botao lima" type="submit">Processar agora<?= $aguardando ? " ($aguardando)" : '' ?></button>
@@ -49,11 +55,11 @@ $r = $resultado;
           <?php endif; ?>
         </tr>
       <?php endforeach; ?>
-      <?php if (!$r['itens']): ?><tr><td colspan="6" class="vazio">Nenhum cliente na fila de reativação.</td></tr><?php endif; ?>
+      <?php if (!$r['itens']): ?><tr><td colspan="6" class="vazio"><?= $comVendedora ? 'Nenhum cliente sem compra há mais de ' . (int) $dias . ' dias. 🎉' : 'Nenhum cliente na fila de reativação.' ?></td></tr><?php endif; ?>
       </tbody>
     </table>
   </div>
-  <div class="paginacao-barra"><span><?= number_format($r['total'], 0, ',', '.') ?> cliente(s) na fila</span>
+  <div class="paginacao-barra"><span><?= number_format($r['total'], 0, ',', '.') ?> cliente(s)<?= $comVendedora ? ' para reativar' : ' na fila' ?></span>
     <?php if ($r['paginas'] > 1): ?><nav class="paginacao">
       <?php for ($p = 1; $p <= $r['paginas']; $p++): ?><a class="botao <?= $p === $r['pagina'] ? '' : 'contorno' ?> pequeno" href="<?= url('/reativacao') ?>?pagina=<?= $p ?>"><?= $p ?></a><?php endfor; ?>
     </nav><?php endif; ?>

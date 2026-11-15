@@ -28,7 +28,7 @@ async function sair(page) { await page.click('form[action$="/sair"] button'); }
   // Admin
   await entrar(page, 'admin@demo.local');
   ok(page.url() === BASE + '/', 'admin entra na tela inicial');
-  ok(await page.locator('.faixa-demo').count() === 1, 'faixa de demonstração visível');
+  ok(await page.locator('.faixa-demo').count() === 0, 'sem a faixa de demonstração no topo (pedido da empresa)');
   ok(await page.locator('nav a', { hasText: 'Pessoas e acessos' }).count() === 1, 'admin vê Pessoas e acessos (Usuários) no menu');
   await page.screenshot({ path: SHOTS + '/inicio-admin.png' });
 

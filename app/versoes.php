@@ -17,6 +17,22 @@
  */
 return [
     [
+        'versao' => '12.1', 'data' => '2026-11-15', 'titulo' => 'Menu mais enxuto',
+        'novo' => [
+            'Comercial: Televendas, Externo, Terceirização e Prospecção agora ficam juntos no grupo Comercial. Quem trabalha em mais de um setor escolhe o setor no alto do grupo.',
+            'Reativação em cada setor: cada vendedora vê os próprios clientes sem compra há algum tempo e tenta reconquistá-los. O cliente continua com ela.',
+            'Treinamento: a Academia e as aulas "Como usar o One" ganharam um menu próprio.',
+            'Pessoas virou um ícone no alto da tela, ao lado do sino.',
+        ],
+        'melhoria' => [
+            'Estoque (matérias-primas, rótulos e estoque acabado) agora fica dentro de Produção.',
+            'Produtos novos e as tarefas de desenvolvimento agora ficam dentro de Produtos.',
+            'Trocar a senha fica em Meu perfil (clique no seu nome no alto da tela).',
+            'Sem a faixa "Ambiente de demonstração" no alto das telas.',
+        ],
+        'admin' => 'Administração saiu do menu lateral: agora é a engrenagem ao lado do botão Sair, com uma página de cartões (Pessoas e acessos, Configurações, Comunicados, Integração, Atualização, Auditoria). Reativação: Configurações › Carteira › "Quem reativa o cliente sem compra" (vendedora = padrão; fila = jeito antigo).',
+    ],
+    [
         'versao' => '12.0', 'data' => '2026-11-15', 'titulo' => 'Campanhas comerciais e catálogo novo',
         'novo' => [
             'Comercial › Campanhas: campanhas do mês ou da semana com faixas pelo valor do pedido. Exemplos: "acima de R$ 2.000, 10% de desconto", "acima de R$ 10.000, ganha uma bicicleta" ou "frete grátis".',

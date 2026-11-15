@@ -492,3 +492,20 @@ a.eq-pessoa { color: inherit; text-decoration: none; }
 @keyframes letreiro-passar { from { transform: translateX(0); } to { transform: translateX(-100%); } }
 @media (prefers-reduced-motion: reduce) { .letreiro-rolar, .com-rolar { animation: none; padding-left: 0; } }
 @media (max-width: 760px) { .letreiro { flex-basis: 100%; order: 10; } }
+
+/* Escolha do setor no alto do Comercial (V12.1) */
+.menu-setores { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 10px 8px 4px; }
+.menu-sub .menu-setores a { display: inline-flex; padding: 4px 9px !important; border-radius: 99px; font-size: .7rem !important; font-weight: 700;
+  background: rgba(255, 255, 255, .08); color: inherit; text-decoration: none; border: 1px solid rgba(255, 255, 255, .14); gap: 0; }
+.menu-sub .menu-setores a.ativo { background: var(--secundaria); color: var(--secundaria-texto); border-color: var(--secundaria); }
+.botao-icone.ativo { background: var(--primaria-clara); color: var(--primaria-escura); }
+
+/* Administração (engrenagem do topo) */
+.adm-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.adm-cartao { position: relative; display: flex; gap: 14px; align-items: flex-start; padding: 18px; border-radius: var(--raio); background: var(--card); border: 1px solid var(--borda);
+  text-decoration: none; color: var(--texto); box-shadow: var(--sombra); transition: transform .15s ease, border-color .15s ease; }
+.adm-cartao:hover { transform: translateY(-2px); border-color: var(--secundaria); }
+.adm-cartao strong { display: block; font-size: 1rem; color: var(--primaria-escura); }
+.adm-cartao small { display: block; margin-top: 4px; color: var(--texto-suave); font-size: .82rem; line-height: 1.35; }
+.adm-icone { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--primaria-clara); color: var(--primaria); }
+.adm-leitura { position: absolute; right: 12px; top: 10px; }

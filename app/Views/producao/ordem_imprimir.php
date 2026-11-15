@@ -31,7 +31,6 @@ $lotesLimite = 9; // linhas da tabela de matérias-primas (o modelo tem linhas e
   <link rel="stylesheet" href="<?= asset('css/op-impressa.css') ?>">
 </head>
 <body class="op">
-  <?php if (config('modo_demo')): ?><p class="op-demo">Ambiente de demonstração — dados simulados</p><?php endif; ?>
   <div class="op-folha">
     <!-- Cabeçalho do documento -->
     <table class="op-cab">

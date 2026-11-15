@@ -22,7 +22,6 @@
   <?= \App\Services\Aparencia::estilo(\App\Core\Auth::usuario()) /* cores do sistema */ ?>
 </head>
 <body class="ap">
-<?php if (config('modo_demo')): ?><div class="faixa-demo">Ambiente de demonstração — dados simulados</div><?php endif; ?>
 <header class="ap-topo">
   <img src="<?= asset('img/one/one-ola-invertido.svg') ?>" alt="" width="34" height="37">
   <div class="ap-titulo"><strong>One Vendas</strong><small data-vendedor>&nbsp;</small></div>

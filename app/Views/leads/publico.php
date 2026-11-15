@@ -22,7 +22,6 @@ $v = fn(string $c) => e((string) ($_POST[$c] ?? ''));
   <?= \App\Services\Aparencia::estilo(null, true) /* cores do sistema */ ?>
 </head>
 <body class="lp">
-<?php if (config('modo_demo')): ?><div class="faixa-demo">Ambiente de demonstração — dados simulados</div><?php endif; ?>
 <main class="lp-caixa">
   <section class="lp-chamada">
     <img src="<?= asset('img/logo.png') ?>" alt="<?= e($empresa) ?>" width="64" height="64">

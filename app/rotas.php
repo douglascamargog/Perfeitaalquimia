@@ -12,6 +12,7 @@ return [
     ['GET',  '/entrar',        'AuthController@formulario', 'publico'],
     ['POST', '/entrar',        'AuthController@entrar',     'publico'],
     ['POST', '/sair',          'AuthController@sair',       'logado'],
+    ['GET',  '/administracao', 'AdministracaoController@index', 'logado'], // engrenagem do topo: só as telas que a pessoa pode abrir
     ['GET',  '/minha-senha',   'AuthController@formSenha',  'logado'],
     ['POST', '/minha-senha',   'AuthController@trocarSenha', 'logado'],
 

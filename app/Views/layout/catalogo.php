@@ -30,7 +30,6 @@ $campanhaTopo = $visualCatalogo['campanha'] ?? null;
   <?= \App\Services\CampanhaService::estilo($visualCatalogo) /* cores do catálogo (da campanha ou o padrão) */ ?>
 </head>
 <body class="cat <?= $visualCatalogo['tema'] === 'escuro' ? 'cat-escuro' : 'cat-claro' ?>">
-<?php if (config('modo_demo')): ?><div class="faixa-demo">Ambiente de demonstração — dados simulados</div><?php endif; ?>
 <header class="cat-topo">
   <a class="cat-marca" href="<?= url('/catalogo') ?>"><img src="<?= asset('img/logo.png') ?>" alt="Perfeita Alquimia" width="44" height="44"><span><?= e(Config::get('catalogo.titulo', 'Catálogo')) ?></span></a>
   <?php if ($campanhaTopo && empty($semMenu)): ?><span class="cat-topo-chip"><?= e($campanhaTopo['titulo'] ?: $campanhaTopo['nome']) ?><?= $campanhaTopo['selo'] ? ' · <b>' . e($campanhaTopo['selo']) . '</b>' : '' ?></span><?php endif; ?>

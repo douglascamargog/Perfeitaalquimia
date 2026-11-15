@@ -51,9 +51,6 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
   </div>
   <canvas class="aniv-confete" data-confete aria-hidden="true"></canvas>
 <?php endif; ?>
-<?php if (config('modo_demo')): ?>
-  <div class="faixa-demo">Ambiente de demonstração — dados simulados</div>
-<?php endif; ?>
 
 <div class="estrutura">
   <aside class="menu-lateral" aria-label="Menu principal">
@@ -71,6 +68,11 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
             <svg class="icone menu-seta" aria-hidden="true"><use href="<?= $icones ?>#mais"/></svg>
           </button>
           <div class="menu-sub">
+          <?php if (!empty($g['setores'])): ?>
+            <div class="menu-setores" role="group" aria-label="Setor">
+              <?php foreach ($g['setores'] as $st): ?><a href="<?= url($st['href']) ?>" class="<?= $st['ativo'] ? 'ativo' : '' ?>" <?= $st['ativo'] ? 'aria-current="true"' : '' ?>><?= e($st['nome']) ?></a><?php endforeach; ?>
+            </div>
+          <?php endif; ?>
         <?php endif; ?>
         <?php foreach ($g['itens'] as $item): ?>
           <?php if ($item['pronto']): ?>
@@ -115,6 +117,7 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
       <div class="usuario">
         <details class="online" data-online <?= $online ? '' : 'hidden' ?>><?= \App\Core\Visao::renderizar('layout/_online', ['online' => $online]) ?></details>
         <?php if (\App\Services\TelefoniaService::veDiscador()): ?><?= \App\Core\Visao::renderizar('layout/_discador') ?><?php endif; ?>
+        <a class="botao-icone <?= str_starts_with($caminhoAtual, '/pessoas') ? 'ativo' : '' ?>" href="<?= url('/pessoas') ?>" title="Pessoas: perfis, gostos e aniversários" aria-label="Pessoas" data-icone-pessoas><svg class="icone"><use href="<?= $icones ?>#pessoas"/></svg></a>
         <div class="sino" data-sino>
           <button class="botao-icone" type="button" aria-label="Notificações" aria-haspopup="true" aria-expanded="false" data-sino-botao>
             <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
@@ -135,7 +138,7 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
           </span>
           <?= \App\Services\EquipeService::avatar($usuario, 38) ?>
         </a>
-        <a class="botao-icone so-tela-grande" href="<?= url('/minha-senha') ?>" title="Minha senha" aria-label="Minha senha"><svg class="icone"><use href="<?= $icones ?>#chave"/></svg></a>
+        <?php if (\App\Core\Menu::administracao()): ?><a class="botao-icone <?= str_starts_with($caminhoAtual, '/administracao') ? 'ativo' : '' ?>" href="<?= url('/administracao') ?>" title="Administração" aria-label="Administração" data-engrenagem><svg class="icone"><use href="<?= $icones ?>#engrenagem"/></svg></a><?php endif; ?>
         <form method="post" action="<?= url('/sair') ?>">
           <?= csrf_campo() ?>
           <button class="botao-icone" type="submit" title="Sair" aria-label="Sair"><svg class="icone"><use href="<?= $icones ?>#sair"/></svg></button>

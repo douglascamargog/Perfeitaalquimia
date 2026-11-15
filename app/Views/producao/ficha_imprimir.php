@@ -26,7 +26,6 @@ $forma = P::FORMAS[P::formaDoProduto((int) $p['id'])] ?? '';
   <link rel="stylesheet" href="<?= asset('css/ficha-impressa.css') ?>">
 </head>
 <body class="ft">
-  <?php if (config('modo_demo')): ?><p class="ft-demo">Ambiente de demonstração — dados simulados</p><?php endif; ?>
   <div class="ft-folha">
     <header class="ft-cab">
       <img src="<?= asset('img/logo.png') ?>" alt="<?= e($empresa) ?>">

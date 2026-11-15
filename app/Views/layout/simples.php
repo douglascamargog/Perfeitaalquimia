@@ -24,9 +24,6 @@ use App\Core\Sessao;
   <?= \App\Services\Aparencia::estilo(null, true) /* cores do sistema */ ?>
 </head>
 <body>
-<?php if (config('modo_demo')): ?>
-  <div class="faixa-demo">Ambiente de demonstração — dados simulados</div>
-<?php endif; ?>
 <div class="pagina-simples">
   <div class="caixa-simples">
     <div class="marca-login">

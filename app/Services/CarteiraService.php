@@ -214,6 +214,9 @@ class CarteiraService
      */
     public static function processarInatividade(?int $usuarioId = null): int
     {
+        if (self::reativacaoComVendedora()) {
+            return 0; // o cliente fica com a vendedora (aparece na Reativação dela): ninguém é movido
+        }
         $dias = (int) Config::get('carteira.dias_inatividade', 90);
         $funcaoId = self::funcaoId((string) Config::get('carteira.funcao_reativacao', 'prospeccao_reativacao'));
         if (!$funcaoId) {
@@ -243,6 +246,12 @@ class CarteiraService
             Auditoria::registrar('carteira', null, 'processar_inatividade', null, ['clientes_movidos' => count($clientes), 'dias' => $dias]);
         }
         return count($clientes);
+    }
+
+    /** Reativação com a própria vendedora (padrão) ou fila da função de reativação (modo antigo)? */
+    public static function reativacaoComVendedora(): bool
+    {
+        return Config::get('carteira.reativacao_modo', 'vendedora') !== 'fila';
     }
 
     /** Cliente reativado volta para um vendedor (e sai da fila de reativação) */

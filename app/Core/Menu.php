@@ -6,21 +6,94 @@ class Menu
 {
     /** Ícone de cada grupo (submenu) que não é setor de venda */
     private const ICONES_GRUPO = ['Financeiro' => 'moeda', 'Gestão' => 'grafico', 'Marketing' => 'megafone', 'Produtos' => 'caixa',
-        'Produção' => 'fabrica', 'Administração' => 'engrenagem', 'Vendas' => 'pessoas', 'Comercial' => 'pessoas', 'Desenvolvimento' => 'faisca', 'Depósito' => 'loja', 'Compras' => 'carrinho', 'Estoque' => 'caixa'];
+        'Produção' => 'fabrica', 'Administração' => 'engrenagem', 'Vendas' => 'pessoas', 'Comercial' => 'pessoas', 'Treinamento' => 'livro', 'Desenvolvimento' => 'faisca', 'Depósito' => 'loja', 'Compras' => 'carrinho', 'Estoque' => 'caixa'];
 
     /**
      * Monta o menu lateral em grupos que abrem e fecham (submenus).
-     *  - Topo: itens sem grupo (Início, Equipe).
-     *  - Um grupo por SETOR DE VENDA da pessoa (Setores::daPessoa): abas comuns ('setor' => true) com ?setor=slug
-     *    e as abas só daquele setor ('so_setor'). Setor desligado em Funções (ou pessoa sem setor): as abas vão para o grupo "Comercial".
+     *  - Topo: itens sem grupo (Início).
+     *  - COMERCIAL: um grupo só para todos os setores de venda (Televendas, Externo, Terceirização, Prospecção).
+     *    No alto, a escolha do setor (só para quem trabalha em mais de um); embaixo, as abas comuns ('setor' => true)
+     *    com ?setor=slug, as abas só daquele setor ('so_setor') e as outras abas do Comercial (Campanhas).
+     *  - Administração NÃO fica no menu: abre pela engrenagem do topo (/administracao).
      *  - Demais grupos (Financeiro, Gestão, Marketing...): todos veem, com cadeado (sem acesso) ou olho (só leitura).
-     * Devolve [ ['chave', 'nome', 'icone', 'itens' => [...], 'aberto' => bool, 'contador' => int, 'topo' => bool], ... ]
-     * Cada item ganha: href, bloqueado, leitura, ativo, contador (só no grupo principal, para não repetir).
+     * Devolve [ ['chave', 'nome', 'icone', 'itens' => [...], 'aberto' => bool, 'contador' => int, 'topo' => bool, 'setores' => [...]], ... ]
+     * Cada item ganha: href, bloqueado, leitura, ativo, contador.
      */
     public static function lateral(string $caminhoAtual, array $pendencias): array
     {
         $setores = \App\Services\Setores::daPessoa();
         $atual = \App\Services\Setores::atual();
+        $itens = self::itensVisiveis($caminhoAtual, $urlAtual);
+        $verTodos = Auth::pode('carteira.ver_todas');
+        // Setor das abas do Comercial: o escolhido; sem escolha, quem vê todas as carteiras fica em "Todos" ('') e os outros no 1º setor
+        $principal = $atual['slug'] ?? ($verTodos ? '' : (array_key_first($setores) ?? ''));
+
+        $grupos = [];
+        $novoGrupo = fn(string $chave, string $nome, string $icone, bool $topo = false) => ['chave' => $chave, 'nome' => $nome, 'icone' => $icone, 'itens' => [], 'aberto' => false, 'contador' => 0, 'topo' => $topo];
+        $grupos['topo'] = $novoGrupo('topo', '', '', true);
+        $grupos['Comercial'] = $novoGrupo('Comercial', 'Comercial', self::ICONES_GRUPO['Comercial']);
+        $comuns = [];
+        $extras = [];
+        foreach ($itens as $item) {
+            if (!empty($item['oculto']) || ($item['grupo'] ?? '') === 'Administração') {
+                continue; // fica em abas de outra entrada, ou na página Administração (engrenagem do topo)
+            }
+            $item['ativo'] = $item['url'] === '/' ? $caminhoAtual === '/' : ($item['url'] === $urlAtual || in_array($urlAtual, $item['tambem'] ?? [], true));
+            $item['href'] = $item['url'];
+            $item['contador'] = (int) ($pendencias[$item['url']] ?? 0);
+            if (($item['grupo'] ?? '') === '') {
+                $grupos['topo']['itens'][] = $item;
+            } elseif (!empty($item['setor'])) {
+                $item['href'] = $item['url'] . ($setores ? '?setor=' . rawurlencode($principal) : '');
+                $comuns[] = $item;
+            } elseif (!empty($item['so_setor'])) {
+                if (isset($setores[$item['so_setor']])) {
+                    // aba só de um setor: aparece com o setor escolhido (ou em "Todos"); leva para o setor dela
+                    if ($principal === '' || $principal === $item['so_setor']) {
+                        $item['href'] = $item['url'] . '?setor=' . rawurlencode($item['so_setor']);
+                        $extras[] = $item;
+                    }
+                } elseif (!$setores || !isset(\App\Services\Setores::todos()[$item['so_setor']])) {
+                    $extras[] = $item; // quem não trabalha em setor de venda (ex.: Produção vê os rótulos da Terceirização)
+                }
+            } elseif (in_array($item['grupo'], ['Vendas', 'Comercial'], true)) {
+                $extras[] = $item;
+            } else {
+                $grupos[$item['grupo']] ??= $novoGrupo($item['grupo'], $item['grupo'], self::ICONES_GRUPO[$item['grupo']] ?? 'mais');
+                $grupos[$item['grupo']]['itens'][] = $item;
+            }
+        }
+        $grupos['Comercial']['itens'] = array_merge($comuns, $extras);
+        // Escolha do setor (chips no alto do Comercial): só para quem trabalha em mais de um
+        if (count($setores) > 1 || ($verTodos && $setores)) {
+            $base = !empty(self::itemDe($caminhoAtual)['setor']) ? $urlAtual : '/carteira';
+            $chips = [];
+            if ($verTodos) {
+                $chips[] = ['slug' => '', 'nome' => 'Todos', 'href' => $base . '?setor=', 'ativo' => $principal === ''];
+            }
+            foreach ($setores as $slug => $st) {
+                $chips[] = ['slug' => $slug, 'nome' => self::nomeCurto($st['nome']), 'href' => $base . '?setor=' . rawurlencode($slug), 'ativo' => $principal === $slug, 'icone' => $st['icone']];
+            }
+            $grupos['Comercial']['setores'] = $chips;
+        }
+        foreach ($grupos as $chave => &$g) {
+            if (!$g['itens']) {
+                unset($grupos[$chave]);
+                continue;
+            }
+            // Dentro do grupo, as abas que a pessoa pode abrir vêm primeiro (usort é estável no PHP 8)
+            usort($g['itens'], fn($a, $b) => (int) $a['bloqueado'] <=> (int) $b['bloqueado']);
+            $g['aberto'] = (bool) array_filter($g['itens'], fn($i) => $i['ativo']);
+            $g['contador'] = array_sum(array_column($g['itens'], 'contador'));
+            $g['bloqueado'] = !array_filter($g['itens'], fn($i) => !$i['bloqueado']);
+        }
+        unset($g);
+        return array_values($grupos);
+    }
+
+    /** Todos os itens do menu com bloqueado/leitura calculados; $urlAtual recebe o item da página atual */
+    private static function itensVisiveis(string $caminhoAtual, ?string &$urlAtual): array
+    {
         $itens = [];
         $urlAtual = '/';
         foreach (require RAIZ . '/app/menu.php' as $item) {
@@ -36,77 +109,23 @@ class Menu
                 $urlAtual = $item['url'];
             }
         }
-        // Setor "principal" para marcar a aba ativa e mostrar os contadores: o atual, senão o primeiro
-        $principal = $atual['slug'] ?? (array_key_first($setores) ?? '');
+        return $itens;
+    }
 
-        $grupos = [];
-        $novoGrupo = fn(string $chave, string $nome, string $icone, bool $topo = false) => ['chave' => $chave, 'nome' => $nome, 'icone' => $icone, 'itens' => [], 'aberto' => false, 'contador' => 0, 'topo' => $topo];
-        $grupos['topo'] = $novoGrupo('topo', '', '', true);
-        foreach ($setores as $slug => $s) {
-            $grupos['setor:' . $slug] = $novoGrupo('setor:' . $slug, $s['nome'], $s['icone']) + ['setor' => $slug];
-        }
-        $comuns = array_filter($itens, fn($i) => !empty($i['setor']));
-        foreach ($itens as $item) {
-            if (!empty($item['oculto'])) {
-                continue; // tela que fica em abas de outra entrada (ex.: Painel de vendas dentro de Resultados)
-            }
-            $item['ativo'] = $item['url'] === '/' ? $caminhoAtual === '/' : ($item['url'] === $urlAtual || in_array($urlAtual, $item['tambem'] ?? [], true));
-            $item['href'] = $item['url'];
-            $item['contador'] = (int) ($pendencias[$item['url']] ?? 0);
-            if (($item['grupo'] ?? '') === '') {
-                $grupos['topo']['itens'][] = $item;
-            } elseif (!empty($item['setor'])) {
-                continue; // entra em cada setor logo abaixo
-            } elseif (!empty($item['so_setor']) && isset($grupos['setor:' . $item['so_setor']])) {
-                $grupos['setor:' . $item['so_setor']]['extras'][] = $item;
-            } elseif (!empty($item['so_setor']) && $setores && isset(\App\Services\Setores::todos()[$item['so_setor']])) {
-                continue; // setor existe, mas não é desta pessoa (cada um vê só o seu setor)
-            } else {
-                // Quem não trabalha em setor de venda (ex.: Produção vê os rótulos da Terceirização): grupo "Comercial"
-                $g = $item['grupo'] === 'Vendas' ? 'Comercial' : $item['grupo'];
-                $grupos[$g] ??= $novoGrupo($g, $g, self::ICONES_GRUPO[$g] ?? 'mais');
-                $grupos[$g]['itens'][] = $item;
-            }
-        }
-        // Abas comuns de venda dentro de cada setor (com ?setor=), depois as abas só do setor
-        foreach ($setores as $slug => $s) {
-            $g = &$grupos['setor:' . $slug];
-            foreach ($comuns as $item) {
-                $item['href'] = $item['url'] . '?setor=' . rawurlencode($slug);
-                $item['ativo'] = $item['url'] === $urlAtual && $slug === $principal;
-                $item['comContador'] = $slug === $principal; // contador pessoal (agenda, recompra) aparece num setor só
-                $item['contador'] = $item['comContador'] ? (int) ($pendencias[$item['url']] ?? 0) : 0;
-                $g['itens'][] = $item;
-            }
-            foreach ($g['extras'] ?? [] as $item) {
-                $item['ativo'] = $item['url'] === $urlAtual;
-                $g['itens'][] = $item;
-            }
-            unset($g['extras'], $g);
-        }
-        // Sem nenhum setor de venda cadastrado: as abas comuns vão para o grupo "Vendas"
-        if (!$setores && $comuns) {
-            $grupos['Comercial'] ??= $novoGrupo('Comercial', 'Comercial', self::ICONES_GRUPO['Vendas']);
-            foreach ($comuns as $item) {
-                $item['ativo'] = $item['url'] === $urlAtual;
-                $item['href'] = $item['url'];
-                $item['contador'] = (int) ($pendencias[$item['url']] ?? 0);
-                array_unshift($grupos['Comercial']['itens'], $item);
-            }
-        }
-        foreach ($grupos as $chave => &$g) {
-            if (!$g['itens']) {
-                unset($grupos[$chave]);
-                continue;
-            }
-            // Dentro do grupo, as abas que a pessoa pode abrir vêm primeiro (usort é estável no PHP 8)
-            usort($g['itens'], fn($a, $b) => (int) $a['bloqueado'] <=> (int) $b['bloqueado']);
-            $g['aberto'] = (bool) array_filter($g['itens'], fn($i) => $i['ativo']);
-            $g['contador'] = array_sum(array_column($g['itens'], 'contador'));
-            $g['bloqueado'] = !array_filter($g['itens'], fn($i) => !$i['bloqueado']);
-        }
-        unset($g);
-        return array_values($grupos);
+    /** "Terceirização e Marca Própria" → "Terceirização"; "Prospecção e Reativação" → "Prospecção" (só no chip do menu) */
+    private static function nomeCurto(string $nome): string
+    {
+        return preg_replace('/\s+e\s+.*$/u', '', $nome) ?: $nome;
+    }
+
+    /** Itens da página Administração (engrenagem do topo) que a pessoa pode abrir */
+    public static function administracao(): array
+    {
+        $ordem = ['/usuarios', '/configuracoes', '/comunicados', '/integracao', '/sistema/atualizacao', '/auditoria', '/desenvolvimento/etapas'];
+        $lista = array_values(array_filter(self::itensVisiveis('/', $nada), fn($i) => ($i['grupo'] ?? '') === 'Administração' && empty($i['oculto']) && !$i['bloqueado']));
+        $pos = fn($i) => ($k = array_search($i['url'], $ordem, true)) === false ? 99 : $k;
+        usort($lista, fn($a, $b) => $pos($a) <=> $pos($b));
+        return $lista;
     }
 
     /** Telas que não estão no menu, mas têm nome */
