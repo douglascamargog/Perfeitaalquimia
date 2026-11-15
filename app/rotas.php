@@ -43,7 +43,8 @@ return [
     // ---------- Início ----------
     ['GET',  '/',              'InicioController@index', 'logado'],
     ['GET',  '/one/falas',     'OneController@falas',    'logado'],   // One, o ajudante
-    ['GET',  '/one/tela',      'OneController@naTela',     'logado'],   // One na tela atual: balão importante e ajuda
+    ['GET',  '/one/tela',      'OneController@naTela',     'logado'],
+    ['POST', '/one/perguntar', 'OneController@perguntar', 'logado'],   // Pergunte ao One (IA ou aulas do sistema)
 
     // ---------- Carteira e CRM ----------
     ['GET',  '/carteira',                       'CarteiraController@visaoGeral', 'carteira.ver_propria|carteira.ver_todas'],

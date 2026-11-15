@@ -17,6 +17,15 @@
  */
 return [
     [
+        'versao' => '12.4', 'data' => '2026-11-15', 'titulo' => 'Pergunte ao One',
+        'novo' => [
+            'Pergunte ao One: abra o One e escreva a sua dúvida, do jeito que falaria com um colega. Ex.: "como faço um orçamento?", "quanto falta para a minha meta?", "quais campanhas estão no ar?".',
+            'Ele responde com o caminho certo no sistema (com o link da tela), os seus números do mês e as campanhas. Lembra do assunto enquanto a conversa está aberta.',
+        ],
+        'melhoria' => ['Menu: a escolha do setor no Comercial ficou numa linha só ("Setor ▾"), mais limpa.'],
+        'admin' => 'A IA (Claude) vem DESLIGADA: sem ela, o One responde com as aulas "Como usar o One" e os dados do sistema, sem custo e sem nada sair do servidor. Para ligar: a chave da Anthropic no config.php (integracoes.anthropic.chave, a mesma da busca de contatos) e Configurações › One (IA). Lá também: se a IA pode consultar clientes (LGPD, desligado por padrão; cada pessoa só vê a própria carteira) e o limite de perguntas por hora. O texto das perguntas não é guardado; o uso e o custo estimado aparecem em Administração.',
+    ],
+    [
         'versao' => '12.3', 'data' => '2026-11-15', 'titulo' => 'O One mais presente',
         'novo' => [
             'O One puxa conversa sozinho quando há algo importante na tela: retornos atrasados na Agenda, por qual cliente começar na Recompra, pedidos esperando na Aprovação, e-commerce com horário no Depósito e outros.',

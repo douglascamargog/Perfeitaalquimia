@@ -560,3 +560,27 @@ a.eq-pessoa { color: inherit; text-decoration: none; }
 .one-ajuda-painel summary small { font-weight: 500; color: var(--texto-suave); margin-left: 4px; }
 .one-ajuda-painel ol { margin: 8px 0 4px; padding-left: 18px; display: grid; gap: 4px; }
 @media (max-width: 700px) { .one-balao { right: 14px; bottom: 72px; } }
+
+/* Pergunte ao One (V12.4) */
+.one-pergunte-caixa { position: sticky; top: 64px; z-index: 1; padding: 10px 14px 8px; background: #fff; border-bottom: 1px solid #e3efec; display: grid; gap: 8px; }
+.one-conversa { display: grid; gap: 8px; max-height: 300px; overflow-y: auto; }
+.one-conversa:empty { display: none; }
+.one-msg { display: flex; gap: 8px; align-items: flex-start; font-size: .86rem; line-height: 1.4; }
+.one-msg-corpo { min-width: 0; padding: 8px 11px; border-radius: 14px; }
+.one-msg-corpo p { margin: 0 0 4px; } .one-msg-corpo p:last-child { margin: 0; }
+.one-msg-corpo ul { margin: 4px 0; padding-left: 18px; }
+.one-msg-corpo a { color: var(--primaria-escura); font-weight: 700; }
+.one-msg.pessoa { justify-content: flex-end; }
+.one-msg.pessoa .one-msg-corpo { background: var(--primaria); color: var(--primaria-texto); border-radius: 14px 14px 4px 14px; max-width: 85%; }
+.one-msg.one .one-msg-corpo { background: #f1f8f6; border: 1px solid #d6ebe6; border-radius: 4px 14px 14px 14px; }
+.one-msg.pensando .one-msg-corpo { color: var(--texto-suave); font-style: italic; }
+.one-msg.pensando img { animation: one-acenar 1.2s ease-in-out infinite; }
+.one-sugestoes { display: flex; flex-wrap: wrap; gap: 6px; }
+.one-sugestoes button { border: 1px solid var(--primaria-suave); background: var(--primaria-clara); color: var(--primaria-escura); border-radius: 99px; padding: 5px 10px; font: inherit; font-size: .76rem; font-weight: 600; cursor: pointer; }
+.one-pergunte { display: flex; gap: 6px; }
+.one-pergunte input { flex: 1; min-width: 0; padding: 9px 12px; border: 1px solid var(--borda); border-radius: 99px; font: inherit; font-size: .88rem; }
+.one-pergunte input:focus { outline: 2px solid var(--secundaria); border-color: transparent; }
+.one-pergunte button { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--primaria); color: var(--primaria-texto); cursor: pointer; font-size: .95rem; }
+.one-pergunte button:disabled { opacity: .5; }
+.one-pergunte-nota { margin: 0; font-size: .7rem; color: var(--texto-suave); }
+.one-pergunte-nota button { border: 0; background: none; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }

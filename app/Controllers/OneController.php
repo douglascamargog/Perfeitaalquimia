@@ -25,4 +25,15 @@ class OneController extends Controller
         $balao = (int) ($usuario['one_balao'] ?? 1) ? \App\Services\OneTela::balao($pagina, $query) : null;
         $this->json(['balao' => $balao, 'ajuda' => \App\Services\OneTela::ajuda($pagina)]);
     }
+
+    /** Pergunte ao One (JSON). A resposta vem em markdown simples; a tela converte só negrito, links internos e listas. */
+    public function perguntar(): void
+    {
+        if (!empty($_POST['esquecer'])) {
+            \App\Services\OnePergunta::esquecer();
+            $this->json(['ok' => true]);
+            return;
+        }
+        $this->json(['ok' => true] + \App\Services\OnePergunta::perguntar((string) ($_POST['pergunta'] ?? '')));
+    }
 }

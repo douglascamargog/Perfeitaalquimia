@@ -142,3 +142,73 @@ window.One = { dizer: (humor, texto) => mostrar(humor, [el('p', {}, texto)]) };
     }
   } catch { /* sem internet: o One fica quieto */ }
 })();
+
+// ---------------------------------------------------------------- Pergunte ao One
+// A resposta vem em markdown simples. Aqui tudo é escapado e só viram HTML: **negrito**, [texto](/caminho interno) e listas "- ".
+function formatar(texto) {
+  const esc = (t) => t.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const linha = (t) => esc(t)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[([^\]]+)\]\((\/[^)\s]*)\)/g, (m, rotulo, caminho) => (caminho.startsWith('//') ? rotulo : `<a href="${BASE}${caminho}">${rotulo}</a>`));
+  const blocos = [];
+  let lista = [];
+  const fecharLista = () => { if (lista.length) { blocos.push('<ul>' + lista.map((i) => `<li>${i}</li>`).join('') + '</ul>'); lista = []; } };
+  texto.split('\n').forEach((l) => {
+    const m = l.match(/^\s*[-•]\s+(.*)$/);
+    if (m) lista.push(linha(m[1]));
+    else { fecharLista(); if (l.trim()) blocos.push(`<p>${linha(l)}</p>`); }
+  });
+  fecharLista();
+  return blocos.join('');
+}
+
+const formPergunta = document.querySelector('[data-one-pergunte]');
+const conversa = document.querySelector('[data-one-conversa]');
+function bolha(quem, html) {
+  const b = el('div', { class: 'one-msg ' + quem });
+  if (quem.startsWith('one')) b.append(el('img', { src: img('ola'), alt: '', width: '28', height: '31' }));
+  const corpo = el('div', { class: 'one-msg-corpo' });
+  corpo.innerHTML = html;
+  b.append(corpo);
+  conversa.append(b);
+  conversa.scrollTop = conversa.scrollHeight;
+  return b;
+}
+async function perguntar(texto) {
+  if (!texto.trim()) return;
+  document.querySelector('[data-one-sugestoes]')?.setAttribute('hidden', '');
+  bolha('pessoa', formatar(texto));
+  const pensando = bolha('one pensando', '<p>Deixa eu ver…</p>');
+  pensando.querySelector('img').src = img('pensando');
+  const botaoEnviar = formPergunta.querySelector('button');
+  botaoEnviar.disabled = true;
+  try {
+    const corpo = new FormData(); corpo.append('pergunta', texto); corpo.append('_csrf', CSRF);
+    const r = await fetch(`${BASE}/one/perguntar`, { method: 'POST', body: corpo, headers: { Accept: 'application/json', 'X-CSRF-Token': CSRF } });
+    const d = await r.json();
+    pensando.remove();
+    bolha('one', formatar(d.texto || 'Não entendi. Pode perguntar de outro jeito?'));
+  } catch {
+    pensando.remove();
+    bolha('one', '<p>Sem conexão agora. Tente de novo em instantes.</p>');
+  } finally {
+    botaoEnviar.disabled = false;
+  }
+}
+formPergunta?.addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const campo = formPergunta.pergunta;
+  const texto = campo.value;
+  campo.value = '';
+  perguntar(texto);
+});
+document.addEventListener('click', (ev) => {
+  const ex = ev.target.closest('[data-one-exemplo]');
+  if (ex) perguntar(ex.textContent);
+  if (ev.target.closest('[data-one-limpar]') && conversa) {
+    conversa.replaceChildren();
+    document.querySelector('[data-one-sugestoes]')?.removeAttribute('hidden');
+    const corpo = new FormData(); corpo.append('esquecer', '1'); corpo.append('_csrf', CSRF);
+    fetch(`${BASE}/one/perguntar`, { method: 'POST', body: corpo, headers: { 'X-CSRF-Token': CSRF } }).catch(() => {});
+  }
+});
