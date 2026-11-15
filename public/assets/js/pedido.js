@@ -8,21 +8,39 @@ const real = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BR
 
 function recalcular() {
   const minimo = Number(form.dataset.minimo) || 0;
-  let subtotal = 0, itens = 0;
+  let subtotal = 0, itens = 0, tabela = 0;
+  const pct = (campo) => Math.max(0, Math.min(100, Number(String(campo?.value || '').replace(',', '.')) || 0));
   form.querySelectorAll('[data-linha]').forEach((linha) => {
     const q = Math.max(0, Number(linha.querySelector('.ped-qtd').value) || 0);
-    const total = q * Number(linha.dataset.preco);
+    const preco = Number(linha.dataset.preco);
+    const desc = pct(linha.querySelector('.ped-desc')); // desconto da vendedora no produto (pedido da equipe)
+    const total = q * Math.round(preco * (1 - desc / 100) * 100) / 100;
     linha.querySelector('[data-total-linha]').textContent = q ? real(total) : '';
     linha.classList.toggle('escolhido', q > 0);
-    subtotal += total; itens += q;
+    subtotal += total; itens += q; tabela += q * preco;
   });
+  // Desconto no pedido inteiro + aviso do limite (acima dele, o pedido vai para aprovação)
+  const caixaDesc = form.querySelector('[data-desconto-max]');
+  let totalPedido = subtotal;
+  if (caixaDesc) {
+    const descPedido = Math.round(subtotal * pct(form.querySelector('[data-desconto-pedido]')) ) / 100;
+    totalPedido = subtotal - descPedido;
+    const dado = tabela - totalPedido;
+    const pctTotal = tabela > 0 ? dado / tabela * 100 : 0;
+    const max = Number(caixaDesc.dataset.descontoMax) || 0;
+    const resumo = caixaDesc.querySelector('[data-desconto-resumo]');
+    resumo.hidden = dado <= 0.004;
+    resumo.className = 'ped-desconto-resumo' + (pctTotal > max + 0.0001 ? ' acima' : '');
+    resumo.textContent = `Desconto total: ${real(dado)} (${pctTotal.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%)`
+      + (pctTotal > max + 0.0001 ? ` · acima do limite de ${max.toLocaleString('pt-BR')}%: o pedido vai para aprovação` : '');
+  }
   form.querySelector('[data-itens]').textContent = itens;
-  form.querySelector('[data-subtotal]').textContent = real(subtotal);
-  const falta = Math.max(0, minimo - subtotal);
+  form.querySelector('[data-subtotal]').textContent = real(totalPedido);
+  const falta = Math.max(0, minimo - tabela); // pedido mínimo pelo preço de tabela (como o servidor confere)
   const caixa = form.querySelector('[data-caixa-minimo]');
   caixa.className = 'cat-minimo ' + (falta > 0 ? 'falta' : 'ok');
   form.querySelector('[data-texto-minimo]').textContent = falta > 0 ? `Faltam ${real(falta)} para o mínimo (${real(minimo)})` : 'Pedido mínimo atingido ✓';
-  form.querySelector('[data-barra-minimo]').style.width = (minimo ? Math.min(100, subtotal / minimo * 100) : 100) + '%';
+  form.querySelector('[data-barra-minimo]').style.width = (minimo ? Math.min(100, tabela / minimo * 100) : 100) + '%';
   // Condições com valor mínimo (ex.: boleto 28/56 a partir de R$ 1.500)
   form.querySelectorAll('[data-condicao-minimo]').forEach((op) => {
     const bloqueada = subtotal < Number(op.dataset.condicaoMinimo);
@@ -76,7 +94,7 @@ function aplicarModelo() {
 if (form) {
   form.querySelector('[data-modelo-aplicar]')?.addEventListener('click', aplicarModelo);
   form.addEventListener('input', (e) => {
-    if (e.target.matches('.ped-qtd')) recalcular();
+    if (e.target.matches('.ped-qtd, .ped-desc, [data-desconto-pedido]')) recalcular();
     if (e.target.matches('[data-filtro-produtos]')) filtrar();
   });
   form.addEventListener('change', (e) => { if (e.target.matches('[data-so-escolhidos]')) filtrar(); });

@@ -185,25 +185,56 @@ class PedidoService
             return [null, $erros];
         }
 
-        $desconto = $condicao ? round($carrinho['subtotal'] * (float) $condicao['desconto_pct'] / 100, 2) : 0.0;
         $vendedor = (int) ($d['vendedor_id'] ?? 0) ?: (int) ($d['usuario_id'] ?? 0) ?: (int) $cliente['responsavel_id'] ?: null;
         $origem = in_array($d['origem'] ?? '', ['catalogo', 'sistema', 'app', 'orcamento'], true) ? $d['origem'] : 'sistema';
 
-        $id = Banco::transacao(function () use ($cliente, $carrinho, $forma, $condicao, $desconto, $vendedor, $origem, $uuid, $d) {
+        // Desconto da vendedora (só em pedido montado pela equipe): por produto e no pedido inteiro
+        $subtotalTabela = $carrinho['subtotal'];
+        $descontoPedidoPct = 0.0;
+        if (in_array($origem, ['sistema', 'app'], true)) {
+            $pct = fn($v) => max(0, min(100, round(ProducaoService::numero((string) $v), 2)));
+            foreach ($carrinho['itens'] as &$i) {
+                $chave = (string) ($i['chave'] ?? $i['id']);
+                $i['preco_tabela'] = $i['preco'];
+                $i['desconto_pct'] = $pct($d['descontos'][$chave] ?? 0);
+                if ($i['desconto_pct'] > 0) {
+                    $i['preco'] = round($i['preco'] * (1 - $i['desconto_pct'] / 100), 2);
+                    $i['total'] = round($i['quantidade'] * $i['preco'], 2);
+                }
+            }
+            unset($i);
+            $carrinho['subtotal'] = round(array_sum(array_column($carrinho['itens'], 'total')), 2);
+            $descontoPedidoPct = $pct($d['desconto_pedido_pct'] ?? 0);
+        }
+        $descontoPedido = round($carrinho['subtotal'] * $descontoPedidoPct / 100, 2);
+        $descontoVendedor = round($subtotalTabela - $carrinho['subtotal'] + $descontoPedido, 2);
+        $pctVendedor = $subtotalTabela > 0 ? $descontoVendedor / $subtotalTabela * 100 : 0;
+        $limite = (float) \App\Core\Config::get('pedidos.desconto_max_pct', 10);
+        $acimaLimite = $descontoVendedor > 0 && $pctVendedor > $limite + 0.0001;
+        $base = $carrinho['subtotal'] - $descontoPedido;
+        $desconto = round($descontoPedido + ($condicao ? $base * (float) $condicao['desconto_pct'] / 100 : 0.0), 2);
+
+        $id = Banco::transacao(function () use ($cliente, $carrinho, $forma, $condicao, $desconto, $vendedor, $origem, $uuid, $d, $descontoPedidoPct, $descontoVendedor, $acimaLimite, $pctVendedor, $limite) {
             $id = Banco::inserir('pedidos', [
                 'uuid' => $uuid, 'cliente_id' => $cliente['id'], 'vendedor_id' => $vendedor, 'origem' => $origem,
                 'tabela_preco_id' => $carrinho['tabela']['id'], 'forma_pagamento_id' => $forma['id'], 'condicao_id' => $condicao['id'] ?? null,
                 'subtotal' => $carrinho['subtotal'], 'desconto' => $desconto, 'total' => round($carrinho['subtotal'] - $desconto, 2),
+                'desconto_pedido_pct' => $descontoPedidoPct, 'desconto_vendedor' => $descontoVendedor, 'desconto_acima_limite' => $acimaLimite ? 1 : 0,
                 'observacoes' => mb_substr(trim((string) ($d['observacoes'] ?? '')), 0, 1000) ?: null,
                 'criado_por_usuario' => $d['usuario_id'] ?? null, 'criado_por_cliente' => in_array($origem, ['catalogo', 'orcamento'], true) ? 1 : 0,
             ]);
             foreach ($carrinho['itens'] as $i) {
                 Banco::inserir('pedido_itens', ['pedido_id' => $id, 'produto_id' => $i['id'], 'codigo' => $i['codigo'] ?? null, 'nome' => $i['nome'],
                     'quantidade' => $i['quantidade'], 'preco_unitario' => $i['preco'], 'total' => $i['total'],
+                    'preco_tabela' => $i['preco_tabela'] ?? null, 'desconto_pct' => $i['desconto_pct'] ?? 0,
                     'terceirizacao_produto_id' => $i['terceirizacao_produto_id'] ?? null]);
             }
             $quem = ['catalogo' => 'pelo cliente no catálogo', 'sistema' => 'pela equipe', 'app' => 'pelo app do vendedor externo', 'orcamento' => 'pelo cliente, aprovando o orçamento'][$origem];
             self::historico($id, 'aguardando_aprovacao', "Pedido criado $quem.", $d['usuario_id'] ?? null);
+            if ($descontoVendedor > 0) {
+                self::historico($id, 'aguardando_aprovacao', 'Desconto da vendedora: ' . dinheiro($descontoVendedor) . ' (' . number_format($pctVendedor, 1, ',', '.') . '%)'
+                    . ($acimaLimite ? ' · acima do limite de ' . number_format($limite, 1, ',', '.') . '%: precisa de aprovação.' : '.'), $d['usuario_id'] ?? null);
+            }
             ClienteEvento::registrar((int) $cliente['id'], 'pedido', 'Pedido #' . $id . ' · ' . dinheiro(round($carrinho['subtotal'] - $desconto, 2)) . ' · ' . $forma['nome'] . ' (aguardando aprovação)',
                 $d['usuario_id'] ?? null, $origem === 'orcamento' ? 'Orçamento' : ucfirst($origem), ['pedido_id' => $id]);
             Auditoria::registrar('pedido', $id, 'criar', null, ['cliente_id' => $cliente['id'], 'total' => round($carrinho['subtotal'] - $desconto, 2), 'origem' => $origem]);
@@ -211,6 +242,11 @@ class PedidoService
         });
         self::enviarAoErp($id);
         NotificacaoService::pedidoCriado((int) $id, $d['usuario_id'] ?? null); // sino do Financeiro (e do vendedor, se veio do catálogo)
+        if ($acimaLimite) { // gestores avisados: desconto acima do limite
+            NotificacaoService::avisar(NotificacaoService::destinatarios('pedidos.ver_todos', 'comercial', 'aprovacao'), 'pedido_desconto',
+                "Pedido #$id com desconto acima do limite (" . number_format($pctVendedor, 1, ',', '.') . '%)', '/pedidos/' . $id,
+                ['pedido_id' => (int) $id, 'cliente_id' => (int) $cliente['id'], 'texto' => 'Desconto da vendedora: ' . dinheiro($descontoVendedor)], $d['usuario_id'] ?? null);
+        }
         return [$id, []];
     }
 

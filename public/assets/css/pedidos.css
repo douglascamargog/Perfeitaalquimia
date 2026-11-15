@@ -142,3 +142,11 @@ tr.ped-do-modelo { animation: ped-pisca 1.2s ease; }
 .orc-riscado { text-decoration: line-through; color: var(--texto-suave); }
 .orc-lista td small { display: block; color: var(--texto-suave); }
 @media (max-width: 980px) { .orc-pagina { grid-template-columns: minmax(0, 1fr); } .orc-enviar { position: static; } }
+
+/* Desconto da vendedora (V11.8) */
+.ped-desc { width: 64px; text-align: right; }
+.ped-desconto label { display: grid; gap: 4px; font-size: .8rem; font-weight: 600; }
+.ped-desconto input { max-width: 120px; }
+.ped-desconto-resumo { margin: 6px 0 0; font-size: .8rem; font-weight: 600; color: var(--primaria-escura); }
+.ped-desconto-resumo.acima { color: var(--aviso); }
+.selo-desconto { background: var(--aviso-fundo); color: var(--aviso); }

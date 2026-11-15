@@ -39,11 +39,13 @@ $origens = ['catalogo' => 'Catálogo (cliente)', 'sistema' => 'Sistema (equipe)'
     <table class="tabela ped-itens">
       <thead><tr><th>Produto</th><th class="direita">Qtd.</th><th class="direita">Preço</th><th class="direita">Total</th></tr></thead>
       <tbody>
-      <?php foreach ($itens as $i): ?><tr><td><?= !empty($i['codigo']) ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><?= e($i['nome']) ?></td><td class="direita"><?= (int) $i['quantidade'] ?></td><td class="direita"><?= dinheiro((float) $i['preco_unitario']) ?></td><td class="direita"><?= dinheiro((float) $i['total']) ?></td></tr><?php endforeach; ?>
+      <?php foreach ($itens as $i): ?><tr><td><?= !empty($i['codigo']) ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><?= e($i['nome']) ?></td><td class="direita"><?= (int) $i['quantidade'] ?></td><td class="direita"><?= dinheiro((float) $i['preco_unitario']) ?><?= (float) ($i['desconto_pct'] ?? 0) > 0 ? '<small class="suave" style="display:block">tabela ' . dinheiro((float) $i['preco_tabela']) . ' · −' . e(rtrim(rtrim(number_format((float) $i['desconto_pct'], 2, ',', ''), '0'), ',')) . '%</small>' : '' ?></td><td class="direita"><?= dinheiro((float) $i['total']) ?></td></tr><?php endforeach; ?>
       </tbody>
       <tfoot>
         <tr><td colspan="3" class="direita">Subtotal</td><td class="direita"><?= dinheiro((float) $p['subtotal']) ?></td></tr>
         <?php if ((float) $p['desconto'] > 0): ?><tr><td colspan="3" class="direita">Desconto</td><td class="direita">−<?= dinheiro((float) $p['desconto']) ?></td></tr><?php endif; ?>
+        <?php if ((float) ($p['desconto_vendedor'] ?? 0) > 0): ?><tr data-desconto-vendedor><td colspan="3" class="direita">Desconto dado pela vendedora (produtos<?= (float) $p['desconto_pedido_pct'] > 0 ? ' + ' . e(rtrim(rtrim(number_format((float) $p['desconto_pedido_pct'], 2, ',', ''), '0'), ',')) . '% no pedido' : '' ?>)
+          <?= $p['desconto_acima_limite'] ? '<span class="selo selo-desconto">acima do limite</span>' : '' ?></td><td class="direita"><?= dinheiro((float) $p['desconto_vendedor']) ?></td></tr><?php endif; ?>
         <tr class="ped-total-final"><td colspan="3" class="direita">Total</td><td class="direita"><?= dinheiro((float) $p['total']) ?></td></tr>
       </tfoot>
     </table>

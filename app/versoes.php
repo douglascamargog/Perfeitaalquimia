@@ -17,6 +17,16 @@
  */
 return [
     [
+        'versao' => '11.8', 'data' => '2026-11-15', 'titulo' => 'Desconto da vendedora no pedido',
+        'novo' => [
+            'Novo pedido: coluna "Desc. %" em cada produto e o campo "Desconto no pedido (%)". O total é recalculado na hora.',
+            'O resumo mostra o desconto total em R$ e em %. Passou do limite, o aviso fica vermelho: o pedido vai para a Aprovação marcado "desconto acima do limite" e os gestores são avisados.',
+            'A página do pedido mostra o preço de tabela, o desconto de cada produto e quanto a vendedora deu de desconto.',
+        ],
+        'melhoria' => ['O pedido mínimo é conferido pelo preço de tabela, igual na tela e no envio.'],
+        'admin' => 'Configurações › Pedidos: desconto máximo da vendedora sem aprovação (padrão 10%).',
+    ],
+    [
         'versao' => '11.7', 'data' => '2026-11-15', 'titulo' => 'Tabela nutricional e ficha técnica para imprimir',
         'novo' => [
             'Ficha técnica: bloco "Tabela nutricional" no modelo da Anvisa. Preencha porção, porções por embalagem e nutrientes, e a tabela vai sendo desenhada ao lado.',

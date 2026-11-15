@@ -82,6 +82,7 @@ class PedidoController extends Controller
         [$id, $erros] = PedidoService::criar($cliente, [
             'itens' => (array) ($_POST['qtd'] ?? []), 'forma_pagamento_id' => $forma, 'condicao_id' => $condicao,
             'observacoes' => $this->campo('observacoes'), 'origem' => 'sistema', 'usuario_id' => Auth::id(), 'uuid' => $this->campo('uuid'),
+            'descontos' => (array) ($_POST['desconto'] ?? []), 'desconto_pedido_pct' => $this->campo('desconto_pedido'),
         ]);
         if ($erros) {
             $this->voltarComErros('/pedidos/novo?cliente=' . (int) $cliente['id'], $erros);
