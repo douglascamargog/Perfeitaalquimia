@@ -72,6 +72,12 @@ class OneAssistente
             $falas[] = ['humor' => 'ops', 'texto' => count($docs) . ' documento(s) de produto vencido(s) ou vencendo (o primeiro: ' . $docs[0]['titulo'] . ' — ' . $docs[0]['produto'] . ', ' . data_br($docs[0]['validade']) . ').',
                 'link' => '/produtos?situacao=vencendo', 'acao' => 'Ver documentos'];
         }
+        // Matérias-primas: laudos e documentos vencidos ou vencendo (Produção e Qualidade)
+        if (((Auth::pode('producao.gerenciar') && Foco::tem('producao')) || \App\Models\Usuario::temFuncao((int) Auth::id(), 'qualidade'))
+            && ($docsMp = ItemCompraService::documentosVencendo(99))) {
+            $falas[] = ['humor' => 'ops', 'texto' => count($docsMp) . ' laudo(s) ou documento(s) de matéria-prima vencido(s) ou vencendo (o primeiro: ' . $docsMp[0]['item'] . ', ' . data_br($docsMp[0]['validade']) . ').',
+                'link' => '/producao/materias/' . (int) $docsMp[0]['item_id'] . '?aba=documentos', 'acao' => 'Ver documento'];
+        }
         // Desenvolvimento de Produto: projetos esperando a pessoa
         if ((Auth::pode('desenvolvimento.ver') || Auth::pode('desenvolvimento.gerenciar')) && Foco::tem('desenvolvimento')
             && ($dp = DesenvolvimentoService::minhas((int) Auth::id()))) {

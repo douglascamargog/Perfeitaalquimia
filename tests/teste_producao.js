@@ -21,7 +21,7 @@ const aviso = async (p) => (await p.locator('.aviso').allInnerTexts()).join(' | 
   ok(await p.locator('.cabecalho-secao h1', { hasText: 'Produção' }).count() === 1, 'painel abre para o perfil Produção');
   ok(Number(await p.locator('[data-mp-alerta]').innerText()) >= 3, 'painel mostra matérias-primas em alerta (demo)');
   ok(Number(await p.locator('[data-reabastecer-qtd]').innerText()) >= 1, 'painel mostra produtos para reabastecer (demo)');
-  ok(await p.evaluate(() => !!Chart.getChart('grafico-producao')), 'gráfico de produção desenhado');
+  ok(await p.locator('[data-grafico-producao] [data-coluna]').count() === 6, 'gráfico de produção desenhado (6 meses, sem internet)');
   ok(await p.locator('.menu-lateral a[href$="/producao/materias"]').count() === 1, 'menu tem Matérias-primas');
 
   // ---------- 1. cadastra matéria-prima ----------

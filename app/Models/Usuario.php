@@ -79,4 +79,10 @@ class Usuario
     {
         return Banco::todos('SELECT * FROM perfis ORDER BY id');
     }
+
+    /** A pessoa tem a função (pelo código, ex.: 'qualidade')? */
+    public static function temFuncao(int $usuarioId, string $slug): bool
+    {
+        return (bool) Banco::valor('SELECT 1 FROM usuario_funcoes uf JOIN funcoes f ON f.id = uf.funcao_id WHERE uf.usuario_id = ? AND f.slug = ? LIMIT 1', [$usuarioId, $slug]);
+    }
 }

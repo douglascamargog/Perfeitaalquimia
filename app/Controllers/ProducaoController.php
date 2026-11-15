@@ -14,14 +14,14 @@ use RuntimeException;
  */
 class ProducaoController extends Controller
 {
-    private const ESTILOS = ['carteira.css', 'inicio.css', 'painel.css', 'producao.css'];
+    private const ESTILOS = ['carteira.css', 'inicio.css', 'painel.css', 'producao.css', 'graficos.css'];
 
     public function painel(): void
     {
         $this->tela('producao/painel', [
             'titulo' => 'Produção', 'p' => ProducaoService::painel(), 'pode' => Auth::pode('producao.gerenciar'),
             'estilos' => self::ESTILOS,
-            'scripts' => ['https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js', 'producao.js'],
+            'scripts' => ['producao.js'], // gráfico desenhado no servidor (funciona sem internet)
         ]);
     }
 

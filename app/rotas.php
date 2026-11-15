@@ -272,6 +272,8 @@ return [
     ['POST', '/producao/reabastecer/{id}',       'ProducaoController@reabastecer',       'producao.gerenciar'],
     // ---------- Financeiro › Compras (compras da empresa, NFs, itens comprados) ----------
     ['GET',  '/financeiro/compras',               'FinanceiroCompraController@index',      'compras.itens|compras.ver'],
+    ['GET',  '/financeiro/fornecedores',          'FinanceiroCompraController@fornecedores', 'compras.itens|compras.ver'],
+    ['GET',  '/financeiro/fornecedores/ver',      'FinanceiroCompraController@fornecedor',   'compras.itens|compras.ver'],
     ['POST', '/financeiro/compras',               'FinanceiroCompraController@lancar',     'compras.itens'],
     ['POST', '/financeiro/compras/omie',          'FinanceiroCompraController@buscarOmie', 'compras.itens'],
     ['POST', '/financeiro/compras/itens',         'FinanceiroCompraController@novoItem',   'compras.itens'],

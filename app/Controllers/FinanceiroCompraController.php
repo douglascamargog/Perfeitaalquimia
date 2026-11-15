@@ -35,6 +35,25 @@ class FinanceiroCompraController extends Controller
         ]);
     }
 
+    /** Fornecedores: lista (aba de Compras da empresa) */
+    public function fornecedores(): void
+    {
+        $busca = mb_substr(trim((string) ($_GET['q'] ?? '')), 0, 80);
+        $this->tela('financeiro_compras/fornecedores', ['titulo' => 'Fornecedores', 'busca' => $busca, 'lista' => \App\Services\FornecedorService::lista($busca),
+            'pendentes' => L::pendentes(), 'pode' => Auth::pode('compras.itens') && !Auth::somenteAcompanha(), 'estilos' => self::ESTILOS]);
+    }
+
+    /** Página de um fornecedor: itens que fornece (com comparação de preço), compras, prazo e documentos */
+    public function fornecedor(): void
+    {
+        $f = \App\Services\FornecedorService::ver(mb_substr((string) ($_GET['nome'] ?? ''), 0, 160));
+        if (!$f) {
+            Sessao::aviso('erro', 'Fornecedor não encontrado.');
+            redirecionar('/financeiro/fornecedores');
+        }
+        $this->tela('financeiro_compras/fornecedor', ['titulo' => $f['nome'], 'f' => $f, 'estilos' => self::ESTILOS]);
+    }
+
     /** Lançar compra (NF) com várias linhas */
     public function lancar(): void
     {

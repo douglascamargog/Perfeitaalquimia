@@ -60,3 +60,21 @@
 .ac-canais b { display: block; height: 100%; background: var(--primaria); border-radius: 0 4px 4px 0; }
 .ac-canais strong { text-align: right; }
 .it-cats div { grid-template-columns: 150px minmax(0, 1fr) 110px; }
+
+/* ---------- Fornecedores (V11.0) ---------- */
+.fo-grade { display: grid; gap: 8px; }
+.fo-cartao { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 14px; align-items: center; margin: 0; padding: 12px 16px; text-decoration: none; color: inherit; transition: transform .15s, box-shadow .15s; }
+.fo-cartao:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0, 0, 0, .08); }
+.fo-inicial { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; font-size: 1.1rem; background: var(--primaria-escura); color: var(--secundaria); }
+.fo-txt { display: grid; gap: 3px; min-width: 0; }
+.fo-txt strong { font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fo-txt small { color: var(--texto-suave); font-size: .76rem; }
+.fo-barra { display: block; height: 4px; border-radius: 4px; background: var(--fundo); overflow: hidden; max-width: 360px; }
+.fo-barra i { display: block; height: 100%; background: linear-gradient(90deg, var(--primaria-escura), var(--secundaria)); border-radius: 4px; }
+.fo-valor { display: grid; text-align: right; gap: 2px; }
+.fo-valor strong { font-size: 1rem; }
+.fo-valor small { color: var(--texto-suave); font-size: .72rem; }
+.fo-docs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.fo-docs li { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+@media (max-width: 700px) { .fo-cartao { grid-template-columns: 40px minmax(0, 1fr); } .fo-valor { grid-column: 2; text-align: left; } }
+.fo-rolar { max-height: 420px; overflow: auto; } .fo-rolar thead th { position: sticky; top: 0; background: var(--card); z-index: 1; }

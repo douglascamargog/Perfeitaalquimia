@@ -127,7 +127,7 @@ $formsEstoque = function () use ($pode, $m, $u, $num, $fornecedores, $id) {
       <tbody>
       <?php foreach ($fornecedores as $f): $barato = $f['ultimo_preco'] !== null && abs((float) $f['ultimo_preco'] - $menorPreco) < 0.00005 && count($fornecedores) > 1; ?>
         <tr data-fornecedor="<?= (int) $f['id'] ?>">
-          <td><strong><?= e($f['fornecedor']) ?></strong><?= $f['principal'] ? ' <span class="selo lima">principal</span>' : '' ?><?= $barato ? ' <span class="selo verde" data-menor-preco>menor preço</span>' : '' ?>
+          <td><?php if (\App\Core\Auth::pode('compras.itens') || \App\Core\Auth::pode('compras.ver')): ?><a href="<?= url('/financeiro/fornecedores/ver') ?>?nome=<?= e(rawurlencode($f['fornecedor'])) ?>" title="Ver tudo deste fornecedor"><strong><?= e($f['fornecedor']) ?></strong></a><?php else: ?><strong><?= e($f['fornecedor']) ?></strong><?php endif; ?><?= $f['principal'] ? ' <span class="selo lima">principal</span>' : '' ?><?= $barato ? ' <span class="selo verde" data-menor-preco>menor preço</span>' : '' ?>
             <small class="suave" style="display:block"><?= e(trim(($f['cnpj'] ?? '') . ($f['codigo_no_fornecedor'] ? ' · cód. ' . $f['codigo_no_fornecedor'] : ''), ' ·')) ?></small></td>
           <td class="pequeno"><?= e(implode(' · ', array_filter([$f['contato'], $f['telefone'], $f['email']]))) ?: '—' ?></td>
           <td class="direita"><?= $f['ultimo_preco'] !== null ? dinheiro((float) $f['ultimo_preco']) . '/' . e($u) : '—' ?></td>

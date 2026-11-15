@@ -66,10 +66,24 @@ $n = fn($v) => number_format((float) $v, 0, ',', '.');
     </ul>
   </section>
 
+  <?php $docsItens = \App\Services\ItemCompraService::documentosVencendo(12); if ($docsItens): ?>
+  <section class="b-card span-12" data-card="docs-vencendo">
+    <header class="b-topo"><h2>Laudos e documentos das matérias-primas vencendo</h2><span class="b-chip"><?= count($docsItens) ?> documento(s)</span></header>
+    <ul class="pr-alertas">
+      <?php foreach ($docsItens as $d): $venc = $d['validade'] < date('Y-m-d'); ?>
+        <li data-doc-vencendo="<?= (int) $d['id'] ?>"><a href="<?= url('/producao/materias/' . (int) $d['item_id'] . '?aba=documentos') ?>"><strong><?= e($d['item']) ?></strong>
+          <small><?= e(\App\Services\ItemCompraService::TIPOS_DOCUMENTO[$d['tipo']] ?? $d['tipo']) ?><?= $d['titulo'] ? ' · ' . e($d['titulo']) : '' ?></small></a>
+          <span class="selo <?= $venc ? 'vermelho' : 'laranja' ?>"><?= $venc ? 'venceu em ' : 'vence em ' ?><?= data_br($d['validade']) ?></span></li>
+      <?php endforeach; ?>
+    </ul>
+  </section>
+  <?php endif; ?>
+
   <section class="b-card span-6">
     <header class="b-topo"><h2>Unidades produzidas por mês</h2><span class="b-chip">últimos 6 meses</span></header>
-    <div class="mk-grafico"><canvas id="grafico-producao" aria-label="Unidades produzidas por mês"
-      data-meses='<?= e(json_encode(array_map(fn($m, $u) => ['mes' => $m, 'unidades' => $u], array_keys($p['por_mes']), array_values($p['por_mes'])))) ?>'></canvas></div>
+    <div data-grafico-producao><?= \App\Core\Visao::renderizar('graficos/_barras_dia', [
+        'dias' => array_map(fn($m, $u) => ['dia' => $m . '-01', 'valores' => [(float) $u], 'rotulo' => mes_curto((int) substr($m, 5, 2)) . '/' . substr($m, 2, 2), 'dica' => mes_curto((int) substr($m, 5, 2)) . '/' . substr($m, 0, 4)], array_keys($p['por_mes']), array_values($p['por_mes'])),
+        'series' => [['nome' => 'Unidades', 'classe' => 's1']]]) ?></div>
   </section>
   <section class="b-card span-6" data-card="planejadas">
     <header class="b-topo"><h2>Programação</h2><?php if ($pode): ?><a class="b-chip" href="<?= url('/producao/ordens/nova') ?>">+ nova ordem</a><?php endif; ?></header>

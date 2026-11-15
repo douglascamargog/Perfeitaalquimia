@@ -27,6 +27,7 @@ $q = fn(array $mais) => url('/financeiro/compras') . '?' . e(http_build_query($m
 
 <nav class="abas" aria-label="Compras">
   <?php foreach ($abas as $k => $nome): ?><a class="<?= $k === $aba ? 'ativa' : '' ?>" href="<?= url('/financeiro/compras') ?>?aba=<?= $k ?>" data-aba-compras="<?= $k ?>"><?= e($nome) ?></a><?php endforeach; ?>
+  <a href="<?= url('/financeiro/fornecedores') ?>" data-aba-compras="fornecedores">Fornecedores</a>
 </nav>
 
 <?php if ($aba === 'lancamentos'): ?>

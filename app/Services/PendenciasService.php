@@ -81,6 +81,10 @@ class PendenciasService
         if ($pode('produtos.tecnico') && Foco::tem('producao')) {
             $r['/produtos'] = count(ProdutoService::documentosVencendo(99));
         }
+        // Matérias-primas: laudos, fichas técnicas e certificados vencidos ou vencendo (a Qualidade é avisada pelo One)
+        if ($pode('producao.gerenciar') && Foco::tem('producao')) {
+            $r['/producao/materias'] = count(ItemCompraService::documentosVencendo(99));
+        }
         // Desenvolvimento: projetos esperando a etapa (ou a aprovação) de uma função da pessoa
         if (($pode('desenvolvimento.ver') || $pode('desenvolvimento.gerenciar')) && Foco::tem('desenvolvimento')) {
             $r['/desenvolvimento/minhas'] = DesenvolvimentoService::qtdMinhas($id);

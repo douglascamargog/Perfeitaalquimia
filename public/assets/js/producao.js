@@ -1,7 +1,6 @@
 // =====================================================================
-// Produção: gráfico do painel, editor da ficha técnica e prévia da ordem de produção.
+// Produção: editor da ficha técnica e prévia da ordem de produção.
 // =====================================================================
-import { cor, corAlfa } from './cores.js';
 const real = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 4 });
 const numero = (texto) => {
   let t = String(texto || '').trim().replace(/\s/g, '');
@@ -9,24 +8,6 @@ const numero = (texto) => {
   const n = Number(t);
   return Number.isFinite(n) ? n : 0;
 };
-const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-
-// ---------- Painel: unidades produzidas por mês ----------
-const grafico = document.getElementById('grafico-producao');
-if (grafico && window.Chart) {
-  const meses = JSON.parse(grafico.dataset.meses || '[]');
-  Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
-  Chart.defaults.color = cor('--texto-suave');
-  new Chart(grafico, {
-    type: 'bar',
-    data: {
-      labels: meses.map((m) => MESES[Number(m.mes.slice(5)) - 1] + '/' + m.mes.slice(2, 4)),
-      datasets: [{ label: 'Unidades', data: meses.map((m) => m.unidades), backgroundColor: meses.map((_, i, l) => (i === l.length - 1 ? cor('--primaria-escura') : cor('--secundaria'))), borderRadius: 8, maxBarThickness: 40 }],
-    },
-    options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } },
-      scales: { y: { grid: { color: cor('--borda') }, border: { display: false }, beginAtZero: true }, x: { grid: { display: false }, border: { display: false } } } },
-  });
-}
 
 // ---------- Ficha técnica: acrescentar/tirar linhas e recalcular o custo ----------
 const ficha = document.querySelector('[data-ficha]');

@@ -122,9 +122,24 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
     ok(sql(`select count(*) from compras_lancadas where compra_id=${compra} and origem='orcamento' and numero_nf='4455' and arquivo is not null`) === '1', 'orçamento recebido no Depósito vira lançamento com a NF');
   } else ok(true, 'sem orçamento "comprado" com matéria-prima na demonstração (pulado)');
 
+  // ---------- Fornecedores (V11.0) ----------
+  await f.p.goto(BASE + '/financeiro/fornecedores');
+  ok(await f.p.locator('[data-fornecedor="Papelaria Nova"]').count() === 1, 'lista de fornecedores (inclui o que veio da NF lançada)');
+  await f.p.goto(BASE + '/financeiro/fornecedores/ver?nome=' + encodeURIComponent('papelaria nova'));
+  ok((await f.p.textContent('h1')).includes('Papelaria Nova'), 'página do fornecedor (o nome não depende de maiúsculas)');
+  ok(await f.p.locator('[data-itens-fornecedor] tbody tr[data-item="' + papel + '"]').count() === 1, 'mostra os itens que ele fornece');
+  ok(await f.p.locator('[data-compras-fornecedor] tbody tr', { hasText: '998877' }).count() === 1, 'mostra as NFs dele');
+  await f.p.goto(BASE + '/financeiro/fornecedores/ver?nome=' + encodeURIComponent('Atacado Escolar'));
+  ok(await f.p.locator(`[data-itens-fornecedor] tr[data-item="${papel}"] [data-mais-barato]`).count() === 1, 'compara o preço com os outros fornecedores do item (menor preço)');
+  ok((await prod.p.request.get(BASE + '/financeiro/fornecedores')).status() === 403, 'Produção não entra em Fornecedores');
+
+  // ---------- Documentos vencendo no painel da Produção ----------
+  await prod.p.goto(BASE + '/producao');
+  ok(await prod.p.locator(`[data-card="docs-vencendo"] [data-doc-vencendo="${doc}"]`).count() === 1, 'laudo vencendo aparece no painel da Produção');
+
   // ---------- Celular ----------
   const cel = await como('financeiro@demo.local', { viewport: { width: 390, height: 844 }, isMobile: true });
-  for (const u of [`/producao/materias/${papel}`, '/financeiro/compras?aba=lancar']) {
+  for (const u of [`/producao/materias/${papel}`, '/financeiro/compras?aba=lancar', '/financeiro/fornecedores', '/financeiro/fornecedores/ver?nome=Papelaria%20Nova']) {
     await cel.p.goto(BASE + u);
     ok(await cel.p.evaluate(() => document.documentElement.scrollWidth) <= 392, `${u} cabe no celular`);
   }
