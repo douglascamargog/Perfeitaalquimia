@@ -25,7 +25,7 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
   const v = await como('televendas1@demo.local');
   await v.p.goto(BASE + '/meu-mes');
   const meta = Number(sql(`select coalesce(meta,0) from meu_mes where usuario_id=${t1} and mes='${mes}'`) || 0);
-  const vendido = Number(sql(`select coalesce(sum(valor),0) from vendas_registradas where usuario_id=${t1} and data like '${mes}-%' and data <= curdate()`));
+  const vendido = Number(sql(`select coalesce(sum(total),0) from pedidos where vendedor_id=${t1} and situacao='faturado' and faturado_em >= '${mes}-01' and date(faturado_em) <= curdate()`)); // vendas = pedidos faturados (Omie)
   const anel = Number(await v.p.getAttribute('[data-mm-hero] [data-anel]', 'data-anel'));
   ok(meta > 0 && anel === Math.round(vendido / meta * 100), `anel da meta mostra ${Math.round(vendido / meta * 100)}%`);
   const ritmo = await v.p.getAttribute('[data-mm-hero] [data-ritmo]', 'data-ritmo');
