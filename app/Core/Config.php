@@ -41,6 +41,12 @@ class Config
         return Banco::todos('SELECT * FROM configuracoes ORDER BY grupo, ordem, chave');
     }
 
+    /** Esquece os valores já lidos (ex.: depois de um seed gravar configurações novas na mesma execução) */
+    public static function recarregar(): void
+    {
+        self::$cache = null;
+    }
+
     /** Grava um valor (com registro na auditoria) */
     public static function definir(string $chave, string $valor): void
     {

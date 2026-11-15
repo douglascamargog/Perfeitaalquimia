@@ -112,6 +112,46 @@ class TrayClient implements EcommerceInterface
         ], $r['Orders'] ?? []);
     }
 
+    /**
+     * Pedidos pagos alterados desde $desde, com itens e nota. API da Tray: /orders (lista) e /orders/{id}/complete (detalhe).
+     * Campos de marketplace e nota variam conforme a integração da loja: conferir com a Tray ao ligar a loja real.
+     */
+    public function pedidosParaSeparar(string $desde): array
+    {
+        $lista = [];
+        for ($pagina = 1; $pagina <= 20; $pagina++) {
+            $r = $this->get('/orders', ['modified' => substr($desde, 0, 10) . ',' . date('Y-m-d'), 'limit' => self::POR_PAGINA, 'page' => $pagina, 'sort' => 'id_asc']);
+            foreach ($r['Orders'] ?? [] as $linha) {
+                $id = (string) ($linha['Order']['id'] ?? '');
+                $status = mb_strtoupper((string) ($linha['Order']['status'] ?? ''));
+                if ($id === '' || str_contains($status, 'AGUARDANDO PAGAMENTO')) {
+                    continue; // ainda não pago
+                }
+                $o = ($this->get("/orders/$id/complete", [])['Order'] ?? []) ?: $linha['Order'];
+                $origem = mb_strtoupper(implode(' ', [(string) ($o['point_sale'] ?? ''), (string) ($o['partner_id'] ?? ''), (string) ($o['MarketplaceOrder'][0]['MarketplaceOrder']['marketplace_name'] ?? '')]));
+                $canal = str_contains($origem, 'MERCADO') ? 'mercado_livre' : (str_contains($origem, 'SHOPEE') ? 'shopee' : (str_contains($origem, 'AMAZON') ? 'amazon' : 'loja'));
+                $nota = $o['OrderInvoice'][0]['OrderInvoice'] ?? null;
+                $nome = trim((string) ($o['Customer']['name'] ?? ''));
+                $partes = preg_split('/\s+/', $nome) ?: [];
+                $lista[] = [
+                    'codigo' => $id, 'numero_marketplace' => (string) ($o['MarketplaceOrder'][0]['MarketplaceOrder']['marketplace_order_id'] ?? ($o['external_code'] ?? '')),
+                    'canal' => $canal, 'criado_em' => trim(($o['date'] ?? date('Y-m-d')) . ' ' . ($o['hour'] ?? '00:00:00')),
+                    'nf' => $nota ? (string) ($nota['number'] ?? '') : null, 'nf_em' => $nota ? (string) ($nota['issue_date'] ?? date('Y-m-d H:i:s')) : null,
+                    'cancelado' => str_contains($status, 'CANCEL'),
+                    'comprador' => $partes ? $partes[0] . (count($partes) > 1 ? ' ' . mb_substr(end($partes), 0, 1) . '.' : '') : '',
+                    'cidade' => (string) ($o['Customer']['city'] ?? ''), 'uf' => (string) ($o['Customer']['state'] ?? ''),
+                    'total' => (float) ($o['total'] ?? 0),
+                    'itens' => array_map(fn($p) => ['ref' => (string) ($p['ProductsSold']['reference'] ?? ($p['ProductsSold']['ean'] ?? '')), 'nome' => (string) ($p['ProductsSold']['name'] ?? 'Produto'),
+                        'quantidade' => (int) ($p['ProductsSold']['quantity'] ?? 1), 'preco' => (float) ($p['ProductsSold']['price'] ?? 0)], $o['ProductsSold'] ?? []),
+                ];
+            }
+            if ($pagina * self::POR_PAGINA >= (int) ($r['paging']['total'] ?? 0)) {
+                break;
+            }
+        }
+        return $lista;
+    }
+
     public function testarConexao(): array
     {
         if ($this->api === '' || $this->consumerKey === '' || $this->consumerSecret === '' || $this->code === '') {

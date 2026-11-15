@@ -17,6 +17,19 @@
  */
 return [
     [
+        'versao' => '11.4', 'data' => '2026-11-15', 'titulo' => 'Pedidos do e-commerce na separação',
+        'novo' => [
+            'Depósito: os pedidos do e-commerce (Mercado Livre, Shopee, Amazon e loja própria) chegam sozinhos da Tray e entram na fila de separação assim que a nota fiscal é emitida.',
+            'Cada pedido mostra o horário limite do canal ("sai até 13:00 · faltam 1h20"). Fica laranja quando falta menos de 1 hora e vermelho quando passa do horário. Os mais urgentes vão para o topo da fila.',
+            'Filtro na separação: Todos, Lojistas, E-commerce e Terceirização, com a quantidade de cada um e um selo colorido em cada pedido.',
+            'Botão "Buscar pedidos da Tray" para trazer na hora. A busca também roda sozinha a cada 15 minutos.',
+        ],
+        'melhoria' => [
+            'Os compradores do e-commerce não entram na carteira, nas metas nem no painel de vendas da equipe. O e-commerce continua com o painel próprio.',
+        ],
+        'admin' => 'Configurações › Depósito: horário limite de cada canal (padrão: Mercado Livre 13:00, Shopee 11:00, Amazon 12:00, loja própria sem horário). Agende no cPanel o arquivo cron/pedidos_ecommerce.php a cada 15 minutos. Com a loja real ligada (Configurações › E-commerce), confira com a Tray os campos de marketplace e nota fiscal na primeira importação.',
+    ],
+    [
         'versao' => '11.3', 'data' => '2026-11-15', 'titulo' => 'Caixas sempre aparecem na separação',
         'correcao' => [
             'Separação do pedido: o quadro "Caixas e embalagem usadas" aparece sempre. Toda caixa cadastrada entra na lista, mesmo sem a categoria "Embalagem de envio".',

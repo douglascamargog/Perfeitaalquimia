@@ -65,7 +65,7 @@ class VendasService
         return [implode(' AND ', $w), $par];
     }
 
-    private const BASE = 'FROM pedidos p JOIN clientes c ON c.id = p.cliente_id';
+    private const BASE = "FROM pedidos p JOIN clientes c ON c.id = p.cliente_id AND c.tipo <> 'consumidor'"; // sem os pedidos do e-commerce (painel próprio)
 
     /** Cards: faturamento, pedidos, ticket, clientes e recorrência */
     public static function resumo(array $f): array

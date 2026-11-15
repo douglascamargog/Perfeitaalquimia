@@ -23,6 +23,16 @@ interface EcommerceInterface
     /** Pedidos recentes, sem dados pessoais: [[numero, data, valor, situacao, cidade, uf], ...] */
     public function pedidosRecentes(int $limite = 10): array;
 
+    /**
+     * Pedidos PAGOS para o Depósito (alterados desde $desde, AAAA-MM-DD HH:MM:SS), um por linha:
+     * ['codigo' (id na Tray), 'numero_marketplace', 'canal' (mercado_livre|shopee|amazon|loja), 'criado_em',
+     *  'nf' (número da nota ou null = ainda sem nota), 'nf_em', 'cancelado' (bool),
+     *  'comprador' (nome curto, só para conferir a etiqueta), 'cidade', 'uf', 'total',
+     *  'itens' => [['ref' (código do produto ou EAN), 'nome', 'quantidade', 'preco'], ...]]
+     * Só o necessário para separar e despachar (LGPD): sem CPF, e-mail, telefone ou endereço completo.
+     */
+    public function pedidosParaSeparar(string $desde): array;
+
     /** Confere se as chaves funcionam: [ok (bool), mensagem] */
     public function testarConexao(): array;
 

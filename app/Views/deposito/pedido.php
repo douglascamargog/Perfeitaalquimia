@@ -16,11 +16,15 @@ $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceiriza
 <a class="voltar-link" href="<?= url('/deposito') ?>">← Fila do depósito</a>
 <div class="cabecalho-secao">
   <div><div class="sobretitulo">DEPÓSITO · PEDIDO #<?= (int) $p['id'] ?><?= $p['numero_nf'] ? ' · NF ' . e($p['numero_nf']) : '' ?></div>
-    <h1><?= e($p['cliente']) ?></h1>
+    <?php $eco = $p['tipo_venda'] === 'ecommerce'; $prazo = $eco && $p['expedicao'] !== 'despachado' ? \App\Services\EcommercePedidoService::prazo($p['expedicao_limite']) : null; ?>
+    <h1><?= $eco ? '🛒 ' . e(\App\Services\EcommercePedidoService::nomeCanal($p['canal'])) . ($p['marketplace_numero'] ? ' · ' . e($p['marketplace_numero']) : '') : e($p['cliente']) ?></h1>
     <p><span class="selo <?= $ec ?>" data-etapa><?= e($er) ?></span>
+      <span class="dep-tipo-selo tipo-<?= $eco ? 'ecommerce' : ($terceirizado ? 'terceirizacao' : 'lojista') ?>"><?= $eco ? 'E-commerce' : ($terceirizado ? 'Terceirização' : 'Lojista') ?></span>
       <?= $p['expedicao_prioridade'] ? '<span class="selo vermelho">urgente</span>' : '' ?>
       <?= $p['expedicao_aguarda_produto'] ? '<span class="selo laranja">aguardando produto</span>' : '' ?>
-      <?= e($p['cidade']) ?>/<?= e($p['uf']) ?> · vendedor <?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null, false, 18) ?><?= $p['separador'] ? ' · separando: ' . pessoa($p['separador'] ?? null, null, false, 18, '—') : '' ?></p></div>
+      <?php if ($eco): ?>comprador <?= e((string) $p['comprador_nome']) ?> · <?= e(trim(($p['comprador_cidade'] ?? '') . '/' . ($p['comprador_uf'] ?? ''), '/')) ?><?= $p['separador'] ? ' · separando: ' . pessoa($p['separador'] ?? null, null, false, 18, '—') : '' ?>
+      <?php else: ?><?= e($p['cidade']) ?>/<?= e($p['uf']) ?> · vendedor <?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null, false, 18) ?><?= $p['separador'] ? ' · separando: ' . pessoa($p['separador'] ?? null, null, false, 18, '—') : '' ?><?php endif; ?></p>
+    <?php if ($prazo): ?><p class="dep-prazo grande <?= $prazo[1] ?>" data-prazo>⏰ <?= e($prazo[0]) ?></p><?php endif; ?></div>
   <div class="acoes">
     <a class="botao contorno pequeno" href="<?= url('/pedidos/' . (int) $p['id']) ?>">Ver o pedido</a>
     <?php if ($pode && $p['expedicao'] !== 'despachado'): ?>

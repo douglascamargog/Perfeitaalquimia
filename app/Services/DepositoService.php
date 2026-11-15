@@ -26,17 +26,25 @@ class DepositoService
     // Fila e painel do dia
     // ------------------------------------------------------------------
 
-    /** Fila: $aba = separar (aguardando + separando) | separados | despachados */
-    public static function fila(string $aba = 'separar'): array
+    /**
+     * Fila: $aba = separar (aguardando + separando) | separados | despachados.
+     * $tipo = '' (todos) | lojista | ecommerce | terceirizacao. Pedidos com horário limite (e-commerce) vêm primeiro, o mais urgente no topo.
+     */
+    public static function fila(string $aba = 'separar', string $tipo = ''): array
     {
-        $w = match ($aba) {
+        $w = [match ($aba) {
             'separados'   => "p.expedicao = 'separado'",
             'despachados' => "p.expedicao = 'despachado' AND p.despachado_em >= CURDATE() - INTERVAL 7 DAY",
             default       => "p.expedicao IN ('aguardando', 'separando')",
-        };
-        $ordem = $aba === 'despachados' ? 'p.despachado_em DESC' : 'p.expedicao_prioridade DESC, p.expedicao_desde, p.id';
+        }];
+        if ($tipo !== '' && ($filtro = self::sqlTipo($tipo))) {
+            $w[] = $filtro;
+        }
+        $ordem = $aba === 'despachados' ? 'p.despachado_em DESC'
+            : 'p.expedicao_prioridade DESC, p.expedicao_limite IS NULL, p.expedicao_limite, p.expedicao_desde, p.id';
         return Banco::todos("SELECT p.id, p.numero_nf, p.total, p.expedicao, p.expedicao_prioridade, p.expedicao_aguarda_produto, p.expedicao_desde,
-                p.transportadora, p.rastreio, p.despachado_em, p.falta,
+                p.transportadora, p.rastreio, p.despachado_em, p.falta, p.tipo_venda, p.canal, p.marketplace_numero, p.expedicao_limite,
+                p.comprador_cidade, p.comprador_uf,
                 COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS cliente, c.cidade, c.uf,
                 v.nome AS vendedor, v.foto AS vendedor_foto, s.nome AS separador,
                 (SELECT COUNT(*) FROM pedido_itens i WHERE i.pedido_id = p.id) AS itens,
@@ -44,7 +52,29 @@ class DepositoService
                 (SELECT COUNT(*) FROM pedido_itens i WHERE i.pedido_id = p.id AND i.terceirizacao_produto_id IS NOT NULL) AS terceirizados
             FROM pedidos p JOIN clientes c ON c.id = p.cliente_id
             LEFT JOIN usuarios v ON v.id = p.vendedor_id LEFT JOIN usuarios s ON s.id = p.separado_por
-            WHERE $w ORDER BY $ordem LIMIT 300");
+            WHERE " . implode(' AND ', $w) . " ORDER BY $ordem LIMIT 300");
+    }
+
+    /** Filtro SQL de cada tipo de pedido (lojista = venda da equipe/catálogo sem produto terceirizado) */
+    public static function sqlTipo(string $tipo): ?string
+    {
+        $terc = 'EXISTS (SELECT 1 FROM pedido_itens i WHERE i.pedido_id = p.id AND i.terceirizacao_produto_id IS NOT NULL)';
+        return match ($tipo) {
+            'ecommerce'     => "p.tipo_venda = 'ecommerce'",
+            'terceirizacao' => "p.tipo_venda IS NULL AND $terc",
+            'lojista'       => "p.tipo_venda IS NULL AND NOT $terc",
+            default         => null,
+        };
+    }
+
+    /** Quantos de cada tipo estão na aba (para os chips do filtro) */
+    public static function contagemTipos(string $aba = 'separar'): array
+    {
+        $r = [];
+        foreach (array_keys(EcommercePedidoService::TIPOS) as $t) {
+            $r[$t] = count(self::fila($aba, $t));
+        }
+        return $r;
     }
 
     /** Números do dia (topo da fila e cartão do Início) */

@@ -20,8 +20,24 @@ class DepositoController extends Controller
     public function index(): void
     {
         $aba = in_array($_GET['aba'] ?? '', ['separados', 'despachados'], true) ? $_GET['aba'] : 'separar';
-        $this->tela('deposito/index', ['titulo' => 'Depósito', 'aba' => $aba, 'fila' => D::fila($aba), 'resumo' => D::resumo(),
+        $tipo = array_key_exists($_GET['tipo'] ?? '', \App\Services\EcommercePedidoService::TIPOS) ? $_GET['tipo'] : '';
+        $this->tela('deposito/index', ['titulo' => 'Depósito', 'aba' => $aba, 'tipo' => $tipo, 'fila' => D::fila($aba, $tipo), 'resumo' => D::resumo(),
+            'tipos' => D::contagemTipos($aba),
             'diasAtraso' => max(1, (int) Config::get('deposito.dias_atraso', 2)), 'pode' => Auth::pode('deposito.operar'), 'estilos' => self::ESTILOS]);
+    }
+
+    /** Busca agora os pedidos da Tray (também roda sozinho no agendamento a cada 15 minutos) */
+    public function buscarTray(): void
+    {
+        try {
+            $r = \App\Services\EcommercePedidoService::importar((int) Auth::id());
+            Sessao::aviso('sucesso', $r['novos'] || $r['na_fila'] || $r['cancelados']
+                ? "{$r['novos']} pedido(s) novo(s) da Tray · {$r['na_fila']} com nota entraram na fila" . ($r['cancelados'] ? " · {$r['cancelados']} cancelado(s)" : '') . '.'
+                : 'Nenhum pedido novo da Tray.');
+        } catch (\Throwable $e) {
+            Sessao::aviso('erro', 'Não foi possível buscar na Tray agora: ' . $e->getMessage());
+        }
+        redirecionar('/deposito?tipo=ecommerce');
     }
 
     public function ver(string $id): void

@@ -78,6 +78,48 @@ class TrayFake implements EcommerceInterface
         return $pedidos;
     }
 
+    /**
+     * Demonstração: pedidos do dia nos marketplaces. Os que foram pagos há mais de 40 minutos já têm nota
+     * (então entram na fila do Depósito); os mais novos ainda esperam a nota.
+     */
+    public function pedidosParaSeparar(string $desde): array
+    {
+        $produtos = \App\Core\Banco::todos("SELECT codigo, nome FROM produtos WHERE ativo = 1 AND codigo IS NOT NULL AND codigo <> '' ORDER BY id LIMIT 20");
+        if (!$produtos) {
+            return [];
+        }
+        $canais = ['mercado_livre', 'mercado_livre', 'shopee', 'mercado_livre', 'shopee', 'amazon', 'loja', 'mercado_livre', 'shopee', 'loja'];
+        $nomes = ['Ana P.', 'Bruno S.', 'Carla M.', 'Diego R.', 'Elisa T.', 'Fábio L.', 'Gabi N.', 'Heitor C.', 'Iara B.', 'João V.'];
+        $cidades = [['Porto Alegre', 'RS'], ['São Paulo', 'SP'], ['Curitiba', 'PR'], ['Recife', 'PE'], ['Belo Horizonte', 'MG'], ['Canoas', 'RS'],
+            ['Florianópolis', 'SC'], ['Goiânia', 'GO'], ['Salvador', 'BA'], ['Campinas', 'SP']];
+        $hoje = date('Y-m-d');
+        $lista = [];
+        foreach ([7 * 60 + 10, 7 * 60 + 45, 8 * 60 + 20, 8 * 60 + 55, 9 * 60 + 30, 10 * 60 + 5, 10 * 60 + 40, 11 * 60 + 25, 12 * 60 + 10, 13 * 60 + 40] as $i => $minuto) {
+            $criado = strtotime($hoje) + $minuto * 60;
+            if ($criado > time()) {
+                continue; // ainda não aconteceu hoje
+            }
+            $s = crc32($hoje . '-' . $i);
+            $itens = [];
+            foreach ([0, 1] as $k) {
+                if ($k === 1 && $s % 3 === 0) {
+                    continue;
+                }
+                $pr = $produtos[($s >> ($k * 4)) % count($produtos)];
+                $itens[] = ['ref' => $pr['codigo'], 'nome' => $pr['nome'], 'quantidade' => 1 + ($s >> (8 + $k)) % 3, 'preco' => round(39.9 + ($s >> (12 + $k)) % 60, 2)];
+            }
+            $temNota = $criado < time() - 40 * 60;
+            $lista[] = [
+                'codigo' => 'TRAY-' . date('ymd') . '-' . ($i + 1), 'numero_marketplace' => strtoupper(substr($canais[$i], 0, 2)) . '-' . (2000000000 + $s % 999999999),
+                'canal' => $canais[$i], 'criado_em' => date('Y-m-d H:i:s', $criado), 'cancelado' => false,
+                'nf' => $temNota ? (string) (90000 + (int) date('z') * 20 + $i) : null, 'nf_em' => $temNota ? date('Y-m-d H:i:s', $criado + 35 * 60) : null,
+                'comprador' => $nomes[$i], 'cidade' => $cidades[$i][0], 'uf' => $cidades[$i][1],
+                'total' => round(array_sum(array_map(fn($it) => $it['quantidade'] * $it['preco'], $itens)), 2), 'itens' => $itens,
+            ];
+        }
+        return $lista;
+    }
+
     public function testarConexao(): array
     {
         return [true, 'Loja simulada (demonstração).'];

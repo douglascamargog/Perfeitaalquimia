@@ -37,7 +37,7 @@ async function sair(page) { await page.click('form[action$="/sair"] button'); }
   // ---------- Gestor ----------
   await entrar(page, 'gestor@demo.local');
   await page.goto(BASE + '/carteira');
-  ok((await page.locator('.v4-metrica.destaque .v4-valor').innerText()).replace('.', '') === sql('select count(*) from clientes'), 'visão geral: total de estabelecimentos bate com o banco');
+  ok((await page.locator('.v4-metrica.destaque .v4-valor').innerText()).replace('.', '') === sql("select count(*) from clientes where tipo <> 'consumidor'"), 'visão geral: total de estabelecimentos bate com o banco');
   await page.waitForSelector('.pino-grupo', { timeout: 15000 }).catch(() => {});
   ok(await page.locator('.pino-grupo').count() > 0, 'mapa mostra agrupamentos por estado');
   await page.waitForTimeout(1500);

@@ -255,6 +255,7 @@ return [
     ['GET',  '/deposito/lotes',                  'DepositoController@lotes',            'deposito.ver|deposito.operar|producao.gerenciar'],
     ['GET',  '/deposito/recebimento',            'DepositoController@recebimento',      'deposito.ver|deposito.operar|producao.gerenciar'],
     ['POST', '/deposito/recebimento/{id}',       'DepositoController@receber',          'deposito.operar|producao.gerenciar'],
+    ['POST', '/deposito/tray',                   'DepositoController@buscarTray',       'deposito.operar'],
     ['GET',  '/deposito/{id}',                   'DepositoController@ver',              'deposito.ver|deposito.operar'],
     ['POST', '/deposito/{id}/{acao}',            'DepositoController@acao',             'deposito.operar'],
     ['GET',  '/compras',                         'CompraController@index',              'logado'],

@@ -80,3 +80,24 @@
 .dep-emb-resumo p { margin: 0; }
 @media (max-width: 600px) { .dep-emb-linha { grid-template-columns: minmax(0, 1fr) 80px; } }
 .dep-lote-validade { align-self: center; font-size: .74rem; color: var(--texto-suave); white-space: nowrap; min-width: 90px; }
+
+/* Tipos de pedido e horário limite do e-commerce (V11.4) */
+.dep-tipos { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 14px; }
+.dep-tipos a { display: inline-flex; gap: 6px; align-items: center; padding: 6px 14px; border-radius: 99px; border: 1px solid var(--borda); background: var(--card); text-decoration: none; color: var(--texto); font-weight: 600; font-size: .84rem; }
+.dep-tipos a b { font-size: .74rem; background: var(--fundo); border-radius: 99px; padding: 1px 8px; }
+.dep-tipos a.ativo { background: var(--primaria-escura); border-color: var(--primaria-escura); color: #fff; }
+.dep-tipos a.ativo b { background: rgba(255, 255, 255, .2); }
+.dep-tipo-selo { display: inline-block; font-size: .7rem; font-weight: 700; padding: 2px 9px; border-radius: 99px; vertical-align: middle; }
+.dep-tipo-selo.tipo-ecommerce { background: #ede7ff; color: #5b3cc4; }
+.dep-tipo-selo.tipo-lojista { background: var(--primaria-clara); color: var(--primaria-escura); }
+.dep-tipo-selo.tipo-terceirizacao { background: #fff1dc; color: #9a5b00; }
+.dep-cartao.tipo-ecommerce { border-left: 4px solid #7b5ee8; }
+.dep-cartao.tipo-terceirizacao { border-left: 4px solid #e8a33a; }
+.dep-cartao.tipo-lojista { border-left: 4px solid var(--secundaria-escura, #8ab817); }
+.dep-prazo { display: inline-flex; align-items: center; gap: 4px; font-size: .8rem; font-weight: 700; padding: 3px 10px; border-radius: 8px; background: #eef7f1; color: #1f7a5a; margin: 4px 0; }
+.dep-prazo.perto { background: #fff1dc; color: #9a5b00; }
+.dep-prazo.atrasado { background: #fde3e1; color: #b3261e; animation: dep-pisca 1.6s ease-in-out infinite; }
+.dep-prazo.grande { font-size: .95rem; padding: 6px 14px; }
+.dep-cartao.prazo-atrasado { box-shadow: 0 0 0 2px #f2b8b5; }
+@keyframes dep-pisca { 50% { opacity: .65; } }
+@media (prefers-reduced-motion: reduce) { .dep-prazo.atrasado { animation: none; } }

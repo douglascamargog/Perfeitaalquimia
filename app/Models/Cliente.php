@@ -41,7 +41,7 @@ class Cliente
     /** Monta o WHERE (com escopo de acesso) e os parâmetros */
     public static function montarWhere(array $f): array
     {
-        $w = ['c.excluido_em IS NULL'];
+        $w = ['c.excluido_em IS NULL', "c.tipo <> 'consumidor'"]; // consumidores do e-commerce (Tray) não fazem parte da carteira
         $p = [];
 
         if (!Auth::pode('carteira.ver_todas')) {
