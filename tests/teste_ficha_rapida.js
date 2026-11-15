@@ -66,7 +66,7 @@ const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwA
   ok(!!tarefa && sql(`select concat(vence_em,' ',substr(hora,1,5),' ',usuario_id) from tarefas where id=${tarefa}`) === `${amanha} 14:00 ${t1}`, 'atividade agendada vira tarefa (dia, hora, dono)');
   ok(sql(`select count(*) from cliente_eventos where cliente_id=${cli} and tipo='tarefa' and descricao like 'Agendou: Ligar%'`) === '1', 'agendamento na linha do tempo');
   ok(await v.p.locator(`[data-proximas] [data-tarefa="${tarefa}"]`).count() === 1, 'aparece em "Próximas atividades"');
-  await v.p.goto(BASE + '/agenda');
+  await v.p.goto(BASE + '/agenda?ver=lista'); // em lista: "amanhã" pode já ser a semana seguinte (num domingo)
   ok((await v.p.content()).includes('Oferecer a campanha'), 'aparece na Agenda');
   await v.p.goto(BASE + `/carteira/clientes/${cli}`);
   await Promise.all([v.p.waitForNavigation(), v.p.click(`[data-proximas] [data-tarefa="${tarefa}"] button`)]);

@@ -23,7 +23,7 @@ const aviso = async (p) => (await p.locator('.aviso').allInnerTexts()).join(' | 
   const uid = (email) => sql(`select id from usuarios where email='${email}'`);
   const tv1 = uid('televendas1@demo.local'), tv2 = uid('televendas2@demo.local'), gestora = uid('gestora.televendas@demo.local');
 
-  ok(sql('select count(*) from clientes where carteira_id is null') === '0', 'instalação: todo cliente numa carteira');
+  ok(sql("select count(*) from clientes where carteira_id is null and tipo <> 'consumidor'") === '0', 'instalação: todo cliente numa carteira (menos compradores do e-commerce)');
   ok(sql('select count(*) from clientes c join carteiras k on k.id=c.carteira_id where not (k.responsavel_id <=> c.responsavel_id)') === '0', 'carteira e responsável batem');
 
   const g = await nova();
