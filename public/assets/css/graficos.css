@@ -41,3 +41,35 @@
 .s2, .grafico-legenda i.s2, .grafico-pilha .s2 { background: #b9cfc5; }
 .grafico-ref { position: absolute; left: 0; right: 0; height: 0; border-top: 2px dashed var(--texto-suave); z-index: 1; pointer-events: auto; }
 @media print { .grafico-barras { height: 150px; } .anel-valor { transition: none; } }
+
+/* ---------- Evolução da meta da equipe (SVG) — fica no painel escuro da meta ---------- */
+.ev-grafico { margin: 18px 0 0; padding: 14px 14px 8px; border-radius: 16px; background: rgba(255, 255, 255, .04); }
+.ev-grafico svg { display: block; width: 100%; height: auto; overflow: visible; }
+.ev-grade { stroke: rgba(255, 255, 255, .08); stroke-width: 1; }
+.ev-eixo { fill: rgba(255, 255, 255, .62); font-size: 13px; font-family: inherit; }
+.ev-hoje { fill: var(--secundaria, #caff4d); font-weight: 800; }
+.ev-folga { fill: rgba(255, 255, 255, .035); }
+.ev-meta { stroke: #efc07a; stroke-width: 1.5; stroke-dasharray: 8 6; }
+.ev-ritmo { fill: none; stroke: rgba(255, 255, 255, .45); stroke-width: 2; stroke-dasharray: 4 6; }
+.ev-real { fill: none; stroke: var(--secundaria, #caff4d); stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
+.ev-ponto { fill: var(--secundaria, #caff4d); stroke: #1f2a24; stroke-width: 2; cursor: default; }
+.ev-ponto:hover { r: 7; }
+.legenda-evolucao { display: flex; gap: 6px 18px; flex-wrap: wrap; margin-top: 8px; font-size: .74rem; color: rgba(255, 255, 255, .7); }
+.legenda-evolucao i { display: inline-block; width: 16px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+.legenda-evolucao i.real { background: var(--secundaria, #caff4d); }
+.legenda-evolucao i.ideal { background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .6) 0 4px, transparent 4px 8px); }
+.legenda-evolucao i.meta { background: repeating-linear-gradient(90deg, #efc07a 0 6px, transparent 6px 10px); }
+.legenda-evolucao i.folga { height: 10px; background: rgba(255, 255, 255, .12); }
+
+/* ---------- Barras agrupadas por mês (faturado por frente) ---------- */
+.grafico-grupos { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px; align-items: end; height: 220px; padding-top: 6px; border-bottom: 1px solid var(--borda); }
+.grafico-grupo { display: grid; grid-template-rows: 1fr auto; height: 100%; gap: 4px; }
+.grafico-grupo-barras { display: flex; align-items: flex-end; justify-content: center; gap: 3px; height: 100%; }
+.grafico-grupo-barras span { position: relative; flex: 1 1 0; max-width: 28px; min-height: 2px; border-radius: 6px 6px 2px 2px; }
+.grafico-grupo-barras b { position: absolute; left: 50%; bottom: calc(100% + 2px); transform: translateX(-50%) rotate(-90deg); transform-origin: left center; translate: 6px 0; white-space: nowrap; font-size: .6rem; color: var(--texto-suave); font-weight: 700; display: none; }
+.grafico-grupo small { text-align: center; font-size: .72rem; color: var(--texto-suave); text-transform: uppercase; }
+.g0 { background: var(--primaria-escura); }
+.g1 { background: var(--secundaria); }
+.g2 { background: color-mix(in srgb, var(--primaria) 45%, transparent); }
+.grafico-legenda i.g0, .grafico-legenda i.g1, .grafico-legenda i.g2 { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: 5px; vertical-align: -1px; }
+@media print { .ev-grafico { background: none; } .ev-eixo { fill: #333; } .legenda-evolucao { color: #333; } }

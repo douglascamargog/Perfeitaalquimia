@@ -17,7 +17,7 @@ $link = fn(array $p) => url('/equipe') . '?' . e(http_build_query($p + ['mes' =>
 ?>
 <div class="cabecalho-secao">
   <div><div class="sobretitulo">COMERCIAL · EQUIPE DE VENDAS</div><h1>Equipe de vendas</h1>
-    <p>A meta da equipe e como está cada frente de venda: Externos, Televendas e Terceirização. Só pedidos faturados contam.</p></div>
+    <p>A meta da equipe (<?= e(implode(" + ", array_column(\App\Services\MetaService::funcoesMetaEquipe(), "nome"))) ?>) e como está cada frente de venda. Nas frentes, só pedidos faturados contam.</p></div>
   <div class="acoes seletor-mes">
     <a class="botao-icone" href="<?= $link(['mes' => $anterior, 'frente' => $frente]) ?>" aria-label="Mês anterior">←</a>
     <form method="get" action="<?= url('/equipe') ?>"><input type="month" name="mes" value="<?= e($mes) ?>" aria-label="Mês" onchange="this.form.submit()"></form>
@@ -76,7 +76,6 @@ $link = fn(array $p) => url('/equipe') . '?' . e(http_build_query($p + ['mes' =>
   <section class="card">
     <h2>Faturado por frente</h2>
     <p class="suave pequeno">Últimos 6 meses</p>
-    <div class="eq-grafico"><canvas id="grafico-frentes" aria-label="Faturado por frente nos últimos 6 meses"></canvas></div>
-    <script type="application/json" id="dados-equipe"><?= json_encode($grafico, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) ?></script>
+    <div class="eq-grafico" aria-label="Faturado por frente nos últimos 6 meses"><?= Visao::renderizar('graficos/_barras_grupo', ['rotulos' => $grafico['meses'], 'series' => $grafico['series']]) ?></div>
   </section>
 </div>

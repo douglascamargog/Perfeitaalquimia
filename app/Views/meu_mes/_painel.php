@@ -85,7 +85,9 @@ $pendentes = array_slice(array_filter($tarefas, fn($t) => !$t['concluida_em']), 
   <section class="card mm-grupo">
     <h3>Na equipe</h3>
     <dl>
-      <div><dt>Minha participação</dt><dd><?= $participacao === null ? '—' : $pct($participacao) ?> <small><?= $equipe ? 'do vendido pela equipe' : 'meta da equipe não cadastrada' ?></small></dd></div>
+      <?php if ($participaEquipe ?? true): // a meta da equipe é só dos setores configurados (ex.: Televendas + Prospecção e Reativação) ?>
+        <div data-participacao><dt>Minha participação</dt><dd><?= $participacao === null ? '—' : $pct($participacao) ?> <small><?= $equipe ? 'do vendido pela equipe' : 'meta da equipe não cadastrada' ?></small></dd></div>
+      <?php endif; ?>
       <?php if (!empty($faturadoSistema)): ?><div><dt>Faturado no sistema</dt><dd><?= dinheiro($faturadoSistema['valor']) ?> <small><?= (int) $faturadoSistema['pedidos'] ?> pedido(s)</small></dd></div><?php endif; ?>
     </dl>
     <div class="mm-top-clientes" data-top-mes><span class="mm-rotulo">Melhores clientes do mês</span>

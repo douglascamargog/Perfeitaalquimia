@@ -13,6 +13,9 @@ $feriados = implode(', ', array_map(fn($d) => substr($d, 8, 2) . '/' . substr($d
   <div class="meta-equipe-topo">
     <div>
       <span class="sobretitulo">META DA EQUIPE · <?= e(mb_strtoupper($nomeMes($mes))) ?></span>
+      <?php $setoresMeta = $q['setores'] ?? array_column(MetaService::funcoesMetaEquipe(), 'nome'); if ($setoresMeta): ?>
+        <span class="meta-equipe-setores" data-setores-meta>Vale para: <?= e(implode(' + ', $setoresMeta)) ?></span>
+      <?php endif; ?>
       <?php if ($q): ?>
         <h2><?= dinheiro($q['meta']) ?></h2>
         <p><?= $q['atingida'] ? 'Meta da equipe alcançada! 🎉' : ($q['passado'] ? 'Mês encerrado.' : 'Vendido pela equipe até ' . data_br($q['referencia']) . '.') ?></p>
@@ -49,16 +52,8 @@ $feriados = implode(', ', array_map(fn($d) => substr($d, 8, 2) . '/' . substr($d
       <span class="pequeno">Atualizado por <?= e($q['linha']['atualizado_por_nome'] ?? '—') ?> em <?= data_br($q['linha']['atualizado_em'], true) ?></span>
     </div>
 
-    <?php if ($q['lancamentos']): // Evolução: vendido acumulado (último lançamento de cada dia) × ritmo necessário até a meta
-        $ultimoDoDia = [];
-        foreach ($q['lancamentos'] as $lan) {
-            $ultimoDoDia[$lan['data']] = (float) $lan['vendido']; // correções no mesmo dia: vale o último valor
-        }
-        $dadosEvolucao = ['dias' => array_values($q['trabalho']), 'meta' => (float) $q['meta'], 'vendido' => $ultimoDoDia];
-    ?>
-      <div class="grafico-evolucao"><canvas id="grafico-evolucao" aria-label="Evolução do vendido pela equipe no mês"></canvas></div>
-      <script type="application/json" id="dados-evolucao"><?= json_encode($dadosEvolucao, JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
-      <div class="legenda-evolucao"><span><i class="real"></i>Vendido (lançamentos do gestor)</span><span><i class="ideal"></i>Ritmo necessário para a meta</span></div>
+    <?php if ($q['lancamentos']): // Evolução: vendido acumulado × ritmo necessário (desenhado no servidor, funciona sem internet) ?>
+      <?= \App\Core\Visao::renderizar('graficos/_evolucao_meta', ['mes' => $mes, 'meta' => (float) $q['meta'], 'trabalho' => array_values($q['trabalho']), 'lancamentos' => $q['lancamentos']]) ?>
     <?php endif; ?>
   <?php endif; ?>
 

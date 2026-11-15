@@ -21,7 +21,9 @@ class MeuMesController extends Controller
         $aba = in_array($_GET['aba'] ?? '', ['painel', 'vendas', 'clientes', 'calendario', 'tarefas'], true) ? $_GET['aba'] : 'painel';
         $dia = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($_GET['dia'] ?? '')) && str_starts_with($_GET['dia'], $mes) ? $_GET['dia'] : (str_starts_with(date('Y-m-d'), $mes) ? date('Y-m-d') : "$mes-01");
         $eu = MetaService::indicadores(Auth::id(), $mes);
-        $equipe = MetaService::equipe($mes);
+        // A meta da equipe é dos setores configurados (ex.: Televendas + Prospecção e Reativação): só eles (e quem gerencia metas) veem no Meu mês
+        $participaEquipe = MetaService::participaMetaEquipe((int) Auth::id()) || Auth::pode('metas.gerenciar');
+        $equipe = $participaEquipe ? MetaService::equipe($mes) : null;
 
         $tarefas = Banco::todos(
             'SELECT t.*, c.razao_social FROM tarefas t LEFT JOIN clientes c ON c.id = t.cliente_id
@@ -35,6 +37,7 @@ class MeuMesController extends Controller
             'dia'      => $dia,
             'eu'       => $eu,
             'equipe'   => $equipe,
+            'participaEquipe' => $participaEquipe,
             'tarefas'  => $tarefas,
             'podeEquipe' => Auth::pode('metas.gerenciar'),
             'participacao' => $equipe && $equipe['vendido'] > 0 ? $eu['vendido'] / $equipe['vendido'] * 100 : null,

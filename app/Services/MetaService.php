@@ -134,6 +134,23 @@ class MetaService
     // Equipe
     // ------------------------------------------------------------------
 
+    /** Setores (funções) que a meta da equipe cobre — Configurações › Metas (padrão: Televendas + Prospecção e Reativação) */
+    public static function funcoesMetaEquipe(): array
+    {
+        $slugs = (array) \App\Core\Config::get('metas.equipe_funcoes', ['televendas', 'prospeccao_reativacao']);
+        return $slugs ? Banco::todos('SELECT id, slug, nome FROM funcoes WHERE slug IN (' . implode(',', array_fill(0, count($slugs), '?')) . ') ORDER BY ordem, nome', array_values($slugs)) : [];
+    }
+
+    /** A pessoa faz parte da meta da equipe? (quem gerencia metas sempre vê) */
+    public static function participaMetaEquipe(int $usuarioId): bool
+    {
+        $ids = array_column(self::funcoesMetaEquipe(), 'id');
+        if (!$ids) {
+            return true;
+        }
+        return (bool) Banco::valor('SELECT 1 FROM usuario_funcoes WHERE usuario_id = ? AND funcao_id IN (' . implode(',', array_map('intval', $ids)) . ') LIMIT 1', [$usuarioId]);
+    }
+
     /** Meta da equipe do mês com projeções (null se o gestor ainda não cadastrou) */
     public static function equipe(string $mes): ?array
     {
@@ -152,6 +169,7 @@ class MetaService
         }
         return self::calcular($mes, (float) $linha['meta'], (float) $linha['vendido'], $dias, $folgas, (float) $linha['vendido'] > 0, $hoje) + [
             'linha' => $linha, 'dias_semana' => $dias, 'folgas' => $folgas, 'lancamentos' => $lancamentos, 'referencia' => $referencia,
+            'setores' => array_column(self::funcoesMetaEquipe(), 'nome'),
         ];
     }
 

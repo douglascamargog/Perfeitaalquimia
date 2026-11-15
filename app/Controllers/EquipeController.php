@@ -16,8 +16,7 @@ class EquipeController extends Controller
             'titulo' => 'Equipe de vendas', 'mes' => $mes, 'frente' => $frente,
             'equipe' => MetaService::equipe($mes), 'podeEquipe' => Auth::pode('metas.gerenciar'),
             'frentes' => E::frentes($mes), 'ranking' => E::ranking($mes, $frente), 'grafico' => E::porMes($mes),
-            'estilos' => ['carteira.css', 'meu_mes.css', 'equipe.css'],
-            'scripts' => ['https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js', 'equipe.js'],
+            'estilos' => ['carteira.css', 'meu_mes.css', 'equipe.css', 'graficos.css'], // gráficos desenhados no servidor (sem internet)
         ]);
     }
 }

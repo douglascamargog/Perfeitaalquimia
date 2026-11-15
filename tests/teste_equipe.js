@@ -37,7 +37,7 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   const soTele = await ven.locator('[data-ranking] tbody tr').allInnerTexts();
   ok(soTele.length >= 1 && soTele.every((t) => t.includes('Televendas')), 'filtro do ranking por frente');
   ok(await ven.locator('.form-equipe').count() === 0, 'vendedor não lança o vendido da equipe');
-  ok(await ven.evaluate(() => !!document.querySelector('#grafico-frentes') && !!window.Chart), 'gráfico do faturado por frente');
+  ok(await ven.locator('[data-grafico-grupos] .grafico-grupo').count() === 6, 'gráfico do faturado por frente (6 meses, desenhado sem internet)');
 
   // 2. Meu mês do vendedor: atalho da equipe e "Meus clientes" só da carteira dele
   await ven.goto(BASE + '/meu-mes');
@@ -68,6 +68,22 @@ async function entrar(p, email) { await p.goto(BASE + '/entrar'); await p.fill('
   const prod = await nova();
   await entrar(prod, 'producao@demo.local');
   ok(await prod.locator('.menu-lateral a[href$="/resultados"][data-bloqueado]').count() === 1, 'Produção: Resultados (Equipe de vendas) com cadeado');
+
+  // 4. Meta da equipe: setores que ela cobre; gráfico com sábado e sem "despencar" quando um valor errado foi lançado no meio do mês
+  ok((await ges.goto(BASE + '/equipe'), (await ges.textContent('[data-setores-meta]')).includes('Televendas + Prospecção e Reativação')), 'meta da equipe diz que vale para Televendas + Prospecção e Reativação');
+  const sab = sql(`select min(d) from (select date('${mes}-01') + interval n day d from (select 0 n union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9 union select 10 union select 11 union select 12 union select 13) x) y where dayofweek(d)=7`);
+  const antes = sql(`select date('${sab}') - interval 1 day`), antes2 = sql(`select date('${sab}') - interval 2 day`);
+  sql(`delete from metas_equipe_lancamentos where mes='${mes}'`);
+  sql(`insert into metas_equipe_lancamentos (mes, data, vendido, usuario_id) values ('${mes}', '${antes2}', 80000, 2), ('${mes}', '${antes}', 5000, 2), ('${mes}', '${sab}', 100000, 2)`);
+  await ges.goto(BASE + '/equipe');
+  const pontos = await ges.$$eval('[data-ponto]', (cs) => cs.map((c) => [c.dataset.ponto, Number(c.dataset.valor)]));
+  ok(pontos.some(([d]) => d === sab), 'lançamento num sábado aparece no gráfico');
+  ok(pontos.every(([, v], i) => i === 0 || v >= pontos[i - 1][1]), 'a linha do vendido nunca despenca (' + pontos.map(([d, v]) => d.slice(8) + '=' + v).join(' ') + ')');
+  ok(await ges.locator('.ev-folga').count() >= 8, 'fins de semana marcados no gráfico');
+  const ext = await nova(); await entrar(ext, 'externo1@demo.local'); await ext.goto(BASE + '/meu-mes');
+  ok(await ext.locator('[data-participacao]').count() === 0, 'Externo (fora da meta da equipe) não vê "participação na equipe" no Meu mês');
+  await ven.goto(BASE + '/meu-mes');
+  ok(await ven.locator('[data-participacao]').count() === 1, 'Televendas vê a participação na meta da equipe');
 
   ok(erros.length === 0, 'sem erros de JavaScript ' + erros.join(' / '));
   await b.close();
