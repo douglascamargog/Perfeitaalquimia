@@ -6,6 +6,15 @@
  * O mesmo formulário serve para "Enviar pedido" e "Gerar orçamento" (botão com formaction).
  */
 $jsonModelos = array_map(fn($m) => ['id' => (int) $m['id'], 'itens' => (object) $m['itens']], $modelos);
+// Campanhas no ar para este cliente: faixas para o resumo calcular ao vivo (o servidor confere ao enviar)
+$campanhas = \App\Services\CampanhaService::paraCliente($c);
+$jsonFaixas = [];
+foreach ($campanhas as $cp) {
+    foreach ($cp['faixas'] as $f) {
+        $jsonFaixas[] = ['valor' => (float) $f['a_partir_de'], 'tipo' => $f['tipo'], 'pct' => (float) $f['desconto_pct'], 'texto' => \App\Services\CampanhaService::textoFaixa($f),
+            'brinde' => (string) $f['brinde'], 'soma' => (bool) (int) $cp['soma_desconto_vendedor'], 'campanha' => $cp['titulo'] ?: $cp['nome']];
+    }
+}
 ?>
 <div class="cabecalho-secao">
   <div>
@@ -71,7 +80,7 @@ $jsonModelos = array_map(fn($m) => ['id' => (int) $m['id'], 'itens' => (object) 
           <tr data-linha class="<?= !empty($p['terceirizado']) ? 'ped-linha-marca' : '' ?>" data-nome="<?= e(mb_strtolower(($p['codigo'] ?? '') . ' ' . $p['nome'] . ' ' . $p['categoria'])) ?>" data-preco="<?= e((string) $p['preco']) ?>">
             <td><div class="ped-produto"><?php if ($p['imagem']): ?><img src="<?= url('/' . $p['imagem']) ?>" alt="" width="40" height="40" loading="lazy"><?php endif; ?>
               <span><strong><?= !empty($p['codigo']) ? '<span class="cod-produto">' . e($p['codigo']) . '</span> ' : '' ?><?= e($p['nome']) ?></strong><small><?= !empty($p['terceirizado']) ? '<span class="selo-marca">marca do cliente</span> ' . (int) $p['rotulos'] . ' rótulo(s) · ' : '' ?><?= e($p['embalagem']) ?><?= $p['estoque'] !== null ? ' · estoque ' . (int) $p['estoque'] : '' ?></small></span></div></td>
-            <td class="direita"><?= dinheiro((float) $p['preco']) ?></td>
+            <td class="direita"><?php if (!empty($p['preco_cheio'])): ?><s class="ped-preco-cheio"><?= dinheiro((float) $p['preco_cheio']) ?></s><span class="ped-promo">-<?= e(\App\Services\CampanhaService::pct((float) $p['promo_pct'])) ?></span><br><?php endif; ?><?= dinheiro((float) $p['preco']) ?></td>
             <td><input class="ped-qtd" type="number" name="qtd[<?= e((string) $p['id']) ?>]" min="0" max="<?= !empty($p['terceirizado']) ? 99999 : 9999 ?>" value="<?= $q ?: '' ?>" placeholder="0" aria-label="Quantidade de <?= e($p['nome']) ?>"></td>
             <td><input class="ped-desc" type="text" inputmode="decimal" name="desconto[<?= e((string) $p['id']) ?>]" value="<?= e((string) (\App\Core\Sessao::antigo('desconto', [])[$p['id']] ?? '')) ?>" placeholder="0" aria-label="Desconto (%) em <?= e($p['nome']) ?>"></td>
             <td class="direita" data-total-linha><?= $q ? dinheiro($q * (float) $p['preco']) : '' ?></td>
@@ -84,10 +93,19 @@ $jsonModelos = array_map(fn($m) => ['id' => (int) $m['id'], 'itens' => (object) 
 
   <aside class="card ped-resumo">
     <h2>Resumo</h2>
+    <?php if ($campanhas): ?>
+      <div class="ped-campanha" data-campanha='<?= e(json_encode($jsonFaixas, JSON_UNESCAPED_UNICODE)) ?>'>
+        <small>Campanha<?= count($campanhas) > 1 ? 's' : '' ?>: <?= e(implode(', ', array_map(fn($cp) => $cp['titulo'] ?: $cp['nome'], $campanhas))) ?></small>
+        <strong data-campanha-msg></strong>
+        <span data-campanha-ganhou hidden></span>
+        <div class="ped-campanha-barra"><i data-campanha-barra style="width:0"></i></div>
+      </div>
+    <?php endif; ?>
     <div class="ped-total"><span><b data-itens>0</b> item(ns)</span><strong data-subtotal>R$ 0,00</strong></div>
     <div class="ped-desconto" data-desconto-max="<?= e((string) (float) \App\Core\Config::get('pedidos.desconto_max_pct', 10)) ?>">
       <label>Desconto no pedido (%)<input type="text" inputmode="decimal" name="desconto_pedido" value="<?= antigo('desconto_pedido') ?>" placeholder="0" data-desconto-pedido></label>
       <p class="ped-desconto-resumo" data-desconto-resumo hidden></p>
+      <p class="ped-desconto-resumo campanha" data-desconto-campanha hidden></p>
     </div>
     <div class="cat-minimo falta" data-caixa-minimo><span data-texto-minimo></span><div class="cat-minimo-barra"><i data-barra-minimo style="width:0"></i></div></div>
     <h3>Pagamento</h3>

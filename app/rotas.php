@@ -148,6 +148,15 @@ return [
     ['POST', '/aprovacao/{id}/aprovar',         'AprovacaoController@aprovar', 'pedidos.aprovar'],
     ['POST', '/aprovacao/{id}/recusar',         'AprovacaoController@recusar', 'pedidos.aprovar'],
     // Catálogo (vitrine do cliente): visível, chamada, ordem, códigos e preços
+    // Comercial › Campanhas (faixas, brindes, frete, produtos em promoção e visual do catálogo)
+    ['GET',  '/campanhas',                      'CampanhaController@index',    'campanhas.ver|campanhas.gerenciar'],
+    ['GET',  '/campanhas/nova',                 'CampanhaController@nova',     'campanhas.gerenciar'],
+    ['POST', '/campanhas',                      'CampanhaController@salvar',   'campanhas.gerenciar'],
+    ['POST', '/campanhas/visual',               'CampanhaController@visual',   'campanhas.gerenciar'],
+    ['GET',  '/campanhas/{id}',                 'CampanhaController@ver',      'campanhas.ver|campanhas.gerenciar'],
+    ['POST', '/campanhas/{id}',                 'CampanhaController@salvar',   'campanhas.gerenciar'],
+    ['POST', '/campanhas/{id}/alternar',        'CampanhaController@alternar', 'campanhas.gerenciar'],
+    ['POST', '/campanhas/{id}/duplicar',        'CampanhaController@duplicar', 'campanhas.gerenciar'],
     ['GET',  '/produtos/catalogo',                   'CatalogoAdminController@index',     'produtos.ver|catalogo.editar'],
     ['POST', '/produtos/catalogo/sincronizar',       'CatalogoAdminController@sincronizar', 'catalogo.editar'],
     ['POST', '/produtos/catalogo/codigos',           'CatalogoAdminController@importarCodigos', 'catalogo.editar'],

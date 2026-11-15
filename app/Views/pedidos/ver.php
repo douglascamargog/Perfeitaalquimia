@@ -46,6 +46,9 @@ $origens = ['catalogo' => 'Catálogo (cliente)', 'sistema' => 'Sistema (equipe)'
         <?php if ((float) $p['desconto'] > 0): ?><tr><td colspan="3" class="direita">Desconto</td><td class="direita">−<?= dinheiro((float) $p['desconto']) ?></td></tr><?php endif; ?>
         <?php if ((float) ($p['desconto_vendedor'] ?? 0) > 0): ?><tr data-desconto-vendedor><td colspan="3" class="direita">Desconto dado pela vendedora (produtos<?= (float) $p['desconto_pedido_pct'] > 0 ? ' + ' . e(rtrim(rtrim(number_format((float) $p['desconto_pedido_pct'], 2, ',', ''), '0'), ',')) . '% no pedido' : '' ?>)
           <?= $p['desconto_acima_limite'] ? '<span class="selo selo-desconto">acima do limite</span>' : '' ?></td><td class="direita"><?= dinheiro((float) $p['desconto_vendedor']) ?></td></tr><?php endif; ?>
+        <?php if (!empty($p['campanhas'])): ?><tr data-pedido-campanha><td colspan="3" class="direita">Campanha <?= e($p['campanhas']) ?><?= (float) $p['campanha_desconto'] > 0 ? ' (' . e(\App\Services\CampanhaService::pct((float) $p['campanha_desconto_pct'])) . ', já no desconto)' : '' ?>
+          <?= $p['campanha_brindes'] ? '<br>🎁 Brinde: <strong>' . e($p['campanha_brindes']) . '</strong>' : '' ?><?= (int) $p['frete_gratis'] ? '<br><strong>Frete grátis</strong>' : '' ?></td>
+          <td class="direita"><?= (float) $p['campanha_desconto'] > 0 ? dinheiro((float) $p['campanha_desconto']) : '' ?></td></tr><?php endif; ?>
         <tr class="ped-total-final"><td colspan="3" class="direita">Total</td><td class="direita"><?= dinheiro((float) $p['total']) ?></td></tr>
       </tfoot>
     </table>

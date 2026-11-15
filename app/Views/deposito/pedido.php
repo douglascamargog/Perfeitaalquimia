@@ -39,6 +39,7 @@ $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceiriza
 
 <?php if ($terceirizado): ?><p class="aviso alerta">Pedido com produto de <strong>terceirização</strong>: vai com o rótulo do cliente.</p><?php endif; ?>
 <?php if ($p['observacoes']): ?><p class="aviso">Observação do pedido: <?= e($p['observacoes']) ?></p><?php endif; ?>
+<?php if (!empty($p['campanha_brindes'])): ?><p class="aviso atencao" data-brinde-separar>🎁 Colocar o brinde da campanha na caixa: <strong><?= e($p['campanha_brindes']) ?></strong></p><?php endif; ?>
 
 <?php if ($editavel): ?>
 <form method="post" action="<?= $acao('separar') ?>" class="card dep-separar" data-separar>

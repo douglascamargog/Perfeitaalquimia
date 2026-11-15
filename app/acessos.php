@@ -22,6 +22,7 @@ return [
             ['Equipe de vendas', null, 'equipe.ver', 'Meta da equipe, números das frentes e ranking'],
             ['Terceirização', 'terceirizacao.ver', 'terceirizacao.editar', 'Editar: produtos dos clientes e registro de rótulos'],
             ['Cobrança', 'cobranca.ver', 'cobranca.gerenciar', ''],
+            ['Campanhas comerciais', 'campanhas.ver', 'campanhas.gerenciar', 'Ver: campanhas no ar e agendadas · Editar: criar campanhas, faixas, brindes, promoções e o visual do catálogo'],
         ],
         'Gestão' => [
             ['Painel de vendas', null, 'painel.ver', ''],

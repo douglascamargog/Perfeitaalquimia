@@ -112,10 +112,34 @@ class PedidoService
             }
         }
         usort($itens, fn($a, $b) => strcmp($a['nome'], $b['nome']));
+        // Campanhas comerciais: preço promocional nos produtos (as linhas com a marca do cliente ficam de fora)
+        $campanhas = CampanhaService::paraCliente($cliente);
+        $promo = CampanhaService::promocoes($campanhas);
+        foreach ($itens as &$i) {
+            if (empty($i['chave']) && isset($promo[$i['id']])) {
+                $i['preco_cheio'] = (float) $i['preco'];
+                $i['promo_pct'] = $promo[$i['id']]['pct'];
+                $i['campanha_id'] = $promo[$i['id']]['campanha_id'];
+                $i['preco'] = CampanhaService::precoPromo($i['preco'], $i['promo_pct']);
+                $i['total'] = round($i['quantidade'] * $i['preco'], 2);
+            }
+        }
+        unset($i);
         $subtotal = round(array_sum(array_column($itens, 'total')), 2);
         $minimo = self::pedidoMinimo($cliente['uf']);
+        // Faixas (desconto, brinde, frete) pelo valor do pedido já com os preços promocionais
+        $beneficios = CampanhaService::beneficios($campanhas, $subtotal);
+        $descontoCampanha = round($subtotal * $beneficios['desconto_pct'] / 100, 2);
+        $usadas = array_unique(array_filter(array_column($itens, 'campanha_id')));
+        foreach ($campanhas as $c) { // campanha com produto em promoção neste pedido também conta como aplicada
+            if (in_array((int) $c['id'], $usadas, true) && !in_array($c['titulo'] ?: $c['nome'], $beneficios['nomes'], true)) {
+                $beneficios['nomes'][] = $c['titulo'] ?: $c['nome'];
+            }
+        }
         return ['tabela' => $tabela, 'itens' => $itens, 'sem_preco' => $semPreco, 'subtotal' => $subtotal,
-            'quantidade' => array_sum(array_column($itens, 'quantidade')), 'minimo' => $minimo, 'falta' => max(0, round($minimo - $subtotal, 2))];
+            'quantidade' => array_sum(array_column($itens, 'quantidade')), 'minimo' => $minimo, 'falta' => max(0, round($minimo - $subtotal, 2)),
+            'campanhas' => $campanhas, 'campanha' => $beneficios, 'desconto_campanha' => $descontoCampanha,
+            'economia_promo' => round(array_sum(array_map(fn($i) => isset($i['preco_cheio']) ? ($i['preco_cheio'] - $i['preco']) * $i['quantidade'] : 0, $itens)), 2)];
     }
 
     /**
@@ -129,6 +153,16 @@ class PedidoService
             FROM produtos p JOIN produto_precos pp ON pp.produto_id = p.id AND pp.tabela_preco_id = ?
             LEFT JOIN categorias c ON c.id = p.categoria_id LEFT JOIN midias m ON m.id = p.imagem_id LEFT JOIN produto_estoque e ON e.produto_id = p.id
             WHERE p.ativo = 1 AND p.visivel_catalogo = 1 ORDER BY p.nome', [$tabela['id']]);
+        // Preço promocional das campanhas do cliente (o mesmo que calcular() aplica ao gravar)
+        $promo = CampanhaService::promocoes(CampanhaService::paraCliente($cliente));
+        foreach ($produtos as &$p) {
+            $p['promo_pct'] = $promo[$p['id']]['pct'] ?? 0;
+            if ($p['promo_pct'] > 0) {
+                $p['preco_cheio'] = (float) $p['preco'];
+                $p['preco'] = CampanhaService::precoPromo((float) $p['preco'], $p['promo_pct']);
+            }
+        }
+        unset($p);
         $marca = [];
         foreach (TerceirizacaoService::linhasDoPedido((int) $cliente['id']) as $chave => $t) {
             $marca[] = ['id' => $chave, 'codigo' => $t['codigo_cliente'] ?: $t['produto_codigo'], 'nome' => $t['nome_rotulo'], 'embalagem' => $t['embalagem'],
@@ -206,20 +240,35 @@ class PedidoService
             $carrinho['subtotal'] = round(array_sum(array_column($carrinho['itens'], 'total')), 2);
             $descontoPedidoPct = $pct($d['desconto_pedido_pct'] ?? 0);
         }
-        $descontoPedido = round($carrinho['subtotal'] * $descontoPedidoPct / 100, 2);
+        // Campanha: a faixa foi calculada com o total já promocional (antes dos descontos da vendedora)
+        $camp = $carrinho['campanha'];
+        $deuDescontoVendedor = $subtotalTabela - $carrinho['subtotal'] > 0.004 || $descontoPedidoPct > 0;
+        $campPct = $camp['desconto_pct'];
+        if ($campPct > 0 && $deuDescontoVendedor) {
+            foreach ($carrinho['campanhas'] as $c) { // a campanha da faixa não soma com o desconto da vendedora
+                if (($c['titulo'] ?: $c['nome']) === $camp['desconto_de'] && !(int) $c['soma_desconto_vendedor']) {
+                    $campPct = 0.0;
+                }
+            }
+        }
+        $descontoCampanha = round($carrinho['subtotal'] * $campPct / 100, 2);
+        $descontoPedido = round(($carrinho['subtotal'] - $descontoCampanha) * $descontoPedidoPct / 100, 2);
         $descontoVendedor = round($subtotalTabela - $carrinho['subtotal'] + $descontoPedido, 2);
         $pctVendedor = $subtotalTabela > 0 ? $descontoVendedor / $subtotalTabela * 100 : 0;
         $limite = (float) \App\Core\Config::get('pedidos.desconto_max_pct', 10);
         $acimaLimite = $descontoVendedor > 0 && $pctVendedor > $limite + 0.0001;
-        $base = $carrinho['subtotal'] - $descontoPedido;
-        $desconto = round($descontoPedido + ($condicao ? $base * (float) $condicao['desconto_pct'] / 100 : 0.0), 2);
+        $base = $carrinho['subtotal'] - $descontoCampanha - $descontoPedido;
+        $desconto = round($descontoCampanha + $descontoPedido + ($condicao ? $base * (float) $condicao['desconto_pct'] / 100 : 0.0), 2);
+        $brindes = implode(' · ', array_column($camp['brindes'], 'texto'));
 
-        $id = Banco::transacao(function () use ($cliente, $carrinho, $forma, $condicao, $desconto, $vendedor, $origem, $uuid, $d, $descontoPedidoPct, $descontoVendedor, $acimaLimite, $pctVendedor, $limite) {
+        $id = Banco::transacao(function () use ($cliente, $carrinho, $forma, $condicao, $desconto, $vendedor, $origem, $uuid, $d, $descontoPedidoPct, $descontoVendedor, $acimaLimite, $pctVendedor, $limite, $camp, $campPct, $descontoCampanha, $brindes) {
             $id = Banco::inserir('pedidos', [
                 'uuid' => $uuid, 'cliente_id' => $cliente['id'], 'vendedor_id' => $vendedor, 'origem' => $origem,
                 'tabela_preco_id' => $carrinho['tabela']['id'], 'forma_pagamento_id' => $forma['id'], 'condicao_id' => $condicao['id'] ?? null,
                 'subtotal' => $carrinho['subtotal'], 'desconto' => $desconto, 'total' => round($carrinho['subtotal'] - $desconto, 2),
                 'desconto_pedido_pct' => $descontoPedidoPct, 'desconto_vendedor' => $descontoVendedor, 'desconto_acima_limite' => $acimaLimite ? 1 : 0,
+                'campanha_desconto_pct' => $campPct, 'campanha_desconto' => $descontoCampanha, 'campanha_brindes' => mb_substr($brindes, 0, 500) ?: null,
+                'frete_gratis' => $camp['frete'] ? 1 : 0, 'campanhas' => mb_substr(implode(', ', $camp['nomes']), 0, 255) ?: null,
                 'observacoes' => mb_substr(trim((string) ($d['observacoes'] ?? '')), 0, 1000) ?: null,
                 'criado_por_usuario' => $d['usuario_id'] ?? null, 'criado_por_cliente' => in_array($origem, ['catalogo', 'orcamento'], true) ? 1 : 0,
             ]);
@@ -227,6 +276,7 @@ class PedidoService
                 Banco::inserir('pedido_itens', ['pedido_id' => $id, 'produto_id' => $i['id'], 'codigo' => $i['codigo'] ?? null, 'nome' => $i['nome'],
                     'quantidade' => $i['quantidade'], 'preco_unitario' => $i['preco'], 'total' => $i['total'],
                     'preco_tabela' => $i['preco_tabela'] ?? null, 'desconto_pct' => $i['desconto_pct'] ?? 0,
+                    'promo_pct' => $i['promo_pct'] ?? 0, 'campanha_id' => $i['campanha_id'] ?? null,
                     'terceirizacao_produto_id' => $i['terceirizacao_produto_id'] ?? null]);
             }
             $quem = ['catalogo' => 'pelo cliente no catálogo', 'sistema' => 'pela equipe', 'app' => 'pelo app do vendedor externo', 'orcamento' => 'pelo cliente, aprovando o orçamento'][$origem];
@@ -234,6 +284,10 @@ class PedidoService
             if ($descontoVendedor > 0) {
                 self::historico($id, 'aguardando_aprovacao', 'Desconto da vendedora: ' . dinheiro($descontoVendedor) . ' (' . number_format($pctVendedor, 1, ',', '.') . '%)'
                     . ($acimaLimite ? ' · acima do limite de ' . number_format($limite, 1, ',', '.') . '%: precisa de aprovação.' : '.'), $d['usuario_id'] ?? null);
+            }
+            $ganhou = CampanhaService::conquistas(['desconto_pct' => $campPct] + $camp);
+            if ($ganhou) {
+                self::historico($id, 'aguardando_aprovacao', 'Campanha ' . implode(', ', $camp['nomes']) . ': ' . implode(' · ', $ganhou) . '.', $d['usuario_id'] ?? null);
             }
             ClienteEvento::registrar((int) $cliente['id'], 'pedido', 'Pedido #' . $id . ' · ' . dinheiro(round($carrinho['subtotal'] - $desconto, 2)) . ' · ' . $forma['nome'] . ' (aguardando aprovação)',
                 $d['usuario_id'] ?? null, $origem === 'orcamento' ? 'Orçamento' : ucfirst($origem), ['pedido_id' => $id]);
@@ -262,7 +316,7 @@ class PedidoService
             LEFT JOIN produtos pr ON pr.id = i.produto_id WHERE i.pedido_id = ?', [$id]);
         try {
             $r = Integracoes::erp()->enviarPedido(['uuid' => $p['uuid'], 'cnpj' => (string) $p['cnpj'], 'itens' => $itens,
-                'forma_pagamento' => $p['forma'], 'condicao' => $p['condicao'], 'observacoes' => (string) $p['observacoes']]);
+                'forma_pagamento' => $p['forma'], 'condicao' => $p['condicao'], 'observacoes' => self::observacoesErp($p)]);
         } catch (\Throwable $erro) {
             error_log('Envio do pedido ' . $id . ' ao ERP: ' . $erro->getMessage());
             return false;
@@ -270,6 +324,25 @@ class PedidoService
         Banco::atualizar('pedidos', $id, ['omie_codigo' => $r['omie_codigo'], 'omie_numero' => $r['numero']]);
         self::historico($id, $p['situacao'], 'Enviado ao ERP como orçamento nº ' . $r['numero'] . '.', null);
         return true;
+    }
+
+    /** Observação que vai ao ERP: a do pedido + o que a campanha deu (brinde, frete grátis, desconto) para o faturamento não esquecer */
+    private static function observacoesErp(array $p): string
+    {
+        $extra = [];
+        if (!empty($p['campanhas'])) {
+            if ((float) $p['campanha_desconto'] > 0) {
+                $extra[] = 'desconto da campanha ' . CampanhaService::pct((float) $p['campanha_desconto_pct']) . ' (' . dinheiro((float) $p['campanha_desconto']) . ')';
+            }
+            if ($p['campanha_brindes']) {
+                $extra[] = 'BRINDE: ' . $p['campanha_brindes'];
+            }
+            if ((int) $p['frete_gratis']) {
+                $extra[] = 'FRETE GRÁTIS';
+            }
+        }
+        $campanha = $extra ? 'Campanha ' . $p['campanhas'] . ': ' . implode(' · ', $extra) : '';
+        return trim((string) $p['observacoes'] . ($campanha ? "\n" . $campanha : ''));
     }
 
     // ------------------------------------------------------------------

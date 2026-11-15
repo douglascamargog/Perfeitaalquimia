@@ -150,3 +150,14 @@ tr.ped-do-modelo { animation: ped-pisca 1.2s ease; }
 .ped-desconto-resumo { margin: 6px 0 0; font-size: .8rem; font-weight: 600; color: var(--primaria-escura); }
 .ped-desconto-resumo.acima { color: var(--aviso); }
 .selo-desconto { background: var(--aviso-fundo); color: var(--aviso); }
+
+/* Campanha no resumo do pedido (V12.0) */
+.ped-campanha { display: grid; gap: 5px; padding: 12px 14px; margin-bottom: 10px; border-radius: 14px; background: var(--primaria); color: var(--primaria-texto); }
+.ped-campanha small { font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 800; opacity: .85; }
+.ped-campanha strong { font-size: .98rem; line-height: 1.25; }
+.ped-campanha span { font-size: .82rem; font-weight: 800; color: var(--secundaria); }
+.ped-campanha-barra { height: 7px; border-radius: 99px; background: rgba(255, 255, 255, .2); overflow: hidden; }
+.ped-campanha-barra i { display: block; height: 100%; background: var(--secundaria); border-radius: 99px; transition: width .3s ease; }
+.ped-desconto-resumo.campanha { color: var(--sucesso); }
+.ped-preco-cheio { color: var(--texto-suave); font-size: .78rem; }
+.ped-promo { margin-left: 4px; font-size: .7rem; font-weight: 800; background: var(--secundaria); color: var(--secundaria-texto); padding: 1px 6px; border-radius: 6px; }

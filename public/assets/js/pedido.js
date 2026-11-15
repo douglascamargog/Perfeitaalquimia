@@ -19,13 +19,23 @@ function recalcular() {
     linha.classList.toggle('escolhido', q > 0);
     subtotal += total; itens += q; tabela += q * preco;
   });
+  // Campanha: faixa pelo valor com os preços promocionais (antes do desconto da vendedora) — mesma regra do servidor
+  const pctPedido = pct(form.querySelector('[data-desconto-pedido]'));
+  const deuDesconto = tabela - subtotal > 0.004 || pctPedido > 0;
+  const camp = campanha(tabela, deuDesconto);
+  const descCampanha = Math.round(subtotal * camp.pct) / 100;
+  const caixaCamp = form.querySelector('[data-desconto-campanha]');
+  if (caixaCamp) {
+    caixaCamp.hidden = descCampanha <= 0;
+    caixaCamp.textContent = `Desconto da campanha (${camp.pct.toLocaleString('pt-BR')}%): ${real(descCampanha)}`;
+  }
   // Desconto no pedido inteiro + aviso do limite (acima dele, o pedido vai para aprovação)
   const caixaDesc = form.querySelector('[data-desconto-max]');
-  let totalPedido = subtotal;
+  let totalPedido = subtotal - descCampanha;
   if (caixaDesc) {
-    const descPedido = Math.round(subtotal * pct(form.querySelector('[data-desconto-pedido]')) ) / 100;
-    totalPedido = subtotal - descPedido;
-    const dado = tabela - totalPedido;
+    const descPedido = Math.round((subtotal - descCampanha) * pctPedido) / 100;
+    totalPedido = subtotal - descCampanha - descPedido;
+    const dado = tabela - subtotal + descPedido; // só o que a vendedora deu (a campanha não conta no limite)
     const pctTotal = tabela > 0 ? dado / tabela * 100 : 0;
     const max = Number(caixaDesc.dataset.descontoMax) || 0;
     const resumo = caixaDesc.querySelector('[data-desconto-resumo]');
@@ -55,6 +65,35 @@ function recalcular() {
   enviar.textContent = itens === 0 ? 'Escolha os produtos' : falta > 0 ? 'Complete o pedido mínimo' : enviar.dataset.texto;
   const orc = form.querySelector('[data-gerar-orcamento]');
   if (orc) orc.disabled = itens === 0;
+}
+
+// Faixas das campanhas (desconto, brinde, frete): o que já ganhou e quanto falta para a próxima
+function campanha(valor, deuDesconto) {
+  const caixa = form.querySelector('[data-campanha]');
+  const r = { pct: 0 };
+  if (!caixa) return r;
+  const faixas = JSON.parse(caixa.dataset.campanha || '[]');
+  const ganhou = [];
+  let frete = false;
+  const brindes = {};
+  faixas.forEach((f) => {
+    if (valor + 0.0001 < f.valor) return;
+    if (f.tipo === 'desconto' && f.pct > r.pct && (f.soma || !deuDesconto)) r.pct = f.pct;
+    if (f.tipo === 'frete') frete = true;
+    if (f.tipo === 'brinde' && (!brindes[f.campanha] || brindes[f.campanha].valor < f.valor)) brindes[f.campanha] = f;
+  });
+  if (r.pct > 0) ganhou.push(`${r.pct.toLocaleString('pt-BR')}% de desconto`);
+  Object.values(brindes).forEach((b) => ganhou.push('🎁 ' + b.brinde));
+  if (frete) ganhou.push('frete grátis');
+  const proximas = faixas.filter((f) => f.valor > valor + 0.0001 && !(f.tipo === 'desconto' && f.pct <= r.pct) && !(f.tipo === 'frete' && frete))
+    .sort((a, b) => a.valor - b.valor);
+  const prox = proximas[0];
+  caixa.querySelector('[data-campanha-msg]').textContent = prox ? `Faltam ${real(prox.valor - valor)} para ganhar ${prox.texto}` : (ganhou.length ? 'Ganhou tudo da campanha! 🎉' : '');
+  const g = caixa.querySelector('[data-campanha-ganhou]');
+  g.hidden = !ganhou.length;
+  g.textContent = 'Ganhou: ' + ganhou.join(' · ');
+  caixa.querySelector('[data-campanha-barra]').style.width = (prox ? Math.min(100, valor / prox.valor * 100) : 100) + '%';
+  return r;
 }
 
 function filtrar() {

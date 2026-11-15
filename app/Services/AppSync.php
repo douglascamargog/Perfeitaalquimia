@@ -45,6 +45,18 @@ class AppSync
         foreach (Banco::todos('SELECT produto_id, tabela_preco_id, preco FROM produto_precos WHERE tabela_preco_id IN (' . implode(',', array_map('intval', $tabelas)) . ')') as $p) {
             $precos[$p['tabela_preco_id']][$p['produto_id']] = (float) $p['preco'];
         }
+        // Campanhas no ar: o app mostra o preço promocional das campanhas abertas a todos ou por tabela de preço
+        // (as de UF, região ou setor o servidor aplica ao receber o pedido, como em qualquer pedido)
+        foreach ($precos as $tab => &$lista) {
+            $daTabela = array_filter(\App\Services\CampanhaService::ativasHoje(), fn($c) => $c['publico'] === 'todos'
+                || ($c['publico'] === 'tabela' && in_array((string) $tab, explode(',', (string) $c['publico_valores']), true)));
+            foreach (\App\Services\CampanhaService::promocoes($daTabela) as $pid => $pr) {
+                if (isset($lista[$pid])) {
+                    $lista[$pid] = \App\Services\CampanhaService::precoPromo($lista[$pid], $pr['pct']);
+                }
+            }
+        }
+        unset($lista);
         $produtos = Banco::todos('SELECT p.id, p.codigo, p.nome, p.embalagem, c.nome AS categoria, m.arquivo AS imagem FROM produtos p
             LEFT JOIN categorias c ON c.id = p.categoria_id LEFT JOIN midias m ON m.id = p.imagem_id
             WHERE p.ativo = 1 AND p.visivel_catalogo = 1 ORDER BY p.nome');
