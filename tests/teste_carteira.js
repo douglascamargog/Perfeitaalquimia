@@ -130,7 +130,12 @@ async function sair(page) { await page.click('form[action$="/sair"] button'); }
   await page.waitForTimeout(1500);
   await page.screenshot({ path: SHOTS + '/carteira-mapa.png' });
 
-  // Reativação
+  // Reativação — padrão (V12.1): o cliente sem compra fica com a vendedora e aparece na Reativação dela
+  await page.goto(BASE + '/reativacao');
+  const semCompra = Number(sql("select count(*) from clientes c where c.tipo='cliente' and c.excluido_em is null and ultima_compra_em < curdate() - interval 90 day"));
+  ok(await page.locator('form[action$="/reativacao/processar"]').count() === 0 && (await page.content()).includes('Reativação'), 'Reativação com a vendedora: sem "processar" (ninguém muda de dono)');
+  // Jeito antigo (Configurações › Carteira = fila): continua funcionando
+  sql("update configuracoes set valor='fila' where chave='carteira.reativacao_modo'");
   const antes = Number(sql("select count(*) from clientes c join funcoes f on f.id=c.funcao_id where f.slug='prospeccao_reativacao' and c.tipo='cliente'"));
   const aguardando = Number(sql("select count(*) from clientes c where ultima_compra_em < curdate() - interval 90 day and funcao_id <> (select id from funcoes where slug='prospeccao_reativacao')"));
   await page.goto(BASE + '/reativacao');

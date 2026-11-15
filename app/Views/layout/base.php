@@ -70,7 +70,7 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
           <div class="menu-sub">
           <?php if (!empty($g['setores'])): ?>
             <div class="menu-setores" role="group" aria-label="Setor">
-              <?php foreach ($g['setores'] as $st): ?><a href="<?= url($st['href']) ?>" class="<?= $st['ativo'] ? 'ativo' : '' ?>" <?= $st['ativo'] ? 'aria-current="true"' : '' ?>><?= e($st['nome']) ?></a><?php endforeach; ?>
+              <?php foreach ($g['setores'] as $st): ?><a href="<?= url($st['href']) ?>" data-setor-chip="<?= e($st['slug']) ?>" class="<?= $st['ativo'] ? 'ativo' : '' ?>" <?= $st['ativo'] ? 'aria-current="true"' : '' ?>><?= e($st['nome']) ?></a><?php endforeach; ?>
             </div>
           <?php endif; ?>
         <?php endif; ?>

@@ -26,7 +26,7 @@ async function entrar(p, email) {
 
   // ---------- 1. Menu: só o Televendas ----------
   const secoes = await p.$$eval('[data-menu-secao]', (l) => l.map((s) => s.dataset.menuSecao));
-  ok(secoes.includes('setor:televendas') && !secoes.includes('setor:externo') && !secoes.includes('setor:terceirizacao'), 'gestora vê só o setor que gerencia');
+  ok(secoes.includes('Comercial') && await p.locator('[data-setor-chip]').count() === 0 && (await p.locator('[data-menu-secao="Comercial"] a[data-url="/carteira"]').getAttribute('href')).includes('setor=televendas'), 'gestora vê só o setor que gerencia (Comercial do Televendas)');
 
   // ---------- 2. Carteira: própria + equipe do setor, nada de outro setor ----------
   await p.goto(BASE + '/carteira/lista?setor=televendas');

@@ -22,28 +22,30 @@ const secoes = (p) => p.$$eval('[data-menu-secao]', (l) => l.map((s) => s.datase
   const tv = await nova();
   await entrar(tv, 'televendas1@demo.local');
   let s = await secoes(tv);
-  ok(s.includes('setor:televendas') && !s.includes('setor:externo') && !s.includes('setor:terceirizacao') && !s.includes('setor:prospeccao_reativacao'), 'Televendas vê só o setor Televendas');
-  ok(s.includes('Financeiro') && s.includes('Produtos') && s.includes('Administração'), 'demais grupos continuam no menu (com cadeado quando não tem acesso)');
+  const chips = async (p) => p.$$eval('[data-setor-chip]', (l) => l.map((a) => a.dataset.setorChip));
+  ok(s.includes('Comercial') && !s.some((x) => x.startsWith('setor:')) && (await chips(tv)).length === 0, 'Televendas: tudo dentro de Comercial, sem escolha de setor (só tem um)');
+  ok(await tv.locator('[data-menu-secao="Comercial"] a[data-url="/reativacao"]').getAttribute('href').then((h) => h.includes('setor=televendas')), 'Reativação dentro do Comercial, no setor da vendedora');
+  ok(s.includes('Financeiro') && s.includes('Produtos') && s.includes('Treinamento') && !s.includes('Administração') && await tv.locator('[data-engrenagem]').count() === 0, 'demais grupos continuam no menu (com cadeado); Administração sai do menu e a vendedora não tem engrenagem');
   ok(await tv.locator('[data-menu-secao].aberta').count() === 0, 'no Início, os grupos começam fechados');
   const ges = await nova();
   await entrar(ges, 'gestor@demo.local');
-  s = await secoes(ges);
-  ok(['televendas', 'externo', 'terceirizacao', 'prospeccao_reativacao'].every((x) => s.includes('setor:' + x)), 'Gestor vê os quatro setores');
+  ok(JSON.stringify((await chips(ges)).sort()) === JSON.stringify(['', 'externo', 'prospeccao_reativacao', 'televendas', 'terceirizacao']), 'Gestor escolhe entre Todos e os quatro setores');
   const ext = await nova();
   await entrar(ext, 'externo1@demo.local');
   s = await secoes(ext);
-  ok(s.includes('setor:externo') && !s.includes('setor:televendas'), 'Externo vê só o setor Externo');
-  ok(await ext.locator('[data-menu-secao="setor:externo"] a[data-url="/app"]').count() === 1, 'App do externo fica dentro do setor Externo');
+  ok((await chips(ext)).length === 0 && s.includes('Comercial'), 'Externo: só o setor Externo (sem escolha)');
+  ok(await ext.locator('[data-menu-secao="Comercial"] a[data-url="/app"]').count() === 1 && await ext.locator('[data-menu-secao="Comercial"] a[data-url="/prospeccao"]').count() === 0, 'App do externo dentro do Comercial (e sem a Prospecção, que é de outro setor)');
 
-  // ---------- 2. Abrir e fechar ----------
-  await ges.click('[data-menu-secao="setor:externo"] .menu-secao-botao');
-  ok(await ges.locator('[data-menu-secao="setor:externo"] .menu-secao-botao').getAttribute('aria-expanded') === 'true' && await ges.locator('[data-menu-secao="setor:externo"].aberta').count() === 1, 'clique abre o setor');
-  await ges.click('[data-menu-secao="setor:externo"] a[data-url="/carteira"]');
-  await ges.waitForLoadState();
-  ok(await ges.locator('[data-menu-secao="setor:externo"].aberta a.ativo[data-url="/carteira"]').count() === 1, 'a página atual deixa o setor aberto e a aba marcada');
+  // ---------- 2. Escolher o setor, abrir e fechar ----------
+  await ges.click('[data-menu-secao="Comercial"] .menu-secao-botao');
+  ok(await ges.locator('[data-menu-secao="Comercial"].aberta').count() === 1, 'clique abre o Comercial');
+  await Promise.all([ges.waitForNavigation(), ges.click('[data-setor-chip="externo"]')]);
+  ok(ges.url().includes('/carteira') && await ges.locator('[data-setor-chip="externo"].ativo').count() === 1, 'escolher o setor Externo abre a Carteira dele e marca o setor');
+  ok(await ges.locator('[data-menu-secao="Comercial"].aberta a.ativo[data-url="/carteira"]').count() === 1, 'a página atual deixa o Comercial aberto e a aba marcada');
   ok((await ges.locator('[data-selo-setor]').innerText()).includes('Externo'), 'selo do setor ao lado do título');
-  await ges.click('[data-menu-secao="setor:externo"] .menu-secao-botao');
-  ok(await ges.locator('[data-menu-secao="setor:externo"].aberta').count() === 0, 'clique de novo fecha');
+  ok(await ges.locator('[data-menu-secao="Comercial"] a[data-url="/app"]').count() === 1 && await ges.locator('[data-menu-secao="Comercial"] a[data-url="/prospeccao"]').count() === 0, 'com o Externo escolhido, aparecem as abas do Externo');
+  await ges.click('[data-menu-secao="Comercial"] .menu-secao-botao');
+  ok(await ges.locator('[data-menu-secao="Comercial"].aberta').count() === 0, 'clique de novo fecha');
 
   // ---------- 3. Cada setor, a sua carteira ----------
   for (const setor of ['televendas', 'externo']) {
@@ -91,8 +93,8 @@ const secoes = (p) => p.$$eval('[data-menu-secao]', (l) => l.map((s) => s.datase
   const cel = await nova(390);
   await entrar(cel, 'gestor@demo.local');
   await cel.click('.abrir-menu');
-  await cel.click('[data-menu-secao="setor:televendas"] .menu-secao-botao');
-  ok(await cel.locator('[data-menu-secao="setor:televendas"] a[data-url="/carteira"]').isVisible(), 'celular: o setor abre dentro da gaveta do menu');
+  await cel.click('[data-menu-secao="Comercial"] .menu-secao-botao');
+  ok(await cel.locator('[data-menu-secao="Comercial"] a[data-url="/carteira"]').isVisible() && await cel.locator('[data-setor-chip]').first().isVisible(), 'celular: o Comercial (com a escolha de setor) abre dentro da gaveta do menu');
   ok(await cel.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), 'celular: nada passa da largura');
 
   ok(erros.length === 0, 'nenhum erro de JavaScript' + (erros.length ? ': ' + erros.join(' / ') : ''));

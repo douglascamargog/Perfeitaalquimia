@@ -206,7 +206,7 @@ table.tabela { width: 100%; border-collapse: collapse; }
 .usuario-linha { display: flex; gap: 10px; align-items: center; } .usuario-linha > span { display: grid; }
 
 /* Avisos flutuando (depois de salvar, quando a página volta para onde a pessoa estava) */
-.avisos-flutuantes { position: fixed; top: max(16px, env(safe-area-inset-top, 0px)); right: 16px; z-index: 90; display: grid; gap: 8px; width: min(420px, calc(100vw - 32px)); }
+.avisos-flutuantes { position: fixed; top: max(84px, calc(env(safe-area-inset-top, 0px) + 84px)); right: 16px; z-index: 90; display: grid; gap: 8px; width: min(420px, calc(100vw - 32px)); }
 .aviso-flut { border-radius: var(--raio-pequeno); padding: 12px 40px 12px 16px; font-weight: 500; position: relative; box-shadow: 0 12px 30px rgba(0, 0, 0, .18); transition: opacity .4s, transform .4s; }
 .aviso-flut.sucesso { background: var(--sucesso-fundo); color: var(--sucesso); }
 .aviso-flut.erro { background: var(--perigo-fundo); color: var(--perigo); }

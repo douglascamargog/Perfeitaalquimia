@@ -29,7 +29,9 @@ async function sair(page) { await page.click('form[action$="/sair"] button'); }
   await entrar(page, 'admin@demo.local');
   ok(page.url() === BASE + '/', 'admin entra na tela inicial');
   ok(await page.locator('.faixa-demo').count() === 0, 'sem a faixa de demonstração no topo (pedido da empresa)');
-  ok(await page.locator('nav a', { hasText: 'Pessoas e acessos' }).count() === 1, 'admin vê Pessoas e acessos (Usuários) no menu');
+  ok(await page.locator('[data-engrenagem]').count() === 1, 'admin tem a engrenagem da Administração no topo');
+  await page.goto(BASE + '/administracao');
+  ok(await page.locator('.adm-cartao', { hasText: 'Pessoas e acessos' }).count() === 1, 'Administração: cartão Pessoas e acessos (Usuários)');
   await page.screenshot({ path: SHOTS + '/inicio-admin.png' });
 
   // Configuração → auditoria
@@ -73,7 +75,7 @@ async function sair(page) { await page.click('form[action$="/sair"] button'); }
 
   // Vendedor: menu restrito, 403 em área de admin
   await entrar(page, 'televendas1@demo.local');
-  ok(await page.locator('nav a:not([data-bloqueado])', { hasText: 'Pessoas e acessos' }).count() === 0 && await page.locator('nav a[data-bloqueado]', { hasText: 'Pessoas e acessos' }).count() === 1, 'vendedor: Pessoas e acessos aparece com cadeado');
+  ok(await page.locator('[data-engrenagem]').count() === 0 && (await page.request.get(BASE + '/administracao')).status() === 403, 'vendedor: sem engrenagem e sem acesso à Administração');
   ok(await page.locator('nav a', { hasText: /Carteira(?!s)/ }).count() === 1, 'vendedor vê Carteira');
   ok((await page.locator('.topo').innerText()).includes('Televendas'), 'topo mostra a função');
   const r = await page.goto(BASE + '/usuarios');
