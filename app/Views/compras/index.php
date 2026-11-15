@@ -12,7 +12,7 @@ if (!$pode && !\App\Core\Auth::pode('compras.ver')) {
 }
 ?>
 <div class="cabecalho-secao">
-  <div><div class="sobretitulo">COMPRAS · QUALIDADE</div><h1>Orçamentos e compras</h1>
+  <div><div class="sobretitulo">COMPRAS · QUALIDADE</div><h1>Pedidos de compra</h1>
     <p>Matéria-prima, rótulos, embalagens e itens avulsos: monte as cotações, escolha quem aprova e acompanhe até chegar.</p></div>
   <?php if ($pode): ?><div class="acoes"><a class="botao" href="<?= url('/compras/novo') ?>"><svg class="icone"><use href="<?= $icones ?>#mais"/></svg>Novo orçamento</a></div><?php endif; ?>
 </div>

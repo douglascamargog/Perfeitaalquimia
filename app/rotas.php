@@ -200,7 +200,7 @@ return [
     ['POST', '/desenvolvimento/{id}/{acao}',        'DesenvolvimentoController@acao',    'desenvolvimento.ver|desenvolvimento.gerenciar'],
 
     // ---------- Painel de vendas, metas e recompra ----------
-    ['GET',  '/resultados',             'PainelController@resultados', 'painel.ver|equipe.ver|acompanhamento.ver|setor.gestao|cobranca.gerenciar'],
+    ['GET',  '/resultados',             'PainelController@resultados', 'painel.ver|equipe.ver|acompanhamento.ver|setor.gestao|cobranca.gerenciar|metas.ver|metas.gerenciar'],
     ['GET',  '/painel',                 'PainelController@index',    'painel.ver'],
     ['GET',  '/painel/exportar.csv',    'PainelController@exportar', 'painel.ver'],
     ['GET',  '/metas',                  'MetasController@index',     'metas.ver|metas.gerenciar'],

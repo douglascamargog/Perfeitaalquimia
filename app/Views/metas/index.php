@@ -39,7 +39,7 @@ $grade = function (string $tipo, array $linhas, string $titulo) use ($historico,
 <?php };
 ?>
 <div class="cabecalho-secao">
-  <div><div class="sobretitulo">GESTÃO · METAS</div><h1>Metas de <?= e($nomeMes) ?></h1>
+  <div><div class="sobretitulo">GESTÃO · RESULTADOS · METAS</div><h1>Metas de <?= e($nomeMes) ?></h1>
     <p>Realizado = pedidos faturados no mês. Projeção pelo ritmo por dia de trabalho (mesma regra do Meu mês).</p></div>
   <div class="acoes">
     <a class="botao-icone" href="?mes=<?= $anterior ?>" aria-label="Mês anterior">‹</a>
@@ -47,6 +47,7 @@ $grade = function (string $tipo, array $linhas, string $titulo) use ($historico,
     <?php if ($podeEditar): ?><form method="post" action="<?= url('/metas/copiar') ?>"><?= csrf_campo() ?><input type="hidden" name="mes" value="<?= e($mes) ?>"><button class="botao contorno" type="submit">Copiar metas do mês anterior</button></form><?php endif; ?>
   </div>
 </div>
+<?= \App\Core\Visao::renderizar('layout/_abas_grupo', ['grupo' => 'resultados', 'atual' => '/metas']) ?>
 
 <section class="card pn-equipe">
   <div><strong>Meta da equipe:</strong>
