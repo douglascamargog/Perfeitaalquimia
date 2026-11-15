@@ -141,6 +141,14 @@ class EquipeService
         return trim((string) ($u['apelido'] ?? '')) ?: explode(' ', trim((string) ($u['nome'] ?? '')))[0];
     }
 
+    /** Foto de uma pessoa pelo nome (para mostrar "nome + foto" onde a consulta só trouxe o nome). Uma consulta por página. */
+    public static function fotoPorNome(string $nome): ?string
+    {
+        static $fotos = null;
+        $fotos ??= array_column(\App\Core\Banco::todos('SELECT nome, foto FROM usuarios WHERE foto IS NOT NULL AND foto <> \'\''), 'foto', 'nome');
+        return $fotos[$nome] ?? null;
+    }
+
     /** HTML do avatar (foto ou iniciais do nome). $tamanho em px */
     public static function avatar(array $u, int $tamanho = 36): string
     {

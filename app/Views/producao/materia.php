@@ -179,7 +179,7 @@ $formsEstoque = function () use ($pode, $m, $u, $num, $fornecedores, $id) {
           <td><span class="selo <?= $d['tipo'] === 'nf' ? 'cinza' : 'lima' ?>"><?= e(I::TIPOS_DOCUMENTO[$d['tipo']] ?? $d['tipo']) ?></span></td>
           <td class="pequeno"><?= e((string) $d['lote']) ?: '—' ?></td>
           <td><?= $d['validade'] ? data_br($d['validade']) : '—' ?><?= $sit === 'vencido' ? ' <span class="selo vermelho">vencido</span>' : ($sit === 'vencendo' ? ' <span class="selo laranja">vencendo</span>' : '') ?></td>
-          <td class="pequeno"><?= data_br($d['criado_em']) ?><?= $d['enviado_por_nome'] ? ' · ' . e($d['enviado_por_nome']) : '' ?></td>
+          <td class="pequeno"><?= data_br($d['criado_em']) ?><?= $d['enviado_por_nome'] ? ' · ' . pessoa($d['enviado_por_nome'] ?? null, null, false, 18, '—') : '' ?></td>
           <td><?php if ($podeCadastro): ?><form method="post" action="<?= $base ?>/documentos/<?= (int) $d['id'] ?>/arquivar" data-confirmar="Arquivar este documento?"><?= csrf_campo() ?><button class="botao contorno pequeno" type="submit">Arquivar</button></form><?php endif; ?></td>
         </tr>
       <?php endforeach; ?>
@@ -219,7 +219,7 @@ $formsEstoque = function () use ($pode, $m, $u, $num, $fornecedores, $id) {
             <td class="direita"><?= P::qtd((float) $mv['saldo'], $u) ?></td>
             <td class="pequeno"><?php if ($mv['ordem_id']): ?><a href="<?= url('/producao/ordens/' . (int) $mv['ordem_id']) ?>"><?= e($mv['referencia']) ?></a><?php else: ?><?= e($mv['referencia'] ?? '') ?><?php endif; ?>
               <?= $mv['custo_unitario'] ? ' · ' . dinheiro((float) $mv['custo_unitario']) . '/' . e($u) : '' ?><?= $mv['observacao'] ? '<br><span class="suave">' . e($mv['observacao']) . '</span>' : '' ?></td>
-            <td class="pequeno"><?= e($mv['usuario'] ?? '—') ?></td>
+            <td class="pequeno"><?= pessoa($mv['usuario'] ?? null, null, false, 18, '—') ?></td>
           </tr>
         <?php endforeach; ?>
         <?php if (!$movimentos): ?><tr><td colspan="6" class="vazio">Nenhum movimento ainda.</td></tr><?php endif; ?>

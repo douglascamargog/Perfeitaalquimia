@@ -32,7 +32,7 @@ $specs = array_filter([
   <label>Armazenamento<input type="text" name="armazenamento" maxlength="500" value="<?= $v('armazenamento') ?>"></label>
   <label>Observações técnicas<textarea name="observacoes" rows="3"><?= $v('observacoes') ?></textarea></label>
   <div class="acoes-form"><button class="botao" type="submit">Salvar especificações</button></div>
-  <?php if (!empty($t['atualizado_por_nome'])): ?><p class="ajuda suave">Última alteração: <?= e($t['atualizado_por_nome']) ?>, <?= data_br($t['atualizado_em'], true) ?>.</p><?php endif; ?>
+  <?php if (!empty($t['atualizado_por_nome'])): ?><p class="ajuda suave">Última alteração: <?= pessoa($t['atualizado_por_nome'] ?? null, null, false, 18, '—') ?>, <?= data_br($t['atualizado_em'], true) ?>.</p><?php endif; ?>
 </form>
 <?php else: ?>
 <section class="card">

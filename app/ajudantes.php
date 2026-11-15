@@ -112,21 +112,22 @@ function redirecionar(string $caminho): never
 }
 
 /**
- * Nome da pessoa com a fotinha dela (ou as iniciais), para "Responsável", "Vendedor"...
- * Ex.: <?= pessoa($c['responsavel'], $c['responsavel_foto']) ?>   ·   $curto = só o primeiro nome
+ * Nome da pessoa com a fotinha dela (ou as iniciais), para "Responsável", "Vendedor", "Criado por"...
+ * Ex.: <?= pessoa($c['responsavel'], $c['responsavel_foto']) ?>  ·  sem a foto na consulta, o One acha a foto pelo nome.
+ * $curto = só o primeiro nome; $vazio = o que aparece quando não tem pessoa (ex.: 'Sistema').
  */
-function pessoa(?string $nome, ?string $foto = null, bool $curto = false, int $tamanho = 22): string
+function pessoa(?string $nome, ?string $foto = null, bool $curto = false, int $tamanho = 22, string $vazio = '—'): string
 {
     $nome = trim((string) $nome);
     if ($nome === '') {
-        return '<span class="suave">—</span>';
+        return $vazio === '' ? '' : '<span class="suave">' . e($vazio) . '</span>';
     }
+    $foto ??= \App\Services\EquipeService::fotoPorNome($nome);
     $texto = $curto ? explode(' ', $nome)[0] : $nome;
-    // sem foto: as iniciais vão pelo CSS (data-ini), para o texto da célula continuar sendo só o nome
+    // sem foto: as iniciais vão pelo CSS (data-ini), para o texto continuar sendo só o nome
     $avatar = $foto ? \App\Services\EquipeService::avatar(['nome' => $nome, 'foto' => $foto], $tamanho)
         : '<span class="avatar avatar-iniciais" data-ini="' . e(\App\Services\EquipeService::iniciais($nome)) . '" style="width:' . $tamanho . 'px;height:' . $tamanho . 'px;font-size:' . round($tamanho * .38) . 'px" aria-hidden="true"></span>';
-    return '<span class="pessoa-chip" title="' . e($nome) . '">' . $avatar
-        . '<span class="pessoa-nome">' . e($texto) . '</span></span>';
+    return '<span class="pessoa-chip" title="' . e($nome) . '">' . $avatar . '<span class="pessoa-nome">' . e($texto) . '</span></span>';
 }
 
 /** Mês abreviado em português: mes_curto(9) → "set" */

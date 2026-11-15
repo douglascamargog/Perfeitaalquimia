@@ -6,7 +6,7 @@ $selecionado = fn(string $campo, $valor) => (string) \App\Core\Sessao::antigo($c
 ?>
 <div class="cabecalho-secao">
   <div><div class="sobretitulo">CARTEIRA</div><h1><?= $novo ? 'Novo estabelecimento' : e($c['nome_fantasia'] ?: $c['razao_social']) ?></h1>
-    <p><?= $novo ? 'O responsável é definido pela regra de funções.' : 'Responsável: ' . e($c['responsavel']) ?></p></div>
+    <p><?= $novo ? 'O responsável é definido pela regra de funções.' : 'Responsável: ' . pessoa($c['responsavel'] ?? null, null, false, 18, '—') ?></p></div>
 </div>
 
 <form method="post" action="<?= url($novo ? '/carteira/clientes' : '/carteira/clientes/' . (int) $c['id']) ?>" class="card form-cliente">

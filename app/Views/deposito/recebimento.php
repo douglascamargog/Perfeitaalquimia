@@ -17,7 +17,7 @@ use App\Services\ProducaoService as P;
       <?php foreach ($itens as $c): $atrasada = $c['previsto_em'] && $c['previsto_em'] < date('Y-m-d'); ?>
         <tr data-compra="<?= (int) $c['id'] ?>">
           <td><a href="<?= url('/compras/' . (int) $c['id']) ?>"><strong><?= e($c['titulo']) ?></strong></a>
-            <small class="suave"><?= e(C::TIPOS[$c['tipo']] ?? $c['tipo']) ?><?= $c['materia_prima_id'] ? ' · entra no estoque' : '' ?> · pediu <?= e((string) $c['solicitante']) ?></small></td>
+            <small class="suave"><?= e(C::TIPOS[$c['tipo']] ?? $c['tipo']) ?><?= $c['materia_prima_id'] ? ' · entra no estoque' : '' ?> · pediu <?= pessoa($c['solicitante'] ?? null, null, false, 18, '—') ?></small></td>
           <td><?= e((string) $c['fornecedor']) ?></td>
           <td class="direita"><?= e(P::qtd((float) $c['quantidade'], (string) $c['unidade'])) ?></td>
           <td class="<?= $atrasada ? 'pn-vermelho' : '' ?>"><?= $c['previsto_em'] ? data_br($c['previsto_em']) . ($atrasada ? ' · atrasada' : '') : '—' ?></td>
@@ -39,7 +39,7 @@ use App\Services\ProducaoService as P;
 <section class="card">
   <h2>Últimos recebimentos</h2>
   <ul class="ac-lista"><?php foreach ($recebidos as $r): ?>
-    <li><time><?= data_br($r['recebido_em'], true) ?></time> <strong><?= e($r['titulo']) ?></strong> · <?= e(P::qtd((float) $r['recebido_qtd'], (string) $r['unidade'])) ?> · <?= e((string) $r['recebedor']) ?></li>
+    <li><time><?= data_br($r['recebido_em'], true) ?></time> <strong><?= e($r['titulo']) ?></strong> · <?= e(P::qtd((float) $r['recebido_qtd'], (string) $r['unidade'])) ?> · <?= pessoa($r['recebedor'] ?? null, null, false, 18, '—') ?></li>
   <?php endforeach; ?></ul>
 </section>
 <?php endif; ?>

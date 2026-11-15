@@ -12,7 +12,7 @@ $icones = asset('img/icones.svg');
     <?php if (!empty($o['cliente_nome'])): ?><p><span class="selo verde">Terceirização</span> para <strong><?= e($o['cliente_nome']) ?></strong> · rótulo "<?= e($o['nome_rotulo']) ?>"
       <?php if ($o['situacao'] === 'planejada'): ?>· <span class="<?= (int) $o['rotulos_estoque'] < (int) $o['quantidade'] ? 'pn-vermelho' : '' ?>"><?= (int) $o['rotulos_estoque'] ?> rótulos em estoque</span><?php endif; ?></p><?php endif; ?>
     <p><?= number_format((int) $o['quantidade'], 0, ',', '.') ?> unidade(s)<?= $o['lote'] ? ' · lote ' . e($o['lote']) : '' ?><?= $o['validade'] ? ' · validade ' . data_br($o['validade']) : '' ?>
-      · criada por <?= e($o['criador'] ?? '—') ?> em <?= data_br($o['criado_em'], true) ?></p></div>
+      · criada por <?= pessoa($o['criador'] ?? null, null, false, 18, '—') ?> em <?= data_br($o['criado_em'], true) ?></p></div>
   <div class="acoes"><a class="botao contorno" href="<?= url('/producao/ordens/' . (int) $o['id'] . '/imprimir') ?>" target="_blank" rel="noopener"><svg class="icone"><use href="<?= $icones ?>#imprimir"/></svg>Imprimir ordem</a></div>
 </div>
 <?= Visao::renderizar('producao/_abas', ['atual' => '/producao/ordens']) ?>
@@ -59,7 +59,7 @@ $icones = asset('img/icones.svg');
   </section>
 <?php elseif ($o['situacao'] === 'concluida'): ?>
   <section class="card">
-    <h2>Concluída em <?= data_br($o['concluida_em'], true) ?> por <?= e($o['concluidor'] ?? '—') ?></h2>
+    <h2>Concluída em <?= data_br($o['concluida_em'], true) ?> por <?= pessoa($o['concluidor'] ?? null, null, false, 18, '—') ?></h2>
     <table class="tabela pr-tabela" data-consumo>
       <thead><tr><th>Matéria-prima baixada</th><th class="direita">Quantidade</th></tr></thead>
       <tbody><?php foreach ($consumo as $c): ?><tr><td><?= e($c['nome']) ?></td><td class="direita"><?= P::qtd((float) $c['quantidade'], $c['unidade']) ?></td></tr><?php endforeach; ?></tbody>

@@ -23,7 +23,7 @@ $detalhe = function (array $h) use ($campos): string {
   <ol class="pd-historico">
     <?php foreach ($historico as $h): ?>
       <li><time><?= data_br($h['criado_em'], true) ?></time>
-        <div><strong><?= e(PS::descreverMudanca($h)) ?></strong> <span class="suave">· <?= e($h['usuario'] ?? 'Sistema') ?></span>
+        <div><strong><?= e(PS::descreverMudanca($h)) ?></strong> <span class="suave">· <?= pessoa($h['usuario'] ?? null, null, false, 18, 'Sistema') ?></span>
           <?php if ($txt = $detalhe($h)): ?><p class="pequeno"><?= e($txt) ?></p><?php endif; ?></div></li>
     <?php endforeach; ?>
   </ol>

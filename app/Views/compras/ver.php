@@ -19,20 +19,20 @@ $escolhida = $c['cotacao_id'] ? current(array_filter($cotacoes, fn($x) => (int) 
     <p><span class="selo <?= $sc ?>" data-situacao="<?= e($c['situacao']) ?>"><?= e($sn) ?></span>
       <?= e(P::qtd((float) $c['quantidade'], (string) $c['unidade'])) ?>
       <?= $c['necessario_ate'] ? ' · precisa até <strong>' . data_br($c['necessario_ate']) . '</strong>' : '' ?>
-      <?= $c['projeto'] ? ' · projeto ' . e($c['projeto']) : '' ?> · pediu <?= e((string) $c['solicitante']) ?></p></div>
+      <?= $c['projeto'] ? ' · projeto ' . e($c['projeto']) : '' ?> · pediu <?= pessoa($c['solicitante'] ?? null, null, false, 18, '—') ?></p></div>
   <?php if ($pode && in_array($c['situacao'], ['rascunho', 'refazer', 'aprovacao', 'aprovado'], true)): ?>
     <div class="acoes"><form method="post" action="<?= $acao('cancelar') ?>" data-confirmar="Cancelar este orçamento?"><?= csrf_campo() ?><input type="hidden" name="motivo" value=""><button class="botao contorno pequeno" type="submit">Cancelar orçamento</button></form></div>
   <?php endif; ?>
 </div>
 
 <?php if ($c['motivo']): ?><p class="aviso">Para quê: <?= nl2br(e($c['motivo'])) ?></p><?php endif; ?>
-<?php if ($c['situacao'] === 'refazer' && $c['decisao_comentario']): ?><p class="aviso alerta"><strong><?= e((string) $c['aprovador']) ?> pediu outra cotação:</strong> <?= e($c['decisao_comentario']) ?></p><?php endif; ?>
-<?php if ($c['situacao'] === 'recusado'): ?><p class="aviso erro">Recusado por <?= e((string) $c['aprovador']) ?>: <?= e((string) $c['decisao_comentario']) ?></p><?php endif; ?>
+<?php if ($c['situacao'] === 'refazer' && $c['decisao_comentario']): ?><p class="aviso alerta"><strong><?= pessoa($c['aprovador'] ?? null, null, false, 18, '—') ?> pediu outra cotação:</strong> <?= e($c['decisao_comentario']) ?></p><?php endif; ?>
+<?php if ($c['situacao'] === 'recusado'): ?><p class="aviso erro">Recusado por <?= pessoa($c['aprovador'] ?? null, null, false, 18, '—') ?>: <?= e((string) $c['decisao_comentario']) ?></p><?php endif; ?>
 
 <?php if ($podeDecidir): ?>
 <section class="card cp-decidir" data-decidir>
   <h2>Sua aprovação</h2>
-  <p><?= e((string) $c['solicitante']) ?> escolheu <strong><?= e($escolhida['fornecedor'] ?? '—') ?></strong> por <strong><?= $escolhida ? dinheiro((float) $escolhida['valor_total']) : '—' ?></strong>
+  <p><?= pessoa($c['solicitante'] ?? null, null, false, 18, '—') ?> escolheu <strong><?= e($escolhida['fornecedor'] ?? '—') ?></strong> por <strong><?= $escolhida ? dinheiro((float) $escolhida['valor_total']) : '—' ?></strong>
     <?= $c['escolha_motivo'] ? '· motivo: ' . e($c['escolha_motivo']) : '' ?>. Compare as cotações abaixo.</p>
   <form method="post" action="<?= $acao('decidir') ?>" class="pd-form"><?= csrf_campo() ?>
     <label>Comentário <small>obrigatório para pedir outra cotação ou recusar</small><textarea name="comentario" rows="2"></textarea></label>
@@ -44,7 +44,7 @@ $escolhida = $c['cotacao_id'] ? current(array_filter($cotacoes, fn($x) => (int) 
   </form>
 </section>
 <?php elseif ($c['situacao'] === 'aprovacao'): ?>
-<p class="aviso">Esperando a aprovação de <strong><?= e((string) $c['aprovador']) ?></strong> (enviado em <?= data_br($c['enviado_em'], true) ?>).</p>
+<p class="aviso">Esperando a aprovação de <strong><?= pessoa($c['aprovador'] ?? null, null, false, 18, '—') ?></strong> (enviado em <?= data_br($c['enviado_em'], true) ?>).</p>
 <?php endif; ?>
 
 <section class="card sem-espaco">
@@ -111,7 +111,7 @@ $escolhida = $c['cotacao_id'] ? current(array_filter($cotacoes, fn($x) => (int) 
 <?php if ($pode && $c['situacao'] === 'aprovado'): ?>
 <section class="card">
   <h2>Comprar</h2>
-  <p>Aprovado por <?= e((string) $c['aprovador']) ?>. Faça a compra com <strong><?= e($escolhida['fornecedor'] ?? '') ?></strong> e registre aqui: o Depósito vai receber.</p>
+  <p>Aprovado por <?= pessoa($c['aprovador'] ?? null, null, false, 18, '—') ?>. Faça a compra com <strong><?= e($escolhida['fornecedor'] ?? '') ?></strong> e registre aqui: o Depósito vai receber.</p>
   <form method="post" action="<?= $acao('comprar') ?>" class="pd-form dp-inline"><?= csrf_campo() ?>
     <label>Chega até<input type="date" name="previsto" value="<?= e(date('Y-m-d', strtotime('+' . (int) ($escolhida['prazo_dias'] ?? 7) . ' days'))) ?>"></label>
     <button class="botao lima" type="submit">Comprei</button></form>
@@ -119,10 +119,10 @@ $escolhida = $c['cotacao_id'] ? current(array_filter($cotacoes, fn($x) => (int) 
 <?php elseif ($c['situacao'] === 'comprado'): ?>
 <p class="aviso">Comprado em <?= data_br($c['comprado_em']) ?><?= $c['previsto_em'] ? ' · chega até ' . data_br($c['previsto_em']) : '' ?>. O recebimento é registrado no <a href="<?= url('/deposito/recebimento') ?>">Depósito › Recebimento</a>.</p>
 <?php elseif ($c['situacao'] === 'recebido'): ?>
-<p class="aviso sucesso">Chegou em <?= data_br($c['recebido_em'], true) ?>: <?= e(P::qtd((float) $c['recebido_qtd'], (string) $c['unidade'])) ?> · recebido por <?= e((string) $c['recebedor']) ?><?= $c['materia_prima_id'] ? ' (entrou no estoque)' : '' ?>.</p>
+<p class="aviso sucesso">Chegou em <?= data_br($c['recebido_em'], true) ?>: <?= e(P::qtd((float) $c['recebido_qtd'], (string) $c['unidade'])) ?> · recebido por <?= pessoa($c['recebedor'] ?? null, null, false, 18, '—') ?><?= $c['materia_prima_id'] ? ' (entrou no estoque)' : '' ?>.</p>
 <?php endif; ?>
 
 <section class="card">
   <h2>Histórico</h2>
-  <ul class="ac-lista"><?php foreach ($historico as $h): ?><li><time><?= data_br($h['criado_em'], true) ?></time> <strong><?= e($h['usuario'] ?? 'Sistema') ?>:</strong> <?= e($h['texto']) ?></li><?php endforeach; ?></ul>
+  <ul class="ac-lista"><?php foreach ($historico as $h): ?><li><time><?= data_br($h['criado_em'], true) ?></time> <strong><?= pessoa($h['usuario'] ?? null, null, false, 18, 'Sistema') ?>:</strong> <?= e($h['texto']) ?></li><?php endforeach; ?></ul>
 </section>

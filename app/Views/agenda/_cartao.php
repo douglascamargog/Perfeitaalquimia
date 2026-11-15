@@ -20,7 +20,7 @@ $hoje = date('Y-m-d');
     <button type="button" class="ag-cliente" data-abrir-cliente="<?= (int) $t['cliente_id'] ?>"><?= e($t['razao_social']) ?></button>
     <small class="suave"><?= e($t['cidade']) ?>/<?= e($t['uf']) ?><?= $wa ? ' · ' . e(Normalizar::telefoneFormatado($wa)) : '' ?></small>
   <?php endif; ?>
-  <?php if ($verTodas): ?><small class="ag-quem">👤 <?= e($t['usuario_nome']) ?></small><?php endif; ?>
+  <?php if ($verTodas): ?><small class="ag-quem"><?= pessoa($t['usuario_nome'] ?? null, null, false, 18, '—') ?></small><?php endif; ?>
   <footer class="ag-acoes">
     <?php if ($wa): ?><a class="ag-botao" href="https://wa.me/55<?= e($wa) ?>" target="_blank" rel="noopener noreferrer" title="WhatsApp">💬</a><?php endif; ?>
     <details class="ag-reagendar"><summary class="ag-botao" title="Reagendar">📅</summary>

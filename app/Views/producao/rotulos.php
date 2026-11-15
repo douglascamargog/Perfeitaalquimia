@@ -82,7 +82,7 @@ $form = fn(string $acao, string $nome) => '<form method="post" action="' . url($
         <tr><td class="pequeno"><?= data_br($m['criado_em'], true) ?></td><td><?= e($m['nome']) ?></td><td class="pequeno"><?= $m['cliente'] ? e($m['cliente']) : '<span class="suave">nosso</span>' ?></td>
           <td><span class="selo <?= $tc ?>"><?= $tn ?></span><?= $m['ordem_id'] ? ' <a href="' . url('/producao/ordens/' . (int) $m['ordem_id']) . '">OP ' . (int) $m['ordem_id'] . '</a>' : '' ?></td>
           <td class="direita"><?= ($m['quantidade'] > 0 ? '+' : '') . $n($m['quantidade']) ?></td><td class="direita"><?= $n($m['saldo']) ?></td>
-          <td class="pequeno"><?= e($m['observacao'] ?? '') ?><?= $m['usuario'] ? ' · ' . e($m['usuario']) : '' ?></td></tr>
+          <td class="pequeno"><?= e($m['observacao'] ?? '') ?><?= $m['usuario'] ? ' · ' . pessoa($m['usuario'] ?? null, null, false, 18, '—') : '' ?></td></tr>
       <?php endforeach; ?>
       <?php if (!$movimentos): ?><tr><td colspan="7" class="suave">Nenhum movimento ainda.</td></tr><?php endif; ?>
       </tbody>

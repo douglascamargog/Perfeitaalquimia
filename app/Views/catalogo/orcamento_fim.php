@@ -19,7 +19,7 @@ $textos = [
   <?php if ($o): ?><span class="orc-selo">ORÇAMENTO #<?= (int) $o['id'] ?></span><?php endif; ?>
   <h1><?= e($t) ?></h1>
   <p><?= $texto /* textos fixos acima, sem dado digitado */ ?></p>
-  <?php if ($o && $o['vendedor']): ?><p class="suave">Atendimento: <?= e($o['vendedor']) ?></p><?php endif; ?>
+  <?php if ($o && $o['vendedor']): ?><p class="suave">Atendimento: <?= pessoa($o['vendedor'] ?? null, null, false, 18, '—') ?></p><?php endif; ?>
   <p class="orc-fim-acoes">
     <a class="botao contorno" href="<?= url('/catalogo') ?>">Ver o catálogo</a>
     <?php if ($whats): ?><a class="botao" href="https://wa.me/55<?= e($whats) ?>" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a><?php endif; ?>

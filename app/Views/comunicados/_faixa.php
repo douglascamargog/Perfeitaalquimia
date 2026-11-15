@@ -21,7 +21,7 @@ $icones = asset('img/icones.svg');
     <article class="com-janela-conteudo <?= $c['prioridade'] === 'importante' ? 'importante' : '' ?>">
       <span class="sobretitulo"><?= $c['prioridade'] === 'importante' ? 'COMUNICADO IMPORTANTE' : 'COMUNICADO' ?></span>
       <h2><?= e($c['titulo']) ?></h2>
-      <p class="com-quem"><?= e($c['autor'] ?? 'Administração') ?> · <?= data_br($c['inicio'], true) ?></p>
+      <p class="com-quem"><?= pessoa($c['autor'] ?? null, null, false, 18, 'Administração') ?> · <?= data_br($c['inicio'], true) ?></p>
       <div class="com-texto"><?= nl2br(e($c['texto'])) ?></div>
     </article>
   </template>

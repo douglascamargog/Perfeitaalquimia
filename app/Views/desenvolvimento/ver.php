@@ -29,7 +29,7 @@ $situacoes = ['andamento' => ['Em andamento', 'lima'], 'pausado' => ['Pausado', 
   <?php foreach ($linha as $e): ?>
     <li class="<?= e($e['situacao'] ?? 'pendente') ?>" title="<?= e($e['funcao'] ?: 'gestão') ?>">
       <b><?= (int) $e['ordem'] ?></b><span><?= e($e['nome']) ?></span>
-      <small><?= $e['situacao'] === 'concluida' ? '✓ ' . e($e['concluida_por'] ?? '') . ' · ' . data_br($e['concluida_em']) : e($e['funcao'] ?: 'gestão') ?></small>
+      <small><?= $e['situacao'] === 'concluida' ? '✓ ' . pessoa($e['concluida_por'] ?? null, null, false, 18, '') . ' · ' . data_br($e['concluida_em']) : e($e['funcao'] ?: 'gestão') ?></small>
     </li>
   <?php endforeach; ?>
 </ol>
@@ -106,7 +106,7 @@ $compacto = count(array_filter($gavetas, fn($g) => $g['aberta'])) > 2;
     <form method="post" action="<?= $acao('comentar') ?>" class="pd-form dp-inline"><?= csrf_campo() ?>
       <input type="text" name="texto" maxlength="1000" placeholder="Escreva um comentário para a equipe…" aria-label="Comentário" required><button class="botao contorno pequeno" type="submit">Comentar</button></form>
     <ul class="ac-lista dp-historico"><?php foreach ($historico as $h): ?>
-      <li class="<?= e($h['tipo']) ?>"><time><?= data_br($h['criado_em'], true) ?></time> <strong><?= e($h['usuario'] ?? 'Sistema') ?>:</strong> <?= e($h['texto']) ?></li>
+      <li class="<?= e($h['tipo']) ?>"><time><?= data_br($h['criado_em'], true) ?></time> <strong><?= pessoa($h['usuario'] ?? null, null, false, 18, 'Sistema') ?>:</strong> <?= e($h['texto']) ?></li>
     <?php endforeach; ?></ul>
   </section>
 </div>

@@ -74,7 +74,7 @@ $origens = ['catalogo' => 'Catálogo (cliente)', 'sistema' => 'Sistema (equipe)'
     <section class="card">
       <h2>Histórico</h2>
       <ol class="linha-tempo">
-        <?php foreach ($historico as $h): ?><li><strong><?= e(PedidoService::SITUACOES[$h['situacao']][0] ?? ($h['situacao'] === 'deposito' ? 'Depósito' : $h['situacao'])) ?></strong><span><?= e($h['texto']) ?></span><small><?= data_br($h['criado_em'], true) ?> · <?= e($h['usuario_nome'] ?? 'Sistema') ?></small></li><?php endforeach; ?>
+        <?php foreach ($historico as $h): ?><li><strong><?= e(PedidoService::SITUACOES[$h['situacao']][0] ?? ($h['situacao'] === 'deposito' ? 'Depósito' : $h['situacao'])) ?></strong><span><?= e($h['texto']) ?></span><small><?= data_br($h['criado_em'], true) ?> · <?= pessoa($h['usuario_nome'] ?? null, null, false, 18, 'Sistema') ?></small></li><?php endforeach; ?>
       </ol>
     </section>
   </aside>

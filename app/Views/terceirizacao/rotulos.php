@@ -51,7 +51,7 @@ $tipos = ['entrada' => ['Chegada', 'verde'], 'consumo' => ['Produção', 'cinza'
         <tr><td class="pequeno"><?= data_br($m['criado_em'], true) ?></td><td><?= e($m['nome_rotulo']) ?></td><td class="pequeno"><?= e($m['cliente_nome']) ?></td>
           <td><span class="selo <?= $tc ?>"><?= $tn ?></span><?= $m['ordem_producao_id'] ? ' <a href="' . url('/producao/ordens/' . (int) $m['ordem_producao_id']) . '">OP ' . (int) $m['ordem_producao_id'] . '</a>' : '' ?></td>
           <td class="direita"><?= ($m['quantidade'] > 0 ? '+' : '') . $n($m['quantidade']) ?></td><td class="direita"><?= $n($m['saldo_apos']) ?></td>
-          <td class="pequeno"><?= e($m['observacao'] ?? '') ?><?= $m['usuario'] ? ' · ' . e($m['usuario']) : '' ?></td></tr>
+          <td class="pequeno"><?= e($m['observacao'] ?? '') ?><?= $m['usuario'] ? ' · ' . pessoa($m['usuario'] ?? null, null, false, 18, '—') : '' ?></td></tr>
       <?php endforeach; ?>
       </tbody>
     </table>

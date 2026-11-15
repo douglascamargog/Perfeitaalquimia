@@ -7,7 +7,7 @@ use App\Services\CompraLancamentoService as L;
   <div><div class="sobretitulo">COMPRA · <?= e(mb_strtoupper(L::ORIGENS[$c['origem']] ?? $c['origem'])) ?></div>
     <h1><?= e($c['fornecedor']) ?> <a class="botao contorno pequeno" href="<?= url('/financeiro/fornecedores/ver') ?>?nome=<?= e(rawurlencode($c['fornecedor'])) ?>">Ver fornecedor</a></h1>
     <p>NF <strong><?= e($c['numero_nf'] ?: '—') ?></strong> · <?= data_br($c['emissao']) ?><?= $c['cnpj'] ? ' · CNPJ ' . e($c['cnpj']) : '' ?> · <?= dinheiro((float) $c['valor_total']) ?>
-      <?= $c['lancado_por_nome'] ? ' · lançada por ' . e($c['lancado_por_nome']) : '' ?></p></div>
+      <?= $c['lancado_por_nome'] ? ' · lançada por ' . pessoa($c['lancado_por_nome'] ?? null, null, false, 18, '—') : '' ?></p></div>
   <div class="acoes"><?php if ($c['arquivo']): ?><a class="botao contorno" href="<?= url('/financeiro/compras/' . (int) $c['id'] . '/nf') ?>" target="_blank" rel="noopener" data-nf>📎 Ver a NF</a><?php endif; ?>
     <?php if ($c['compra_id']): ?><a class="botao contorno" href="<?= url('/compras/' . (int) $c['compra_id']) ?>">Orçamento #<?= (int) $c['compra_id'] ?></a><?php endif; ?></div>
 </div>

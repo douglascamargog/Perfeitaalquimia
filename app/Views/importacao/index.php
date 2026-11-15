@@ -44,7 +44,7 @@ $status = ['previa' => ['Aguardando confirmação', 'lima'], 'concluida' => ['Co
         <tr>
           <td><?= data_br($i['criado_em'], true) ?></td>
           <td><a href="<?= url('/carteira/importar/' . (int) $i['id']) ?>"><?= e($i['arquivo']) ?></a></td>
-          <td class="pequeno"><?= e($i['usuario_nome']) ?></td>
+          <td class="pequeno"><?= pessoa($i['usuario_nome'] ?? null, null, false, 18, '—') ?></td>
           <td><?= (int) $i['total'] ?></td><td><?= (int) $i['novos'] ?></td><td><?= (int) $i['atualizados'] ?></td>
           <td><?= (int) $i['duplicados'] ?></td><td><?= (int) $i['erros'] ?></td>
           <td><span class="selo <?= $cor ?>"><?= $rotulo ?></span></td>

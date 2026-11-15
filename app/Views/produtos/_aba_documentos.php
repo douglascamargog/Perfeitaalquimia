@@ -15,7 +15,7 @@ $rotulo = ['vencido' => 'Vencido', 'vencendo' => 'Vence em breve'];
       <div>
         <small><?= e(PS::TIPOS_DOCUMENTO[$d['tipo']] ?? 'Documento') ?><?= $d['interno'] ? ' · <b class="pd-interno">interno</b>' : '' ?></small>
         <strong><?= e($d['titulo']) ?></strong>
-        <p class="pequeno suave"><?= $tamanho((int) $d['tamanho']) ?> · enviado por <?= e($d['enviado_por_nome'] ?? '—') ?> em <?= data_br($d['criado_em']) ?>
+        <p class="pequeno suave"><?= $tamanho((int) $d['tamanho']) ?> · enviado por <?= pessoa($d['enviado_por_nome'] ?? null, null, false, 18, '—') ?> em <?= data_br($d['criado_em']) ?>
           <?php if ($d['validade']): ?> · validade <strong class="<?= $d['situacao'] !== 'ok' ? 'pd-vence' : '' ?>"><?= data_br($d['validade']) ?></strong><?= isset($rotulo[$d['situacao']]) ? ' (' . $rotulo[$d['situacao']] . ')' : '' ?><?php endif; ?></p>
       </div>
       <div class="pd-doc-acoes">

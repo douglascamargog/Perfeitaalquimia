@@ -84,7 +84,7 @@ $linkCarteira = fn(int $dias) => url('/carteira/lista') . '?' . http_build_query
         <thead><tr><th>Vendedor</th><th class="direita">Faturado</th><?php if ($metas): ?><th>Meta</th><?php endif; ?><th class="direita">Pedidos</th><th class="direita">Ticket</th><th class="direita">Clientes</th></tr></thead>
         <tbody>
         <?php foreach ($vendedores as $v): $meta = $metas ? (float) ($metas['vendedor'][$v['id']] ?? 0) : 0; ?>
-          <tr><td><?= e($v['nome']) ?></td><td class="direita"><strong><?= dinheiro($v['valor']) ?></strong></td>
+          <tr><td><?= pessoa($v['nome']) ?></td><td class="direita"><strong><?= dinheiro($v['valor']) ?></strong></td>
             <?php if ($metas): ?><td><?php if ($meta > 0): $pct = $v['valor'] / $meta * 100; ?><div class="pn-meta"><div class="b-barra"><i style="width: <?= min(100, round($pct)) ?>%"></i></div><small class="<?= $pct >= 100 ? 'ok' : '' ?>"><?= number_format($pct, 0, ',', '.') ?>% de <?= $curto($meta) ?></small></div><?php else: ?><span class="suave pequeno">sem meta</span><?php endif; ?></td><?php endif; ?>
             <td class="direita"><?= $n($v['pedidos']) ?></td><td class="direita"><?= dinheiro($v['ticket']) ?></td><td class="direita"><?= $n($v['clientes']) ?></td></tr>
         <?php endforeach; ?>
@@ -100,7 +100,7 @@ $linkCarteira = fn(int $dias) => url('/carteira/lista') . '?' . http_build_query
         <thead><tr><th>Função</th><th class="direita">Faturado</th><?php if ($metas): ?><th>Meta</th><?php endif; ?><th class="direita">Pedidos</th><th class="direita">Ticket</th><th class="direita">Clientes</th></tr></thead>
         <tbody>
         <?php foreach ($funcoes as $v): $meta = $metas ? (float) ($metas['funcao'][$v['id']] ?? 0) : 0; ?>
-          <tr><td><?= e($v['nome']) ?></td><td class="direita"><strong><?= dinheiro($v['valor']) ?></strong></td>
+          <tr><td><?= pessoa($v['nome']) ?></td><td class="direita"><strong><?= dinheiro($v['valor']) ?></strong></td>
             <?php if ($metas): ?><td><?php if ($meta > 0): $pct = $v['valor'] / $meta * 100; ?><div class="pn-meta"><div class="b-barra"><i style="width: <?= min(100, round($pct)) ?>%"></i></div><small class="<?= $pct >= 100 ? 'ok' : '' ?>"><?= number_format($pct, 0, ',', '.') ?>% de <?= $curto($meta) ?></small></div><?php else: ?><span class="suave pequeno">sem meta</span><?php endif; ?></td><?php endif; ?>
             <td class="direita"><?= $n($v['pedidos']) ?></td><td class="direita"><?= dinheiro($v['ticket']) ?></td><td class="direita"><?= $n($v['clientes']) ?></td></tr>
         <?php endforeach; ?>

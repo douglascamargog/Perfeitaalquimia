@@ -20,7 +20,7 @@ $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceiriza
     <p><span class="selo <?= $ec ?>" data-etapa><?= e($er) ?></span>
       <?= $p['expedicao_prioridade'] ? '<span class="selo vermelho">urgente</span>' : '' ?>
       <?= $p['expedicao_aguarda_produto'] ? '<span class="selo laranja">aguardando produto</span>' : '' ?>
-      <?= e($p['cidade']) ?>/<?= e($p['uf']) ?> · vendedor <?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null, false, 18) ?><?= $p['separador'] ? ' · separando: ' . e($p['separador']) : '' ?></p></div>
+      <?= e($p['cidade']) ?>/<?= e($p['uf']) ?> · vendedor <?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null, false, 18) ?><?= $p['separador'] ? ' · separando: ' . pessoa($p['separador'] ?? null, null, false, 18, '—') : '' ?></p></div>
   <div class="acoes">
     <a class="botao contorno pequeno" href="<?= url('/pedidos/' . (int) $p['id']) ?>">Ver o pedido</a>
     <?php if ($pode && $p['expedicao'] !== 'despachado'): ?>
@@ -119,7 +119,7 @@ $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceiriza
 <?php elseif ($p['expedicao'] === 'despachado'): ?>
 <section class="card"><h2>Despachado</h2>
   <dl class="pd-dados">
-    <div><dt>Quando</dt><dd><?= data_br($p['despachado_em'], true) ?> · <?= e($p['despachante'] ?? '') ?></dd></div>
+    <div><dt>Quando</dt><dd><?= data_br($p['despachado_em'], true) ?> · <?= pessoa($p['despachante'] ?? null, null, false, 18, '') ?></dd></div>
     <div><dt>Transportadora</dt><dd><?= e($p['transportadora']) ?> · <?= (int) $p['volumes'] ?> volume(s)<?= $p['peso_kg'] ? ' · ' . rtrim(rtrim(number_format((float) $p['peso_kg'], 3, ',', '.'), '0'), ',') . ' kg' : '' ?></dd></div>
     <div><dt>Rastreio</dt><dd><?= e($p['rastreio'] ?: '—') ?></dd></div>
     <?php if ($p['expedicao_obs']): ?><div><dt>Observação</dt><dd><?= e($p['expedicao_obs']) ?></dd></div><?php endif; ?>

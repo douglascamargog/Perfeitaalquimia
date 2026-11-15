@@ -62,7 +62,7 @@ $rotulos = ['criado' => ['Novo lead', 'verde'], 'existente' => ['Já existia', '
             <td class="pequeno"><?= e(trim(($l['cidade'] ?? '') . ($l['uf'] ? '/' . $l['uf'] : ''), '/')) ?: '—' ?></td>
             <td class="pequeno"><?= e($l['utm_source'] ?? 'direto') ?><small class="suave"><?= e($l['utm_campaign'] ?? '') ?></small></td>
             <td><span class="selo <?= $cor ?>"><?= $rot ?></span><?= $l['motivo'] ? '<small class="suave">' . e($l['motivo']) . '</small>' : '' ?></td>
-            <td class="pequeno"><?php if ($l['cliente_id']): ?><?= $l['cliente_tipo'] === 'cliente' ? '<span class="selo lima">cliente</span>' : e($l['etapa'] ?? '') ?><small class="suave"><?= e($l['responsavel'] ?? '') ?></small><?php else: ?>—<?php endif; ?></td>
+            <td class="pequeno"><?php if ($l['cliente_id']): ?><?= $l['cliente_tipo'] === 'cliente' ? '<span class="selo lima">cliente</span>' : e($l['etapa'] ?? '') ?><small class="suave"><?= pessoa($l['responsavel'] ?? null, null, false, 18, '') ?></small><?php else: ?>—<?php endif; ?></td>
           </tr>
         <?php endforeach; ?>
         <?php if (!$leads): ?><tr><td colspan="6" class="vazio">Nenhum lead no período.</td></tr><?php endif; ?>

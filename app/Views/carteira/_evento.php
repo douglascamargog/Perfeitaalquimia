@@ -23,5 +23,5 @@ $grupo = ['contato' => 'contato', 'ligacao' => 'contato', 'whatsapp' => 'contato
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
-  <small><?= data_br($ev['ocorrido_em'], true) ?> · <?= e($ev['usuario_nome'] ?? 'Sistema') ?></small>
+  <small><?= data_br($ev['ocorrido_em'], true) ?> · <?= pessoa($ev['usuario_nome'] ?? null, null, false, 18, 'Sistema') ?></small>
 </li>

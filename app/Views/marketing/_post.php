@@ -130,7 +130,7 @@ $acao = $id ? url("/marketing/posts/$id") : url('/marketing/posts');
           <li class="tipo-<?= $c['tipo'] === 'ajuste' ? 'cobranca' : ($c['tipo'] === 'aprovacao' ? 'pedido' : 'nota') ?>">
             <strong><?= ['comentario' => 'Comentário', 'ajuste' => 'Ajuste pedido', 'aprovacao' => 'Aprovação', 'etapa' => 'Histórico'][$c['tipo']] ?? 'Histórico' ?></strong>
             <span><?= e($c['texto']) ?></span>
-            <small><?= data_br($c['criado_em'], true) ?> · <?= e($c['usuario_nome'] ?? 'Sistema') ?></small>
+            <small><?= data_br($c['criado_em'], true) ?> · <?= pessoa($c['usuario_nome'] ?? null, null, false, 18, 'Sistema') ?></small>
           </li>
         <?php endforeach; ?>
       </ol>

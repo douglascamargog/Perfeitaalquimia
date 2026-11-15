@@ -30,7 +30,7 @@ foreach ($carteiras as $k) {
       <article class="card ct-cartao <?= $k['responsavel_id'] ? '' : 'sem' ?>" data-carteira="<?= (int) $k['id'] ?>">
         <header>
           <a href="<?= url('/carteiras/' . (int) $k['id']) ?>"><strong><?= e($k['nome']) ?></strong></a>
-          <?php if ($k['responsavel_id']): ?><span class="ct-vendedor"><svg class="icone"><use href="<?= $icones ?>#usuario"/></svg><?= e($k['vendedor']) ?></span>
+          <?php if ($k['responsavel_id']): ?><span class="ct-vendedor"><svg class="icone"><use href="<?= $icones ?>#usuario"/></svg><?= pessoa($k['vendedor'] ?? null, null, false, 18, '—') ?></span>
           <?php else: ?><span class="selo vermelho">Sem vendedor(a)</span><?php endif; ?>
         </header>
         <dl class="ct-numeros">

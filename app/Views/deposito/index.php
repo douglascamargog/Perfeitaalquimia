@@ -38,7 +38,7 @@ $atrasado = fn(array $p) => $p['expedicao'] !== 'despachado' && $p['expedicao_de
         <span class="dep-cliente"><?= e($p['cliente']) ?></span>
         <small><?= e($p['cidade']) ?>/<?= e($p['uf']) ?> · <?= (int) $p['itens'] ?> item(ns), <?= (int) $p['unidades'] ?> un · vendedor <?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null, false, 18) ?></small>
         <small class="suave"><?php if ($p['expedicao'] === 'despachado'): ?>Despachado <?= data_br($p['despachado_em'], true) ?> · <?= e($p['transportadora']) ?><?= $p['rastreio'] ? ' · ' . e($p['rastreio']) : '' ?>
-          <?php else: ?>Na fila desde <?= data_br($p['expedicao_desde'], true) ?><?= $p['separador'] ? ' · com ' . e($p['separador']) : '' ?><?php endif; ?></small>
+          <?php else: ?>Na fila desde <?= data_br($p['expedicao_desde'], true) ?><?= $p['separador'] ? ' · com ' . pessoa($p['separador'] ?? null, null, false, 18, '—') : '' ?><?php endif; ?></small>
       </a>
       <?php if ($pode && $p['expedicao'] !== 'despachado'): ?>
         <form method="post" action="<?= url('/deposito/' . (int) $p['id'] . '/urgente') ?>" class="dep-urgente"><?= csrf_campo() ?>

@@ -46,7 +46,7 @@ if (!$pode && !\App\Core\Auth::pode('compras.ver')) {
           <td><span class="selo <?= $sc ?>"><?= e($sn) ?></span></td>
           <td class="direita"><?= e(P::qtd((float) $c['quantidade'], (string) $c['unidade'])) ?></td>
           <td class="direita"><?= $c['valor_escolhido'] !== null ? dinheiro((float) $c['valor_escolhido']) : ($c['menor_valor'] !== null ? '<small class="suave">a partir de</small> ' . dinheiro((float) $c['menor_valor']) : '—') ?></td>
-          <td class="pequeno"><?= $c['aprovador'] ? e($c['aprovador']) : '—' ?></td>
+          <td class="pequeno"><?= $c['aprovador'] ? pessoa($c['aprovador'] ?? null, null, false, 18, '—') : '—' ?></td>
           <td class="pequeno <?= $c['necessario_ate'] && $c['necessario_ate'] < date('Y-m-d') && !in_array($c['situacao'], ['recebido', 'cancelado', 'recusado'], true) ? 'pn-vermelho' : '' ?>"><?= $c['necessario_ate'] ? data_br($c['necessario_ate']) : '—' ?></td>
         </tr>
       <?php endforeach; ?>

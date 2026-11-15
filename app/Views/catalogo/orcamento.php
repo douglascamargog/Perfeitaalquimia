@@ -33,7 +33,7 @@ $linha = function (array $p) use ($quantidades): string {
     <div>
       <span class="orc-selo">ORÇAMENTO #<?= (int) $o['id'] ?></span>
       <h1><?= e($o['cliente']) ?></h1>
-      <p>Preparado por <strong><?= e($o['vendedor'] ?: 'nossa equipe') ?></strong> · tabela <?= e((string) $o['tabela']) ?> · válido até <strong><?= data_br($o['validade']) ?></strong></p>
+      <p>Preparado por <strong><?= $o['vendedor'] ? pessoa($o['vendedor'], null, false, 26) : 'nossa equipe' ?></strong> · tabela <?= e((string) $o['tabela']) ?> · válido até <strong><?= data_br($o['validade']) ?></strong></p>
     </div>
     <p class="orc-dica">Confira os produtos, mude as quantidades se quiser (ou acrescente outros) e toque em <strong>Aprovar orçamento</strong>.</p>
   </section>

@@ -80,7 +80,7 @@ $imagem = [
       <div class="orc-botoes"><button class="botao contorno" type="button" data-baixar-imagem>Baixar imagem do orçamento</button></div>
     <?php endif; ?>
     <h3>Histórico</h3>
-    <ul class="ac-lista" data-historico><?php foreach ($historico as $h): ?><li><time><?= data_br($h['criado_em'], true) ?></time> <strong><?= $h['pelo_cliente'] ? 'Cliente' : e($h['usuario'] ?? 'Sistema') ?>:</strong> <?= e($h['texto']) ?></li><?php endforeach; ?></ul>
+    <ul class="ac-lista" data-historico><?php foreach ($historico as $h): ?><li><time><?= data_br($h['criado_em'], true) ?></time> <strong><?= $h['pelo_cliente'] ? 'Cliente' : pessoa($h['usuario'] ?? null, null, false, 18, 'Sistema') ?>:</strong> <?= e($h['texto']) ?></li><?php endforeach; ?></ul>
   </aside>
 </div>
 <canvas data-canvas-orcamento hidden></canvas>

@@ -33,7 +33,7 @@ $mostrarJson = function (?string $json): string {
       <?php foreach ($registros as $r): ?>
         <tr>
           <td><?= data_br($r['criado_em'], true) ?></td>
-          <td><?= e($r['usuario_nome'] ?? 'Sistema') ?></td>
+          <td><?= pessoa($r['usuario_nome'] ?? null, null, false, 18, 'Sistema') ?></td>
           <td><span class="selo"><?= e($r['entidade']) ?><?= $r['entidade_id'] ? ' #' . (int) $r['entidade_id'] : '' ?></span> <?= e($r['acao']) ?></td>
           <td class="json-mudanca"><?= $mostrarJson($r['antes_json']) ?></td>
           <td class="json-mudanca"><?= $mostrarJson($r['depois_json']) ?></td>

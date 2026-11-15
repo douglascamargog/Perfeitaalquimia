@@ -19,7 +19,7 @@ $grade = function (string $tipo, array $linhas, string $titulo) use ($historico,
         <tbody>
         <?php foreach ($linhas as $l): $h = $historico[$tipo][$l['id']] ?? []; ?>
           <tr>
-            <td><strong><?= e($l['nome']) ?></strong><small class="suave"><?= (int) $l['pedidos'] ?> pedido(s)</small></td>
+            <td><strong><?= $tipo === 'vendedor' ? pessoa($l['nome']) : e($l['nome']) ?></strong><small class="suave"><?= (int) $l['pedidos'] ?> pedido(s)</small></td>
             <td><?php if ($podeEditar): ?><input class="pn-input-meta" type="text" inputmode="decimal" name="metas[<?= $tipo ?>][<?= (int) $l['id'] ?>]"
                  value="<?= $l['meta'] > 0 ? number_format($l['meta'], 2, ',', '.') : '' ?>" placeholder="0,00" aria-label="Meta de <?= e($l['nome']) ?>"><?php else: ?><?= $l['meta'] > 0 ? dinheiro($l['meta']) : '—' ?><?php endif; ?></td>
             <td class="direita"><?= dinheiro($l['vendido']) ?></td>

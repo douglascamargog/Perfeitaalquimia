@@ -21,9 +21,9 @@ $imagem = $t['anexo'] && str_starts_with((string) $t['anexo_mime'], 'image/');
     <h1><?= e($t['titulo']) ?></h1>
     <p><span class="selo <?= $sc ?>" data-situacao="<?= e($t['situacao']) ?>"><?= e($sn) ?></span>
       <?= $t['urgente'] ? '<span class="selo vermelho">urgente</span>' : '' ?>
-      <?= e((string) $t['funcao']) ?><?= $t['responsavel'] ? ' · com ' . e($t['responsavel']) : '' ?>
+      <?= e((string) $t['funcao']) ?><?= $t['responsavel'] ? ' · com ' . pessoa($t['responsavel'] ?? null, null, false, 18, '—') : '' ?>
       <?= $t['prazo'] ? ' · prazo <strong>' . data_br($t['prazo']) . '</strong>' : '' ?>
-      · <?= $t['setor'] ? 'pedido de ' . e((string) $t['solicitante']) . ' (' . e($t['setor']) . ')' : 'criada por ' . e((string) $t['solicitante']) ?> em <?= data_br($t['criado_em']) ?></p>
+      · <?= $t['setor'] ? 'pedido de ' . pessoa($t['solicitante'] ?? null, null, false, 18, '—') . ' (' . e($t['setor']) . ')' : 'criada por ' . pessoa($t['solicitante'] ?? null, null, false, 18, '—') ?> em <?= data_br($t['criado_em']) ?></p>
   </div>
   <div class="acoes mt-botoes">
     <?php if ($pode && $t['situacao'] === 'a_fazer'): ?><?= $botao('comecar', 'Começar') ?><?php endif; ?>
@@ -60,7 +60,7 @@ $imagem = $t['anexo'] && str_starts_with((string) $t['anexo_mime'], 'image/');
       <textarea name="texto" rows="2" maxlength="1000" placeholder="<?= $dono && !$pode ? 'Mande um recado para o Marketing…' : 'Escreva um comentário (quem pediu é avisado)…' ?>" required></textarea>
       <button class="botao contorno" type="submit">Comentar</button>
     </form>
-    <ul class="ac-lista" data-historico><?php foreach ($historico as $h): ?><li><time><?= data_br($h['criado_em'], true) ?></time> <strong><?= e($h['usuario'] ?? 'Sistema') ?>:</strong> <?= e($h['texto']) ?></li><?php endforeach; ?></ul>
+    <ul class="ac-lista" data-historico><?php foreach ($historico as $h): ?><li><time><?= data_br($h['criado_em'], true) ?></time> <strong><?= pessoa($h['usuario'] ?? null, null, false, 18, 'Sistema') ?>:</strong> <?= e($h['texto']) ?></li><?php endforeach; ?></ul>
   </section>
 
   <?php if ($pode): ?>

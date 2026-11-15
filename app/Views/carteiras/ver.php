@@ -8,7 +8,7 @@ $opcoesCarteiras = fn() => implode('', array_map(fn($o) => '<option value="' . (
 <a class="voltar-link" href="<?= url('/carteiras') ?>">← Todas as carteiras</a>
 <div class="cabecalho-secao">
   <div><div class="sobretitulo">CARTEIRA · <?= e(mb_strtoupper((string) $k['setor'])) ?></div><h1><?= e($k['nome']) ?></h1>
-    <p><?= $k['responsavel_id'] ? 'Vendedor(a): <strong>' . e($k['vendedor']) . '</strong>' : '<span class="selo vermelho">Sem vendedor(a)</span> os clientes ficam parados até alguém assumir.' ?>
+    <p><?= $k['responsavel_id'] ? 'Vendedor(a): <strong>' . pessoa($k['vendedor'] ?? null, null, false, 18, '—') . '</strong>' : '<span class="selo vermelho">Sem vendedor(a)</span> os clientes ficam parados até alguém assumir.' ?>
       · <?= (int) $r['total'] ?> cliente(s)</p></div>
   <div class="acoes"><a class="botao contorno" href="<?= url('/carteiras/' . (int) $k['id'] . '/exportar.csv') ?>"><svg class="icone"><use href="<?= $icones ?>#baixar"/></svg>Exportar CSV</a></div>
 </div>

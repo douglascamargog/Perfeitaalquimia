@@ -20,7 +20,7 @@ $acao = fn(string $a, string $rotulo, string $classe = 'contorno') => '<form met
     <?php if (!empty($c['prazo'])): ?><span class="mt-prazo"><?= $atrasada ? 'atrasada · ' : '' ?><?= data_br($c['prazo']) ?></span><?php endif; ?>
   </div>
   <?php if ($c['tipo'] === 'tarefa'): ?>
-    <small class="mt-quem"><?= e((string) $c['funcao']) ?><?= $c['responsavel'] ? ' · ' . e($c['responsavel']) : '' ?><?= $c['setor'] ? ' · pedido de ' . e($c['setor']) : '' ?></small>
+    <small class="mt-quem"><?= e((string) $c['funcao']) ?><?= $c['responsavel'] ? ' · ' . pessoa($c['responsavel'] ?? null, null, false, 18, '—') : '' ?><?= $c['setor'] ? ' · pedido de ' . e($c['setor']) : '' ?></small>
     <?php if ($pode || $podeAprovar): ?><div class="mt-acoes">
       <?php if ($pode && $c['situacao'] === 'a_fazer'): ?><?= $acao('comecar', 'Começar') ?><?php endif; ?>
       <?php if ($pode && in_array($c['situacao'], ['a_fazer', 'fazendo'], true)): ?><?= $acao('aprovacao', 'Para aprovação') ?><?= $acao('concluir', 'Concluir', 'lima') ?><?php endif; ?>

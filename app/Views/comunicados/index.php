@@ -37,7 +37,7 @@ $situacao = ['no ar' => 'verde', 'agendado' => 'laranja', 'vencido' => 'cinza', 
         <?php foreach ($emitidos as $c): $pct = $c['total'] ? round($c['leram'] / $c['total'] * 100) : 0; ?>
           <tr data-comunicado="<?= (int) $c['id'] ?>">
             <td><strong><?= e($c['titulo']) ?></strong> <span class="selo <?= $situacao[$c['situacao']] ?>"><?= e($c['situacao']) ?></span><?= $c['prioridade'] === 'importante' ? ' <span class="selo vermelho">importante</span>' : '' ?>
-              <small class="suave"><?= data_br($c['inicio'], true) ?><?= $c['fim'] ? ' até ' . data_br($c['fim']) : '' ?> · <?= e($c['autor'] ?? '') ?></small></td>
+              <small class="suave"><?= data_br($c['inicio'], true) ?><?= $c['fim'] ? ' até ' . data_br($c['fim']) : '' ?> · <?= pessoa($c['autor'] ?? null, null, false, 18, '') ?></small></td>
             <td class="pequeno"><?= e($c['setores']) ?></td>
             <td><div class="com-leitura"><div class="barra-meta clara"><span style="width: <?= $pct ?>%"></span></div>
               <small data-leitura><?= (int) $c['leram'] ?> de <?= (int) $c['total'] ?> leram</small>
@@ -67,7 +67,7 @@ $situacao = ['no ar' => 'verde', 'agendado' => 'laranja', 'vencido' => 'cinza', 
     <?php foreach ($recebidos as $c): ?>
       <article class="com-item <?= $c['lida_em'] ? 'lido' : '' ?> <?= $c['prioridade'] === 'importante' ? 'importante' : '' ?>" id="c<?= (int) $c['id'] ?>">
         <header><strong><?= e($c['titulo']) ?></strong><?= $c['lida_em'] ? '' : ' <span class="selo laranja">não lido</span>' ?>
-          <small class="suave"><?= e($c['autor'] ?? 'Administração') ?> · <?= data_br($c['inicio'], true) ?></small></header>
+          <small class="suave"><?= pessoa($c['autor'] ?? null, null, false, 18, 'Administração') ?> · <?= data_br($c['inicio'], true) ?></small></header>
         <div class="com-texto"><?= nl2br(e($c['texto'])) ?></div>
         <?php if (!$c['lida_em']): ?><button type="button" class="botao contorno pequeno" data-com-ler="<?= (int) $c['id'] ?>">Li e entendi</button><?php endif; ?>
       </article>

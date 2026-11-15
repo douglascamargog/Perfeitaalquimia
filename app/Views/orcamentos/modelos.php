@@ -20,7 +20,7 @@
       <?php foreach ($modelos as $m): $pode = $m['tipo'] === 'pessoal' || $podeCampanha; ?>
         <tr data-modelo="<?= (int) $m['id'] ?>">
           <td><strong><?= e($m['nome']) ?></strong><?= $m['descricao'] ? '<small>' . e($m['descricao']) . '</small>' : '' ?></td>
-          <td><?php if ($m['tipo'] === 'campanha'): ?><span class="selo lima">Campanha</span><small><?= e($m['setor'] ?: 'todos os setores') ?><?= $m['validade_ate'] ? ' · até ' . data_br($m['validade_ate']) : '' ?> · por <?= e((string) $m['autor']) ?></small>
+          <td><?php if ($m['tipo'] === 'campanha'): ?><span class="selo lima">Campanha</span><small><?= e($m['setor'] ?: 'todos os setores') ?><?= $m['validade_ate'] ? ' · até ' . data_br($m['validade_ate']) : '' ?> · por <?= pessoa($m['autor'] ?? null, null, false, 18, '—') ?></small>
             <?php else: ?><span class="selo cinza">Meu</span><?php endif; ?></td>
           <td class="pequeno"><?= e(implode(' · ', $m['nomes'] ?? [])) ?: '—' ?></td>
           <td><?php if ($pode): ?><form method="post" action="<?= url('/pedidos/modelos/' . (int) $m['id'] . '/remover') ?>" data-confirmar="Tirar o modelo &quot;<?= e($m['nome']) ?>&quot;?"><?= csrf_campo() ?><button class="botao contorno pequeno" type="submit">Tirar</button></form><?php endif; ?></td>

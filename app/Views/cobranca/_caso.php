@@ -159,7 +159,7 @@ $aberto = $c['situacao'] === 'aberta';
         <li class="tipo-<?= e($ev['tipo']) ?>">
           <strong><?= e(ClienteEvento::TIPOS[$ev['tipo']] ?? $ev['tipo']) ?><?= $ev['canal'] ? ' · ' . e($ev['canal']) : '' ?></strong>
           <?php if ($ev['descricao']): ?><span><?= e($ev['descricao']) ?></span><?php endif; ?>
-          <small><?= data_br($ev['ocorrido_em'], true) ?> · <?= e($ev['usuario_nome'] ?? 'Sistema') ?></small>
+          <small><?= data_br($ev['ocorrido_em'], true) ?> · <?= pessoa($ev['usuario_nome'] ?? null, null, false, 18, 'Sistema') ?></small>
         </li>
       <?php endforeach; ?>
     </ol>
