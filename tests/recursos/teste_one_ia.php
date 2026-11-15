@@ -28,3 +28,10 @@ $cnpj = (string) Banco::valor('SELECT cnpj FROM clientes WHERE id = ?', [$ids[0]
 $ok(!str_contains($json, $cnpj), 'resumo do cliente não leva CNPJ nem telefone para a IA');
 $ok(isset(F::executar('apagar_tudo', [])['erro']), 'consulta inventada: recusada');
 Banco::executar("UPDATE configuracoes SET valor = '0' WHERE chave = 'one.ia_dados_clientes'");
+// "Testar a IA agora" (Administração)
+[$certo, $msg] = (new App\Integrations\OneIA\OneIAClaude('chave-de-teste', 'claude-opus-5-5', 'http://127.0.0.1:8099'))->testar();
+$ok($certo && str_contains($msg, 'Funcionando'), 'botão "Testar a IA agora": avisa que está funcionando');
+[$certo, $msg] = (new App\Integrations\OneIA\OneIAClaude('', 'claude-opus-5-5'))->testar();
+$ok(!$certo && str_contains($msg, 'Falta a chave'), 'sem chave: explica onde colocar');
+[$certo, $msg] = (new App\Integrations\OneIA\OneIAClaude('x', 'claude-opus-5-5', 'http://127.0.0.1:8098'))->testar();
+$ok(!$certo && str_contains($msg, 'api.anthropic.com'), 'sem conexão: explica o que pedir à hospedagem');
