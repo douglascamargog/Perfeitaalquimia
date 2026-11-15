@@ -113,7 +113,8 @@ class Roteador
 
     /** POST que a Diretoria pode fazer: aprovar, decidir, comentar, coisas pessoais. Rotas exatas (padrões de app/rotas.php). */
     private const POST_DIRETORIA = [
-        '/sair', '/minha-senha', '/meu-perfil', '/meu-perfil/publico', '/meu-perfil/aparencia', '/notificacoes/marcar-todas', '/novidades/vista',
+        '/sair', '/minha-senha', '/meu-perfil', '/meu-perfil/publico', '/meu-perfil/aparencia', '/meu-perfil/status', '/meu-perfil/personalizar',
+        '/pessoas/{id}/recados', '/pessoas/recados/{id}/apagar', '/pessoas/{id}/elogios', '/pessoas/elogios/{id}/apagar', '/notificacoes/marcar-todas', '/novidades/vista',
         '/aniversario/{id}/mensagens', '/aniversario/mensagens/{id}/apagar', '/comunicados/{id}/ler', '/academia/progresso',
         '/aprovacao/{id}/aprovar', '/aprovacao/{id}/recusar',
         '/marketing/posts/{id}/aprovar', '/marketing/posts/{id}/ajuste', '/marketing/posts/{id}/comentar', '/marketing/ecommerce/atualizar',

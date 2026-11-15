@@ -1,6 +1,7 @@
 <?php
-/** Equipe: diretório. Variáveis: $busca, $pessoas */
+/** Equipe: diretório. Variáveis: $busca, $pessoas, $elogios (total recebido por pessoa) */
 use App\Services\EquipeService;
+use App\Services\PerfilSocialService as Social;
 use App\Services\PessoaService;
 
 $icones = asset('img/icones.svg');
@@ -14,14 +15,19 @@ $icones = asset('img/icones.svg');
     <input type="search" name="q" value="<?= e($busca) ?>" placeholder="Nome ou setor…" aria-label="Buscar pessoa"></div>
 </form>
 <div class="pe-grade">
-  <?php foreach ($pessoas as $p): ?>
-    <a class="pe-cartao" href="<?= url('/pessoas/' . (int) $p['id']) ?>" data-pessoa="<?= (int) $p['id'] ?>">
-      <span class="pe-cartao-capa" <?= $p['capa'] ? 'style="background-image:url(\'' . e(url('/' . $p['capa'])) . '\')"' : '' ?>></span>
+  <?php foreach ($pessoas as $p): $st = Social::status($p); $nEl = $elogios[(int) $p['id']] ?? 0; ?>
+    <a class="pe-cartao" href="<?= url('/pessoas/' . (int) $p['id']) ?>" data-pessoa="<?= (int) $p['id'] ?>" style="--pe-cor: <?= e(Social::cor($p)) ?>">
+      <span class="pe-cartao-capa" style="background: <?= e(Social::fundoCapa($p)) ?>"></span>
       <span class="pe-cartao-foto"><?= EquipeService::avatar($p, 72) ?></span>
       <strong><?= e($p['nome']) ?></strong>
       <small><?= e($p['funcoes'] ?: '—') ?></small>
-      <?php if ($p['sobre_mim']): ?><span class="pe-cartao-sobre"><?= e(mb_strimwidth($p['sobre_mim'], 0, 90, '…')) ?></span><?php endif; ?>
-      <?php if ($p['data_nascimento']): ?><span class="pe-cartao-aniver">🎂 <?= e(PessoaService::aniversario($p['data_nascimento'])) ?></span><?php endif; ?>
+      <?php if ($st): ?><span class="pe-cartao-status" data-status><?= e($st['emoji']) ?> <?= e($st['texto']) ?></span><?php endif; ?>
+      <?php if (!empty($p['frase'])): ?><span class="pe-cartao-frase">“<?= e(mb_strimwidth($p['frase'], 0, 80, '…')) ?>”</span>
+      <?php elseif ($p['sobre_mim']): ?><span class="pe-cartao-sobre"><?= e(mb_strimwidth($p['sobre_mim'], 0, 90, '…')) ?></span><?php endif; ?>
+      <span class="pe-cartao-rodape">
+        <?php if ($p['data_nascimento']): ?><span>🎂 <?= e(PessoaService::aniversario($p['data_nascimento'])) ?></span><?php endif; ?>
+        <?php if ($nEl): ?><span title="Elogios recebidos">💛 <?= $nEl ?></span><?php endif; ?>
+      </span>
     </a>
   <?php endforeach; ?>
 </div>

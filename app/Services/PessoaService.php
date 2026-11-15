@@ -24,7 +24,7 @@ class PessoaService
             $w .= ' AND (u.nome LIKE ? OR EXISTS (SELECT 1 FROM usuario_funcoes uf JOIN funcoes f ON f.id = uf.funcao_id WHERE uf.usuario_id = u.id AND f.nome LIKE ?))';
             $p = ['%' . $busca . '%', '%' . $busca . '%'];
         }
-        return Banco::todos("SELECT u.id, u.nome, u.foto, u.data_nascimento, up.sobre_mim, up.capa,
+        return Banco::todos("SELECT u.id, u.nome, u.foto, u.data_nascimento, up.sobre_mim, up.capa, up.capa_tema, up.cor_perfil, up.frase, up.status_emoji, up.status_texto, up.status_ate,
                 (SELECT GROUP_CONCAT(f.nome ORDER BY f.nome SEPARATOR ', ') FROM usuario_funcoes uf JOIN funcoes f ON f.id = uf.funcao_id WHERE uf.usuario_id = u.id) AS funcoes
             FROM usuarios u LEFT JOIN usuario_perfil up ON up.usuario_id = u.id WHERE $w ORDER BY u.nome", $p);
     }

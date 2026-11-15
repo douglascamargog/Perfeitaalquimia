@@ -31,3 +31,138 @@
 .pe-pet { display: flex; gap: 12px; align-items: center; }
 .pe-pet img { border-radius: 16px; object-fit: cover; }
 @media (max-width: 700px) { .pe-capa { height: 130px; } .pe-foto { margin-top: -48px; } .pe-editar { margin-left: 0; } }
+
+/* ===================== V11.0 · Perfil estilo rede social ===================== */
+.pe-perfil { --pe-cor: var(--primaria); }
+.pe-hero { background: var(--card); border: 1px solid var(--borda); border-radius: calc(var(--raio) + 6px); overflow: hidden; box-shadow: var(--sombra); }
+.pe-hero .pe-capa { height: 230px; position: relative; }
+.pe-hero .pe-capa::after { content: ""; position: absolute; inset: auto 0 0 0; height: 70px; background: linear-gradient(transparent, rgba(0, 0, 0, .18)); }
+.pe-hero-corpo { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 22px; align-items: end; padding: 0 28px 18px; }
+.pe-foto-area { position: relative; margin-top: -78px; }
+.pe-hero .pe-foto { margin: 0; padding: 4px; border: 0; background: conic-gradient(from 210deg, var(--pe-cor), var(--secundaria), var(--pe-cor)); box-shadow: 0 10px 30px rgba(0, 0, 0, .18); }
+.pe-hero .pe-foto .avatar { border: 4px solid var(--card); }
+.pe-status { position: absolute; left: 112px; bottom: 6px; max-width: 240px; background: var(--card); border: 1px solid var(--borda); border-radius: 18px 18px 18px 4px;
+  padding: 6px 12px; font-size: .8rem; font-weight: 600; box-shadow: 0 6px 18px rgba(0, 0, 0, .12); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pe-status b { font-size: 1rem; }
+.pe-id-txt { min-width: 0; padding-top: 12px; }
+.pe-id-txt h1 { margin: 0 0 2px; font-size: 1.7rem; }
+.pe-frase { margin: 0 0 4px; font-style: italic; color: var(--texto); font-size: .98rem; }
+.pe-cargo { margin: 0; color: var(--texto-suave); font-size: .88rem; }
+.pe-redes a { color: var(--pe-cor); }
+.pe-hero-acoes { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.pe-botao-cor { background: var(--pe-cor) !important; border-color: var(--pe-cor) !important; color: #fff !important; }
+.pe-numeros { display: flex; gap: 6px 26px; align-items: center; flex-wrap: wrap; padding: 12px 28px; border-top: 1px solid var(--borda); background: color-mix(in srgb, var(--pe-cor) 5%, var(--card)); }
+.pe-numeros a { display: flex; align-items: baseline; gap: 6px; text-decoration: none; color: var(--texto-suave); font-size: .84rem; }
+.pe-numeros strong { font-size: 1.15rem; color: var(--pe-cor); }
+.pe-numeros-top { margin-left: auto; display: flex; gap: 10px; font-size: .84rem; }
+.pe-numeros-top b { background: var(--card); border: 1px solid var(--borda); border-radius: 99px; padding: 2px 10px; font-weight: 700; }
+
+/* Status do dia (só no meu perfil) */
+.pe-status-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 10px 28px 14px; border-top: 1px dashed var(--borda); }
+.pe-status-rotulo { font-size: .78rem; font-weight: 700; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .04em; }
+.pe-emojis { display: flex; gap: 2px; flex-wrap: wrap; }
+.pe-emojis label { cursor: pointer; }
+.pe-emojis input { position: absolute; opacity: 0; pointer-events: none; }
+.pe-emojis span { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; font-size: 1.05rem; transition: background .15s, transform .15s; }
+.pe-emojis span:hover { background: var(--fundo); transform: scale(1.12); }
+.pe-emojis input:checked + span { background: color-mix(in srgb, var(--pe-cor) 18%, transparent); box-shadow: inset 0 0 0 2px var(--pe-cor); }
+.pe-emojis input:focus-visible + span { outline: 2px solid var(--pe-cor); }
+.pe-status-form input[type=text] { flex: 1 1 220px; min-width: 0; }
+
+/* Painel de elogio */
+.pe-elogiar { border-color: color-mix(in srgb, var(--pe-cor) 40%, var(--borda)); }
+.pe-tipos-elogio { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.pe-tipos-elogio input { position: absolute; opacity: 0; }
+.pe-tipos-elogio span { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 14px; cursor: pointer; font-weight: 600; font-size: .86rem; background: var(--card); transition: border-color .15s, transform .15s; }
+.pe-tipos-elogio span b { font-size: 1.3rem; }
+.pe-tipos-elogio span:hover { transform: translateY(-2px); }
+.pe-tipos-elogio input:checked + span { border-color: var(--pe-cor); background: color-mix(in srgb, var(--pe-cor) 10%, var(--card)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pe-cor) 30%, transparent); }
+.pe-tipos-elogio input:focus-visible + span { outline: 2px solid var(--pe-cor); }
+
+/* Blocos em duas colunas (ordem que a pessoa escolheu) */
+.pe-blocos { columns: 2 380px; column-gap: 18px; }
+.pe-bloco { break-inside: avoid; margin: 0 0 18px; display: block; }
+.pe-bloco h2 { font-size: 1.05rem; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+.pe-bloco h2::before { content: ""; width: 6px; height: 18px; border-radius: 4px; background: var(--pe-cor); }
+.pe-bloco h3 { font-size: .86rem; margin: 14px 0 6px; color: var(--texto-suave); }
+.pe-bloco-topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+.pe-bloco-topo h2 { margin: 0; }
+.pe-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.pe-tags span { background: color-mix(in srgb, var(--pe-cor) 10%, var(--card)); color: var(--pe-cor); border-radius: 99px; padding: 4px 12px; font-size: .8rem; font-weight: 700; }
+.pe-tags-pergunte span { background: var(--fundo); color: var(--texto); }
+.pe-selos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.pe-selos li { display: flex; gap: 10px; align-items: center; padding: 10px; border-radius: 14px; background: linear-gradient(135deg, color-mix(in srgb, var(--pe-cor) 10%, var(--card)), var(--card)); border: 1px solid var(--borda); }
+.pe-selo-icone { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 50%; font-size: 1.3rem; background: var(--card); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pe-cor) 35%, transparent); }
+.pe-selos strong { display: block; font-size: .84rem; }
+.pe-selos small { color: var(--texto-suave); font-size: .72rem; }
+.pe-resumo-elogios { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.pe-resumo-elogios span { font-size: .78rem; font-weight: 600; border: 1px solid var(--borda); border-radius: 99px; padding: 3px 10px; }
+.pe-resumo-elogios em { font-style: normal; color: var(--pe-cor); font-weight: 800; }
+.pe-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 460px; overflow: auto; }
+.pe-lista li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 8px; border-radius: 12px; }
+.pe-lista li:hover { background: var(--fundo); }
+.pe-lista p { margin: 0; font-size: .84rem; }
+.pe-lista-texto { color: var(--texto); line-height: 1.45; overflow-wrap: anywhere; }
+.pe-lista small { color: var(--texto-suave); font-size: .7rem; }
+.pe-autor { font-weight: 700; color: inherit; text-decoration: none; }
+.pe-x { border: 0; background: none; color: var(--texto-suave); font-size: 1.1rem; cursor: pointer; line-height: 1; padding: 2px 6px; border-radius: 8px; }
+.pe-x:hover { background: var(--aviso-fundo); color: var(--aviso); }
+.pe-recado-form { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: start; margin-bottom: 10px; }
+.pe-recado-form textarea { resize: vertical; min-height: 42px; }
+
+/* Diretório */
+.pe-cartao { transition: transform .15s, box-shadow .15s; }
+.pe-cartao:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0, 0, 0, .1); }
+.pe-cartao-capa { height: 84px; }
+.pe-cartao-foto { padding: 3px; border: 0; background: conic-gradient(from 210deg, var(--pe-cor, var(--primaria)), var(--secundaria), var(--pe-cor, var(--primaria))); }
+.pe-cartao-foto .avatar { border: 3px solid var(--card); }
+.pe-cartao-status { font-size: .74rem; background: var(--fundo); border-radius: 99px; padding: 2px 10px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pe-cartao-frase { font-size: .8rem; font-style: italic; color: var(--texto); }
+.pe-cartao-rodape { display: flex; gap: 10px; justify-content: center; font-size: .74rem; color: var(--texto-suave); }
+
+/* Meu perfil › Personalizar */
+.pp-capas { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+.pp-capas label { cursor: pointer; display: grid; gap: 4px; font-size: .74rem; text-align: center; }
+.pp-capas input { position: absolute; opacity: 0; }
+.pp-capas span { height: 54px; border-radius: 12px; border: 2px solid transparent; }
+.pp-capas input:checked + span { border-color: var(--texto); box-shadow: 0 0 0 3px var(--card) inset; }
+.pp-capas input:focus-visible + span { outline: 2px solid var(--primaria); }
+.pp-cores { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.pp-cores label { cursor: pointer; }
+.pp-cores input[type=radio] { position: absolute; opacity: 0; }
+.pp-cores span { display: block; width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--card); box-shadow: 0 0 0 1px var(--borda); }
+.pp-cores input:checked + span { box-shadow: 0 0 0 3px var(--texto); }
+.pp-previa { height: 90px; border-radius: 14px; margin-bottom: 12px; position: relative; }
+.pp-previa::after { content: ""; position: absolute; left: 18px; bottom: -18px; width: 54px; height: 54px; border-radius: 50%; background: var(--card); box-shadow: 0 0 0 4px var(--pe-cor, var(--primaria)); }
+.pp-blocos { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-width: 520px; }
+.pp-blocos li { display: grid; grid-template-columns: auto minmax(0, 1fr) 64px auto; gap: 10px; align-items: center; padding: 6px 10px; border: 1px solid var(--borda); border-radius: 12px; background: var(--card); }
+.pp-blocos input[type=number] { width: 64px; }
+.pp-mover { display: flex; gap: 4px; }
+.pp-mover button { border: 1px solid var(--borda); background: var(--card); border-radius: 8px; width: 30px; height: 30px; cursor: pointer; }
+
+@media (max-width: 760px) {
+  .pe-hero .pe-capa { height: 150px; }
+  .pe-hero-corpo { grid-template-columns: 1fr; gap: 8px; padding: 0 16px 14px; justify-items: start; }
+  .pe-foto-area { margin-top: -64px; }
+  .pe-hero .pe-foto .avatar { width: 96px !important; height: 96px !important; font-size: 36px !important; }
+  .pe-status { left: 92px; max-width: calc(100vw - 140px); }
+  .pe-hero-acoes { justify-content: flex-start; }
+  .pe-numeros, .pe-status-form { padding-left: 16px; padding-right: 16px; }
+  .pe-numeros-top { margin-left: 0; }
+  .pe-recado-form { grid-template-columns: 1fr; }
+  .pe-recado-form .avatar { display: none; }
+  .pp-blocos li { grid-template-columns: auto minmax(0, 1fr) 56px; }
+  .pp-mover { grid-column: 1 / -1; }
+}
+@media print { .pe-status-form, .pe-hero-acoes, .pe-recado-form, .pe-x, .pe-elogiar { display: none !important; } .pe-lista { max-height: none; } }
+/* status: balão abaixo do nome + emoji no canto da foto */
+.pe-hero .pe-status { position: static; display: inline-flex; align-items: center; gap: 6px; max-width: 100%; margin: 4px 0 6px; border-radius: 4px 18px 18px 18px;
+  background: color-mix(in srgb, var(--pe-cor) 8%, var(--card)); border-color: color-mix(in srgb, var(--pe-cor) 30%, var(--borda)); box-shadow: none; }
+.pe-status-emoji { position: absolute; right: 6px; bottom: 8px; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%;
+  background: var(--card); box-shadow: 0 4px 12px rgba(0, 0, 0, .18); font-size: 1.2rem; }
+@media (max-width: 760px) { .pe-status-emoji { right: 2px; bottom: 4px; width: 32px; height: 32px; font-size: 1rem; } }
+/* anel da foto: sem a "sobra" embaixo das iniciais */
+.pe-cartao-foto, .pe-hero .pe-foto { line-height: 0; display: inline-block; }
+.pe-cartao-foto .avatar, .pe-hero .pe-foto .avatar { display: grid; }
+.pe-cartao-foto .avatar-iniciais, .pe-hero .pe-foto .avatar-iniciais { line-height: 1; }
+.pe-cartao { align-content: start; } .pe-cartao > * { align-self: start; } .pe-cartao-rodape { margin-top: auto; }

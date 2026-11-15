@@ -21,6 +21,48 @@ use App\Core\Visao;
 $pp = $publico ?? [];
 $v = fn(string $c) => e((string) ($pp[$c] ?? ''));
 ?>
+<?php // Personalizar o perfil (V11.0): capa, cor, frase, interesses e ordem dos blocos
+use App\Services\PerfilSocialService as Social;
+$corAtual = Social::cor($pp);
+$livre = !in_array($corAtual, Social::CORES, true);
+?>
+<form method="post" action="<?= url('/meu-perfil/personalizar') ?>" class="card" style="max-width:820px; --pe-cor: <?= e($corAtual) ?>" id="personalizar" data-personalizar>
+  <?= csrf_campo() ?>
+  <h2>🎨 Personalizar meu perfil</h2>
+  <p class="suave pequeno">Deixe o seu perfil com a sua cara. Os colegas veem em <a href="<?= url('/pessoas/' . (int) $u['id']) ?>">Equipe</a>.</p>
+  <div class="pp-previa" data-previa-capa style="background: <?= e(Social::fundoCapa($pp)) ?>"></div>
+  <div class="campo"><label for="pp-frase">Minha frase</label><input type="text" id="pp-frase" name="frase" maxlength="140" value="<?= $v('frase') ?>" placeholder="Ex.: Cliente bem atendido sempre volta 😉"></div>
+  <h3>Capa</h3>
+  <p class="ajuda">Escolha uma da galeria<?= !empty($pp['capa']) ? ' (você tem uma foto de capa enviada: ela aparece no lugar desta; para usar a galeria, remova a foto em "Meu perfil público")' : ' ou envie a sua foto em "Meu perfil público", logo abaixo' ?>.</p>
+  <div class="pp-capas">
+    <?php foreach (Social::CAPAS as $chave => [$nome, $fundo]): ?>
+      <label><input type="radio" name="capa_tema" value="<?= e($chave) ?>" data-fundo="<?= e($fundo) ?>" <?= ($pp['capa_tema'] ?? 'aurora') === $chave ? 'checked' : '' ?>><span style="background: <?= e($fundo) ?>"></span><?= e($nome) ?></label>
+    <?php endforeach; ?>
+  </div>
+  <h3>Cor do perfil</h3>
+  <div class="pp-cores" role="radiogroup" aria-label="Cor do perfil">
+    <?php foreach (Social::CORES as $c): ?>
+      <label title="<?= e($c) ?>"><input type="radio" name="cor_perfil" value="<?= e($c) ?>" <?= $corAtual === $c ? 'checked' : '' ?>><span style="background: <?= e($c) ?>"></span></label>
+    <?php endforeach; ?>
+    <label class="opcao pequeno"><input type="radio" name="cor_perfil" value="livre" <?= $livre ? 'checked' : '' ?>> Outra: <input type="color" name="cor_livre" value="<?= e($corAtual) ?>" aria-label="Escolher outra cor"></label>
+  </div>
+  <div class="grade-campos" style="margin-top:14px">
+    <div class="campo"><label for="pp-interesses">Interesses</label><input type="text" id="pp-interesses" name="interesses" maxlength="300" value="<?= $v('interesses') ?>" placeholder="Ex.: corrida, café, suplementação, viagens"><div class="ajuda">Separe por vírgula. Viram etiquetas (#corrida).</div></div>
+    <div class="campo"><label for="pp-pergunte">Pergunte-me sobre</label><input type="text" id="pp-pergunte" name="pergunte_sobre" maxlength="200" value="<?= $v('pergunte_sobre') ?>" placeholder="Ex.: fitoterápicos, Excel, receitas fit"><div class="ajuda">Assuntos em que você pode ajudar os colegas.</div></div>
+  </div>
+  <h3>Ordem dos blocos</h3>
+  <p class="ajuda">Use ↑ ↓ (ou o número) para escolher a ordem. Desmarque para esconder um bloco do seu perfil.</p>
+  <ol class="pp-blocos" data-ordem-blocos>
+    <?php foreach (Social::blocos($pp['blocos'] ?? null) as $i => $b): ?>
+      <li><input type="checkbox" name="mostrar[<?= e($b['chave']) ?>]" value="1" <?= $b['visivel'] ? 'checked' : '' ?> aria-label="Mostrar <?= e(Social::BLOCOS[$b['chave']]) ?>">
+        <span><?= e(Social::BLOCOS[$b['chave']]) ?></span>
+        <input type="number" name="ordem[<?= e($b['chave']) ?>]" value="<?= $i + 1 ?>" min="1" max="20" aria-label="Posição de <?= e(Social::BLOCOS[$b['chave']]) ?>">
+        <span class="pp-mover"><button type="button" data-mover="cima" aria-label="Subir <?= e(Social::BLOCOS[$b['chave']]) ?>">↑</button><button type="button" data-mover="baixo" aria-label="Descer <?= e(Social::BLOCOS[$b['chave']]) ?>">↓</button></span></li>
+    <?php endforeach; ?>
+  </ol>
+  <div class="acoes-form"><button class="botao" type="submit">Salvar personalização</button><a class="botao contorno" href="<?= url('/pessoas/' . (int) $u['id']) ?>">Ver meu perfil</a></div>
+</form>
+
 <form method="post" action="<?= url('/meu-perfil/publico') ?>" class="card" style="max-width:820px" enctype="multipart/form-data" id="perfil-publico" data-perfil-publico>
   <?= csrf_campo() ?>
   <h2>Meu perfil público</h2>

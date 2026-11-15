@@ -16,7 +16,7 @@ class MeuPerfilController extends Controller
     public function index(): void
     {
         $id = (int) Auth::id();
-        $this->tela('usuarios/meu_perfil', ['titulo' => 'Meu perfil', 'u' => Auth::usuario(), 'scripts' => ['aparencia.js'],
+        $this->tela('usuarios/meu_perfil', ['titulo' => 'Meu perfil', 'u' => Auth::usuario(), 'scripts' => ['aparencia.js', 'pessoas.js'],
             'publico' => \App\Services\PessoaService::perfil($id) ?? [], 'estilos' => ['pessoas.css']]);
     }
 
