@@ -136,6 +136,18 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
   ok(exp(p2) === 'separado' && sql(`select falta from pedidos where id=${p2}`) === '1', 'separado sem o que falta (marcado)');
   ok(Number(sql("select count(*) from notificacoes where tipo='pedido_falta' and usuario_id=(select id from usuarios where email='financeiro@demo.local')")) > antesFin, 'Financeiro avisado (nota pode precisar de ajuste)');
 
+  // ---------- A validade vem do lote (não tem campo de validade na separação) ----------
+  await d.p.goto(BASE + `/deposito/${p2}`);
+  ok(await d.p.locator('.dep-separar input[type=date]').count() === 0, 'separação não pede a validade (vem do lote)');
+  const p3 = sql(`select p.id from pedidos p join pedido_itens i on i.pedido_id=p.id join ordens_producao o on o.produto_id=i.produto_id and o.situacao='concluida' and o.lote is not null and o.validade is not null
+    where p.expedicao='aguardando' and p.id not in (${pid},${p2}) order by p.id limit 1`);
+  if (p3) {
+    const [it3, q3, lote3, val3] = sql(`select concat(i.id,'|',i.quantidade,'|',o.lote,'|',o.validade) from pedido_itens i join ordens_producao o on o.produto_id=i.produto_id and o.situacao='concluida' and o.lote is not null and o.validade is not null
+      where i.pedido_id=${p3} order by o.validade limit 1`).split('|');
+    await post(d, `/deposito/${p3}/separar`, { [`item[${it3}][qtd]`]: q3, [`item[${it3}][lotes][0][lote]`]: lote3, [`item[${it3}][lotes][0][qtd]`]: q3 });
+    ok(sql(`select validade from pedido_item_lotes where pedido_item_id=${it3} and lote='${lote3}'`) === val3, `validade do lote ${lote3} preenchida sozinha (${val3})`);
+  } else ok(true, 'sem ordem de produção com lote na demonstração (pulado)');
+
   // ---------- Rastrear lote ----------
   await d.p.goto(BASE + '/deposito/lotes?q=LT-DEP-1');
   const cliente = sql(`select coalesce(nullif(c.nome_fantasia,''), c.razao_social) from pedidos p join clientes c on c.id=p.cliente_id where p.id=${pid}`);

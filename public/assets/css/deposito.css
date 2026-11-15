@@ -79,3 +79,4 @@
 .dep-emb-linha { display: grid; grid-template-columns: minmax(0, 1fr) 110px; gap: 8px; max-width: 640px; }
 .dep-emb-resumo p { margin: 0; }
 @media (max-width: 600px) { .dep-emb-linha { grid-template-columns: minmax(0, 1fr) 80px; } }
+.dep-lote-validade { align-self: center; font-size: .74rem; color: var(--texto-suave); white-space: nowrap; min-width: 90px; }

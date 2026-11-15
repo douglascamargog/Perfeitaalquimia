@@ -21,7 +21,7 @@ if (form) {
     const qtd = tr.querySelector('[data-qtd]');
     qtd.addEventListener('input', () => { atualizar(tr); verFalta(); });
     tr.querySelector('[data-tudo]').addEventListener('click', () => { qtd.value = tr.dataset.pedidoQtd; atualizar(tr); verFalta(); });
-    // Lote escolhido da lista sugerida preenche a validade
+    // Lote escolhido: mostra a validade dele (vem da ordem de produção; não precisa digitar)
     tr.querySelectorAll('[data-lote-nome]').forEach((campo) => campo.addEventListener('change', () => preencherValidade(tr, campo)));
     tr.querySelector('[data-outro-lote]').addEventListener('click', () => {
       const caixa = tr.querySelector('[data-lotes]');
@@ -29,6 +29,7 @@ if (form) {
       const novo = ultimo.cloneNode(true);
       const n = caixa.children.length;
       novo.querySelectorAll('input').forEach((i) => { i.name = i.name.replace(/\[lotes\]\[\d+\]/, `[lotes][${n}]`); i.value = ''; });
+      novo.querySelector('[data-lote-validade]').textContent = '';
       novo.querySelector('[data-lote-nome]').addEventListener('change', (e) => preencherValidade(tr, e.target));
       caixa.append(novo);
       novo.querySelector('input').focus();
@@ -39,8 +40,9 @@ if (form) {
 
   function preencherValidade(tr, campo) {
     const opcao = [...tr.querySelectorAll('datalist option')].find((o) => o.value === campo.value);
-    const validade = campo.closest('[data-lote]').querySelector('[data-lote-validade]');
-    if (opcao && opcao.dataset.validade && !validade.value) validade.value = opcao.dataset.validade;
+    const aviso = campo.closest('[data-lote]').querySelector('[data-lote-validade]');
+    const v = opcao?.dataset.validade;
+    aviso.textContent = v ? 'vence ' + v.split('-').reverse().join('/') : (campo.value ? 'validade pelo lote' : '');
   }
 
   // Leitor: Enter com o EAN soma 1 no item; não envia o formulário

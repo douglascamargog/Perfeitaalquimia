@@ -24,6 +24,9 @@ return [
             'No despacho, os volumes já vêm preenchidos com o número de caixas. A embalagem usada fica no histórico do pedido.',
             'As caixas entram no consumo do item: a página da caixa em Compras da empresa mostra quanto tempo o estoque dura e quando comprar de novo.',
         ],
+        'melhoria' => [
+            'Separação mais rápida: não precisa mais digitar a validade. Ela vem sozinha do lote, e o "vence em…" aparece ao lado do lote para conferir.',
+        ],
         'admin' => 'Configurações › Depósito: categorias que aparecem como caixa/embalagem de envio (padrão "Embalagem de envio") e se a caixa é obrigatória para concluir a separação. Cadastre as caixas em Compras da empresa › Itens com essa categoria.',
     ],
     [

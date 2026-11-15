@@ -87,6 +87,17 @@ class DepositoService
         return $p;
     }
 
+    /** Validade de um lote do produto: da ordem de produção daquele lote ou, se não houver, de uma separação anterior */
+    public static function validadeDoLote(int $produtoId, string $lote): ?string
+    {
+        if ($produtoId <= 0 || $lote === '') {
+            return null;
+        }
+        $v = Banco::valor("SELECT MIN(validade) FROM ordens_producao WHERE produto_id = ? AND lote = ? AND validade IS NOT NULL", [$produtoId, $lote])
+            ?: Banco::valor('SELECT MIN(validade) FROM pedido_item_lotes WHERE produto_id = ? AND lote = ? AND validade IS NOT NULL', [$produtoId, $lote]);
+        return $v ?: null;
+    }
+
     /** Lotes das ordens de produção concluídas do produto, a validade mais próxima primeiro (vencidos ficam de fora) */
     public static function lotesSugeridos(int $produtoId): array
     {
@@ -140,7 +151,9 @@ class DepositoService
                     $lote = mb_substr(trim((string) ($l['lote'] ?? '')), 0, 40);
                     $q = (int) ($l['qtd'] ?? 0);
                     if ($lote !== '' && $q > 0) {
-                        $val = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($l['validade'] ?? '')) ? $l['validade'] : null;
+                        // a validade vem do próprio lote (ordem de produção ou separação anterior); não precisa digitar
+                        $val = self::validadeDoLote((int) $item['produto_id'], $lote)
+                            ?? (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($l['validade'] ?? '')) ? $l['validade'] : null);
                         $lotes[] = [$lote, $val, $q];
                     }
                 }
