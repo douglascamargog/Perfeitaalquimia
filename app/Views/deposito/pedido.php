@@ -77,7 +77,14 @@ $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceiriza
       </tbody>
     </table>
   </div>
-  <?php if ($embalagens): // caixas e embalagens usadas: dão baixa no estoque (Compras da empresa › Itens)
+  <?php if (!$embalagens): // nenhuma caixa cadastrada: o quadro aparece com a explicação e o atalho para cadastrar ?>
+  <fieldset class="dep-embalagem" data-embalagem-vazia>
+    <legend>📦 Caixas e embalagem usadas</legend>
+    <p>Nenhuma caixa cadastrada ainda. Cadastre as caixas de envio em <strong>Compras › Compras da empresa › Itens comprados</strong> (tipo "Uso e consumo", categoria "Embalagem de envio"). Depois elas aparecem aqui para anotar quantas foram usadas, com baixa automática no estoque.</p>
+    <?php if (\App\Core\Auth::pode('compras.itens')): ?><a class="botao contorno pequeno" href="<?= url('/financeiro/compras?aba=itens&novo=caixa') ?>">+ Cadastrar caixa</a>
+    <?php else: ?><p class="suave pequeno">Peça ao Financeiro ou à Qualidade para cadastrar.</p><?php endif; ?>
+  </fieldset>
+  <?php else: // caixas e embalagens usadas: dão baixa no estoque (Compras da empresa › Itens)
     $antigoEmb = array_values(array_filter((array) Sessao::antigo('embalagem', []), 'is_array'));
     $linhasEmb = $antigoEmb ?: array_map(fn($u) => ['item' => $u['materia_prima_id'], 'qtd' => rtrim(rtrim(number_format((float) $u['quantidade'], 3, ',', ''), '0'), ',')], $usadas);
     if (!$linhasEmb) { $linhasEmb = [['item' => count($embalagens) === 1 ? $embalagens[0]['id'] : '', 'qtd' => '']]; } ?>

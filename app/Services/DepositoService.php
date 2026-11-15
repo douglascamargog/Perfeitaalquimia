@@ -184,14 +184,19 @@ class DepositoService
     // Caixas e embalagens usadas (dão baixa no estoque do item)
     // ------------------------------------------------------------------
 
-    /** Itens que podem ser usados para embalar (categorias em Configurações › Depósito) */
+    /**
+     * Itens que podem ser usados para embalar: os das categorias de Configurações › Depósito (padrão "Embalagem de envio")
+     * e qualquer item com "caixa" no nome (para funcionar mesmo se a caixa foi cadastrada sem a categoria).
+     */
     public static function embalagensDisponiveis(): array
     {
         $cats = array_values(array_filter(array_map('trim', (array) Config::get('deposito.embalagem_categorias', ['Embalagem de envio']))));
-        if (!$cats) {
-            return [];
+        $w = ["LOWER(nome) LIKE '%caixa%'"];
+        if ($cats) {
+            $w[] = 'categoria IN (' . implode(',', array_fill(0, count($cats), '?')) . ')';
         }
-        return Banco::todos('SELECT id, nome, unidade, estoque FROM materias_primas WHERE ativo = 1 AND categoria IN (' . implode(',', array_fill(0, count($cats), '?')) . ') ORDER BY nome', $cats);
+        return Banco::todos('SELECT id, nome, unidade, estoque FROM materias_primas WHERE ativo = 1 AND (' . implode(' OR ', $w) . ')
+            ORDER BY LOWER(nome) LIKE \'%caixa%\' DESC, nome', $cats);
     }
 
     /** O que foi usado para embalar o pedido */

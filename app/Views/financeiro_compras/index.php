@@ -89,9 +89,12 @@ $q = fn(array $mais) => url('/financeiro/compras') . '?' . e(http_build_query($m
     </table></div>
   </section>
   <?php if ($pode): ?>
-    <details class="card it-cadastro"><summary><strong>+ Novo item</strong> <small class="suave">ex.: papel A4, detergente, caixa de envio</small></summary>
+    <?php $novaCaixa = ($_GET['novo'] ?? '') === 'caixa'; ?>
+    <details class="card it-cadastro" <?= $novaCaixa ? 'open id="nova-caixa"' : '' ?>><summary><strong>+ Novo item</strong> <small class="suave">ex.: papel A4, detergente, caixa de envio</small></summary>
       <form method="post" action="<?= url('/financeiro/compras/itens') ?>" class="pr-form" data-novo-item><?= csrf_campo() ?>
-        <?= Visao::renderizar('producao/_materia_campos', ['m' => null, 'unidades' => $unidades, 'categorias' => $categorias]) ?>
+        <?php if ($novaCaixa): ?><p class="aviso">Caixa de envio: depois de cadastrar, ela aparece na separação do Depósito para anotar quantas foram usadas.</p><?php endif; ?>
+        <?= Visao::renderizar('producao/_materia_campos', ['m' => null, 'unidades' => $unidades, 'categorias' => $categorias,
+            'padroes' => $novaCaixa ? ['nome' => 'Caixa de papelão ', 'tipo' => 'consumo', 'unidade' => 'un', 'categoria' => 'Embalagem de envio'] : []]) ?>
         <div class="acoes-form"><button class="botao" type="submit">Cadastrar item</button></div></form>
     </details>
   <?php endif; ?>

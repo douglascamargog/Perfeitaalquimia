@@ -1,7 +1,8 @@
 <?php
 /** Campos do cadastro do item (matéria-prima, embalagem, rótulo ou uso e consumo). Variáveis: $m (null = novo), $unidades, $categorias (opcional) */
 $categorias = $categorias ?? \App\Services\ItemCompraService::categorias();
-$v = fn(string $campo, $padrao = '') => $m === null ? antigo($campo, $padrao) : e((string) ($m[$campo] ?? $padrao));
+$padroes = $padroes ?? []; // valores iniciais de um item novo (ex.: atalho "Cadastrar caixa" do Depósito)
+$v = fn(string $campo, $padrao = '') => $m === null ? antigo($campo, $padroes[$campo] ?? $padrao) : e((string) ($m[$campo] ?? $padrao));
 $num = fn($valor) => rtrim(rtrim(number_format((float) $valor, 4, ',', ''), '0'), ',');
 ?>
 <div class="grade-campos">
@@ -9,14 +10,14 @@ $num = fn($valor) => rtrim(rtrim(number_format((float) $valor, 4, ',', ''), '0')
   <div class="campo"><label for="codigo">Código interno</label><input type="text" id="codigo" name="codigo" maxlength="40" value="<?= $v('codigo') ?>"></div>
   <div class="campo"><label for="unidade">Unidade</label>
     <select id="unidade" name="unidade">
-      <?php $atual = $m['unidade'] ?? (string) \App\Core\Sessao::antigo('unidade', 'kg'); foreach ($unidades as $u): ?>
+      <?php $atual = $m['unidade'] ?? (string) \App\Core\Sessao::antigo('unidade', $padroes['unidade'] ?? 'kg'); foreach ($unidades as $u): ?>
         <option <?= $atual === $u ? 'selected' : '' ?>><?= e($u) ?></option>
       <?php endforeach; ?>
     </select>
     <?php if ($m): ?><div class="ajuda">Não muda depois do primeiro movimento.</div><?php endif; ?></div>
   <div class="campo"><label for="tipo">Tipo</label>
     <select id="tipo" name="tipo">
-      <?php $tipo = $m['tipo'] ?? (string) \App\Core\Sessao::antigo('tipo', 'materia_prima'); ?>
+      <?php $tipo = $m['tipo'] ?? (string) \App\Core\Sessao::antigo('tipo', $padroes['tipo'] ?? 'materia_prima'); ?>
       <option value="materia_prima" <?= !in_array($tipo, ['embalagem', 'consumo'], true) ? 'selected' : '' ?>>Matéria-prima</option>
       <option value="embalagem" <?= $tipo === 'embalagem' ? 'selected' : '' ?>>Embalagem (pote, tampa, rótulo, lacre...)</option>
       <option value="consumo" <?= $tipo === 'consumo' ? 'selected' : '' ?>>Uso e consumo (escritório, limpeza...)</option>

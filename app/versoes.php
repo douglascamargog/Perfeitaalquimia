@@ -17,6 +17,13 @@
  */
 return [
     [
+        'versao' => '11.3', 'data' => '2026-11-15', 'titulo' => 'Caixas sempre aparecem na separação',
+        'correcao' => [
+            'Separação do pedido: o quadro "Caixas e embalagem usadas" aparece sempre. Toda caixa cadastrada entra na lista, mesmo sem a categoria "Embalagem de envio".',
+            'Sem nenhuma caixa cadastrada, o quadro explica como cadastrar e tem o botão "+ Cadastrar caixa", que já abre o cadastro preenchido.',
+        ],
+    ],
+    [
         'versao' => '11.2', 'data' => '2026-11-15', 'titulo' => 'Caixas usadas na separação',
         'novo' => [
             'Depósito: na separação, anote qual caixa (e fita, se quiser) e quantas foram usadas para embalar o pedido. Dá baixa sozinha no estoque das caixas.',

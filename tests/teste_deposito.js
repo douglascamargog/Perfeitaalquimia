@@ -83,8 +83,16 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
   const fita = sql("select id from materias_primas where nome like 'Fita adesiva%'");
   const est = (id) => Number(sql(`select estoque from materias_primas where id=${id}`));
   const [c0, f0] = [est(caixa), est(fita)];
+  // nenhuma caixa cadastrada: o quadro aparece explicando como cadastrar (com atalho)
+  sql("update materias_primas set ativo=0 where categoria='Embalagem de envio' or lower(nome) like '%caixa%'");
   await d.p.goto(BASE + `/deposito/${pid}`);
-  ok(await d.p.locator('[data-embalagem] select option', { hasText: 'Caixa de papelão' }).count() === 1, 'separação mostra as caixas para escolher (com o estoque)');
+  ok(await d.p.locator('[data-embalagem-vazia]').count() === 1, 'sem caixa cadastrada: o quadro aparece com a explicação de como cadastrar');
+  sql("update materias_primas set ativo=1 where categoria='Embalagem de envio' or lower(nome) like '%caixa%'");
+  // caixa cadastrada SEM a categoria também aparece (pelo nome)
+  sql(`update materias_primas set categoria=null where id=${caixa}`);
+  await d.p.goto(BASE + `/deposito/${pid}`);
+  ok(await d.p.locator('[data-embalagem] select option', { hasText: 'Caixa de papelão' }).count() === 1, 'separação mostra as caixas para escolher (mesmo sem a categoria, pelo nome)');
+  sql(`update materias_primas set categoria='Embalagem de envio' where id=${caixa}`);
   msg = await post(d, `/deposito/${pid}/separar`, { ...tudo(true), concluir: '1' });
   ok(msg.includes('caixa') && exp(pid) === 'separando', 'sem informar a caixa não conclui');
   await post(d, `/deposito/${pid}/separar`, { ...tudo(true), 'embalagem[0][item]': caixa, 'embalagem[0][qtd]': '3' });
