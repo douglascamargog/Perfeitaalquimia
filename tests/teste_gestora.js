@@ -20,7 +20,7 @@ async function entrar(p, email) {
   const tv1 = sql("select id from usuarios where email='televendas1@demo.local'");
   const tv2 = sql("select id from usuarios where email='televendas2@demo.local'");
 
-  ok(sql(`select concat(perfil_id=(select id from perfis where slug='vendedor'),'|',gestor) from usuario_funcoes uf join usuarios u on u.id=uf.usuario_id where u.id=${eu}`) === '1|1', 'demonstração: gestora com perfil Vendedor e "gestor(a) do setor" no Televendas');
+  ok(sql(`select concat(perfil_id=(select id from perfis where slug='gestor_setor'),'|',gestor) from usuario_funcoes uf join usuarios u on u.id=uf.usuario_id where u.id=${eu}`) === '1|1', 'demonstração: gestora com perfil Gestor de setor e "gestor(a) do setor" no Televendas');
   const p = await nova();
   await entrar(p, 'gestora.televendas@demo.local');
 
