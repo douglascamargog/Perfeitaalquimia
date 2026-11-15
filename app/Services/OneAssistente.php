@@ -120,6 +120,13 @@ class OneAssistente
         }
 
         $falas = array_values(array_filter($falas));
+        // Agenda e recompra ganham botões que já fazem a coisa (abrir o cliente, ligar, WhatsApp, deixar para amanhã)
+        foreach ($falas as &$f) {
+            if (empty($f['acoes']) && in_array($f['link'] ?? '', ['/agenda', '/recompra'], true) && ($b = OneTela::balao($f['link'], [], false))) {
+                $f['acoes'] = $b['acoes'];
+            }
+        }
+        unset($f);
         // Dicas da tela atual aparecem primeiro
         usort($falas, fn($a, $b) => (int) self::daPagina($b, $pagina) <=> (int) self::daPagina($a, $pagina));
         return $falas ?: [['humor' => 'feliz', 'texto' => 'Tudo em ordem por aqui. Quando houver algo importante, eu aviso!']];

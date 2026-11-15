@@ -90,6 +90,10 @@ class AgendaController extends Controller
             ClienteEvento::registrar((int) $tarefa['cliente_id'], 'tarefa', 'Concluída: ' . $tarefa['titulo'], Auth::id());
         }
         Sessao::aviso('sucesso', 'Tarefa concluída.');
+        // One comemora quando a pessoa zera a agenda de hoje (nada atrasado nem para hoje)
+        if ((int) $tarefa['usuario_id'] === (int) Auth::id() && !Banco::valor('SELECT 1 FROM tarefas WHERE usuario_id = ? AND concluida_em IS NULL AND vence_em <= CURDATE() LIMIT 1', [Auth::id()])) {
+            \App\Services\OneTela::festejar('Agenda do dia zerada! ✅', 'Nenhum retorno atrasado nem para hoje. Que tal adiantar a Recompra?');
+        }
         $voltar = (string) ($_POST['voltar'] ?? '');
         redirecionar(preg_match('#^/carteira/clientes/\d+$#', $voltar) || str_starts_with($voltar, '/agenda') ? $voltar : '/agenda');
     }

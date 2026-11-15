@@ -93,6 +93,12 @@ function campanha(valor, deuDesconto) {
   g.hidden = !ganhou.length;
   g.textContent = 'Ganhou: ' + ganhou.join(' · ');
   caixa.querySelector('[data-campanha-barra]').style.width = (prox ? Math.min(100, valor / prox.valor * 100) : 100) + '%';
+  // One comemora cada faixa nova que o cliente conquista neste pedido
+  const chave = ganhou.join('|');
+  if (campanha.antes !== undefined && ganhou.length > campanha.antes.split('|').filter(Boolean).length) {
+    window.One?.dizer('feliz', 'Boa! Com esse pedido o cliente ganhou: ' + ganhou.filter((g) => !campanha.antes.includes(g)).join(' · ') + '. 🎉');
+  }
+  campanha.antes = chave;
   return r;
 }
 

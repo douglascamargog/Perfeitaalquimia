@@ -12,6 +12,17 @@ class OneController extends Controller
     public function falas(): void
     {
         $pagina = '/' . trim((string) ($_GET['pagina'] ?? '/'), '/');
-        echo Visao::renderizar('one/_falas', ['saudacao' => OneAssistente::saudacao(), 'falas' => OneAssistente::falas($pagina)]);
+        echo Visao::renderizar('one/_falas', ['saudacao' => OneAssistente::saudacao(), 'falas' => OneAssistente::falas($pagina),
+            'ajuda' => \App\Services\OneTela::ajuda($pagina)]);
+    }
+
+    /** O One na tela atual (JSON): balão importante (se a pessoa deixa o One puxar conversa) e a ajuda da tela */
+    public function naTela(): void
+    {
+        $pagina = '/' . trim((string) parse_url((string) ($_GET['pagina'] ?? '/'), PHP_URL_PATH), '/');
+        parse_str((string) parse_url((string) ($_GET['pagina'] ?? ''), PHP_URL_QUERY), $query);
+        $usuario = \App\Core\Auth::usuario();
+        $balao = (int) ($usuario['one_balao'] ?? 1) ? \App\Services\OneTela::balao($pagina, $query) : null;
+        $this->json(['balao' => $balao, 'ajuda' => \App\Services\OneTela::ajuda($pagina)]);
     }
 }

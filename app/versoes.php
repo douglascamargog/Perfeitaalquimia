@@ -17,6 +17,16 @@
  */
 return [
     [
+        'versao' => '12.3', 'data' => '2026-11-15', 'titulo' => 'O One mais presente',
+        'novo' => [
+            'O One puxa conversa sozinho quando há algo importante na tela: retornos atrasados na Agenda, por qual cliente começar na Recompra, pedidos esperando na Aprovação, e-commerce com horário no Depósito e outros.',
+            'Os balões do One trazem botões que já fazem a coisa: abrir o cliente, ligar, mandar WhatsApp com a mensagem pronta, deixar o retorno para amanhã, repetir o último pedido.',
+            '"O que dá pra fazer aqui?": o One explica a tela aberta em poucos passos, com o link para a aula da Academia.',
+            'O One comemora com você: pedido enviado, cliente reconquistado, agenda do dia zerada, meta batida e cada faixa da campanha que o cliente ganha no pedido.',
+            'Não quer que ele puxe conversa? Em Meu perfil › O One dá para deixar ele quietinho (ele só fala quando você clica). "Hoje não" no balão também funciona.',
+        ],
+    ],
+    [
         'versao' => '12.2', 'data' => '2026-11-15', 'titulo' => 'Mais rápido com muitos clientes',
         'melhoria' => [
             'O sistema ficou mais rápido para carteiras grandes: o Início dos gestores, o sino, a Recompra, as Carteiras e o Acompanhamento abrem bem mais depressa.',

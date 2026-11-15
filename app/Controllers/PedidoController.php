@@ -91,6 +91,15 @@ class PedidoController extends Controller
             OrcamentoService::vincularPedido((int) $this->campo('orcamento_id'), (int) $id, (int) Auth::id()); // o orçamento virou este pedido
         }
         Sessao::aviso('sucesso', "Pedido #$id criado e enviado ao ERP como orçamento. Agora é com o Financeiro.");
+        // One comemora: cliente que estava parado (sem compra há X dias) vale festa maior
+        $total = dinheiro((float) \App\Core\Banco::valor('SELECT total FROM pedidos WHERE id = ?', [$id]));
+        $nome = $cliente['nome_fantasia'] ?: $cliente['razao_social'];
+        $dias = (int) \App\Core\Config::get('carteira.dias_inatividade', 90);
+        if ($cliente['ultima_compra_em'] && strtotime($cliente['ultima_compra_em']) < strtotime("-$dias days")) {
+            \App\Services\OneTela::festejar('Cliente reconquistado! 🏆', "$nome voltou a comprar depois de muito tempo: pedido #$id de $total. Mandou bem!");
+        } else {
+            \App\Services\OneTela::festejar('Pedido enviado! 🎉', "Pedido #$id de $nome: $total. Agora é com o Financeiro, eu te aviso quando for aprovado.");
+        }
         redirecionar("/pedidos/$id");
     }
 

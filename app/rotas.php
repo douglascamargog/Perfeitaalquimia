@@ -43,6 +43,7 @@ return [
     // ---------- Início ----------
     ['GET',  '/',              'InicioController@index', 'logado'],
     ['GET',  '/one/falas',     'OneController@falas',    'logado'],   // One, o ajudante
+    ['GET',  '/one/tela',      'OneController@naTela',     'logado'],   // One na tela atual: balão importante e ajuda
 
     // ---------- Carteira e CRM ----------
     ['GET',  '/carteira',                       'CarteiraController@visaoGeral', 'carteira.ver_propria|carteira.ver_todas'],
@@ -361,6 +362,7 @@ return [
     ['POST', '/terceirizacao/rotulos/{id}',     'TerceirizacaoController@movimentar',    'terceirizacao.editar'],
     ['GET',  '/meu-perfil',                     'MeuPerfilController@index',  'logado'],
     ['POST', '/meu-perfil',                     'MeuPerfilController@salvar', 'logado'],
+    ['POST', '/meu-perfil/one',                 'MeuPerfilController@one',    'logado'],
     ['POST', '/meu-perfil/aparencia',           'MeuPerfilController@aparencia', 'logado'],
 
     // ---------- Academia (Central de Televendas) ----------

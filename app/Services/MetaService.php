@@ -94,6 +94,8 @@ class MetaService
             return;
         }
         $nome = (string) Banco::valor('SELECT nome FROM usuarios WHERE id = ?', [$usuarioId]);
+        // A própria pessoa também fica sabendo (e o One comemora na próxima tela que ela abrir)
+        NotificacaoService::avisar([$usuarioId], 'meta_batida', 'Você bateu a meta do mês! 🎯', '/meu-mes', ['texto' => 'Vendido ' . dinheiro($depois) . ' · meta ' . dinheiro($meta)]);
         NotificacaoService::diretoria('meta', "$nome bateu a meta do mês! 🎯", $link,
             ['texto' => 'Vendido ' . dinheiro($depois) . ' · meta ' . dinheiro($meta)], $usuarioId);
     }

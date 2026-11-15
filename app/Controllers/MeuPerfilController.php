@@ -67,4 +67,12 @@ class MeuPerfilController extends Controller
         }
         redirecionar('/meu-perfil');
     }
+
+    /** Meu perfil › O One: deixar (ou não) o One puxar conversa sozinho */
+    public function one(): void
+    {
+        Banco::atualizar('usuarios', (int) Auth::id(), ['one_balao' => !empty($_POST['one_balao']) ? 1 : 0]);
+        Sessao::aviso('sucesso', !empty($_POST['one_balao']) ? 'Combinado! Eu aviso quando houver algo importante. 😊' : 'Tudo bem, fico quietinho. É só me chamar quando precisar.');
+        redirecionar('/meu-perfil#one');
+    }
 }

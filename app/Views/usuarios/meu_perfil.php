@@ -101,6 +101,15 @@ $atual = 'personalizada';
 foreach (\App\Services\Aparencia::COMBINACOES as $chave => [, $p, $s]) {
     if ($p === $corP && $s === $corS) { $atual = $chave; break; }
 } ?>
+<form method="post" action="<?= url('/meu-perfil/one') ?>" class="card mp-one" style="max-width:820px" id="one" data-meu-one>
+  <?= csrf_campo() ?>
+  <h2><img src="<?= asset('img/one/one-ola-padrao.svg') ?>" alt="" width="30" height="33" style="vertical-align:middle"> O One</h2>
+  <label class="opcao"><input type="checkbox" name="one_balao" value="1" <?= (int) ($u['one_balao'] ?? 1) ? 'checked' : '' ?>>
+    O One pode puxar conversa sozinho quando houver algo importante na tela (atrasados, cliente para recomprar, pedidos esperando…)</label>
+  <p class="pequeno suave">Desligado, ele só fala quando você clica nele. As comemorações e a ajuda das telas continuam.</p>
+  <button class="botao contorno" type="submit">Salvar</button>
+</form>
+
 <form method="post" action="<?= url('/meu-perfil/aparencia') ?>" class="card mp-aparencia" style="max-width:820px" data-aparencia>
   <?= csrf_campo() ?>
   <h2>Aparência</h2>
