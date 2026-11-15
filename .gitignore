@@ -1,5 +1,6 @@
 # Configuração com senhas e chaves — nunca versionar
 /config/config.php
+/config/segredos.php
 
 # Arquivos gerados em execução (logs, uploads de importação, cache, pedidos do OmieFake)
 /storage/*

@@ -45,7 +45,7 @@ fi
 echo "$VERSAO" > "$DESTINO/VERSAO"
 
 if [ "$TIPO" = "atualizacao" ]; then
-  rm -f "$DESTINO/config/config.php"   # nunca sobrescrever as senhas da hospedagem
+  rm -f "$DESTINO/config/config.php" "$DESTINO/config/segredos.php"   # nunca sobrescrever as senhas e chaves da hospedagem
   mkdir -p "$SAIDA"
   ARQUIVO="$SAIDA/$VERSAO.zip"
   rm -f "$ARQUIVO"

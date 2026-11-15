@@ -17,6 +17,11 @@
  */
 return [
     [
+        'versao' => '12.5', 'data' => '2026-11-15', 'titulo' => 'Chave da IA pela tela',
+        'melhoria' => ['Ajustes internos para ligar a IA do One com mais facilidade.'],
+        'admin' => 'A chave da Anthropic agora é cadastrada pela tela: ⚙️ Administração › Pergunte ao One › "Chave da IA" (não precisa mais editar o config.php). Ela fica em config/segredos.php, protegida, fora do banco e dos pacotes, e nunca aparece de novo. Depois use "Testar a IA agora".',
+    ],
+    [
         'versao' => '12.4', 'data' => '2026-11-15', 'titulo' => 'Pergunte ao One',
         'novo' => [
             'Pergunte ao One: abra o One e escreva a sua dúvida, do jeito que falaria com um colega. Ex.: "como faço um orçamento?", "quanto falta para a minha meta?", "quais campanhas estão no ar?".',

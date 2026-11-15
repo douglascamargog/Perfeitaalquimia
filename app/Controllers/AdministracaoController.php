@@ -25,4 +25,13 @@ class AdministracaoController extends Controller
         \App\Core\Sessao::aviso($ok ? 'sucesso' : 'erro', $mensagem);
         redirecionar('/administracao');
     }
+
+    /** Cadastrar ou remover a chave da IA (Anthropic) pela tela */
+    public function chaveIa(): void
+    {
+        $remover = !empty($_POST['remover']);
+        $erro = \App\Services\ChaveIA::salvar($remover ? '' : (string) ($_POST['chave'] ?? ''), (int) \App\Core\Auth::id());
+        \App\Core\Sessao::aviso($erro ? 'erro' : 'sucesso', $erro ?? ($remover ? 'Chave removida. O One volta a responder sem IA.' : 'Chave guardada com segurança. Agora clique em "Testar a IA agora".'));
+        redirecionar('/administracao#chave-ia');
+    }
 }

@@ -20,6 +20,10 @@ if (!is_file($arquivoConfig)) {
     exit('Configuração não encontrada. Copie config/config.example.php para config/config.php e preencha os dados.');
 }
 $GLOBALS['config'] = require $arquivoConfig;
+// Chaves cadastradas pela tela (Administração › Chave da IA): ficam em config/segredos.php, fora do git, do banco e dos pacotes
+if (is_file(RAIZ . '/config/segredos.php')) {
+    $GLOBALS['config'] = array_replace_recursive($GLOBALS['config'], (array) require RAIZ . '/config/segredos.php');
+}
 
 // 2. Autoload: App\Core\Banco  →  app/Core/Banco.php
 spl_autoload_register(function (string $classe): void {

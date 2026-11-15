@@ -38,6 +38,27 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
   await a.goto(BASE + '/entrar'); await a.fill('#email', 'admin@demo.local'); await a.fill('#senha', 'Demo@2026'); await a.click('button[type=submit]'); await a.waitForLoadState();
   await a.goto(BASE + '/administracao');
   ok((await a.locator('[data-uso-one]').innerText()).includes('pergunta(s) este mês'), 'Administração mostra o uso do Pergunte ao One');
+  // Chave da IA pela tela (sem editar o config.php)
+  const fs = require('fs');
+  try { fs.unlinkSync('config/segredos.php'); } catch { /* não existia */ }
+  await a.fill('[data-chave-ia]', 'qualquer-coisa');
+  await Promise.all([a.waitForNavigation(), a.click('#chave-ia button:has-text("Guardar chave")')]);
+  ok((await a.locator('.aviso.erro').innerText()).includes('sk-ant-') && !fs.existsSync('config/segredos.php'), 'chave em formato errado: recusada com explicação');
+  const chaveFalsa = 'sk-ant-api03-' + 'x'.repeat(40) + 'ABCD';
+  await a.fill('[data-chave-ia]', chaveFalsa);
+  await Promise.all([a.waitForNavigation(), a.click('#chave-ia button:has-text("Guardar chave")')]);
+  const html = await a.content();
+  ok(fs.existsSync('config/segredos.php') && (fs.statSync('config/segredos.php').mode & 0o777) === 0o600 && fs.readFileSync('config/segredos.php', 'utf8').includes(chaveFalsa), 'chave guardada em config/segredos.php, só o dono lê (600)');
+  ok(!html.includes(chaveFalsa) && html.includes('sk-ant-…ABCD') && (await a.inputValue('[data-chave-ia]')) === '', 'a tela nunca mostra a chave de novo (só sk-ant-…ABCD)');
+  ok(sql("select count(*) from auditoria where acao='trocar_chave_ia'") === '1' && !sql("select coalesce(group_concat(depois_json),'') from auditoria where acao='trocar_chave_ia'").includes(chaveFalsa), 'troca da chave fica na auditoria, sem o valor');
+  a.on('dialog', (d) => d.accept());
+  await Promise.all([a.waitForNavigation(), a.click('#chave-ia button:has-text("Remover")')]);
+  ok(!fs.readFileSync('config/segredos.php', 'utf8').includes('sk-ant'), 'remover a chave apaga do arquivo');
+  try { fs.unlinkSync('config/segredos.php'); } catch { /* ok */ }
+  const vendedora = await (await b.newContext()).newPage();
+  await vendedora.goto(BASE + '/entrar'); await vendedora.fill('#email', 'televendas1@demo.local'); await vendedora.fill('#senha', 'Demo@2026'); await vendedora.click('button[type=submit]'); await vendedora.waitForLoadState();
+  const r403 = await vendedora.request.post(BASE + '/administracao/chave-ia', { form: { chave: chaveFalsa, _csrf: await vendedora.locator('meta[name=csrf]').getAttribute('content') } });
+  ok(r403.status() === 403 && !fs.existsSync('config/segredos.php'), 'vendedora não consegue gravar chave (403)');
 
   // Com IA: contra a API simulada
   const sim = spawn('php', ['-S', '127.0.0.1:8099', 'tests/recursos/anthropic_simulada.php'], { stdio: 'ignore' });

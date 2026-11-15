@@ -42,7 +42,7 @@ class OneIAClaude implements OneIAInterface
         $uso = ['tokens_entrada' => 0, 'tokens_saida' => 0, 'custo' => 0.0, 'consultas' => []];
         $autoload = RAIZ . '/vendor/autoload.php';
         if ($this->chave === '' || !is_file($autoload)) {
-            return ['texto' => 'A IA ainda não está pronta neste servidor (falta a chave ou a pasta vendor/). Peça ao admin.', 'situacao' => 'erro'] + $uso;
+            return ['texto' => 'A IA ainda não está pronta neste servidor (falta a chave em Administração ou a pasta vendor/). Peça ao admin.', 'situacao' => 'erro'] + $uso;
         }
         require_once $autoload;
         $cliente = new Client(apiKey: $this->chave, baseUrl: $this->endereco ?: null); // endereço só muda em testes
@@ -115,7 +115,7 @@ class OneIAClaude implements OneIAInterface
                 $mensagens[] = ['role' => 'user', 'content' => $resultados];
             }
         } catch (AuthenticationException | PermissionDeniedException) {
-            return ['texto' => 'A chave da IA foi recusada. Peça ao admin para conferir o config.php.', 'situacao' => 'erro'] + $uso;
+            return ['texto' => 'A chave da IA foi recusada. Peça ao admin para conferir em Administração › Chave da IA.', 'situacao' => 'erro'] + $uso;
         } catch (RateLimitException) {
             return ['texto' => 'Muita gente perguntando ao mesmo tempo. Espere um minutinho e tente de novo.', 'situacao' => 'erro'] + $uso;
         } catch (AnthropicException $erro) {
@@ -132,7 +132,7 @@ class OneIAClaude implements OneIAInterface
     public function testar(): array
     {
         if ($this->chave === '') {
-            return [false, 'Falta a chave: cole a chave da Anthropic no config.php (integracoes › anthropic › chave).'];
+            return [false, 'Falta a chave: cole a chave da Anthropic aqui em Administração, no campo "Chave da IA".'];
         }
         if (!is_file(RAIZ . '/vendor/autoload.php')) {
             return [false, 'A pasta vendor/ (biblioteca da IA) não está no servidor. Envie o pacote completo.'];

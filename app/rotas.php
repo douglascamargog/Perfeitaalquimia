@@ -13,7 +13,8 @@ return [
     ['POST', '/entrar',        'AuthController@entrar',     'publico'],
     ['POST', '/sair',          'AuthController@sair',       'logado'],
     ['GET',  '/administracao', 'AdministracaoController@index', 'logado'],
-    ['POST', '/administracao/testar-ia', 'AdministracaoController@testarIa', 'config.gerenciar'], // engrenagem do topo: só as telas que a pessoa pode abrir
+    ['POST', '/administracao/testar-ia', 'AdministracaoController@testarIa', 'config.gerenciar'],
+    ['POST', '/administracao/chave-ia', 'AdministracaoController@chaveIa', 'config.gerenciar'], // engrenagem do topo: só as telas que a pessoa pode abrir
     ['GET',  '/minha-senha',   'AuthController@formSenha',  'logado'],
     ['POST', '/minha-senha',   'AuthController@trocarSenha', 'logado'],
 
