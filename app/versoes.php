@@ -17,6 +17,16 @@
  */
 return [
     [
+        'versao' => '11.7', 'data' => '2026-11-15', 'titulo' => 'Tabela nutricional e ficha técnica para imprimir',
+        'novo' => [
+            'Ficha técnica: bloco "Tabela nutricional" no modelo da Anvisa. Preencha porção, porções por embalagem e nutrientes, e a tabela vai sendo desenhada ao lado.',
+            'O %VD é calculado sozinho pelos valores diários de referência da Anvisa para adultos. Dá para digitar outro valor quando precisar.',
+            'Baixe a tabela nutricional como imagem (PNG em alta resolução) ou PDF, prontos para mandar à gráfica.',
+            'Botão "Imprimir ficha técnica": documento A4 com identificação, composição (com % de cada matéria-prima), ingredientes, tabela nutricional, modo de uso, armazenamento, alergênicos, advertências, embalagem e assinatura da Responsável Técnica.',
+            'As tabelas nutricionais que já estavam nos produtos (Academia) foram trazidas para a ficha técnica, com o %VD recalculado pelos valores atuais da Anvisa.',
+        ],
+    ],
+    [
         'versao' => '11.6', 'data' => '2026-11-15', 'titulo' => 'Pedir ao Marketing mais enxuto',
         'melhoria' => [
             'Pedir ao Marketing: saíram da lista de assuntos "Rótulo ou embalagem", "Campanha de desconto ou oferta relâmpago" e "Envio FULL". Os pedidos antigos desses assuntos continuam guardados.',

@@ -1,0 +1,36 @@
+/* Ficha técnica do produto impressa (A4 em pé) */
+@page { size: A4 portrait; margin: 12mm; }
+* { box-sizing: border-box; }
+body.ft { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #111; background: #e9ecea; font-size: 11px; }
+.ft-demo { margin: 0; padding: 4px; text-align: center; background: #caff4d; }
+.ft-folha { width: 186mm; margin: 10px auto; background: #fff; padding: 10mm; box-shadow: 0 2px 14px rgba(0, 0, 0, .15); }
+.ft-cab { display: grid; grid-template-columns: 34mm 1fr 48mm; gap: 8px; align-items: center; border: 1.5px solid #222; padding: 6px 10px; }
+.ft-cab img { max-width: 32mm; max-height: 20mm; }
+.ft-titulo h1 { margin: 0; font-family: 'Times New Roman', Times, serif; font-size: 22px; text-align: center; }
+.ft-titulo p { margin: 2px 0 0; text-align: center; font-weight: 700; font-size: 13px; color: #1f5c46; }
+.ft-doc { font-size: 10px; line-height: 1.6; border-left: 1px solid #999; padding-left: 8px; }
+.ft-sec { margin-top: 10px; break-inside: avoid; }
+.ft-sec h2 { font-size: 12px; margin: 0 0 6px; padding: 4px 8px; background: #1f5c46; color: #fff; letter-spacing: .02em; }
+.ft-sec h3 { font-size: 11px; margin: 10px 0 4px; }
+.ft-identificacao { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; }
+.ft-foto { width: 32mm; height: 32mm; object-fit: contain; border: 1px solid #ddd; }
+.ft-grade { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid #ccc; border-left: 1px solid #ccc; }
+.ft-campo { padding: 3px 6px; border-right: 1px solid #ccc; border-bottom: 1px solid #ccc; display: grid; }
+.ft-campo span { font-size: 8.5px; text-transform: uppercase; color: #666; letter-spacing: .03em; }
+.ft-campo b { font-size: 10.5px; }
+.ft-tabela { width: 100%; border-collapse: collapse; }
+.ft-tabela th, .ft-tabela td { border: 1px solid #bbb; padding: 3px 6px; text-align: left; }
+.ft-tabela th { background: #eef3f0; font-size: 10px; }
+.ft-tabela .num { text-align: right; }
+.ft-tabela tfoot td { font-weight: 700; background: #f6f8f7; }
+.ft-texto { margin: 5px 0; line-height: 1.45; text-align: justify; }
+.ft-lista { margin: 0; padding-left: 16px; }
+.ft-duas { display: grid; grid-template-columns: 92mm 1fr; gap: 10px; }
+.ft-duas .tn { font-size: 10px; max-width: 92mm; }
+.ft-duas .tn-titulo { font-size: 1.3rem; }
+.ft-assin { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 14px; border: 1.5px solid #222; }
+.ft-assin div { padding: 6px 8px; min-height: 18mm; border-right: 1px solid #999; display: grid; align-content: start; gap: 2px; }
+.ft-assin div:last-child { border-right: 0; }
+.ft-assin small { color: #777; }
+.suave { color: #777; }
+@media print { body.ft { background: #fff; } .ft-folha { margin: 0; box-shadow: none; padding: 0; width: auto; } .ft-demo { display: none; } }
