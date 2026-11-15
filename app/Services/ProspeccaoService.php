@@ -60,7 +60,7 @@ class ProspeccaoService
         $naCarteira = $enviadas = [];
         if ($cnpjs) {
             $marcas = implode(',', array_fill(0, count($cnpjs), '?'));
-            foreach (Banco::todos("SELECT c.id, c.cnpj, c.tipo, u.nome AS responsavel FROM clientes c LEFT JOIN usuarios u ON u.id = c.responsavel_id
+            foreach (Banco::todos("SELECT c.id, c.cnpj, c.tipo, u.nome AS responsavel, u.foto AS responsavel_foto FROM clientes c LEFT JOIN usuarios u ON u.id = c.responsavel_id
                     WHERE c.excluido_em IS NULL AND c.cnpj IN ($marcas)", $cnpjs) as $c) {
                 $naCarteira[$c['cnpj']] = $c;
             }
@@ -152,7 +152,7 @@ class ProspeccaoService
         $pagina = min(max(1, $pagina), $paginas);
         $prioridades = implode(',', array_map(fn($x) => Banco::pdo()->quote($x), Listas::prioridades()));
         $proximos = Banco::todos("SELECT c.id, c.razao_social, c.nome_fantasia, c.cidade, c.uf, c.bairro, c.prioridade, c.telefone, c.whatsapp,
-                c.criado_em, o.nome AS origem, s.nome AS segmento, u.nome AS responsavel
+                c.criado_em, o.nome AS origem, s.nome AS segmento, u.nome AS responsavel, u.foto AS responsavel_foto
             FROM clientes c LEFT JOIN origens o ON o.id = c.origem_id LEFT JOIN segmentos s ON s.id = c.segmento_id LEFT JOIN usuarios u ON u.id = c.responsavel_id
             WHERE $where AND c.contatado = 0 ORDER BY FIELD(c.prioridade, $prioridades), c.criado_em, c.id
             LIMIT $porPagina OFFSET " . (($pagina - 1) * $porPagina), $par);

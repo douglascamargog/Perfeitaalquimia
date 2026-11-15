@@ -28,7 +28,7 @@ $primeiro = $r['total'] ? ($r['pagina'] - 1) * $r['por_pagina'] + 1 : 0;
           <td><?= $c['telefone'] ? e(Normalizar::telefoneFormatado($c['telefone'])) : ($c['whatsapp'] ? e(Normalizar::telefoneFormatado($c['whatsapp'])) : '<span class="suave">Não informado</span>') ?></td>
           <td><span class="selo prioridade-<?= e(Normalizar::semAcento($c['prioridade'])) ?>"><?= e($c['prioridade']) ?></span></td>
           <td><span class="selo-etapa" style="--cor: <?= e($c['etapa_cor']) ?>"><?= e($c['etapa']) ?></span></td>
-          <td class="pequeno"><?= e($c['responsavel']) ?></td>
+          <td class="pequeno"><?= pessoa($c['responsavel'], $c['responsavel_foto'] ?? null) ?></td>
           <td class="pequeno"><?= $c['ultima_compra_em'] ? data_br($c['ultima_compra_em']) : '<span class="suave">—</span>' ?></td>
         </tr>
       <?php endforeach; ?>

@@ -44,7 +44,7 @@ $aberto = $c['situacao'] === 'aberta';
       <?php if ($c['email']): ?><a class="botao contorno pequeno" href="mailto:<?= e($c['email']) ?>"><?= e($c['email']) ?></a><?php endif; ?>
       <?php if (!$tel && !$whats && !$c['email']): ?><span class="selo vermelho">Nenhum contato no cadastro</span><?php endif; ?>
     </div>
-    <p class="pequeno suave">Vendedor da carteira: <?= e($c['vendedor'] ?? '—') ?></p>
+    <p class="pequeno suave">Vendedor da carteira: <?= pessoa($c['vendedor'] ?? null, $c['vendedor_foto'] ?? null, false, 20) ?></p>
     <?= Visao::renderizar('carteira/_busca_contatos', ['clienteId' => (int) $c['cliente_id'], 'destaque' => $c['etapa_tipo'] === 'sem_contato' || (!$tel && !$whats)]) ?>
   </section>
 

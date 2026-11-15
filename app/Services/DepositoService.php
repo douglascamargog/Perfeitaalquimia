@@ -38,7 +38,7 @@ class DepositoService
         return Banco::todos("SELECT p.id, p.numero_nf, p.total, p.expedicao, p.expedicao_prioridade, p.expedicao_aguarda_produto, p.expedicao_desde,
                 p.transportadora, p.rastreio, p.despachado_em, p.falta,
                 COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS cliente, c.cidade, c.uf,
-                v.nome AS vendedor, s.nome AS separador,
+                v.nome AS vendedor, v.foto AS vendedor_foto, s.nome AS separador,
                 (SELECT COUNT(*) FROM pedido_itens i WHERE i.pedido_id = p.id) AS itens,
                 (SELECT COALESCE(SUM(i.quantidade), 0) FROM pedido_itens i WHERE i.pedido_id = p.id) AS unidades,
                 (SELECT COUNT(*) FROM pedido_itens i WHERE i.pedido_id = p.id AND i.terceirizacao_produto_id IS NOT NULL) AS terceirizados
@@ -67,7 +67,7 @@ class DepositoService
     public static function pedido(int $id): ?array
     {
         $p = Banco::um("SELECT p.*, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS cliente, c.cidade, c.uf, c.telefone,
-                v.nome AS vendedor, s.nome AS separador, d.nome AS despachante
+                v.nome AS vendedor, v.foto AS vendedor_foto, s.nome AS separador, d.nome AS despachante
             FROM pedidos p JOIN clientes c ON c.id = p.cliente_id LEFT JOIN usuarios v ON v.id = p.vendedor_id
             LEFT JOIN usuarios s ON s.id = p.separado_por LEFT JOIN usuarios d ON d.id = p.despachado_por WHERE p.id = ?", [$id]);
         if (!$p) {

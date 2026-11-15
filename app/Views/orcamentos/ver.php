@@ -27,7 +27,7 @@ $imagem = [
     <h1><?= e($o['cliente']) ?></h1>
     <p><span class="selo <?= $sc ?>" data-situacao="<?= e($situacao) ?>"><?= e($sn) ?></span>
       <?= $o['cliente_alterou'] ? '<span class="selo laranja">cliente alterou</span>' : '' ?>
-      <?= e($o['cidade']) ?>/<?= e($o['uf']) ?> · criado em <?= data_br($o['criado_em']) ?> por <?= e((string) $o['vendedor']) ?> · válido até <strong><?= data_br($o['validade']) ?></strong>
+      <?= e($o['cidade']) ?>/<?= e($o['uf']) ?> · criado em <?= data_br($o['criado_em']) ?> por <?= pessoa($o['vendedor'] ?? null, $o['vendedor_foto'] ?? null, false, 18) ?> · válido até <strong><?= data_br($o['validade']) ?></strong>
       <?= $o['visto_em'] ? ' · cliente abriu em ' . data_br($o['visto_em'], true) : '' ?></p>
   </div>
   <div class="acoes">

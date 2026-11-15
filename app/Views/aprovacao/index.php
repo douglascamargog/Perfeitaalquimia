@@ -12,7 +12,7 @@
       <header>
         <div><a href="<?= url('/pedidos/' . (int) $p['id']) ?>"><strong>Pedido #<?= (int) $p['id'] ?></strong></a><?= \App\Services\NotificacaoService::marcaPedido((int) $p['id']) ?> · <?= data_br($p['criado_em'], true) ?>
           <h2><?= e($p['nome_fantasia'] ?: $p['razao_social']) ?></h2>
-          <small><?= e($p['cidade']) ?>/<?= e($p['uf']) ?> · vendedor: <?= e($p['vendedor'] ?? '—') ?> · <?= e(['catalogo' => 'pelo catálogo', 'sistema' => 'pelo sistema', 'app' => 'pelo app'][$p['origem']] ?? '') ?></small></div>
+          <small><?= e($p['cidade']) ?>/<?= e($p['uf']) ?> · vendedor: <?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null, false, 18) ?> · <?= e(['catalogo' => 'pelo catálogo', 'sistema' => 'pelo sistema', 'app' => 'pelo app'][$p['origem']] ?? '') ?></small></div>
         <div class="ped-fila-valor"><strong><?= dinheiro((float) $p['total']) ?></strong><small><?= e($p['forma']) ?><?= $p['condicao'] ? ' · ' . e($p['condicao']) : '' ?></small></div>
       </header>
       <div class="ped-fila-corpo">

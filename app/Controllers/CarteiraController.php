@@ -143,7 +143,7 @@ class CarteiraController extends Controller
         $filtros = self::filtros();
         [$where, $p] = Cliente::montarWhere($filtros);
         $sql = "SELECT c.id, c.razao_social, c.nome_fantasia, c.cnpj, c.cidade, c.uf, c.endereco, s.nome AS segmento, e.nome AS etapa,
-                       c.prioridade, c.telefone, c.whatsapp, c.email, c.instagram, c.site, u.nome AS responsavel, f.nome AS funcao,
+                       c.prioridade, c.telefone, c.whatsapp, c.email, c.instagram, c.site, u.nome AS responsavel, u.foto AS responsavel_foto, f.nome AS funcao,
                        c.ultimo_contato_em, c.ultima_compra_em, o.nome AS origem, c.origem_detalhe, c.observacoes
                   FROM clientes c
                   LEFT JOIN segmentos s ON s.id = c.segmento_id LEFT JOIN funil_etapas e ON e.id = c.etapa_id

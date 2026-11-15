@@ -99,7 +99,7 @@ class CarteirasService
             }
         }
         $total = (int) Banco::valor("SELECT COUNT(*) FROM clientes c WHERE $w", $par);
-        $itens = Banco::todos("SELECT c.id, c.razao_social, c.nome_fantasia, c.cnpj, c.cidade, c.uf, c.tipo, c.ultima_compra_em, u.nome AS responsavel
+        $itens = Banco::todos("SELECT c.id, c.razao_social, c.nome_fantasia, c.cnpj, c.cidade, c.uf, c.tipo, c.ultima_compra_em, u.nome AS responsavel, u.foto AS responsavel_foto
             FROM clientes c LEFT JOIN usuarios u ON u.id = c.responsavel_id WHERE $w ORDER BY c.razao_social
             LIMIT " . (int) $porPagina . ' OFFSET ' . (max(1, $pagina) - 1) * (int) $porPagina, $par);
         return ['itens' => $itens, 'total' => $total, 'paginas' => max(1, (int) ceil($total / $porPagina))];

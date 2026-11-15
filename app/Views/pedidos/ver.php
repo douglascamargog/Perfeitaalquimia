@@ -30,7 +30,7 @@ $origens = ['catalogo' => 'Catálogo (cliente)', 'sistema' => 'Sistema (equipe)'
     <dl class="ped-dados">
       <div><dt>Cliente</dt><dd><?= e($p['razao_social']) ?><?= $p['cnpj'] ? '<br><small>CNPJ ' . e(cnpj_formatado($p['cnpj'])) . '</small>' : '' ?></dd></div>
       <div><dt>Cidade</dt><dd><?= e($p['cidade']) ?>/<?= e($p['uf']) ?></dd></div>
-      <div><dt>Vendedor</dt><dd><?= e($p['vendedor'] ?? '—') ?></dd></div>
+      <div><dt>Vendedor</dt><dd><?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null, false, 28) ?></dd></div>
       <div><dt>Tabela</dt><dd><?= e($p['tabela']) ?></dd></div>
       <div><dt>Pagamento</dt><dd><?= e($p['forma']) ?><?= $p['condicao'] ? ' · ' . e($p['condicao']) : '' ?></dd></div>
       <div><dt>ERP</dt><dd><?= $p['omie_numero'] ? 'Orçamento nº ' . e($p['omie_numero']) : '<span class="suave">envio pendente</span>' ?><?= $p['numero_nf'] ? '<br>NF ' . e($p['numero_nf']) . ' · ' . data_br($p['faturado_em']) : '' ?></dd></div>

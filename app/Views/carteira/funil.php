@@ -17,7 +17,7 @@ use App\Services\Normalizar;
             <small><?= e($c['cidade']) ?> / <?= e($c['uf']) ?> · <?= e($c['segmento']) ?></small>
             <div class="funil-card-rodape">
               <span class="selo prioridade-<?= e(Normalizar::semAcento($c['prioridade'])) ?>"><?= e($c['prioridade']) ?></span>
-              <span class="pequeno suave"><?= e(explode(' ', (string) $c['responsavel'])[0]) ?></span>
+              <span class="pequeno suave"><?= pessoa($c['responsavel'], $c['responsavel_foto'] ?? null, true, 18) ?></span>
             </div>
           </article>
         <?php endforeach; ?>

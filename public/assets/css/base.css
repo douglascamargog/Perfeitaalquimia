@@ -215,3 +215,10 @@ table.tabela { width: 100%; border-collapse: collapse; }
 .avisos-fechar { position: absolute; top: 8px; right: 8px; border: 0; background: transparent; font: inherit; cursor: pointer; color: inherit; opacity: .7; }
 @media (prefers-reduced-motion: reduce) { .aviso-flut { transition: none; } }
 .aviso.alerta  { background: var(--aviso-fundo);   color: var(--aviso); }
+
+/* Nome + fotinha da pessoa responsável (função pessoa() em app/ajudantes.php) */
+.pessoa-chip { display: inline-flex; align-items: center; gap: .4em; max-width: 100%; vertical-align: middle; line-height: 1.2; }
+.pessoa-chip .avatar { box-shadow: 0 0 0 2px var(--fundo, #fff), 0 0 0 3px color-mix(in srgb, var(--secundaria, #caff4d) 70%, transparent); }
+.pessoa-chip .pessoa-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.pessoa-grande .avatar { width: 34px; height: 34px; }
+@media print { .pessoa-chip .avatar { box-shadow: none; } }

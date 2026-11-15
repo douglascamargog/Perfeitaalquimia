@@ -85,7 +85,7 @@ $query = fn(array $extra = []) => '?' . http_build_query(array_filter(['uf' => $
                   <?php if ($e['cliente']): ?><button type="button" class="selo verde ps-selo-botao" data-abrir-cliente="<?= (int) $e['cliente']['id'] ?>" data-na-carteira><?= $e['cliente']['tipo'] === 'cliente' ? 'cliente' : 'na carteira' ?></button>
                   <?php else: ?><span class="selo cinza">livre</span><?php endif; ?>
                   <?php if ($e['enviada_em']): ?><small class="suave">enviada em <?= data_br($e['enviada_em']) ?></small><?php endif; ?>
-                  <?php if ($e['cliente'] && $e['cliente']['responsavel']): ?><small class="suave"><?= e($e['cliente']['responsavel']) ?></small><?php endif; ?>
+                  <?php if ($e['cliente'] && $e['cliente']['responsavel']): ?><small class="suave"><?= pessoa($e['cliente']['responsavel'], $e['cliente']['responsavel_foto'] ?? null, false, 16) ?></small><?php endif; ?>
                 </td>
               </tr>
             <?php endforeach; ?>

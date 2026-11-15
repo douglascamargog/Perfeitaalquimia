@@ -30,7 +30,7 @@ class OrcamentoService
     ];
 
     private const CAMPOS = "o.*, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS cliente, c.razao_social, c.cidade, c.uf, c.whatsapp, c.telefone,
-        c.responsavel_id, c.funcao_id, u.nome AS vendedor, t.nome AS tabela";
+        c.responsavel_id, c.funcao_id, u.nome AS vendedor, u.foto AS vendedor_foto, t.nome AS tabela";
     private const JUNCOES = 'FROM orcamentos o JOIN clientes c ON c.id = o.cliente_id LEFT JOIN usuarios u ON u.id = o.vendedor_id
         LEFT JOIN tabelas_preco t ON t.id = o.tabela_preco_id';
 

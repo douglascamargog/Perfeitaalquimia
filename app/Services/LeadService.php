@@ -175,7 +175,7 @@ class LeadService
             $w .= ' AND l.resultado = ?';
             $par[] = $resultado;
         }
-        return Banco::todos("SELECT l.*, c.tipo AS cliente_tipo, c.razao_social, e.nome AS etapa, e.cor AS etapa_cor, u.nome AS responsavel
+        return Banco::todos("SELECT l.*, c.tipo AS cliente_tipo, c.razao_social, e.nome AS etapa, e.cor AS etapa_cor, u.nome AS responsavel, u.foto AS responsavel_foto
             FROM leads_recebidos l LEFT JOIN clientes c ON c.id = l.cliente_id LEFT JOIN funil_etapas e ON e.id = c.etapa_id
             LEFT JOIN usuarios u ON u.id = c.responsavel_id WHERE $w ORDER BY l.criado_em DESC LIMIT $limite", $par);
     }

@@ -18,7 +18,7 @@ class Cobranca
 
     private const CAMPOS = "cb.*, DATEDIFF(CURDATE(), cb.vencimento_mais_antigo) AS dias_atraso,
         c.razao_social, c.nome_fantasia, c.cnpj, c.cidade, c.uf, c.telefone, c.whatsapp, c.email,
-        e.nome AS etapa, e.cor AS etapa_cor, e.tipo AS etapa_tipo, u.nome AS responsavel";
+        e.nome AS etapa, e.cor AS etapa_cor, e.tipo AS etapa_tipo, u.nome AS responsavel, u.foto AS responsavel_foto";
 
     private const JUNCOES = 'FROM cobrancas cb
         JOIN clientes c ON c.id = cb.cliente_id
@@ -139,7 +139,7 @@ class Cobranca
     public static function buscar(int $id): ?array
     {
         return Banco::um('SELECT ' . self::CAMPOS . ', c.instagram, c.facebook, c.site, c.endereco, c.bairro, c.ultimo_contato_em AS cliente_ultimo_contato,
-            c.responsavel_id AS vendedor_id, (SELECT nome FROM usuarios WHERE id = c.responsavel_id) AS vendedor ' . self::JUNCOES . ' WHERE cb.id = ?', [$id]);
+            c.responsavel_id AS vendedor_id, (SELECT nome FROM usuarios WHERE id = c.responsavel_id) AS vendedor, (SELECT foto FROM usuarios WHERE id = c.responsavel_id) AS vendedor_foto ' . self::JUNCOES . ' WHERE cb.id = ?', [$id]);
     }
 
     /** Títulos do caso (em aberto primeiro) */

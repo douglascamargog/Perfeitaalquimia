@@ -110,3 +110,18 @@ function redirecionar(string $caminho): never
     header('Location: ' . url($caminho));
     exit;
 }
+
+/**
+ * Nome da pessoa com a fotinha dela (ou as iniciais), para "Responsável", "Vendedor"...
+ * Ex.: <?= pessoa($c['responsavel'], $c['responsavel_foto']) ?>   ·   $curto = só o primeiro nome
+ */
+function pessoa(?string $nome, ?string $foto = null, bool $curto = false, int $tamanho = 22): string
+{
+    $nome = trim((string) $nome);
+    if ($nome === '') {
+        return '<span class="suave">—</span>';
+    }
+    $texto = $curto ? explode(' ', $nome)[0] : $nome;
+    return '<span class="pessoa-chip" title="' . e($nome) . '">' . \App\Services\EquipeService::avatar(['nome' => $nome, 'foto' => $foto], $tamanho)
+        . '<span class="pessoa-nome">' . e($texto) . '</span></span>';
+}

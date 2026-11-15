@@ -34,7 +34,7 @@ $r = $resultado;
           <td><?= e($c['cidade']) ?> / <?= e($c['uf']) ?></td>
           <td><?= data_br($c['ultima_compra_em']) ?></td>
           <td><span class="selo <?= $semCompra > 180 ? 'vermelho' : '' ?>"><?= $semCompra ?> dias</span></td>
-          <td class="pequeno"><?= e($c['responsavel']) ?></td>
+          <td class="pequeno"><?= pessoa($c['responsavel'], $c['responsavel_foto'] ?? null) ?></td>
           <?php if ($vendedores): ?>
             <td>
               <form method="post" action="<?= url('/reativacao/' . (int) $c['id'] . '/devolver') ?>" class="devolver" data-confirmar="Devolver este cliente para o vendedor escolhido?">

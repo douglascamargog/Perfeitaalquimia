@@ -36,7 +36,7 @@ class TerceirizacaoController extends Controller
         $w = 'c.excluido_em IS NULL AND ' . T::EH_CLIENTE . ($situacao ? ' AND p.situacao = ?' : '');
         $pedidos = Banco::todos(
             "SELECT p.id, p.criado_em, p.total, p.situacao, p.faturado_em, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS cliente, c.id AS cliente_id,
-                    f.nome AS carteira, u.nome AS vendedor,
+                    f.nome AS carteira, u.nome AS vendedor, u.foto AS vendedor_foto,
                     (SELECT COALESCE(SUM(i.total), 0) FROM pedido_itens i WHERE i.pedido_id = p.id AND i.terceirizacao_produto_id IS NOT NULL) AS total_marca
                FROM pedidos p JOIN clientes c ON c.id = p.cliente_id LEFT JOIN funcoes f ON f.id = c.funcao_id LEFT JOIN usuarios u ON u.id = p.vendedor_id
               WHERE $w ORDER BY p.criado_em DESC LIMIT 200",

@@ -24,7 +24,7 @@ $icones = asset('img/icones.svg');
       <?php foreach ($clientes as $c): ?>
         <tr data-cliente-terc="<?= (int) $c['id'] ?>">
           <td><button type="button" class="link-cliente" data-abrir-cliente="<?= (int) $c['id'] ?>"><strong><?= e($c['nome_fantasia'] ?: $c['razao_social']) ?></strong></button>
-            <small class="suave"><?= e($c['cidade']) ?>/<?= e($c['uf']) ?><?= $c['responsavel'] ? ' · ' . e($c['responsavel']) : '' ?></small></td>
+            <small class="suave"><?= e($c['cidade']) ?>/<?= e($c['uf']) ?></small><?= $c['responsavel'] ? '<br>' . pessoa($c['responsavel'], $c['responsavel_foto'] ?? null, false, 18) : '' ?></td>
           <td><span class="selo <?= $c['frente'] === 'terceirizacao' ? 'verde' : 'cinza' ?>"><?= e($c['carteira'] ?? 'Sem carteira') ?></span></td>
           <td class="direita"><a href="<?= url('/terceirizacao/produtos?cliente=' . (int) $c['id']) ?>"><?= (int) $c['produtos'] ?></a></td>
           <td><?= $c['rotulos_alerta'] ? '<span class="selo vermelho">' . (int) $c['rotulos_alerta'] . ' em alerta</span>' : ($c['produtos'] ? '<span class="selo verde">ok</span>' : '—') ?></td>

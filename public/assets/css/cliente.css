@@ -17,6 +17,8 @@
 .cl-secao-topo { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 18px 20px 6px; }
 .cl-secao-topo h2 { margin: 0; }
 .cl-ficha { position: sticky; top: 96px; max-height: calc(100vh - 116px); overflow: auto; margin: 0; }
+/* a coluna da ficha rola sozinha (o .card.sem-espaco da Carteira cortava com overflow: hidden) */
+.cl-grade > .card.cl-ficha { overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
 .cl-tarefas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .cl-tarefas li { display: grid; padding: 8px 12px; border-radius: 10px; background: var(--primaria-clara); }
 .cl-tarefas li.atrasada { background: var(--aviso-fundo); }

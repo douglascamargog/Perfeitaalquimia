@@ -96,7 +96,7 @@ class Cliente
         $itens = Banco::todos(
             "SELECT c.id, c.razao_social, c.nome_fantasia, c.cidade, c.uf, c.telefone, c.whatsapp, c.prioridade, c.tipo,
                     c.ultimo_contato_em, c.ultima_compra_em, c.contatado,
-                    s.nome AS segmento, e.nome AS etapa, e.cor AS etapa_cor, e.tipo AS etapa_tipo, u.nome AS responsavel
+                    s.nome AS segmento, e.nome AS etapa, e.cor AS etapa_cor, e.tipo AS etapa_tipo, u.nome AS responsavel, u.foto AS responsavel_foto
                FROM clientes c
                LEFT JOIN segmentos s ON s.id = c.segmento_id
                LEFT JOIN funil_etapas e ON e.id = c.etapa_id
@@ -112,7 +112,7 @@ class Cliente
     {
         return Banco::um(
             'SELECT c.*, s.nome AS segmento, e.nome AS etapa, e.cor AS etapa_cor, e.tipo AS etapa_tipo, o.nome AS origem,
-                    u.nome AS responsavel, f.nome AS funcao, f.slug AS funcao_slug, t.nome AS tabela_preco, r.nome AS regiao
+                    u.nome AS responsavel, u.foto AS responsavel_foto, f.nome AS funcao, f.slug AS funcao_slug, t.nome AS tabela_preco, r.nome AS regiao
                FROM clientes c
                LEFT JOIN segmentos s ON s.id = c.segmento_id
                LEFT JOIN funil_etapas e ON e.id = c.etapa_id

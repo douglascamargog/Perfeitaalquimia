@@ -184,7 +184,7 @@ class VendasService
         }
         $clientes = Banco::todos('SELECT c.id, c.razao_social, c.nome_fantasia, c.cidade, c.uf, c.telefone, c.whatsapp, c.ultima_compra_em, c.intervalo_medio_dias,
                 DATEDIFF(CURDATE(), c.ultima_compra_em + INTERVAL c.intervalo_medio_dias DAY) AS dias_atraso, DATEDIFF(CURDATE(), c.ultima_compra_em) AS dias_desde,
-                u.nome AS responsavel,
+                u.nome AS responsavel, u.foto AS responsavel_foto,
                 (SELECT AVG(total) FROM pedidos p WHERE p.cliente_id = c.id AND p.situacao = \'faturado\') AS ticket,
                 (SELECT MAX(id) FROM pedidos p WHERE p.cliente_id = c.id AND p.situacao IN (\'faturado\', \'aprovado\')) AS ultimo_pedido,
                 (SELECT COUNT(*) FROM tarefas t WHERE t.cliente_id = c.id AND t.concluida_em IS NULL) AS tarefas_abertas

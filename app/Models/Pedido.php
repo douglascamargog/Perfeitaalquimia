@@ -14,7 +14,7 @@ class Pedido
     public const FILTROS = ['q', 'situacao', 'origem', 'vendedor', 'de', 'ate'];
 
     private const CAMPOS = "p.*, c.razao_social, c.nome_fantasia, c.cnpj, c.cidade, c.uf, c.responsavel_id,
-        u.nome AS vendedor, f.nome AS forma, cp.nome AS condicao, t.nome AS tabela, a.nome AS aprovador,
+        u.nome AS vendedor, u.foto AS vendedor_foto, f.nome AS forma, cp.nome AS condicao, t.nome AS tabela, a.nome AS aprovador,
         (SELECT COUNT(*) FROM pedido_itens i WHERE i.pedido_id = p.id) AS qtd_itens";
     private const JUNCOES = 'FROM pedidos p JOIN clientes c ON c.id = p.cliente_id
         LEFT JOIN usuarios u ON u.id = p.vendedor_id

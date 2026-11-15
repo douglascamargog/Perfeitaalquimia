@@ -36,7 +36,7 @@ $atrasado = fn(array $p) => $p['expedicao'] !== 'despachado' && $p['expedicao_de
           <?= $p['terceirizados'] ? '<span class="selo cinza">terceirização</span>' : '' ?>
           <?= $p['falta'] ? '<span class="selo laranja">saiu com falta</span>' : '' ?></span>
         <span class="dep-cliente"><?= e($p['cliente']) ?></span>
-        <small><?= e($p['cidade']) ?>/<?= e($p['uf']) ?> · <?= (int) $p['itens'] ?> item(ns), <?= (int) $p['unidades'] ?> un · vendedor <?= e($p['vendedor'] ?? '—') ?></small>
+        <small><?= e($p['cidade']) ?>/<?= e($p['uf']) ?> · <?= (int) $p['itens'] ?> item(ns), <?= (int) $p['unidades'] ?> un · vendedor <?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null, false, 18) ?></small>
         <small class="suave"><?php if ($p['expedicao'] === 'despachado'): ?>Despachado <?= data_br($p['despachado_em'], true) ?> · <?= e($p['transportadora']) ?><?= $p['rastreio'] ? ' · ' . e($p['rastreio']) : '' ?>
           <?php else: ?>Na fila desde <?= data_br($p['expedicao_desde'], true) ?><?= $p['separador'] ? ' · com ' . e($p['separador']) : '' ?><?php endif; ?></small>
       </a>

@@ -67,7 +67,7 @@ $diasSemCompra = $c['ultima_compra_em'] ? (int) floor((time() - strtotime($c['ul
           <tbody>
           <?php foreach ($todosPedidos as $pd): [$rot, $cor] = \App\Services\PedidoService::SITUACOES[$pd['situacao']] ?? [$pd['situacao'], 'cinza']; ?>
             <tr><td><a href="<?= url('/pedidos/' . (int) $pd['id']) ?>"><strong>#<?= (int) $pd['id'] ?></strong></a></td><td class="pequeno"><?= data_br($pd['criado_em']) ?></td>
-              <td class="pequeno"><?= e(ucfirst($pd['origem'])) ?></td><td class="pequeno"><?= e($pd['vendedor'] ?? '—') ?></td><td class="pequeno"><?= e($pd['forma']) ?></td>
+              <td class="pequeno"><?= e(ucfirst($pd['origem'])) ?></td><td class="pequeno"><?= pessoa($pd['vendedor'] ?? null, $pd['vendedor_foto'] ?? null) ?></td><td class="pequeno"><?= e($pd['forma']) ?></td>
               <td><span class="selo <?= $cor ?>"><?= $rot ?></span></td><td class="direita"><strong><?= e(dinheiro((float) $pd['total'])) ?></strong></td></tr>
           <?php endforeach; ?>
           <?php if (!$todosPedidos): ?><tr><td colspan="7" class="suave">Nenhum pedido ainda.</td></tr><?php endif; ?>

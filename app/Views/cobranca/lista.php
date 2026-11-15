@@ -27,7 +27,7 @@ $primeiro = $r['total'] ? ($r['pagina'] - 1) * $r['por_pagina'] + 1 : 0;
           <td><?php if ($c['vencimento_mais_antigo'] && $c['situacao'] === 'aberta'): ?><span class="selo <?= $dias > 90 ? 'vermelho' : ($dias > 30 ? 'laranja' : 'cinza') ?>"><?= $dias ?> dias</span><?php else: ?><span class="suave">—</span><?php endif; ?></td>
           <td><span class="selo-etapa" style="--cor: <?= e($c['etapa_cor']) ?>"><?= e($c['etapa']) ?></span></td>
           <td class="pequeno"><?= $c['promessa_em'] ? data_br($c['promessa_em']) : '<span class="suave">—</span>' ?></td>
-          <td class="pequeno"><?= e($c['responsavel']) ?></td>
+          <td class="pequeno"><?= pessoa($c['responsavel'], $c['responsavel_foto'] ?? null) ?></td>
         </tr>
       <?php endforeach; ?>
       <?php if (!$r['itens']): ?><tr><td colspan="8" class="vazio">Nenhum caso de cobrança com esses filtros.</td></tr><?php endif; ?>

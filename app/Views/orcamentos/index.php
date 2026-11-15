@@ -44,7 +44,7 @@ $abas = ['abertos' => 'Esperando o cliente', 'aprovados' => 'Aprovados', 'encerr
             <?php if ($o['situacao'] === 'recusado' && $o['resposta_cliente']): ?><small>“<?= e(mb_strimwidth($o['resposta_cliente'], 0, 80, '…')) ?>”</small><?php endif; ?></td>
           <td class="direita"><?= dinheiro((float) $o['subtotal']) ?></td>
           <td><?= data_br($o['validade']) ?></td>
-          <td class="pequeno"><?= e((string) $o['vendedor']) ?></td>
+          <td class="pequeno"><?= pessoa($o['vendedor'] ?? null, $o['vendedor_foto'] ?? null) ?></td>
         </tr>
       <?php endforeach; ?>
       <?php if (!$orcamentos): ?><tr><td colspan="6" class="suave">Nenhum orçamento aqui. Para fazer um: <strong>Novo orçamento</strong>, escolha o cliente e os produtos e toque em <strong>Gerar orçamento</strong>.</td></tr><?php endif; ?>

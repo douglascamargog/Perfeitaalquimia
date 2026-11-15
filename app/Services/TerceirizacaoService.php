@@ -41,7 +41,7 @@ class TerceirizacaoService
         }
         $de = date('Y-m-d', strtotime('-12 months'));
         return Banco::todos(
-            "SELECT c.id, c.razao_social, c.nome_fantasia, c.cidade, c.uf, c.ultima_compra_em, f.nome AS carteira, f.frente, u.nome AS responsavel,
+            "SELECT c.id, c.razao_social, c.nome_fantasia, c.cidade, c.uf, c.ultima_compra_em, f.nome AS carteira, f.frente, u.nome AS responsavel, u.foto AS responsavel_foto,
                     (SELECT COUNT(*) FROM terceirizacao_produtos tp WHERE tp.cliente_id = c.id AND tp.ativo = 1) AS produtos,
                     (SELECT COUNT(*) FROM terceirizacao_produtos tp WHERE tp.cliente_id = c.id AND tp.ativo = 1 AND tp.rotulos_estoque <= tp.rotulos_minimo) AS rotulos_alerta,
                     (SELECT COALESCE(SUM(i.total), 0) FROM pedido_itens i JOIN pedidos pd ON pd.id = i.pedido_id

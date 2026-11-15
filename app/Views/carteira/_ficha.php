@@ -99,7 +99,7 @@ $linkSeguro = function (?string $url): string {
           'Último contato' => $c['ultimo_contato_em'] ? data_br($c['ultimo_contato_em']) : '', 'Última compra' => $c['ultima_compra_em'] ? data_br($c['ultima_compra_em']) : 'Ainda não comprou',
       ];
       foreach ($dados as $rotulo => $valor): if ((string) $valor === '') continue; ?>
-        <div><dt><?= e($rotulo) ?></dt><dd><?= e($valor) ?></dd></div>
+        <div><dt><?= e($rotulo) ?></dt><dd><?= $rotulo === 'Responsável' ? pessoa($c['responsavel'], $c['responsavel_foto'] ?? null) . ($c['funcao'] ? ' <small class="suave">· ' . e($c['funcao']) . '</small>' : '') : e($valor) ?></dd></div>
       <?php endforeach; ?>
       <?php foreach (['Instagram' => $c['instagram'], 'Facebook' => $c['facebook'], 'Site' => $c['site'], 'Fonte do cadastro' => $c['fonte_url']] as $rotulo => $valor):
           $url = $linkSeguro($valor); if (!$url) continue; ?>

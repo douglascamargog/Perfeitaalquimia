@@ -23,7 +23,7 @@ $rotulo = ['aguardando_aprovacao' => ['Aguardando aprovação', 'laranja'], 'apr
           <td><a href="<?= url('/pedidos/' . (int) $p['id']) ?>"><strong>#<?= (int) $p['id'] ?></strong></a><small class="suave"><?= data_br($p['criado_em']) ?></small></td>
           <td><?= e($p['cliente']) ?></td>
           <td class="pequeno"><?= e($p['carteira'] ?? '—') ?></td>
-          <td class="pequeno"><?= e($p['vendedor'] ?? '—') ?></td>
+          <td class="pequeno"><?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null) ?></td>
           <td><span class="selo <?= $cor ?>"><?= e($nome) ?></span></td>
           <td class="direita"><?= $p['total_marca'] > 0 ? dinheiro((float) $p['total_marca']) : '—' ?></td>
           <td class="direita"><strong><?= dinheiro((float) $p['total']) ?></strong></td>
