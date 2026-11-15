@@ -493,11 +493,15 @@ a.eq-pessoa { color: inherit; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) { .letreiro-rolar, .com-rolar { animation: none; padding-left: 0; } }
 @media (max-width: 760px) { .letreiro { flex-basis: 100%; order: 10; } }
 
-/* Escolha do setor no alto do Comercial (V12.1) */
-.menu-setores { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 10px 8px 4px; }
-.menu-sub .menu-setores a { display: inline-flex; padding: 4px 9px !important; border-radius: 99px; font-size: .7rem !important; font-weight: 700;
-  background: rgba(255, 255, 255, .08); color: inherit; text-decoration: none; border: 1px solid rgba(255, 255, 255, .14); gap: 0; }
-.menu-sub .menu-setores a.ativo { background: var(--secundaria); color: var(--secundaria-texto); border-color: var(--secundaria); }
+/* Escolha do setor no alto do Comercial: uma linha só, no estilo do menu */
+.menu-setor-escolha { display: flex; align-items: center; gap: 8px; margin: 2px 10px 6px 4px; padding: 6px 10px; border-radius: 12px; background: rgba(255, 255, 255, .07);
+  font-size: .72rem; font-weight: 700; color: rgba(255, 255, 255, .7); }
+.menu-setor-escolha span { text-transform: uppercase; letter-spacing: .08em; }
+.menu-setor-escolha select { flex: 1; min-width: 0; width: auto; padding: 4px 22px 4px 8px; border: 0; border-radius: 8px; font: inherit; font-size: .82rem; font-weight: 800;
+  color: #fff; background: rgba(255, 255, 255, .12) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='white' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") right 8px center no-repeat;
+  appearance: none; cursor: pointer; }
+.menu-setor-escolha select:focus-visible { outline: 2px solid var(--secundaria); }
+.menu-setor-escolha option { color: #10201d; background: #fff; }
 .botao-icone.ativo { background: var(--primaria-clara); color: var(--primaria-escura); }
 
 /* Administração (engrenagem do topo) */

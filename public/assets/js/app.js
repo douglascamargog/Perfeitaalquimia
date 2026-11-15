@@ -67,3 +67,6 @@ function fecharOne() {
 oneBotao?.addEventListener('click', () => (onePainel.hidden ? abrirOne() : fecharOne()));
 document.querySelector('[data-one-fechar]')?.addEventListener('click', fecharOne);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && onePainel && !onePainel.hidden) fecharOne(); });
+
+// Menu › Comercial: escolher o setor leva para a mesma aba no setor escolhido
+document.querySelector('[data-setor-escolha]')?.addEventListener('change', (e) => { window.location.href = e.target.value; });

@@ -39,8 +39,9 @@ const secoes = (p) => p.$$eval('[data-menu-secao]', (l) => l.map((s) => s.datase
   // ---------- 2. Escolher o setor, abrir e fechar ----------
   await ges.click('[data-menu-secao="Comercial"] .menu-secao-botao');
   ok(await ges.locator('[data-menu-secao="Comercial"].aberta').count() === 1, 'clique abre o Comercial');
-  await Promise.all([ges.waitForNavigation(), ges.click('[data-setor-chip="externo"]')]);
-  ok(ges.url().includes('/carteira') && await ges.locator('[data-setor-chip="externo"].ativo').count() === 1, 'escolher o setor Externo abre a Carteira dele e marca o setor');
+  const opcao = await ges.locator('[data-setor-chip="externo"]').getAttribute('value');
+  await Promise.all([ges.waitForNavigation(), ges.selectOption('[data-setor-escolha]', opcao)]);
+  ok(ges.url().includes('/carteira') && (await ges.locator('[data-setor-escolha] option:checked').getAttribute('data-setor-chip')) === 'externo', 'escolher o setor Externo abre a Carteira dele e marca o setor');
   ok(await ges.locator('[data-menu-secao="Comercial"].aberta a.ativo[data-url="/carteira"]').count() === 1, 'a página atual deixa o Comercial aberto e a aba marcada');
   ok((await ges.locator('[data-selo-setor]').innerText()).includes('Externo'), 'selo do setor ao lado do título');
   ok(await ges.locator('[data-menu-secao="Comercial"] a[data-url="/app"]').count() === 1 && await ges.locator('[data-menu-secao="Comercial"] a[data-url="/prospeccao"]').count() === 0, 'com o Externo escolhido, aparecem as abas do Externo');
@@ -94,7 +95,7 @@ const secoes = (p) => p.$$eval('[data-menu-secao]', (l) => l.map((s) => s.datase
   await entrar(cel, 'gestor@demo.local');
   await cel.click('.abrir-menu');
   await cel.click('[data-menu-secao="Comercial"] .menu-secao-botao');
-  ok(await cel.locator('[data-menu-secao="Comercial"] a[data-url="/carteira"]').isVisible() && await cel.locator('[data-setor-chip]').first().isVisible(), 'celular: o Comercial (com a escolha de setor) abre dentro da gaveta do menu');
+  ok(await cel.locator('[data-menu-secao="Comercial"] a[data-url="/carteira"]').isVisible() && await cel.locator('[data-setor-escolha]').isVisible(), 'celular: o Comercial (com a escolha de setor) abre dentro da gaveta do menu');
   ok(await cel.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), 'celular: nada passa da largura');
 
   ok(erros.length === 0, 'nenhum erro de JavaScript' + (erros.length ? ': ' + erros.join(' / ') : ''));

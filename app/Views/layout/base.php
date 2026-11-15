@@ -69,9 +69,11 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
           </button>
           <div class="menu-sub">
           <?php if (!empty($g['setores'])): ?>
-            <div class="menu-setores" role="group" aria-label="Setor">
-              <?php foreach ($g['setores'] as $st): ?><a href="<?= url($st['href']) ?>" data-setor-chip="<?= e($st['slug']) ?>" class="<?= $st['ativo'] ? 'ativo' : '' ?>" <?= $st['ativo'] ? 'aria-current="true"' : '' ?>><?= e($st['nome']) ?></a><?php endforeach; ?>
-            </div>
+            <label class="menu-setor-escolha"><span>Setor</span>
+              <select data-setor-escolha aria-label="Setor de venda">
+                <?php foreach ($g['setores'] as $st): ?><option value="<?= e(url($st['href'])) ?>" data-setor-chip="<?= e($st['slug']) ?>" <?= $st['ativo'] ? 'selected' : '' ?>><?= e($st['nome']) ?></option><?php endforeach; ?>
+              </select>
+            </label>
           <?php endif; ?>
         <?php endif; ?>
         <?php foreach ($g['itens'] as $item): ?>
