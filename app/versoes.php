@@ -17,6 +17,16 @@
  */
 return [
     [
+        'versao' => '11.2', 'data' => '2026-11-15', 'titulo' => 'Caixas usadas na separação',
+        'novo' => [
+            'Depósito: na separação, anote qual caixa (e fita, se quiser) e quantas foram usadas para embalar o pedido. Dá baixa sozinha no estoque das caixas.',
+            'Corrigiu a quantidade antes de concluir? O estoque é acertado sozinho, sem baixar duas vezes.',
+            'No despacho, os volumes já vêm preenchidos com o número de caixas. A embalagem usada fica no histórico do pedido.',
+            'As caixas entram no consumo do item: a página da caixa em Compras da empresa mostra quanto tempo o estoque dura e quando comprar de novo.',
+        ],
+        'admin' => 'Configurações › Depósito: categorias que aparecem como caixa/embalagem de envio (padrão "Embalagem de envio") e se a caixa é obrigatória para concluir a separação. Cadastre as caixas em Compras da empresa › Itens com essa categoria.',
+    ],
+    [
         'versao' => '11.1', 'data' => '2026-11-15', 'titulo' => 'Foto de quem é responsável em todo o One',
         'melhoria' => [
             'A foto (ou as iniciais) aparece junto do nome de quem é responsável em todo o sistema: Agenda, Pedidos de compra (quem pediu, quem aprovou, quem recebeu), ordens de produção, Depósito (separação e despacho), tarefas do Marketing, Desenvolvimento, documentos, históricos e linhas do tempo.',

@@ -263,6 +263,18 @@ class ProducaoService
     }
 
     /** Único ponto que muda o estoque de matéria-prima (trava a linha, soma e grava o movimento com o saldo) */
+    /**
+     * Depósito: caixa/embalagem usada num pedido. $delta > 0 = usou mais (baixa no estoque, conta no consumo do item);
+     * $delta < 0 = devolveu (a pessoa corrigiu a quantidade antes de concluir).
+     */
+    public static function movimentarEmbalagem(int $mpId, float $delta, int $pedidoId, ?int $usuarioId): float
+    {
+        return self::movimentarMp($mpId, $delta > 0 ? 'consumo' : 'ajuste', -$delta, [
+            'referencia' => "Pedido #$pedidoId", 'usuario_id' => $usuarioId,
+            'observacao' => $delta > 0 ? "Embalagem do pedido #$pedidoId" : "Embalagem devolvida (correção do pedido #$pedidoId)",
+        ]);
+    }
+
     private static function movimentarMp(int $mpId, string $tipo, float $quantidade, array $extra = [], ?string $quando = null): float
     {
         return Banco::transacao(function () use ($mpId, $tipo, $quantidade, $extra, $quando) {

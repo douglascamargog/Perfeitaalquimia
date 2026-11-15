@@ -167,6 +167,78 @@ class DepositoService
         return $falta;
     }
 
+    // ------------------------------------------------------------------
+    // Caixas e embalagens usadas (dão baixa no estoque do item)
+    // ------------------------------------------------------------------
+
+    /** Itens que podem ser usados para embalar (categorias em Configurações › Depósito) */
+    public static function embalagensDisponiveis(): array
+    {
+        $cats = array_values(array_filter(array_map('trim', (array) Config::get('deposito.embalagem_categorias', ['Embalagem de envio']))));
+        if (!$cats) {
+            return [];
+        }
+        return Banco::todos('SELECT id, nome, unidade, estoque FROM materias_primas WHERE ativo = 1 AND categoria IN (' . implode(',', array_fill(0, count($cats), '?')) . ') ORDER BY nome', $cats);
+    }
+
+    /** O que foi usado para embalar o pedido */
+    public static function embalagensDoPedido(int $id): array
+    {
+        return Banco::todos('SELECT e.*, m.nome, m.unidade FROM pedido_embalagens e JOIN materias_primas m ON m.id = e.materia_prima_id
+            WHERE e.pedido_id = ? AND e.quantidade > 0 ORDER BY m.nome', [$id]);
+    }
+
+    /** Quantas caixas (itens com "caixa" no nome): sugestão de volumes no despacho */
+    public static function caixasDoPedido(int $id): int
+    {
+        return (int) round((float) Banco::valor("SELECT COALESCE(SUM(e.quantidade), 0) FROM pedido_embalagens e JOIN materias_primas m ON m.id = e.materia_prima_id
+            WHERE e.pedido_id = ? AND LOWER(m.nome) LIKE '%caixa%'", [$id]));
+    }
+
+    /**
+     * Grava as embalagens usadas. $linhas = [['item' => materia_prima_id, 'qtd' => '2'], ...]
+     * Só a DIFERENÇA para o que já estava gravado mexe no estoque (salvar de novo não baixa duas vezes).
+     */
+    public static function salvarEmbalagem(int $id, array $linhas, int $usuarioId): void
+    {
+        $p = self::exigir($id, ['aguardando', 'separando']);
+        $validos = array_column(self::embalagensDisponiveis(), 'nome', 'id');
+        $novo = [];
+        foreach ($linhas as $l) {
+            $item = (int) ($l['item'] ?? 0);
+            $qtd = ProducaoService::numero((string) ($l['qtd'] ?? '0'));
+            if ($item <= 0 || $qtd <= 0) {
+                continue;
+            }
+            if (!isset($validos[$item]) && !Banco::valor('SELECT 1 FROM pedido_embalagens WHERE pedido_id = ? AND materia_prima_id = ?', [$id, $item])) {
+                throw new RuntimeException('Escolha a caixa na lista.');
+            }
+            if ($qtd > 500) {
+                throw new RuntimeException('Quantidade de embalagem muito alta. Confira o número.');
+            }
+            $novo[$item] = ($novo[$item] ?? 0) + $qtd;
+        }
+        $antes = array_map('floatval', array_column(Banco::todos('SELECT materia_prima_id, quantidade FROM pedido_embalagens WHERE pedido_id = ?', [$id]), 'quantidade', 'materia_prima_id'));
+        Banco::transacao(function () use ($id, $novo, $antes, $usuarioId) {
+            foreach (array_unique(array_merge(array_keys($novo), array_keys($antes))) as $item) {
+                $delta = round(($novo[$item] ?? 0) - ($antes[$item] ?? 0), 3);
+                if (abs($delta) < 0.0005) {
+                    continue;
+                }
+                ProducaoService::movimentarEmbalagem((int) $item, $delta, $id, $usuarioId);
+                Banco::executar('INSERT INTO pedido_embalagens (pedido_id, materia_prima_id, quantidade, usuario_id) VALUES (?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE quantidade = VALUES(quantidade), usuario_id = VALUES(usuario_id), atualizado_em = NOW()',
+                    [$id, (int) $item, $novo[$item] ?? 0, $usuarioId]);
+            }
+        });
+        if ($novo != $antes) {
+            Auditoria::registrar('pedido', $id, 'embalagem', $antes ?: null, $novo ?: null);
+        }
+        if ($p['expedicao'] === 'aguardando' && $novo) {
+            Banco::executar("UPDATE pedidos SET expedicao = 'separando', separado_por = ? WHERE id = ?", [$usuarioId, $id]);
+        }
+    }
+
     /** Concluir a separação. Com falta: $decisao = aguardar (fica na fila) | despachar_sem (obs. obrigatória) */
     public static function concluir(int $id, int $usuarioId, string $decisao = '', string $observacao = ''): string
     {
@@ -184,6 +256,10 @@ class DepositoService
             Auditoria::registrar('pedido', $id, 'expedicao_aguardar', null, ['falta' => $lista]);
             return 'O pedido ficou na fila aguardando o produto. O vendedor e a Produção foram avisados.';
         }
+        // vai sair: precisa dizer em que caixa foi embalado (quando fica aguardando produto, ainda não embalou)
+        if (Config::get('deposito.embalagem_obrigatoria', true) && self::embalagensDisponiveis() && !self::embalagensDoPedido($id)) {
+            throw new RuntimeException('Informe a caixa (ou embalagem) usada para embalar o pedido.');
+        }
         if ($falta && $decisao !== 'despachar_sem') {
             throw new RuntimeException('Falta produto: ' . $lista . '. Escolha aguardar o produto ou despachar sem o que falta.');
         }
@@ -192,7 +268,8 @@ class DepositoService
         }
         Banco::executar("UPDATE pedidos SET expedicao = 'separado', separado_por = ?, separado_em = NOW(), expedicao_aguarda_produto = 0, falta = ?,
             expedicao_obs = COALESCE(NULLIF(?, ''), expedicao_obs) WHERE id = ?", [$usuarioId, $falta ? 1 : 0, mb_substr(trim($observacao), 0, 500), $id]);
-        PedidoService::historico($id, 'deposito', $falta ? "Separado sem: $lista. " . trim($observacao) : 'Separado no depósito.', $usuarioId);
+        $emb = implode(', ', array_map(fn($e) => rtrim(rtrim(number_format((float) $e['quantidade'], 3, ',', '.'), '0'), ',') . ' × ' . $e['nome'], self::embalagensDoPedido($id)));
+        PedidoService::historico($id, 'deposito', ($falta ? "Separado sem: $lista. " . trim($observacao) : 'Separado no depósito.') . ($emb ? " Embalagem: $emb." : ''), $usuarioId);
         if ($falta) {
             NotificacaoService::diretoria('problemas', "Pedido #$id vai sem alguns itens", '/pedidos/' . $id,
                 ['texto' => mb_substr("Faltou: $lista. " . trim($observacao), 0, 300), 'pedido_id' => $id], $usuarioId);

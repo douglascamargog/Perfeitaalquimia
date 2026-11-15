@@ -77,6 +77,27 @@ $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceiriza
       </tbody>
     </table>
   </div>
+  <?php if ($embalagens): // caixas e embalagens usadas: dão baixa no estoque (Compras da empresa › Itens)
+    $antigoEmb = array_values(array_filter((array) Sessao::antigo('embalagem', []), 'is_array'));
+    $linhasEmb = $antigoEmb ?: array_map(fn($u) => ['item' => $u['materia_prima_id'], 'qtd' => rtrim(rtrim(number_format((float) $u['quantidade'], 3, ',', ''), '0'), ',')], $usadas);
+    if (!$linhasEmb) { $linhasEmb = [['item' => count($embalagens) === 1 ? $embalagens[0]['id'] : '', 'qtd' => '']]; } ?>
+  <fieldset class="dep-embalagem" data-embalagem>
+    <legend>📦 Caixas e embalagem usadas<?= $embalagemObrigatoria ? ' <small>(obrigatório para concluir)</small>' : '' ?></legend>
+    <p class="ajuda">Qual caixa e quantas foram usadas para embalar este pedido. A baixa no estoque é automática.</p>
+    <div class="dep-emb-linhas" data-emb-linhas>
+      <?php foreach (array_values($linhasEmb) as $n => $l): ?>
+        <div class="dep-emb-linha" data-emb-linha>
+          <select name="embalagem[<?= $n ?>][item]" aria-label="Caixa ou embalagem">
+            <option value="">Escolha a caixa…</option>
+            <?php foreach ($embalagens as $em): ?><option value="<?= (int) $em['id'] ?>" <?= (string) $l['item'] === (string) $em['id'] ? 'selected' : '' ?>><?= e($em['nome']) ?> · <?= e(\App\Services\ProducaoService::qtd((float) $em['estoque'], $em['unidade'])) ?> em estoque</option><?php endforeach; ?>
+          </select>
+          <input type="text" inputmode="decimal" name="embalagem[<?= $n ?>][qtd]" value="<?= e((string) $l['qtd']) ?>" placeholder="qtd" aria-label="Quantidade usada" class="dep-emb-qtd">
+        </div>
+      <?php endforeach; ?>
+    </div>
+    <button type="button" class="dep-outro-lote" data-outra-embalagem>+ outra caixa ou embalagem</button>
+  </fieldset>
+  <?php endif; ?>
   <fieldset class="dep-falta" data-falta-caixa>
     <legend>Se faltar produto</legend>
     <label class="caixa-marcar"><input type="radio" name="decisao" value="aguardar" checked> Aguardar o produto (o pedido fica na fila; avisa o vendedor e a Produção)</label>
@@ -100,6 +121,11 @@ $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceiriza
 </section>
 <?php endif; ?>
 
+<?php if (!$editavel && $usadas): ?>
+<section class="card dep-emb-resumo" data-embalagem-usada><h2>📦 Embalagem usada</h2>
+  <p><?= implode(' · ', array_map(fn($u) => '<strong>' . e(rtrim(rtrim(number_format((float) $u['quantidade'], 3, ',', '.'), '0'), ',')) . ' ×</strong> ' . e($u['nome']), $usadas)) ?></p></section>
+<?php endif; ?>
+
 <?php if ($p['expedicao'] === 'separado'): ?>
 <section class="card dep-despachar">
   <h2>Despachar</h2>
@@ -108,7 +134,7 @@ $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceiriza
   <form method="post" action="<?= $acao('despachar') ?>" class="pd-form dep-despacho"><?= csrf_campo() ?>
     <label>Transportadora<input type="text" name="transportadora" list="transportadoras" required maxlength="80" value="<?= antigo('transportadora') ?>"></label>
     <datalist id="transportadoras"><?php foreach ($transportadoras as $t): ?><option value="<?= e($t) ?>"><?php endforeach; ?></datalist>
-    <label>Volumes<input type="number" name="volumes" min="1" value="<?= antigo('volumes', '1') ?>" required></label>
+    <label>Volumes<input type="number" name="volumes" min="1" value="<?= antigo('volumes', (string) max(1, $caixas)) ?>" required><?php if ($caixas): ?><small class="suave"><?= $caixas ?> caixa(s) na separação</small><?php endif; ?></label>
     <label>Peso (kg)<input type="text" name="peso" inputmode="decimal" value="<?= antigo('peso') ?>"></label>
     <label>Código de rastreio<input type="text" name="rastreio" maxlength="80" value="<?= antigo('rastreio') ?>"></label>
     <label class="dep-despacho-obs">Observação<input type="text" name="observacao" maxlength="500"></label>

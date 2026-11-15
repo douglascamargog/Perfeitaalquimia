@@ -33,6 +33,8 @@ class DepositoController extends Controller
         }
         $this->tela('deposito/pedido', ['titulo' => 'Separar pedido #' . (int) $p['id'], 'p' => $p, 'pode' => Auth::pode('deposito.operar'),
             'loteObrigatorio' => (bool) Config::get('deposito.lote_obrigatorio', true),
+            'embalagens' => D::embalagensDisponiveis(), 'usadas' => D::embalagensDoPedido((int) $p['id']), 'caixas' => D::caixasDoPedido((int) $p['id']),
+            'embalagemObrigatoria' => (bool) Config::get('deposito.embalagem_obrigatoria', true),
             'transportadoras' => array_values(array_unique(array_merge((array) Config::get('deposito.transportadoras', []),
                 array_column(\App\Core\Banco::todos("SELECT DISTINCT transportadora FROM pedidos WHERE transportadora IS NOT NULL AND transportadora <> '' ORDER BY transportadora LIMIT 30"), 'transportadora')))),
             'estilos' => self::ESTILOS, 'scripts' => ['deposito.js']]);
@@ -52,6 +54,7 @@ class DepositoController extends Controller
                     break;
                 case 'separar':
                     $falta = D::salvarSeparacao($pid, (array) ($_POST['item'] ?? []), $uid);
+                    D::salvarEmbalagem($pid, (array) ($_POST['embalagem'] ?? []), $uid); // caixas usadas: baixa no estoque
                     if (!empty($_POST['concluir'])) {
                         Sessao::aviso('sucesso', D::concluir($pid, $uid, $this->campo('decisao'), $this->campo('observacao')));
                     } else {

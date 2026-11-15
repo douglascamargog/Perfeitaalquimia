@@ -78,9 +78,33 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
   ok(Number(sql("select count(*) from notificacoes where tipo='pedido_falta'")) > antesNotif
     && sql(`select count(*) from notificacoes where tipo='pedido_falta' and usuario_id=(select id from usuarios where email='producao@demo.local')`) !== '0', 'falta avisa o vendedor e a Produção');
 
-  // ---------- Concluir completo e despachar ----------
+  // ---------- Caixas usadas: obrigatório, baixa no estoque, corrigir sem baixar duas vezes ----------
+  const caixa = sql("select id from materias_primas where nome like 'Caixa de papel%' and categoria='Embalagem de envio'");
+  const fita = sql("select id from materias_primas where nome like 'Fita adesiva%'");
+  const est = (id) => Number(sql(`select estoque from materias_primas where id=${id}`));
+  const [c0, f0] = [est(caixa), est(fita)];
+  await d.p.goto(BASE + `/deposito/${pid}`);
+  ok(await d.p.locator('[data-embalagem] select option', { hasText: 'Caixa de papelão' }).count() === 1, 'separação mostra as caixas para escolher (com o estoque)');
   msg = await post(d, `/deposito/${pid}/separar`, { ...tudo(true), concluir: '1' });
+  ok(msg.includes('caixa') && exp(pid) === 'separando', 'sem informar a caixa não conclui');
+  await post(d, `/deposito/${pid}/separar`, { ...tudo(true), 'embalagem[0][item]': caixa, 'embalagem[0][qtd]': '3' });
+  ok(est(caixa) === c0 - 3, 'salvar com 3 caixas dá baixa de 3 no estoque');
+  await post(d, `/deposito/${pid}/separar`, { ...tudo(true), 'embalagem[0][item]': caixa, 'embalagem[0][qtd]': '3' });
+  ok(est(caixa) === c0 - 3, 'salvar de novo não baixa duas vezes');
+  await post(d, `/deposito/${pid}/separar`, { ...tudo(true), 'embalagem[0][item]': caixa, 'embalagem[0][qtd]': '2', 'embalagem[1][item]': fita, 'embalagem[1][qtd]': '1' });
+  ok(est(caixa) === c0 - 2 && est(fita) === f0 - 1, 'corrigir para 2 caixas devolve 1 ao estoque; a fita também baixa');
+  ok(sql(`select count(*) from mp_movimentos where materia_prima_id=${caixa} and tipo='consumo' and referencia='Pedido #${pid}'`) !== '0', 'baixa aparece no histórico do item como consumo do pedido');
+  const outra = sql("select id from materias_primas where categoria is null or categoria<>'Embalagem de envio' limit 1");
+  msg = await post(d, `/deposito/${pid}/separar`, { ...tudo(true), 'embalagem[0][item]': outra, 'embalagem[0][qtd]': '1' });
+  ok(msg.includes('Escolha a caixa'), 'item que não é embalagem de envio é recusado');
+
+  // ---------- Concluir completo e despachar ----------
+  msg = await post(d, `/deposito/${pid}/separar`, { ...tudo(true), concluir: '1', 'embalagem[0][item]': caixa, 'embalagem[0][qtd]': '2', 'embalagem[1][item]': fita, 'embalagem[1][qtd]': '1' });
   ok(exp(pid) === 'separado' && sql(`select count(*) from pedido_item_lotes where pedido_id=${pid}`) === String(itens.length), 'separação concluída com o lote de cada item');
+  ok(est(caixa) === c0 - 2, 'estoque das caixas certo depois de concluir');
+  ok(sql(`select count(*) from pedido_historico where pedido_id=${pid} and texto like '%Embalagem: 2 × Caixa%'`) === '1', 'embalagem anotada no histórico do pedido');
+  await d.p.goto(BASE + `/deposito/${pid}`);
+  ok(await d.p.inputValue('input[name=volumes]') === '2' && await d.p.locator('[data-embalagem-usada]').count() === 1, 'despacho já sugere 2 volumes (2 caixas) e mostra a embalagem usada');
   msg = await post(d, `/deposito/${pid}/despachar`, { transportadora: '', volumes: '1' });
   ok(msg.includes('transportadora') && exp(pid) === 'separado', 'despacho pede a transportadora');
   await post(d, `/deposito/${pid}/despachar`, { transportadora: 'Correios', volumes: '2', peso: '3,5', rastreio: 'QA987654321BR' });
@@ -104,6 +128,7 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
   const itens2 = sql(`select concat(id,'|',quantidade) from pedido_itens where pedido_id=${p2} order by id`).split('\n').map((l) => l.split('|'));
   const f2 = {};
   itens2.forEach(([id, q], n) => { const qtd = n === 0 ? 0 : Number(q); f2[`item[${id}][qtd]`] = String(qtd); f2[`item[${id}][lotes][0][lote]`] = 'LT-X'; f2[`item[${id}][lotes][0][qtd]`] = String(qtd); });
+  f2['embalagem[0][item]'] = caixa; f2['embalagem[0][qtd]'] = '1';
   msg = await post(d, `/deposito/${p2}/separar`, { ...f2, concluir: '1', decisao: 'despachar_sem', observacao: '' });
   ok(msg.includes('observação') && exp(p2) === 'separando', 'despachar sem o que falta exige observação');
   const antesFin = Number(sql("select count(*) from notificacoes where tipo='pedido_falta' and usuario_id=(select id from usuarios where email='financeiro@demo.local')"));

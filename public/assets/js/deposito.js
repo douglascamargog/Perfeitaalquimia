@@ -73,3 +73,19 @@ if (form) {
     tr.classList.add('lido');
   });
 }
+
+// ---------- Caixas e embalagem usadas: "+ outra caixa ou embalagem" ----------
+const embalagem = document.querySelector('[data-embalagem]');
+if (embalagem) {
+  embalagem.querySelector('[data-outra-embalagem]').addEventListener('click', () => {
+    const linhas = embalagem.querySelector('[data-emb-linhas]');
+    const nova = linhas.querySelector('[data-emb-linha]').cloneNode(true);
+    const n = linhas.querySelectorAll('[data-emb-linha]').length;
+    nova.querySelectorAll('select, input').forEach((campo) => {
+      campo.name = campo.name.replace(/embalagem\[\d+\]/, `embalagem[${n}]`);
+      if (campo.tagName === 'SELECT') campo.selectedIndex = 0; else campo.value = '';
+    });
+    linhas.appendChild(nova);
+    nova.querySelector('select').focus();
+  });
+}
