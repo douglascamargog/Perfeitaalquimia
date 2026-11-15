@@ -223,3 +223,9 @@ table.tabela { width: 100%; border-collapse: collapse; }
 .pessoa-grande .avatar { width: 34px; height: 34px; }
 @media print { .pessoa-chip .avatar { box-shadow: none; } }
 .pessoa-chip .avatar-iniciais::before { content: attr(data-ini); }
+
+/* Listas longas: "Mostrar mais" (js/lista-longa.js) */
+.ll-escondido { display: none !important; }
+.ll-barra { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 14px 10px; color: var(--texto-suave); font-size: .82rem; }
+.ll-tudo { background: none; border: 0; color: var(--primaria-escura); font: inherit; font-weight: 700; cursor: pointer; text-decoration: underline; }
+@media print { .ll-escondido { display: revert !important; } .ll-barra { display: none; } }

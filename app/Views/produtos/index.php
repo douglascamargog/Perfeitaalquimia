@@ -36,7 +36,7 @@ $link = fn(array $extra) => url('/produtos') . '?' . e(http_build_query(array_fi
 <?php if (!$produtos): ?>
   <div class="card vazio"><p>Nenhum produto com esses filtros.</p></div>
 <?php else: ?>
-<div class="grade-produtos">
+<div class="grade-produtos pd-lista-grade" data-lista-longa="24">
   <?php foreach ($produtos as $p): ?>
     <a class="cartao-produto pd-cartao" href="<?= url('/produtos/' . e($p['slug'])) ?>">
       <span class="foto"><?php if ($p['imagem']): ?><img src="<?= url('/' . e($p['imagem'])) ?>" alt="Embalagem de <?= e($p['nome']) ?>" loading="lazy"><?php else: ?><b>PA</b><?php endif; ?></span>

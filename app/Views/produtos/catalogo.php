@@ -50,7 +50,7 @@ $icones = asset('img/icones.svg');
   <div class="tabela-rolagem tabela-tela">
     <table class="tabela prod-tabela">
       <thead><tr><th>Código</th><th>Produto</th><?php foreach ($tabelas as $t): ?><th class="direita"><?= e($t['nome']) ?></th><?php endforeach; ?><th class="direita">Estoque</th><th>Catálogo</th><th>Chamada e ordem</th></tr></thead>
-      <tbody>
+      <tbody data-lista-longa="30">
       <?php foreach ($produtos as $p): $form = 'prod-' . (int) $p['id']; ?>
         <tr id="produto-<?= (int) $p['id'] ?>" class="<?= $p['visivel_catalogo'] ? '' : 'inativo' ?>">
           <td><?php if ($podeEditar): ?><input type="text" name="codigo" value="<?= e($p['codigo'] ?? '') ?>" maxlength="40" form="<?= $form ?>" class="prod-codigo" placeholder="código" aria-label="Código de <?= e($p['nome']) ?>"><?php else: ?><?= $p['codigo'] ? '<span class="cod-produto">' . e($p['codigo']) . '</span>' : '—' ?><?php endif; ?></td>

@@ -21,7 +21,7 @@ $icones = asset('img/icones.svg');
   <div class="tabela-rolagem">
     <table class="tabela tabela-carteira pr-tabela">
       <thead><tr><th>Produto</th><th>Categoria</th><th class="direita">Matérias-primas</th><th class="direita">Custo de MP por unidade</th><th></th></tr></thead>
-      <tbody>
+      <tbody data-lista-longa="25">
       <?php foreach ($itens as $p): ?>
         <tr>
           <td><a href="<?= url('/producao/fichas/' . (int) $p['id']) ?>"><strong><?= !empty($p['codigo']) ? '<span class="cod-produto">' . e($p['codigo']) . '</span> ' : '' ?><?= e($p['nome']) ?></strong></a><small class="suave"><?= e($p['embalagem'] ?? '') ?></small></td>

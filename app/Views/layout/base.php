@@ -195,6 +195,7 @@ if ($usuarioNov && array_key_exists('versao_vista', $usuarioNov) && empty($usuar
 <script type="module" src="<?= asset('js/comunicados.js') ?>"></script>
 <?php if ($meuAniversario): ?><script type="module" src="<?= asset('js/aniversario.js') ?>"></script><?php endif; ?>
 <script type="module" src="<?= asset('js/app.js') ?>"></script>
+<script type="module" src="<?= asset('js/lista-longa.js') ?>"></script>
 <script type="module" src="<?= asset('js/busca.js') ?>"></script>
 <script type="module" src="<?= asset('js/notificacoes.js') ?>"></script>
 <?php if (\App\Services\TelefoniaService::veDiscador()): ?><script type="module" src="<?= asset('js/discador.js') ?>"></script><?php endif; ?>

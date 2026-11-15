@@ -96,3 +96,13 @@ aside .pd-dados { grid-template-columns: 1fr; }
 .pd-trocar-foto { margin: 0; }
 .pd-trocar-foto label { cursor: pointer; }
 @media (max-width: 760px) { .pd-foto-caixa { width: 100%; } }
+
+/* V11.0: lista de produtos mais compacta (cartões menores, mais por linha) */
+.pd-lista-grade { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.pd-lista-grade .cartao-produto .foto { height: 124px; }
+.pd-lista-grade .cartao-produto .foto img { max-height: 108px; }
+.pd-lista-grade .cartao-produto h3, .pd-lista-grade .cartao-produto strong { font-size: .92rem; }
+/* Catálogo: código inteiro e coluna do produto mais larga */
+.prod-tabela .prod-codigo { width: 96px; }
+.prod-tabela td:nth-child(2) { min-width: 240px; }
+.tabela-tela thead th { position: sticky; top: 0; background: var(--card); z-index: 2; }

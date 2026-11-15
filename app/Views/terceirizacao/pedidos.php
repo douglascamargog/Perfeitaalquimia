@@ -17,7 +17,7 @@ $rotulo = ['aguardando_aprovacao' => ['Aguardando aprovação', 'laranja'], 'apr
   <div class="tabela-rolagem">
     <table class="tabela tabela-carteira">
       <thead><tr><th>Pedido</th><th>Cliente</th><th>Carteira</th><th>Vendedor</th><th>Situação</th><th class="direita">Com a marca dele</th><th class="direita">Total</th></tr></thead>
-      <tbody>
+      <tbody data-lista-longa="25">
       <?php foreach ($pedidos as $p): [$nome, $cor] = $rotulo[$p['situacao']] ?? [$p['situacao'], 'cinza']; ?>
         <tr>
           <td><a href="<?= url('/pedidos/' . (int) $p['id']) ?>"><strong>#<?= (int) $p['id'] ?></strong></a><small class="suave"><?= data_br($p['criado_em']) ?></small></td>
@@ -26,7 +26,7 @@ $rotulo = ['aguardando_aprovacao' => ['Aguardando aprovação', 'laranja'], 'apr
           <td class="pequeno"><?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null) ?></td>
           <td><span class="selo <?= $cor ?>"><?= e($nome) ?></span></td>
           <td class="direita"><?= $p['total_marca'] > 0 ? dinheiro((float) $p['total_marca']) : '—' ?></td>
-          <td class="direita"><strong><?= dinheiro((float) $p['total']) ?></strong></td>
+          <td class="direita" style="white-space:nowrap"><strong><?= dinheiro((float) $p['total']) ?></strong></td>
         </tr>
       <?php endforeach; ?>
       <?php if (!$pedidos): ?><tr><td colspan="7" class="suave">Nenhum pedido.</td></tr><?php endif; ?>
