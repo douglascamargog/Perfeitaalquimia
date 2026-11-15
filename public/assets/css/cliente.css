@@ -29,3 +29,74 @@
 @media print { .cl-ficha, .cl-topo .acoes { display: none; } .cl-grade { grid-template-columns: 1fr; } }
 .cl-principal td.direita { white-space: nowrap; }
 .cl-principal td { vertical-align: middle; }
+
+/* ---------- Página do cliente organizada (blocos compactos) ---------- */
+.cl-bloco { padding: 16px 18px; }
+.cl-bloco.sem-espaco { padding: 0; }
+.cl-bloco-topo { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.cl-bloco-topo h2 { margin: 0; font-size: 1.02rem; }
+.cl-bloco-topo .suave { margin-left: auto; }
+.cl-contador { background: var(--primaria-escura); color: var(--secundaria); border-radius: 999px; font-size: .72rem; font-weight: 800; padding: 1px 8px; }
+.cl-vazio { margin: 4px 0; color: var(--texto-suave); font-size: .85rem; }
+.cl-duas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 18px; align-items: start; }
+.cl-mais { margin-top: 8px; background: none; border: 0; color: var(--primaria-escura); font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; padding: 4px 0; }
+.cl-mais:hover { text-decoration: underline; }
+
+/* Próximas atividades: uma linha por atividade */
+.cl-ativs { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.cl-ativ { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 12px; background: var(--fundo); border: 1px solid var(--borda); }
+.cl-ativ-data { display: grid; place-items: center; line-height: 1; border-radius: 10px; padding: 5px 0; background: var(--card); border: 1px solid var(--borda); }
+.cl-ativ-data b { font-size: 1rem; color: var(--primaria-escura); }
+.cl-ativ-data small { font-size: .62rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); }
+.cl-ativ-txt { display: grid; gap: 2px; min-width: 0; }
+.cl-ativ-txt strong { font-size: .84rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl-ativ-txt small { font-size: .72rem; color: var(--texto-suave); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.cl-ativ-txt em { font-style: normal; font-weight: 700; }
+.cl-ativ.atrasada { border-color: color-mix(in srgb, var(--aviso) 45%, transparent); background: var(--aviso-fundo); }
+.cl-ativ.atrasada em, .cl-ativ.atrasada .cl-ativ-data b { color: var(--aviso); }
+.cl-ativ.hoje { border-color: var(--secundaria-escura, #9bd12a); }
+.cl-ativ.hoje em { color: var(--primaria-escura); }
+.cl-ativ form { margin: 0; }
+.cl-ok { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--borda); background: var(--card); cursor: pointer; font-weight: 800; color: var(--primaria-escura); transition: background .15s, transform .15s; }
+.cl-ok:hover { background: var(--secundaria); transform: scale(1.08); }
+
+/* O que mais compra: foto + barra de participação */
+.cl-top { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; counter-reset: top; }
+.cl-top li { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 5px 6px; border-radius: 12px; }
+.cl-top li:hover { background: var(--fundo); }
+.cl-top-foto { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; background: var(--primaria-clara); display: grid; place-items: center; border: 1px solid var(--borda); }
+.cl-top-foto img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.cl-top-foto b { font-size: .75rem; color: var(--primaria-escura); }
+.cl-top-txt { display: grid; gap: 2px; min-width: 0; }
+.cl-top-txt strong { font-size: .84rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl-top-txt strong a { color: inherit; text-decoration: none; }
+.cl-top-txt strong a:hover { text-decoration: underline; }
+.cl-top-txt small { font-size: .7rem; color: var(--texto-suave); }
+.cl-top-barra { display: block; height: 4px; border-radius: 4px; background: var(--fundo); overflow: hidden; }
+.cl-top-barra i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--primaria-escura), var(--secundaria-escura, #9bd12a)); }
+.cl-top-valor { font-weight: 700; font-size: .84rem; white-space: nowrap; }
+
+/* Linha do tempo compacta, com filtros */
+.cl-filtros { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0 10px; }
+.cl-filtros button { border: 1px solid var(--borda); background: var(--card); border-radius: 999px; padding: 4px 11px; font: inherit; font-size: .74rem; font-weight: 600; cursor: pointer; color: var(--texto-suave); }
+.cl-filtros button.ativo { background: var(--primaria-escura); border-color: var(--primaria-escura); color: var(--secundaria); }
+.cl-linha-tempo { max-height: 420px; gap: 8px; padding-right: 6px; scrollbar-width: thin; }
+.cl-linha-tempo li { grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 1px; padding: 6px 10px; border-radius: 10px; font-size: .8rem; }
+.cl-linha-tempo li:hover { background: var(--fundo); }
+.cl-linha-tempo li::before { left: -18px; top: 11px; }
+.cl-linha-tempo li > strong { grid-column: 1; font-size: .8rem; }
+.cl-linha-tempo li > small { grid-column: 2; grid-row: 1; text-align: right; white-space: nowrap; align-self: start; }
+.cl-linha-tempo li > span, .cl-linha-tempo li > .lt-anexos { grid-column: 1 / -1; color: var(--texto-suave); }
+.cl-linha-tempo li[hidden] { display: none; }
+.cl-pedidos { max-height: 360px; overflow: auto; }
+.cl-pedidos thead th { position: sticky; top: 0; background: var(--card); z-index: 1; }
+
+@media (max-width: 1400px) { .cl-duas { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .cl-linha-tempo li { grid-template-columns: 1fr; }
+  .cl-linha-tempo li > small { grid-column: 1; grid-row: auto; text-align: left; }
+}
+@media print { .cl-filtros, .cl-mais, .cl-ok { display: none; } .cl-linha-tempo, .cl-pedidos { max-height: none; overflow: visible; } [data-a-mais] { display: grid !important; } }
+.cl-ativs > li[hidden], .cl-top > li[hidden] { display: none; }
+.cl-bloco .cl-secao-topo { padding: 16px 18px 8px; }
+.cl-bloco .cl-secao-topo h2 { font-size: 1.02rem; }

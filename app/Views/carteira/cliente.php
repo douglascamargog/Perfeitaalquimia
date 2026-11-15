@@ -43,51 +43,79 @@ $diasSemCompra = $c['ultima_compra_em'] ? (int) floor((time() - strtotime($c['ul
 
 <div class="cl-grade">
   <div class="cl-principal">
-    <?php if ($tarefas): ?>
-    <section class="card">
-      <h2>Próximas atividades</h2>
-      <ul class="cl-tarefas" data-proximas>
-        <?php foreach ($tarefas as $t): $atrasada = $t['vence_em'] < date('Y-m-d'); ?>
-          <li class="<?= $atrasada ? 'atrasada' : '' ?>" data-tarefa="<?= (int) $t['id'] ?>"><div><strong><?= e($t['titulo']) ?></strong>
-            <small><?= data_br($t['vence_em']) ?><?= $t['hora'] ? ' ' . substr($t['hora'], 0, 5) : '' ?> · <?= e($t['usuario'] ?? '') ?><?= $atrasada ? ' · atrasada' : '' ?></small></div>
-            <?php if (!Auth::somenteAcompanha() && ((int) $t['usuario_id'] === Auth::id() || Auth::pode('carteira.ver_todas'))): ?>
-              <form method="post" action="<?= url('/agenda/' . (int) $t['id'] . '/concluir') ?>"><?= csrf_campo() ?><input type="hidden" name="voltar" value="/carteira/clientes/<?= $id ?>"><button class="botao contorno pequeno" type="submit">Concluir</button></form>
-            <?php endif; ?></li>
-        <?php endforeach; ?>
-      </ul>
-    </section>
-    <?php endif; ?>
+    <div class="cl-duas">
+      <section class="card cl-bloco">
+        <header class="cl-bloco-topo"><h2>Próximas atividades</h2><?php if ($tarefas): ?><span class="cl-contador"><?= count($tarefas) ?></span><?php endif; ?></header>
+        <?php if (!$tarefas): ?>
+          <p class="cl-vazio">Nada agendado. Use a aba <strong>Agendar</strong> na linha do tempo.</p>
+        <?php else: ?>
+        <ul class="cl-ativs" data-proximas>
+          <?php foreach ($tarefas as $i => $t): $atrasada = $t['vence_em'] < date('Y-m-d'); $hoje = $t['vence_em'] === date('Y-m-d'); $ts = strtotime($t['vence_em']); ?>
+            <li class="cl-ativ <?= $atrasada ? 'atrasada' : ($hoje ? 'hoje' : '') ?>" data-tarefa="<?= (int) $t['id'] ?>" <?= $i >= 4 ? 'data-a-mais hidden' : '' ?>>
+              <span class="cl-ativ-data"><b><?= date('d', $ts) ?></b><small><?= mes_curto((int) date('n', $ts)) ?></small></span>
+              <div class="cl-ativ-txt"><strong><?= e($t['titulo']) ?></strong>
+                <small><?= $atrasada ? '<em>atrasada</em> · ' : ($hoje ? '<em>hoje</em> · ' : '') ?><?= $t['hora'] ? substr($t['hora'], 0, 5) . ' · ' : '' ?><?= pessoa($t['usuario'] ?? null, $t['usuario_foto'] ?? null, true, 16) ?></small></div>
+              <?php if (!Auth::somenteAcompanha() && ((int) $t['usuario_id'] === Auth::id() || Auth::pode('carteira.ver_todas'))): ?>
+                <form method="post" action="<?= url('/agenda/' . (int) $t['id'] . '/concluir') ?>"><?= csrf_campo() ?><input type="hidden" name="voltar" value="/carteira/clientes/<?= $id ?>"><button class="cl-ok" type="submit" title="Concluir" aria-label="Concluir: <?= e($t['titulo']) ?>">✓</button></form>
+              <?php endif; ?></li>
+          <?php endforeach; ?>
+        </ul>
+        <?php if (count($tarefas) > 4): ?><button class="cl-mais" type="button" data-ver-mais="[data-proximas]">Ver mais <?= count($tarefas) - 4 ?></button><?php endif; ?>
+        <?php endif; ?>
+      </section>
 
-    <section class="card sem-espaco">
+      <section class="card cl-bloco">
+        <header class="cl-bloco-topo"><h2>O que mais compra</h2><span class="suave pequeno">últimos 12 meses</span></header>
+        <?php if (!$maisComprados): ?><p class="cl-vazio">Sem compras faturadas nos últimos 12 meses.</p><?php else: $maior = max(array_map(fn($m) => (float) $m['valor'], $maisComprados)) ?: 1; ?>
+        <ol class="cl-top" data-mais-comprados>
+          <?php foreach ($maisComprados as $i => $m): ?>
+            <li <?= $i >= 5 ? 'data-a-mais hidden' : '' ?>>
+              <span class="cl-top-foto"><?php if ($m['imagem']): ?><img src="<?= url('/' . e($m['imagem'])) ?>" alt="" loading="lazy" width="44" height="44"><?php else: ?><b><?= e(mb_strtoupper(mb_substr((string) $m['nome'], 0, 2))) ?></b><?php endif; ?></span>
+              <div class="cl-top-txt">
+                <strong title="<?= e($m['nome']) ?>"><?= $m['slug'] ? '<a href="' . url('/produtos/' . e($m['slug'])) . '">' . e($m['nome']) . '</a>' : e($m['nome']) ?></strong>
+                <small><?= $m['codigo'] ? '<span class="cod-produto">' . e($m['codigo']) . '</span> ' : '' ?><?= number_format((int) $m['quantidade'], 0, ',', '.') ?> un · <?= (int) $m['vezes'] ?>× · última <?= $m['ultima'] ? data_br($m['ultima']) : '—' ?></small>
+                <span class="cl-top-barra"><i style="width: <?= round((float) $m['valor'] / $maior * 100) ?>%"></i></span>
+              </div>
+              <span class="cl-top-valor"><?= dinheiro((float) $m['valor']) ?></span>
+            </li>
+          <?php endforeach; ?>
+        </ol>
+        <?php if (count($maisComprados) > 5): ?><button class="cl-mais" type="button" data-ver-mais="[data-mais-comprados]">Ver todos (<?= count($maisComprados) ?>)</button><?php endif; ?>
+        <?php endif; ?>
+      </section>
+    </div>
+
+    <section class="card cl-bloco" data-pagina-cliente="<?= $id ?>">
+      <header class="cl-bloco-topo"><h2>Linha do tempo</h2><span class="suave pequeno"><?= count($linhaDoTempo) ?> registro(s)</span></header>
+      <?php if (!Auth::somenteAcompanha() || Auth::pode('diretoria.vende') && (int) $c['responsavel_id'] === Auth::id()): ?>
+        <?= \App\Core\Visao::renderizar('carteira/_compositor', ['id' => $id, 'canais' => array_keys(\App\Services\CarteiraService::CANAIS)]) ?>
+      <?php endif; ?>
+      <?php if (!$linhaDoTempo): ?><p class="cl-vazio">Nenhum registro ainda.</p><?php else: ?>
+        <div class="cl-filtros" role="group" aria-label="Filtrar a linha do tempo" data-filtro-tempo>
+          <?php foreach (['' => 'Tudo', 'contato' => 'Contatos', 'nota' => 'Anotações', 'pedido' => 'Pedidos e orçamentos', 'etapa' => 'Etapas e cadastro', 'cobranca' => 'Cobrança'] as $grupo => $rot): ?>
+            <button type="button" class="<?= $grupo === '' ? 'ativo' : '' ?>" data-grupo="<?= $grupo ?>"><?= $rot ?></button>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+      <?php $anexos = \App\Services\ClienteAnexoService::porEvento($id); ?>
+      <ol class="linha-tempo cl-linha-tempo">
+        <?php foreach ($linhaDoTempo as $ev): ?><?= \App\Core\Visao::renderizar('carteira/_evento', ['ev' => $ev, 'anexos' => $anexos[(int) $ev['id']] ?? [], 'clienteId' => $id]) ?><?php endforeach; ?>
+      </ol>
+    </section>
+
+    <section class="card sem-espaco cl-bloco">
       <header class="cl-secao-topo"><h2>Pedidos</h2>
         <?php if (Auth::pode('pedidos.criar') && $todosPedidos): ?><a class="botao contorno pequeno" href="<?= url('/pedidos/novo') ?>?cliente=<?= $id ?>&repetir=1">↻ Repetir último</a><?php endif; ?></header>
-      <div class="tabela-rolagem">
+      <div class="tabela-rolagem cl-pedidos">
         <table class="tabela" data-pedidos-cliente>
           <thead><tr><th>Pedido</th><th>Data</th><th>Origem</th><th>Vendedor</th><th>Pagamento</th><th>Situação</th><th class="direita">Total</th></tr></thead>
           <tbody>
           <?php foreach ($todosPedidos as $pd): [$rot, $cor] = \App\Services\PedidoService::SITUACOES[$pd['situacao']] ?? [$pd['situacao'], 'cinza']; ?>
             <tr><td><a href="<?= url('/pedidos/' . (int) $pd['id']) ?>"><strong>#<?= (int) $pd['id'] ?></strong></a></td><td class="pequeno"><?= data_br($pd['criado_em']) ?></td>
-              <td class="pequeno"><?= e(ucfirst($pd['origem'])) ?></td><td class="pequeno"><?= pessoa($pd['vendedor'] ?? null, $pd['vendedor_foto'] ?? null) ?></td><td class="pequeno"><?= e($pd['forma']) ?></td>
+              <td class="pequeno"><?= e(ucfirst($pd['origem'])) ?></td><td class="pequeno"><?= pessoa($pd['vendedor'] ?? null, $pd['vendedor_foto'] ?? null, true) ?></td><td class="pequeno"><?= e($pd['forma']) ?></td>
               <td><span class="selo <?= $cor ?>"><?= $rot ?></span></td><td class="direita"><strong><?= e(dinheiro((float) $pd['total'])) ?></strong></td></tr>
           <?php endforeach; ?>
           <?php if (!$todosPedidos): ?><tr><td colspan="7" class="suave">Nenhum pedido ainda.</td></tr><?php endif; ?>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="card sem-espaco">
-      <header class="cl-secao-topo"><h2>O que mais compra</h2><span class="suave pequeno">últimos 12 meses</span></header>
-      <div class="tabela-rolagem">
-        <table class="tabela">
-          <thead><tr><th>Produto</th><th class="direita">Unidades</th><th class="direita">Valor</th><th>Última vez</th></tr></thead>
-          <tbody>
-          <?php foreach ($maisComprados as $m): ?>
-            <tr><td><?= $m['codigo'] ? '<span class="cod-produto">' . e($m['codigo']) . '</span> ' : '' ?><?= e($m['nome']) ?></td>
-              <td class="direita"><?= number_format((int) $m['quantidade'], 0, ',', '.') ?></td><td class="direita"><?= dinheiro((float) $m['valor']) ?></td>
-              <td class="pequeno"><?= $m['ultima'] ? data_br($m['ultima']) : '—' ?></td></tr>
-          <?php endforeach; ?>
-          <?php if (!$maisComprados): ?><tr><td colspan="4" class="suave">Sem compras faturadas nos últimos 12 meses.</td></tr><?php endif; ?>
           </tbody>
         </table>
       </div>
@@ -113,17 +141,6 @@ $diasSemCompra = $c['ultima_compra_em'] ? (int) floor((time() - strtotime($c['ul
     </section>
     <?php endif; ?>
 
-    <section class="card" data-pagina-cliente="<?= $id ?>">
-      <h2>Linha do tempo</h2>
-      <?php if (!Auth::somenteAcompanha() || Auth::pode('diretoria.vende') && (int) $c['responsavel_id'] === Auth::id()): ?>
-        <?= \App\Core\Visao::renderizar('carteira/_compositor', ['id' => $id, 'canais' => array_keys(\App\Services\CarteiraService::CANAIS)]) ?>
-      <?php endif; ?>
-      <?php if (!$linhaDoTempo): ?><p class="suave pequeno">Nenhum registro ainda.</p><?php endif; ?>
-      <?php $anexos = \App\Services\ClienteAnexoService::porEvento($id); ?>
-      <ol class="linha-tempo cl-linha-tempo">
-        <?php foreach ($linhaDoTempo as $ev): ?><?= \App\Core\Visao::renderizar('carteira/_evento', ['ev' => $ev, 'anexos' => $anexos[(int) $ev['id']] ?? [], 'clienteId' => $id]) ?><?php endforeach; ?>
-      </ol>
-    </section>
   </div>
 
   <!-- A mesma ficha da gaveta: contatos, mensagem pronta, dados, gestão comercial, registrar contato... -->

@@ -122,6 +122,15 @@ function pessoa(?string $nome, ?string $foto = null, bool $curto = false, int $t
         return '<span class="suave">—</span>';
     }
     $texto = $curto ? explode(' ', $nome)[0] : $nome;
-    return '<span class="pessoa-chip" title="' . e($nome) . '">' . \App\Services\EquipeService::avatar(['nome' => $nome, 'foto' => $foto], $tamanho)
+    // sem foto: as iniciais vão pelo CSS (data-ini), para o texto da célula continuar sendo só o nome
+    $avatar = $foto ? \App\Services\EquipeService::avatar(['nome' => $nome, 'foto' => $foto], $tamanho)
+        : '<span class="avatar avatar-iniciais" data-ini="' . e(\App\Services\EquipeService::iniciais($nome)) . '" style="width:' . $tamanho . 'px;height:' . $tamanho . 'px;font-size:' . round($tamanho * .38) . 'px" aria-hidden="true"></span>';
+    return '<span class="pessoa-chip" title="' . e($nome) . '">' . $avatar
         . '<span class="pessoa-nome">' . e($texto) . '</span></span>';
+}
+
+/** Mês abreviado em português: mes_curto(9) → "set" */
+function mes_curto(int $mes): string
+{
+    return ['', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][$mes] ?? '';
 }

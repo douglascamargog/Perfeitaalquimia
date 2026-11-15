@@ -30,6 +30,12 @@ return [
         'melhoria' => [
             'Página da matéria-prima com cartões, abas (Resumo, Fornecedores, Compras, Documentos, Estoque) e gráfico de compras por mês.',
             'Desenvolvimento de Produto com visual futurista: balões e janelas de vidro com brilho neon, fundo quadriculado e fios de luz.',
+            'Foto e nome do vendedor responsável em todo lugar: carteira, funil, ficha do cliente, pedidos, aprovação, orçamentos, Depósito, Cobrança e Recompra.',
+            'Página da empresa mais organizada: próximas atividades em linhas compactas (concluir com ✓), "O que mais compra" com a foto de cada produto e barra de quanto pesa nas compras.',
+            'Linha do tempo da empresa mais enxuta, com filtros (Contatos, Anotações, Pedidos e orçamentos, Etapas, Cobrança). A lista de pedidos rola dentro do quadro.',
+        ],
+        'correcao' => [
+            'Página da empresa: a coluna da direita (mensagem pronta, dados, contatos) voltou a rolar até o fim.',
         ],
         'admin' => 'Permissão nova "Lançar compras da empresa" (perfil Financeiro; a função Qualidade também lança). Categorias dos itens em Configurações › Compras. Aviso de compras para a Diretoria em Configurações › Diretoria.',
     ],

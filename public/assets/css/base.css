@@ -222,3 +222,4 @@ table.tabela { width: 100%; border-collapse: collapse; }
 .pessoa-chip .pessoa-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
 .pessoa-grande .avatar { width: 34px; height: 34px; }
 @media print { .pessoa-chip .avatar { box-shadow: none; } }
+.pessoa-chip .avatar-iniciais::before { content: attr(data-ini); }
