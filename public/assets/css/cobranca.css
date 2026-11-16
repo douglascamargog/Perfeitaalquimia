@@ -13,7 +13,7 @@
 .cob-numero span { font-size: .76rem; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .04em; }
 .cob-numero strong { font-size: clamp(1.15rem, 1.5vw, 1.45rem); color: var(--verde-escuro); white-space: nowrap; }
 .cob-numero small { font-size: .78rem; color: var(--texto-suave); }
-.cob-numero.destaque { background: var(--verde-escuro); border-color: var(--verde-escuro); }
+.cob-numero.destaque { background: var(--fundo-forte); border-color: var(--verde-escuro); }
 .cob-numero.destaque span, .cob-numero.destaque small { color: #c7d3c9; }
 .cob-numero.destaque strong { color: var(--lima); }
 .cob-numero.alerta strong { color: var(--perigo); }
@@ -42,13 +42,13 @@ a.cob-numero:hover { border-color: var(--lima-escuro); }
 .linha-campo select { flex: 1; min-width: 0; }
 
 /* Relatório para imprimir (A4) */
-.cob-relatorio { background: #fff; }
+.cob-relatorio { background: var(--card); }
 .cob-relatorio table { width: 100%; border-collapse: collapse; font-size: .82rem; }
 .cob-relatorio th, .cob-relatorio td { border-bottom: 1px solid #ddd; padding: 5px 6px; text-align: left; }
 .cob-relatorio .direita { text-align: right; }
 @media print {
   @page { size: A4; margin: 14mm; }
   .menu-lateral, .topo, .faixa-demo, .one-botao, .one-painel, .nao-imprimir { display: none !important; }
-  body, .conteudo { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  body, .conteudo { background: var(--card) !important; margin: 0 !important; padding: 0 !important; }
   .cob-relatorio { box-shadow: none; border: 0; }
 }

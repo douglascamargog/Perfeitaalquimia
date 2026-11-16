@@ -1,14 +1,14 @@
 /* Desenvolvimento de Produto */
 .dp-filtros { margin: 0 0 12px; }
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
-.chip { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--borda); background: #fff; border-radius: 999px; padding: 6px 12px; font-size: .78rem; color: var(--primaria-escura); text-decoration: none; }
-a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lima); border-color: var(--primaria-escura); }
+.chip { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--borda); background: var(--card); border-radius: 999px; padding: 6px 12px; font-size: .78rem; color: var(--primaria-escura); text-decoration: none; }
+a.chip:hover, .chip.ativo { background: var(--fundo-forte); color: var(--lima); border-color: var(--primaria-escura); }
 .dp-quadro { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 10px; }
 .dp-coluna { background: var(--primaria-clara); border-radius: 14px; padding: 10px; display: grid; gap: 8px; align-content: start; min-height: 140px; }
 .dp-coluna header { display: grid; gap: 2px; padding: 2px 4px 6px; }
 .dp-coluna header strong { font-size: .82rem; color: var(--primaria-escura); }
 .dp-coluna header small { font-size: .7rem; color: var(--texto-suave); }
-.dp-cartao { display: grid; gap: 4px; background: #fff; border: 1px solid var(--borda); border-radius: 12px; padding: 10px 12px; text-decoration: none; color: var(--texto); }
+.dp-cartao { display: grid; gap: 4px; background: var(--card); border: 1px solid var(--borda); border-radius: 12px; padding: 10px 12px; text-decoration: none; color: var(--texto); }
 .dp-cartao:hover { border-color: var(--secundaria); }
 .dp-cartao strong { color: var(--primaria-escura); font-size: .88rem; }
 .dp-cartao small { font-size: .72rem; color: var(--texto-suave); }
@@ -18,7 +18,7 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 .dp-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
 .dp-tarefa { display: grid; gap: 6px; }
 .dp-linha { list-style: none; margin: 0 0 16px; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(110px, 1fr); gap: 6px; overflow-x: auto; }
-.dp-linha li { display: grid; gap: 2px; padding: 10px; border-radius: 12px; background: #fff; border: 1px solid var(--borda); font-size: .75rem; }
+.dp-linha li { display: grid; gap: 2px; padding: 10px; border-radius: 12px; background: var(--card); border: 1px solid var(--borda); font-size: .75rem; }
 .dp-linha li b { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--primaria-clara); font-size: .7rem; }
 .dp-linha li span { font-weight: 700; color: var(--primaria-escura); }
 .dp-linha li small { color: var(--texto-suave); }
@@ -37,7 +37,7 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 .dp-compras { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .dp-compras li { display: flex; gap: 10px; align-items: center; font-size: .88rem; }
 .dp-compras form { margin: 0; }
-.dp-check { width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--borda); background: #fff; cursor: pointer; font-weight: 800; color: #fff; }
+.dp-check { width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--borda); background: var(--card); cursor: pointer; font-weight: 800; color: #fff; }
 .dp-check.ok { background: var(--sucesso); border-color: var(--sucesso); }
 .dp-duas { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin-top: 14px; }
 .dp-duas .card { margin: 0; }
@@ -51,7 +51,7 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 /* ---------- O "jogo": tipo de embalagem, palco 3D e balões ---------- */
 .dp-tipos { border: 0; padding: 0; margin: 0 0 4px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .dp-tipos legend { font-weight: 700; color: var(--primaria-escura); margin-bottom: 8px; font-size: .9rem; }
-.dp-tipo { position: relative; display: grid; justify-items: center; gap: 2px; padding: 12px 8px; border: 2px solid var(--borda); border-radius: 14px; cursor: pointer; text-align: center; background: #fff; transition: border-color .15s, transform .15s; }
+.dp-tipo { position: relative; display: grid; justify-items: center; gap: 2px; padding: 12px 8px; border: 2px solid var(--borda); border-radius: 14px; cursor: pointer; text-align: center; background: var(--card); transition: border-color .15s, transform .15s; }
 .dp-tipo:hover { transform: translateY(-2px); }
 .dp-tipo input { position: absolute; opacity: 0; pointer-events: none; }
 .dp-tipo:has(input:checked) { border-color: var(--primaria-escura); background: var(--primaria-clara); box-shadow: 0 0 0 3px var(--lima); }
@@ -142,7 +142,7 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 .dp-fios line.atual { stroke: var(--lima); stroke-width: 2; stroke-dasharray: 6 4; animation: dp-fio 1s linear infinite; }
 @keyframes dp-fio { to { stroke-dashoffset: -20; } }
 
-.dp-conquista { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); z-index: 5; background: #fff; color: #1f4d3a; font-weight: 700; padding: 10px 18px; border-radius: 99px; box-shadow: 0 8px 26px rgba(0, 0, 0, .3); animation: dp-chegar .5s ease-out; max-width: 90%; text-align: center; font-size: .88rem; }
+.dp-conquista { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); z-index: 5; background: var(--card); color: #1f4d3a; font-weight: 700; padding: 10px 18px; border-radius: 99px; box-shadow: 0 8px 26px rgba(0, 0, 0, .3); animation: dp-chegar .5s ease-out; max-width: 90%; text-align: center; font-size: .88rem; }
 .dp-conquista.saindo { opacity: 0; transition: opacity .6s; }
 @keyframes dp-chegar { from { transform: translate(-50%, -20px); opacity: 0; } }
 .dp-confete { position: absolute; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
@@ -170,7 +170,7 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 .dp-cores { display: grid; gap: 10px; margin: 0 0 6px; }
 .dp-cores fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .dp-cores legend { font-weight: 700; color: var(--primaria-escura); font-size: .85rem; margin-bottom: 6px; }
-.dp-cor { display: inline-flex; align-items: center; gap: 6px; border: 2px solid var(--borda); border-radius: 99px; padding: 4px 12px 4px 5px; cursor: pointer; font-size: .82rem; background: #fff; color: var(--texto); }
+.dp-cor { display: inline-flex; align-items: center; gap: 6px; border: 2px solid var(--borda); border-radius: 99px; padding: 4px 12px 4px 5px; cursor: pointer; font-size: .82rem; background: var(--card); color: var(--texto); }
 .dp-cor input { position: absolute; opacity: 0; pointer-events: none; }
 .dp-cor i { width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, .25); }
 .dp-cor:has(input:checked) { border-color: var(--primaria-escura); box-shadow: 0 0 0 2px var(--lima); }
@@ -183,7 +183,7 @@ a.chip:hover, .chip.ativo { background: var(--primaria-escura); color: var(--lim
 .dp-personalizar { position: relative; }
 .dp-personalizar summary { cursor: pointer; list-style: none; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .25); border-radius: 99px; padding: 6px 14px; font-size: .8rem; color: #fff; }
 .dp-personalizar summary::-webkit-details-marker { display: none; }
-.dp-personalizar[open] form { position: absolute; right: 0; top: calc(100% + 8px); z-index: 6; background: #fff; color: var(--texto); border-radius: 16px; padding: 14px; width: min(360px, calc(100vw - 48px)); box-shadow: 0 14px 40px rgba(0, 0, 0, .35); }
+.dp-personalizar[open] form { position: absolute; right: 0; top: calc(100% + 8px); z-index: 6; background: var(--card); color: var(--texto); border-radius: 16px; padding: 14px; width: min(360px, calc(100vw - 48px)); box-shadow: 0 14px 40px rgba(0, 0, 0, .35); }
 .dp-sem-imagem { color: #ffd479; font-size: .78rem; }
 /* Balão de etapa concluída que abre para editar */
 .dp-editar { justify-self: start; font-size: .66rem; font-weight: 700; color: #2e7d4f; text-decoration: underline; }

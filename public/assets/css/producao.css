@@ -48,7 +48,7 @@ details[open] summary { margin-bottom: 14px; }
 }
 
 /* ---------- Ordem para imprimir (A4) ---------- */
-.pr-impressao { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #111; background: #fff; max-width: 780px; margin: 24px auto; padding: 0 16px; font-size: 11pt; }
+.pr-impressao { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #111; background: var(--card); max-width: 780px; margin: 24px auto; padding: 0 16px; font-size: 11pt; }
 .pr-impressao header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #111; padding-bottom: 10px; margin-bottom: 14px; }
 .pr-impressao header strong { font-size: 14pt; }
 .pr-imp-numero { text-align: right; font-size: 20pt; font-weight: 800; }

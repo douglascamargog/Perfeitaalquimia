@@ -22,7 +22,7 @@ foreach (array_slice($segmentos, 0, 4) as $i => $s) {
     $arco = $comprimento * 0.76;
     $frente = $arco * ($s['total'] / $total);
     $cor = $coresSegmento[$s['chave']] ?? '#9aa79c';
-    $arcos .= sprintf('<circle cx="154" cy="122" r="%d" fill="none" stroke="#edf2e9" stroke-width="13" stroke-linecap="round" stroke-dasharray="%.1f %.1f" transform="rotate(133 154 122)"/>', $raio, $arco, $comprimento);
+    $arcos .= sprintf('<circle cx="154" cy="122" r="%d" fill="none" class="v4-trilho" stroke-width="13" stroke-linecap="round" stroke-dasharray="%.1f %.1f" transform="rotate(133 154 122)"/>', $raio, $arco, $comprimento);
     $arcos .= sprintf('<circle cx="154" cy="122" r="%d" fill="none" stroke="%s" stroke-width="13" stroke-linecap="round" stroke-dasharray="%.1f %.1f" transform="rotate(133 154 122)"/>', $raio, $cor, $frente, $comprimento);
 }
 $query = http_build_query(array_filter($filtros));

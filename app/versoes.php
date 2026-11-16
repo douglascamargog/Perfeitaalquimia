@@ -17,6 +17,15 @@
  */
 return [
     [
+        'versao' => '13.9', 'data' => '2026-11-17', 'titulo' => 'Modo escuro',
+        'novo' => [
+            'Modo escuro: clique no botão 🌙 no alto da tela e o One fica escuro na hora (clique no ☀️ para voltar). Fica guardado no seu login.',
+            'Em Meu perfil › Aparência dá para escolher Claro, Escuro ou Automático (acompanha o modo do seu celular ou computador).',
+        ],
+        'melhoria' => ['O modo escuro respeita as cores que você escolheu para o seu One. Ao imprimir, a folha sai sempre clara.'],
+        'admin' => 'As cores escuras são calculadas a partir das cores da empresa ou da pessoa (Aparencia.php). As cores fixas dos CSS ganham a versão escura pela ferramenta ferramentas/gerar_tema_escuro.py (rode de novo se mudar algum CSS). O catálogo do cliente não muda.',
+    ],
+    [
         'versao' => '13.8', 'data' => '2026-11-17', 'titulo' => 'Treinamento aprofundado para todos os setores',
         'novo' => ['Trilhas novas: "Gestão comercial", para gestores (metas, carteiras, acompanhamento e o treinamento do time), e "Administração do One", para quem administra (pessoas e acessos, configurações, integrações e atualizações).'],
         'melhoria' => [

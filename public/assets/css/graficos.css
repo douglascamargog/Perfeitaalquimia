@@ -68,7 +68,7 @@
 .grafico-grupo-barras span { position: relative; flex: 1 1 0; max-width: 28px; min-height: 2px; border-radius: 6px 6px 2px 2px; }
 .grafico-grupo-barras b { position: absolute; left: 50%; bottom: calc(100% + 2px); transform: translateX(-50%) rotate(-90deg); transform-origin: left center; translate: 6px 0; white-space: nowrap; font-size: .6rem; color: var(--texto-suave); font-weight: 700; display: none; }
 .grafico-grupo small { text-align: center; font-size: .72rem; color: var(--texto-suave); text-transform: uppercase; }
-.g0 { background: var(--primaria-escura); }
+.g0 { background: var(--fundo-forte); }
 .g1 { background: var(--secundaria); }
 .g2 { background: color-mix(in srgb, var(--primaria) 45%, transparent); }
 .grafico-legenda i.g0, .grafico-legenda i.g1, .grafico-legenda i.g2 { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: 5px; vertical-align: -1px; }

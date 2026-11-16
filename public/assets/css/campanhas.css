@@ -50,7 +50,7 @@
 .cp-promo .cp-largo select { width: 100%; }
 .cp-promo label > input:not([type=checkbox]) { width: 110px; }
 .cp-promo .opcao { display: flex; color: var(--texto); padding-bottom: 8px; }
-.cp-tirar { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--borda); background: #fff; font-size: 1.1rem; cursor: pointer; color: var(--texto-suave); }
+.cp-tirar { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--borda); background: var(--card); font-size: 1.1rem; cursor: pointer; color: var(--texto-suave); }
 .cp-tirar:hover { color: var(--perigo); border-color: var(--perigo); }
 .cp-salvar { position: sticky; bottom: 0; padding: 10px 0; background: linear-gradient(transparent, var(--fundo) 30%); }
 
@@ -58,7 +58,7 @@
 .cp-cores { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; }
 .cp-cores legend { font-weight: 700; font-size: .86rem; margin-bottom: 6px; }
 .cp-prontas { display: flex; flex-wrap: wrap; gap: 6px; }
-.cp-pronta { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 5px; border-radius: 99px; border: 1px solid var(--borda); background: #fff; cursor: pointer; font: inherit; font-size: .8rem; }
+.cp-pronta { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 5px; border-radius: 99px; border: 1px solid var(--borda); background: var(--card); cursor: pointer; font: inherit; font-size: .8rem; }
 .cp-pronta i { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, var(--p) 50%, var(--d) 50%); }
 .cp-cores-linha { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: .86rem; }
 .cp-cores-linha label { display: inline-flex; align-items: center; gap: 6px; }
@@ -72,7 +72,7 @@
 .cp-previa.escuro { --fundo-p: color-mix(in srgb, var(--p) 28%, #000); --painel: color-mix(in srgb, var(--p) 45%, #000); --txt: #f4f8f5; }
 .cp-previa-topo { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--p); color: #fff; font-size: .78rem; font-weight: 800; }
 .cp-previa.escuro .cp-previa-topo { background: color-mix(in srgb, var(--p) 40%, #000); }
-.cp-previa-topo img { width: 22px; height: 22px; background: #fff; border-radius: 6px; padding: 2px; }
+.cp-previa-topo img { width: 22px; height: 22px; background: var(--card); border-radius: 6px; padding: 2px; }
 .cp-previa-topo i { margin-left: auto; font-style: normal; background: var(--d); color: #10201d; padding: 3px 9px; border-radius: 99px; }
 .cp-previa-hero { --banner: none; position: relative; margin: 10px; padding: 18px 16px; border-radius: 16px; min-height: 150px; display: grid; align-content: end; gap: 6px;
   background: var(--banner) right center / cover no-repeat, radial-gradient(circle at 85% 20%, color-mix(in srgb, var(--d) 60%, transparent), transparent 55%), var(--p); color: #fff; }

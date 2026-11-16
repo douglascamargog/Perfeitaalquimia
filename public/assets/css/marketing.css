@@ -21,7 +21,7 @@ a.b-chip:hover { background: var(--lima); }
 .mk-numero span { font-size: .74rem; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .04em; }
 .mk-numero strong { font-size: 1.6rem; letter-spacing: -.04em; color: var(--verde-escuro); }
 .mk-numero small { font-size: .76rem; color: var(--texto-suave); }
-.mk-numero.escuro { background: var(--verde-escuro); border-color: var(--verde-escuro); }
+.mk-numero.escuro { background: var(--fundo-forte); border-color: var(--verde-escuro); }
 .mk-numero.escuro strong { color: var(--lima); }
 .mk-numero.escuro span, .mk-numero.escuro small { color: #b8c6bb; }
 .mk-numero.alerta strong { color: #c2410c; }
@@ -40,7 +40,7 @@ a.b-chip:hover { background: var(--lima); }
 .mk-cal-cabeca span { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--texto-suave); }
 .mk-semana { position: relative; border-top: 1px solid var(--primaria-clara); padding: 6px 0; }
 .mk-semana.fraca { background: repeating-linear-gradient(135deg, transparent 0 12px, #fff7e8 12px 24px); border-radius: 12px; }
-.mk-contagem-semana { position: absolute; right: 8px; bottom: 6px; font-size: .66rem; font-weight: 700; color: var(--texto-suave); background: #fff; padding: 1px 7px; border-radius: 99px; border: 1px solid var(--borda); }
+.mk-contagem-semana { position: absolute; right: 8px; bottom: 6px; font-size: .66rem; font-weight: 700; color: var(--texto-suave); background: var(--card); padding: 1px 7px; border-radius: 99px; border: 1px solid var(--borda); }
 .mk-semana.fraca .mk-contagem-semana { color: #c2410c; border-color: #fed7aa; }
 .mk-faixas { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px 6px; padding: 0 2px 5px; }
 .mk-faixa { background: color-mix(in srgb, var(--cor) 28%, #fff); border-left: 4px solid var(--cor); color: var(--verde-escuro); border-radius: 8px; padding: 2px 8px;
@@ -53,11 +53,11 @@ a.b-chip:hover { background: var(--lima); }
 .mk-dia.sobre { background: var(--secundaria); outline: 2px dashed var(--lima-escuro); }
 .mk-dia-topo { display: flex; justify-content: space-between; align-items: center; }
 .mk-dia-topo b { font-size: .8rem; color: var(--verde-escuro); }
-.mk-dia.hoje .mk-dia-topo b { background: var(--verde-escuro); color: var(--lima); border-radius: 99px; padding: 0 7px; }
-.mk-mais { width: 22px; height: 22px; border-radius: 50%; border: 1px dashed #c5d2c0; background: #fff; color: var(--verde-medio); cursor: pointer; line-height: 1; opacity: 0; transition: opacity .15s; }
+.mk-dia.hoje .mk-dia-topo b { background: var(--fundo-forte); color: var(--lima); border-radius: 99px; padding: 0 7px; }
+.mk-mais { width: 22px; height: 22px; border-radius: 50%; border: 1px dashed #c5d2c0; background: var(--card); color: var(--verde-medio); cursor: pointer; line-height: 1; opacity: 0; transition: opacity .15s; }
 .mk-dia:hover .mk-mais, .mk-mais:focus-visible { opacity: 1; }
 .mk-comemorativa { font-size: .66rem; font-weight: 700; color: #9d174d; background: #fde7f1; border-radius: 6px; padding: 2px 6px; line-height: 1.25; }
-.mk-post { border-radius: 11px; background: #fff; border: 1px solid var(--borda); border-left: 4px solid var(--cor); box-shadow: 0 3px 8px rgba(20, 32, 23, .05); }
+.mk-post { border-radius: 11px; background: var(--card); border: 1px solid var(--borda); border-left: 4px solid var(--cor); box-shadow: 0 3px 8px rgba(20, 32, 23, .05); }
 .mk-post.arrastando { opacity: .4; }
 .mk-post button { display: flex; gap: 6px; align-items: center; width: 100%; border: 0; background: none; padding: 4px; cursor: pointer; text-align: left; font: inherit; color: inherit; }
 .mk-post img, .mk-sem-imagem { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; flex: none; }
@@ -87,7 +87,7 @@ a.b-chip:hover { background: var(--lima); }
 /* Prévia do feed */
 .mk-feed-moldura { max-width: 560px; margin: 0 auto; background: var(--card); border: 1px solid var(--borda); border-radius: 28px; padding: 20px; box-shadow: var(--sombra); }
 .mk-feed-perfil { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
-.mk-feed-perfil img { width: 64px; height: 64px; border-radius: 50%; object-fit: contain; border: 2px solid var(--lima-escuro); background: #fff; padding: 6px; }
+.mk-feed-perfil img { width: 64px; height: 64px; border-radius: 50%; object-fit: contain; border: 2px solid var(--lima-escuro); background: var(--card); padding: 6px; }
 .mk-feed-perfil div { display: grid; }
 .mk-feed-perfil small { color: var(--texto-suave); }
 .mk-feed { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
@@ -171,7 +171,7 @@ a.b-chip:hover { background: var(--lima); }
 .mt-quadro-topo h2 { margin: 0; }
 .mt-filtro { display: inline-flex; background: var(--card); border: 1px solid var(--borda); border-radius: 99px; padding: 3px; }
 .mt-filtro a { padding: 6px 14px; border-radius: 99px; text-decoration: none; color: var(--texto-suave); font-weight: 600; font-size: .85rem; }
-.mt-filtro a.ativo { background: var(--verde-escuro); color: var(--lima); }
+.mt-filtro a.ativo { background: var(--fundo-forte); color: var(--lima); }
 .mt-colunas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start; }
 .mt-coluna { background: var(--primaria-clara); border-radius: 20px; padding: 10px; display: grid; gap: 8px; min-height: 120px; }
 .mt-coluna h3 { margin: 2px 4px 4px; font-size: .92rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
@@ -211,7 +211,7 @@ a.b-chip:hover { background: var(--lima); }
 .mt-cal-dia { position: relative; aspect-ratio: 1; border: 0; border-radius: 10px; background: transparent; cursor: pointer; display: grid; align-content: center; justify-items: center; gap: 2px; font: inherit; font-size: .82rem; color: var(--texto); padding: 0; }
 .mt-cal-dia:hover, .mt-cal-dia.escolhido { background: var(--primaria-clara); }
 .mt-cal-dia.fora { opacity: .35; }
-.mt-cal-dia.hoje span { background: var(--verde-escuro); color: var(--lima); border-radius: 99px; width: 24px; height: 24px; display: grid; place-items: center; font-weight: 700; }
+.mt-cal-dia.hoje span { background: var(--fundo-forte); color: var(--lima); border-radius: 99px; width: 24px; height: 24px; display: grid; place-items: center; font-weight: 700; }
 .mt-pontos { display: flex; gap: 2px; height: 5px; font-style: normal; }
 .mt-pontos b, .mt-legenda b { width: 5px; height: 5px; border-radius: 50%; background: var(--c, #a78bfa); display: inline-block; }
 .mt-pontos b.prazo, .mt-legenda b.prazo { background: #ef4444; }

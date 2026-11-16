@@ -1,0 +1,226 @@
+/* GERADO por ferramentas/gerar_tema_escuro.py — não edite à mão (rode a ferramenta de novo).
+   Versão escura das cores fixas dos CSS. As cores principais vêm das variáveis (Aparencia.php). */
+@media screen {
+/* academia.css */
+html.escuro .anel { background: conic-gradient(var(--secundaria-escura) calc(var(--p) * 1%), color-mix(in srgb, #e8eee5 18%, var(--card)) 0); }
+html.escuro .links-externos a { border: 1px solid color-mix(in srgb, #e6ede3 35%, var(--card)); }
+html.escuro .trilha-numero { background: color-mix(in srgb, #eef3ec 18%, var(--card)); color: color-mix(in srgb, #4a5a4d 45%, #ffffff); }
+html.escuro .trilha li.feito .trilha-numero, html.escuro .trilha li.feito .trilha-numero * { color: var(--secundaria-texto); }
+html.escuro .pratica { background: color-mix(in srgb, #fffbe9 18%, var(--card)); border: 1px solid color-mix(in srgb, #f1e3a7 35%, var(--card)); }
+html.escuro .pratica .sobretitulo { color: color-mix(in srgb, #8a6a11 45%, #ffffff); }
+html.escuro .pratica p, html.escuro .pratica ol { color: color-mix(in srgb, #3d3410 45%, #ffffff); }
+html.escuro .bloco-claro { border: 1px solid color-mix(in srgb, #e7ede3 35%, var(--card)); }
+html.escuro .bloco-claro p { color: color-mix(in srgb, #4a5a4d 45%, #ffffff); }
+html.escuro .mensagem-rodape small { color: color-mix(in srgb, #6b5a1a 45%, #ffffff); background: color-mix(in srgb, #fff8e3 18%, var(--card)); }
+html.escuro .cartao-produto .foto { background: linear-gradient(180deg, color-mix(in srgb, var(--cor-produto) 10%, color-mix(in srgb, #fff 18%, var(--card))), color-mix(in srgb, #fff 18%, var(--card))); }
+html.escuro .cartao-produto .chamada { color: color-mix(in srgb, #4a5a4d 45%, #ffffff); }
+html.escuro .ficha-metricas strong { color: color-mix(in srgb, #000 45%, #ffffff); }
+html.escuro .temas-produto dd { color: color-mix(in srgb, #4a5a4d 45%, #ffffff); }
+html.escuro .capitulo-chamada { color: color-mix(in srgb, #3b4f40 45%, #ffffff); }
+html.escuro .linguagem .evite { background: color-mix(in srgb, #fdecea 18%, var(--card)); color: color-mix(in srgb, #7b2a20 45%, #ffffff); }
+html.escuro .linguagem .use { background: color-mix(in srgb, #e5f6ea 18%, var(--card)); }
+/* acompanhamento.css */
+html.escuro .ac-meta .ac-barra i, html.escuro .ac-meta .ac-barra i * { color: var(--secundaria-texto); }
+/* agenda.css */
+html.escuro .ag-atrasadas { border: 1px solid color-mix(in srgb, #f3c1c1 35%, var(--card)); }
+/* app.css */
+html.escuro a.modulo .modulo-icone, html.escuro a.modulo .modulo-icone * { color: var(--secundaria-texto); }
+html.escuro .one-painel { border: 1px solid color-mix(in srgb, #d6e6e3 35%, var(--card)); }
+html.escuro .one-fala > div { background: color-mix(in srgb, #f1f8f6 18%, var(--card)); border: 1px solid color-mix(in srgb, #d6ebe6 35%, var(--card)); }
+html.escuro .menu-ponto { border: 2px solid color-mix(in srgb, #fff 35%, var(--card)); }
+html.escuro .sino-contador { border: 2px solid color-mix(in srgb, #fff 35%, var(--card)); }
+html.escuro .novidade { color: color-mix(in srgb, #b42318 45%, #ffffff); background: color-mix(in srgb, #fde8e4 18%, var(--card)); }
+html.escuro .ac-nivel.n0 { background: color-mix(in srgb, #f6f6f4 18%, var(--card)); }
+html.escuro .ac-nivel.n1 { background: color-mix(in srgb, #eef5ff 18%, var(--card)); color: color-mix(in srgb, #1d4ed8 45%, #ffffff); }
+html.escuro .nov-versao > header strong, html.escuro .nov-versao > header strong * { color: var(--secundaria-texto); }
+html.escuro .com-faixa.importante { background: color-mix(in srgb, #fff1e0 18%, var(--card)); color: color-mix(in srgb, #7a3b00 45%, #ffffff); }
+html.escuro .com-faixa.importante .icone { color: color-mix(in srgb, #c2410c 45%, #ffffff); }
+html.escuro .aniv-faixa { background: linear-gradient(90deg, color-mix(in srgb, #fde68a 18%, var(--card)), color-mix(in srgb, #fbcfe8 18%, var(--card)), var(--secundaria-clara)); color: color-mix(in srgb, #5b2a00 45%, #ffffff); }
+html.escuro .b-mural { background: linear-gradient(160deg, color-mix(in srgb, #fff7ed 18%, var(--card)), var(--card) 60%); }
+html.escuro .menu-setor-escolha select { background: rgba(255, 255, 255, .12) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='color-mix(in srgb, white 18%, var(--card))' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") right 8px center no-repeat; }
+html.escuro .menu-setor-escolha option { color: color-mix(in srgb, #10201d 45%, #ffffff); }
+html.escuro .one-balao.festa { background: linear-gradient(180deg, color-mix(in srgb, #fffbea 18%, var(--card)), var(--card)); }
+html.escuro .one-botao.tem-dica::after { border: 2px solid color-mix(in srgb, #fff 35%, var(--card)); }
+html.escuro .one-abas { background: color-mix(in srgb, #f1f8f6 18%, var(--card)); border-bottom: 1px solid color-mix(in srgb, #e3efec 35%, var(--card)); }
+html.escuro .one-msg.one .one-msg-corpo { background: color-mix(in srgb, #f1f8f6 18%, var(--card)); border: 1px solid color-mix(in srgb, #d6ebe6 35%, var(--card)); }
+html.escuro .one-pergunte { border-top: 1px solid color-mix(in srgb, #e3efec 35%, var(--card)); }
+html.escuro .tut-balao { background: var(--card, color-mix(in srgb, #fff 18%, var(--card))); }
+/* base.css */
+html.escuro .selo.lima, html.escuro .selo.lima * { color: var(--secundaria-texto); }
+html.escuro .selo.cinza { background: color-mix(in srgb, #eceff1 18%, var(--card)); }
+html.escuro .avatar, html.escuro .avatar * { color: var(--secundaria-texto); }
+/* campanhas.css */
+html.escuro .cp-mini-selo { color: color-mix(in srgb, #10201d 45%, #ffffff); }
+html.escuro .cp-chip.brinde { background: color-mix(in srgb, #fff1d6 18%, var(--card)); color: color-mix(in srgb, #7a4b00 45%, #ffffff); }
+html.escuro .cp-chip.frete { background: color-mix(in srgb, #e3f2ff 18%, var(--card)); color: color-mix(in srgb, #0b4d80 45%, #ffffff); }
+html.escuro .cp-previa-topo i { color: color-mix(in srgb, #10201d 45%, #ffffff); }
+html.escuro .cp-previa-botao { color: color-mix(in srgb, #10201d 45%, #ffffff); }
+html.escuro .cp-previa-selo { color: color-mix(in srgb, #10201d 45%, #ffffff); }
+/* carteira.css */
+html.escuro .selo-etapa { background: color-mix(in srgb, var(--cor) 16%, color-mix(in srgb, #fff 18%, var(--card))); color: color-mix(in srgb, #000 45%, #ffffff); }
+html.escuro .selo.prioridade-media { background: color-mix(in srgb, #eef2ee 18%, var(--card)); color: color-mix(in srgb, #5d6b65 45%, #ffffff); }
+html.escuro .selo.prioridade-baixa { background: color-mix(in srgb, #f4f4f1 18%, var(--card)); }
+html.escuro .v4-metrica { border: 1px solid color-mix(in srgb, #e8ede6 35%, var(--card)); }
+html.escuro .v4-metrica.destaque, html.escuro .v4-metrica.destaque * { color: var(--secundaria-texto); }
+html.escuro .v4-mini.calmo { background: color-mix(in srgb, #e8f5f0 18%, var(--card)); color: color-mix(in srgb, #3b7162 45%, #ffffff); }
+html.escuro .v4-mini.neutro { background: color-mix(in srgb, #fff6e7 18%, var(--card)); }
+html.escuro .v4-rotulo { color: color-mix(in srgb, #505d52 45%, #ffffff); }
+html.escuro .v4-legenda { border-top: 1px solid color-mix(in srgb, #edf1eb 35%, var(--card)); color: color-mix(in srgb, #5e7264 45%, #ffffff); }
+html.escuro .v4-bolha { border: 3px solid color-mix(in srgb, #fff 35%, var(--card)); }
+html.escuro .v4-bolha.ouro { color: color-mix(in srgb, #4a3311 45%, #ffffff); }
+html.escuro .v4-acao { border: 1px solid color-mix(in srgb, #e5eae1 35%, var(--card)); }
+html.escuro .v4-acao-icone.pessego { background: color-mix(in srgb, #fff1e5 18%, var(--card)); }
+html.escuro .v4-acao-icone.verde { background: color-mix(in srgb, #e6f4ed 18%, var(--card)); color: color-mix(in srgb, #37785a 45%, #ffffff); }
+html.escuro .linha-cidade div { background: color-mix(in srgb, #eff1e9 18%, var(--card)); }
+html.escuro .mapa-resumo div { border: 1px solid color-mix(in srgb, #e9efe6 35%, var(--card)); }
+html.escuro .mapa-legenda { border-top: 1px solid color-mix(in srgb, #eaf0e9 35%, var(--card)); color: color-mix(in srgb, #5e7264 45%, #ffffff); }
+html.escuro .pino-grupo:focus-visible, html.escuro .pino-grupo:focus-visible * { color: var(--secundaria-texto); }
+html.escuro .ficha-secao { border-top: 1px solid color-mix(in srgb, #edf1eb 35%, var(--card)); }
+html.escuro .ficha-nota.alerta { background: color-mix(in srgb, #fff8e8 18%, var(--card)); color: color-mix(in srgb, #7a5410 45%, #ffffff); }
+html.escuro .linha-tempo { border-left: 2px solid color-mix(in srgb, #e4ece0 35%, var(--card)); }
+html.escuro .linha-tempo li::before { border: 2px solid color-mix(in srgb, #fff 35%, var(--card)); }
+html.escuro .linha-tempo li.tipo-importacao::before { background: color-mix(in srgb, #c9cfc9 18%, var(--card)); }
+html.escuro .funil-coluna header b { color: color-mix(in srgb, #4a5a4d 45%, #ffffff); }
+html.escuro .funil-cards.sobre, html.escuro .funil-cards.sobre * { color: var(--secundaria-texto); }
+html.escuro .funil-card { border: 1px solid color-mix(in srgb, #e3e9e1 35%, var(--card)); }
+html.escuro .agenda-resumo span { color: color-mix(in srgb, #505d52 45%, #ffffff); }
+html.escuro .busca-ia { border: 1px dashed color-mix(in srgb, #cfd9c9 35%, var(--card)); }
+html.escuro .ficha-codigo strong, html.escuro .ficha-codigo strong * { color: var(--secundaria-texto); }
+html.escuro .ficha-recompra-atrasada { color: color-mix(in srgb, #c2410c 45%, #ffffff); }
+/* cobranca.css */
+html.escuro .cob-coluna-valor { color: color-mix(in srgb, #4a5a4d 45%, #ffffff); }
+html.escuro .funil-coluna.encerra { background: color-mix(in srgb, #f3f4f1 18%, var(--card)); }
+html.escuro .cob-relatorio th, html.escuro .cob-relatorio td { border-bottom: 1px solid color-mix(in srgb, #ddd 35%, var(--card)); }
+/* compras-itens.css */
+html.escuro .it-num.alerta { background: color-mix(in srgb, #fff4ec 18%, var(--card)); }
+html.escuro .it-num.alerta strong { color: color-mix(in srgb, #c2410c 45%, #ffffff); }
+html.escuro .it-barra i, html.escuro .it-barra i * { color: var(--secundaria-texto); }
+html.escuro .fo-barra i, html.escuro .fo-barra i * { color: var(--secundaria-texto); }
+/* deposito.css */
+html.escuro .selo.azul { background: color-mix(in srgb, #e6effc 18%, var(--card)); color: color-mix(in srgb, #24508f 45%, #ffffff); }
+html.escuro .dep-resumo > a, html.escuro .dep-resumo > span { background: var(--fundo-card, color-mix(in srgb, #fff 18%, var(--card))); }
+html.escuro .dep-cartao { background: var(--fundo-card, color-mix(in srgb, #fff 18%, var(--card))); }
+html.escuro .dep-embalagem, html.escuro .dep-embalagem * { color: var(--secundaria-texto); }
+html.escuro .dep-tipo-selo.tipo-ecommerce { background: color-mix(in srgb, #ede7ff 18%, var(--card)); color: color-mix(in srgb, #5b3cc4 45%, #ffffff); }
+html.escuro .dep-tipo-selo.tipo-terceirizacao { background: color-mix(in srgb, #fff1dc 18%, var(--card)); color: color-mix(in srgb, #9a5b00 45%, #ffffff); }
+html.escuro .dep-prazo { background: color-mix(in srgb, #eef7f1 18%, var(--card)); color: color-mix(in srgb, #1f7a5a 45%, #ffffff); }
+html.escuro .dep-prazo.perto { background: color-mix(in srgb, #fff1dc 18%, var(--card)); color: color-mix(in srgb, #9a5b00 45%, #ffffff); }
+html.escuro .dep-prazo.atrasado { background: color-mix(in srgb, #fde3e1 18%, var(--card)); color: color-mix(in srgb, #b3261e 45%, #ffffff); }
+/* desenvolvimento.css */
+html.escuro .dp-linha li.andamento b, html.escuro .dp-linha li.andamento b * { color: var(--secundaria-texto); }
+html.escuro .dp-barra i, html.escuro .dp-barra i * { color: var(--secundaria-texto); }
+html.escuro .dp-trocar-tipo option { color: color-mix(in srgb, #000 45%, #ffffff); }
+html.escuro .dp-balao.concluida > div { background: color-mix(in srgb, rgba(255, 255, 255, .92) 18%, var(--card)); color: color-mix(in srgb, #1f4d3a 45%, #ffffff); }
+html.escuro .dp-balao.concluida b { color: color-mix(in srgb, #2e7d4f 45%, #ffffff); }
+html.escuro .dp-balao.andamento > div, html.escuro .dp-balao.andamento > button { color: color-mix(in srgb, #10291f 45%, #ffffff); }
+html.escuro .dp-conquista { color: color-mix(in srgb, #1f4d3a 45%, #ffffff); }
+html.escuro .dp-amostra { border: 2px solid color-mix(in srgb, #fff 35%, var(--card)); }
+html.escuro .dp-editar { color: color-mix(in srgb, #2e7d4f 45%, #ffffff); }
+html.escuro .dp-balao.concluida > button { background: color-mix(in srgb, rgba(255, 255, 255, .92) 18%, var(--card)); color: color-mix(in srgb, #1f4d3a 45%, #ffffff); }
+html.escuro .dp-balao.concluida > button b { color: color-mix(in srgb, #2e7d4f 45%, #ffffff); }
+html.escuro .dp-balao.concluida > button small { color: color-mix(in srgb, #4d6b5f 45%, #ffffff); }
+html.escuro .dp-balao.andamento > div, html.escuro .dp-balao.andamento > button { background: linear-gradient(150deg, color-mix(in srgb, rgba(202, 255, 77, .95) 18%, var(--card)), rgba(150, 230, 90, .88)); color: color-mix(in srgb, #08180f 45%, #ffffff); border: 1px solid color-mix(in srgb, #e9ffb0 35%, var(--card)); }
+html.escuro .dp-conquista { background: linear-gradient(135deg, color-mix(in srgb, #eaffc2 18%, var(--card)), var(--lima)); }
+html.escuro .dp-gaveta .dp-atual { background: linear-gradient(180deg, color-mix(in srgb, #ffffff 18%, var(--card)), color-mix(in srgb, #f2f8f4 18%, var(--card))); border-left: 1px solid color-mix(in srgb, rgba(202, 255, 77, .6) 35%, var(--card)); }
+/* graficos.css */
+html.escuro .s2, html.escuro .grafico-legenda i.s2, html.escuro .grafico-pilha .s2 { background: color-mix(in srgb, #b9cfc5 18%, var(--card)); }
+html.escuro .legenda-evolucao i.real { background: var(--secundaria, color-mix(in srgb, #caff4d 18%, var(--card))); }
+html.escuro .legenda-evolucao i.ideal { background: repeating-linear-gradient(90deg, color-mix(in srgb, rgba(255, 255, 255, .6) 18%, var(--card)) 0 4px, transparent 4px 8px); }
+html.escuro .g1, html.escuro .g1 * { color: var(--secundaria-texto); }
+/* inicio.css */
+html.escuro .b-icone-redondo.lima, html.escuro .b-icone-redondo.lima * { color: var(--secundaria-texto); }
+html.escuro .b-hero, html.escuro .b-hero * { color: var(--secundaria-texto); }
+html.escuro .b-hero p { color: color-mix(in srgb, #3f5a3f 45%, #ffffff); }
+html.escuro .b-atalhos a { background: color-mix(in srgb, #ffffffb3 18%, var(--card)); border: 1px solid color-mix(in srgb, #ffffff 35%, var(--card)); }
+html.escuro .b-clima { background: linear-gradient(160deg, color-mix(in srgb, #e9f6ff 18%, var(--card)) 0%, color-mix(in srgb, #f6fbff 18%, var(--card)) 60%); border-color: color-mix(in srgb, #dcebf5 35%, var(--card)); }
+html.escuro .b-clima-agora strong { color: color-mix(in srgb, #10304a 45%, #ffffff); }
+html.escuro .b-clima-agora b { color: color-mix(in srgb, #10304a 45%, #ffffff); }
+html.escuro .b-clima-dias li { background: color-mix(in srgb, #ffffffc7 18%, var(--card)); }
+html.escuro .b-clima-dias li b { color: color-mix(in srgb, #10304a 45%, #ffffff); }
+html.escuro .b-clima-dica { color: color-mix(in srgb, #10304a 45%, #ffffff); }
+html.escuro .b-barra { background: color-mix(in srgb, #edf1ea 18%, var(--card)); }
+html.escuro .b-barra i, html.escuro .b-barra i * { color: var(--secundaria-texto); }
+html.escuro .b-lima, html.escuro .b-lima * { color: var(--secundaria-texto); }
+html.escuro .b-lima .b-barra { background: color-mix(in srgb, #ffffff8c 18%, var(--card)); }
+html.escuro .b-trilha li:not(:last-child)::after { background: color-mix(in srgb, #e3e9df 18%, var(--card)); }
+html.escuro .b-trilha-ponto { background: color-mix(in srgb, var(--cor) 22%, color-mix(in srgb, #fff 18%, var(--card))); }
+html.escuro .b-alerta-suave { background: color-mix(in srgb, #fff4ec 18%, var(--card)) !important; }
+html.escuro .b-alerta-suave .b-valor { color: color-mix(in srgb, #c2410c 45%, #ffffff); }
+html.escuro .b-desce { color: color-mix(in srgb, #dc2626 45%, #ffffff); }
+/* marketing.css */
+html.escuro .mk-numero.alerta strong { color: color-mix(in srgb, #c2410c 45%, #ffffff); }
+html.escuro .mk-semana.fraca { background: repeating-linear-gradient(135deg, transparent 0 12px, color-mix(in srgb, #fff7e8 18%, var(--card)) 12px 24px); }
+html.escuro .mk-semana.fraca .mk-contagem-semana { color: color-mix(in srgb, #c2410c 45%, #ffffff); border-color: color-mix(in srgb, #fed7aa 35%, var(--card)); }
+html.escuro .mk-faixa { background: color-mix(in srgb, var(--cor) 28%, color-mix(in srgb, #fff 18%, var(--card))); }
+html.escuro .mk-dia.passado { background: color-mix(in srgb, #f6f7f5 18%, var(--card)); }
+html.escuro .mk-dia.sobre, html.escuro .mk-dia.sobre * { color: var(--secundaria-texto); }
+html.escuro .mk-mais { border: 1px dashed color-mix(in srgb, #c5d2c0 35%, var(--card)); }
+html.escuro .mk-comemorativa { color: color-mix(in srgb, #9d174d 45%, #ffffff); background: color-mix(in srgb, #fde7f1 18%, var(--card)); }
+html.escuro .mk-formato.reels { color: color-mix(in srgb, #be185d 45%, #ffffff); }
+html.escuro .mk-formato.stories { color: color-mix(in srgb, #7c3aed 45%, #ffffff); }
+html.escuro .mk-formato.carrossel { color: color-mix(in srgb, #0369a1 45%, #ffffff); }
+html.escuro .mk-gantt-data small { color: color-mix(in srgb, #9d174d 45%, #ffffff); }
+html.escuro .mk-gantt-barra { background: color-mix(in srgb, var(--cor) 30%, color-mix(in srgb, #fff 18%, var(--card))); }
+html.escuro .mk-gantt-barra small { color: color-mix(in srgb, #4b5f4d 45%, #ffffff); }
+html.escuro .mk-var.desce { color: color-mix(in srgb, #dc2626 45%, #ffffff); }
+html.escuro .mk-ranking li:first-child .mk-posicao, html.escuro .mk-ranking li:first-child .mk-posicao * { color: var(--secundaria-texto); }
+html.escuro .mt-etiqueta.post { background: color-mix(in srgb, #ede9fe 18%, var(--card)); color: color-mix(in srgb, #5b21b6 45%, #ffffff); }
+html.escuro .selo.azul { background: color-mix(in srgb, #e0f2fe 18%, var(--card)); color: color-mix(in srgb, #0369a1 45%, #ffffff); }
+html.escuro .selo.roxo { background: color-mix(in srgb, #ede9fe 18%, var(--card)); color: color-mix(in srgb, #5b21b6 45%, #ffffff); }
+/* meu_mes.css */
+html.escuro .barra-meta > span, html.escuro .barra-meta > span * { color: var(--secundaria-texto); }
+html.escuro .meta-equipe-numeros .destaque, html.escuro .meta-equipe-numeros .destaque * { color: var(--secundaria-texto); }
+html.escuro .legenda-evolucao .real, html.escuro .legenda-evolucao .real * { color: var(--secundaria-texto); }
+html.escuro .meta-individual.atingida { background: linear-gradient(135deg, var(--secundaria-clara), color-mix(in srgb, #fff 18%, var(--card))); }
+html.escuro .kpi.destaque, html.escuro .kpi.destaque * { color: var(--secundaria-texto); }
+html.escuro .kpi .positivo { color: color-mix(in srgb, #2f7d32 45%, #ffffff); }
+html.escuro .kpi .negativo { color: color-mix(in srgb, #c62828 45%, #ffffff); }
+html.escuro .lista-tarefas li.atrasada { background: color-mix(in srgb, #fff0e9 18%, var(--card)); }
+html.escuro .calendario-grade a.folga { background: color-mix(in srgb, #f1f2ef 18%, var(--card)); }
+html.escuro .mm-equipe-barra i, html.escuro .mm-equipe-barra i * { color: var(--secundaria-texto); }
+/* nutricional.css */
+html.escuro .tn { color: color-mix(in srgb, #000 45%, #ffffff); }
+/* painel.css */
+html.escuro .mk-var.desce { color: color-mix(in srgb, #dc2626 45%, #ffffff); }
+html.escuro .mk-ranking li:first-child .mk-posicao, html.escuro .mk-ranking li:first-child .mk-posicao * { color: var(--secundaria-texto); }
+html.escuro .pn-sem-compra a:last-child strong { color: color-mix(in srgb, #c2410c 45%, #ffffff); }
+html.escuro .pn-vermelho { color: color-mix(in srgb, #c2410c 45%, #ffffff); }
+html.escuro .pn-historico .bateu { background: color-mix(in srgb, #dcf5e3 18%, var(--card)); }
+html.escuro .pn-historico .nao { background: color-mix(in srgb, #fde8e4 18%, var(--card)); color: color-mix(in srgb, #b42318 45%, #ffffff); }
+html.escuro .rc-atraso { background: color-mix(in srgb, #fff1e8 18%, var(--card)) !important; }
+html.escuro .rc-atraso strong { color: color-mix(in srgb, #c2410c 45%, #ffffff); }
+/* pedidos.css */
+html.escuro .cat-minimo-barra { background: color-mix(in srgb, #ffffffb0 18%, var(--card)); }
+html.escuro .cat-forma.bloqueada { background: color-mix(in srgb, #f6f6f4 18%, var(--card)); }
+html.escuro .ped-campanha-barra i, html.escuro .ped-campanha-barra i * { color: var(--secundaria-texto); }
+/* pessoas.css */
+html.escuro .pe-cartao-capa, html.escuro .pe-cartao-capa * { color: var(--secundaria-texto); }
+html.escuro .pe-capa, html.escuro .pe-capa * { color: var(--secundaria-texto); }
+html.escuro .pe-festa { background: color-mix(in srgb, #fde68a 18%, var(--card)); color: color-mix(in srgb, #5b2a00 45%, #ffffff); }
+html.escuro .pe-hero .pe-foto, html.escuro .pe-hero .pe-foto * { color: var(--secundaria-texto); }
+html.escuro .pe-cartao-foto, html.escuro .pe-cartao-foto * { color: var(--secundaria-texto); }
+/* producao.css */
+html.escuro .selo.laranja { background: color-mix(in srgb, #fff1e0 18%, var(--card)); color: color-mix(in srgb, #b45309 45%, #ffffff); }
+html.escuro .selo.verde { background: color-mix(in srgb, #dcf5e3 18%, var(--card)); color: color-mix(in srgb, #15803d 45%, #ffffff); }
+html.escuro .pr-kpi-alerta { background: color-mix(in srgb, #fff4ec 18%, var(--card)) !important; }
+html.escuro .pr-kpi-alerta .b-valor { color: color-mix(in srgb, #c2410c 45%, #ffffff); }
+html.escuro .pr-falta td { background: color-mix(in srgb, #fff1ee 18%, var(--card)); }
+html.escuro .pr-impressao { color: color-mix(in srgb, #111 45%, #ffffff); }
+html.escuro .pr-imp-dados th { background: color-mix(in srgb, #f2f2f2 18%, var(--card)); }
+html.escuro .pr-imp-tabela th { background: color-mix(in srgb, #f2f2f2 18%, var(--card)); }
+html.escuro .pr-demo { background: color-mix(in srgb, #fff3c4 18%, var(--card)); }
+/* produtos.css */
+html.escuro .pd-selo.cinza { background: color-mix(in srgb, #eef0f0 18%, var(--card)); }
+html.escuro .pd-foto { background: linear-gradient(180deg, var(--secundaria-clara), color-mix(in srgb, #fff 18%, var(--card))); }
+/* prospeccao.css */
+html.escuro .selo.laranja { background: color-mix(in srgb, #fff1e0 18%, var(--card)); color: color-mix(in srgb, #b45309 45%, #ffffff); }
+html.escuro .selo.verde { background: color-mix(in srgb, #dcf5e3 18%, var(--card)); color: color-mix(in srgb, #15803d 45%, #ffffff); }
+html.escuro .ps-faixa { background: color-mix(in srgb, #fff8db 18%, var(--card)); border: 1px solid color-mix(in srgb, #f3e3a1 35%, var(--card)); color: color-mix(in srgb, #6b5300 45%, #ffffff); }
+html.escuro .ps-funil b, html.escuro .ps-funil b * { color: var(--secundaria-texto); }
+html.escuro .msg-cartao p { color: color-mix(in srgb, #3d4a40 45%, #ffffff); }
+html.escuro .msg-balao, html.escuro .msg-balao * { color: var(--secundaria-texto); }
+html.escuro .b-alerta-suave { background: color-mix(in srgb, #fff4ec 18%, var(--card)) !important; }
+html.escuro .b-alerta-suave .b-valor { color: color-mix(in srgb, #c2410c 45%, #ffffff); }
+/* treinamento.css */
+html.escuro .tr-caso summary span { color: color-mix(in srgb, #7c3aed 45%, #ffffff); }
+}

@@ -41,7 +41,7 @@
 .legenda-evolucao .real { background: var(--lima); }
 .legenda-evolucao .ideal { background: #ffffff60; }
 .form-equipe { margin-top: 18px; padding-top: 14px; border-top: 1px solid #ffffff1c; }
-.form-equipe form { margin-top: 14px; background: #fff; color: var(--texto); border-radius: 16px; padding: 18px; }
+.form-equipe form { margin-top: 14px; background: var(--card); color: var(--texto); border-radius: 16px; padding: 18px; }
 .dias-semana { border: 0; padding: 0; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .dias-semana legend { font-weight: 600; font-size: .85rem; color: var(--verde-escuro); margin-bottom: 6px; }
 
@@ -61,7 +61,7 @@
 .form-venda .campo { margin-bottom: 10px; }
 .nota-mes { font-size: .85rem; background: var(--primaria-clara); border-radius: 10px; padding: 10px 12px; margin-top: 12px; }
 .kpis-meu-mes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
-.kpi { background: #fff; border: 1px solid var(--borda); border-radius: 18px; padding: 16px; display: grid; gap: 2px; box-shadow: var(--sombra); }
+.kpi { background: var(--card); border: 1px solid var(--borda); border-radius: 18px; padding: 16px; display: grid; gap: 2px; box-shadow: var(--sombra); }
 .kpi span { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); font-weight: 700; }
 .kpi strong { font-size: 1.45rem; color: var(--primaria-escura); letter-spacing: -.03em; }
 .kpi small { font-size: .74rem; color: var(--primaria); }
@@ -88,7 +88,7 @@
 .calendario-semana, .calendario-grade { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
 .calendario-semana span { font-size: .66rem; font-weight: 800; color: var(--texto-suave); text-align: center; padding-bottom: 4px; }
 .calendario-grade a { position: relative; min-height: 74px; border-radius: 12px; border: 1px solid var(--borda); padding: 6px 8px; text-decoration: none; color: inherit;
-  display: flex; flex-direction: column; gap: 2px; background: #fff; }
+  display: flex; flex-direction: column; gap: 2px; background: var(--card); }
 .calendario-grade a:hover { border-color: var(--lima-escuro); }
 .calendario-grade a.folga { background: #f1f2ef; color: #9aa39b; }
 .calendario-grade a.hoje { border: 2px solid var(--primaria-escura); }

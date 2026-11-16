@@ -6,7 +6,7 @@
 .it-num span { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); }
 .it-num strong { font-size: 1.5rem; letter-spacing: -.03em; color: var(--verde-escuro); }
 .it-num small { font-size: .76rem; color: var(--texto-suave); }
-.it-num.escuro { background: var(--verde-escuro); border-color: var(--verde-escuro); }
+.it-num.escuro { background: var(--fundo-forte); border-color: var(--verde-escuro); }
 .it-num.escuro strong { color: var(--lima); }
 .it-num.escuro span, .it-num.escuro small { color: #c7d6cc; }
 .it-num.escuro small b { color: #ffb4a8; }
@@ -42,7 +42,7 @@
 .it-filtros label { display: grid; gap: 4px; font-size: .8rem; font-weight: 600; }
 .it-filtros .it-largo { flex: 1 1 220px; grid-column: auto; }
 .it-topo { grid-template-columns: minmax(0, 320px) minmax(0, 1fr); }
-.it-total { display: grid; gap: 4px; align-content: center; background: var(--verde-escuro) !important; color: #c7d6cc; }
+.it-total { display: grid; gap: 4px; align-content: center; background: var(--fundo-forte) !important; color: #c7d6cc; }
 .it-total strong { font-size: 2rem; color: var(--lima); letter-spacing: -.03em; }
 .it-cats div { grid-template-columns: 150px minmax(0, 1fr) 110px; }
 .it-lancar h2 { margin: 18px 0 8px; }
@@ -65,7 +65,7 @@
 .fo-grade { display: grid; gap: 8px; }
 .fo-cartao { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 14px; align-items: center; margin: 0; padding: 12px 16px; text-decoration: none; color: inherit; transition: transform .15s, box-shadow .15s; }
 .fo-cartao:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0, 0, 0, .08); }
-.fo-inicial { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; font-size: 1.1rem; background: var(--primaria-escura); color: var(--secundaria); }
+.fo-inicial { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; font-size: 1.1rem; background: var(--fundo-forte); color: var(--secundaria); }
 .fo-txt { display: grid; gap: 3px; min-width: 0; }
 .fo-txt strong { font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fo-txt small { color: var(--texto-suave); font-size: .76rem; }

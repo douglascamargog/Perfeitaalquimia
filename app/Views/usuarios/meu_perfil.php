@@ -113,6 +113,14 @@ foreach (\App\Services\Aparencia::COMBINACOES as $chave => [, $p, $s]) {
 <form method="post" action="<?= url('/meu-perfil/aparencia') ?>" class="card mp-aparencia" style="max-width:820px" data-aparencia>
   <?= csrf_campo() ?>
   <h2>Aparência</h2>
+  <fieldset class="mp-tema" data-mp-tema>
+    <legend>Tema</legend>
+    <?php $temaAtual = \App\Services\Aparencia::tema(\App\Core\Auth::usuario()); ?>
+    <?php foreach (['claro' => ['☀️', 'Claro'], 'escuro' => ['🌙', 'Escuro'], 'auto' => ['🖥️', 'Automático (segue o celular ou computador)']] as $v => [$ic, $rot]): ?>
+      <label class="mp-tema-opcao"><input type="radio" name="tema" value="<?= $v ?>" <?= $temaAtual === $v ? 'checked' : '' ?>> <span><?= $ic ?> <?= e($rot) ?></span></label>
+    <?php endforeach; ?>
+    <p class="pequeno suave">Também dá para trocar com um clique no botão 🌙/☀️ do topo.</p>
+  </fieldset>
   <p class="suave pequeno">Escolha as cores do seu One. A primária vai no menu, no topo e nos botões; a secundária nos destaques.
     Valem só para você<?= $propria ? '' : ' (agora você está com as cores da empresa)' ?>.</p>
   <div class="mp-combinacoes">

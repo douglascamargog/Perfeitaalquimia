@@ -26,7 +26,7 @@
 .ps-na-carteira td { background: var(--primaria-clara); }
 .ps-selo-botao { border: 0; cursor: pointer; font: inherit; }
 .ps-barra-envio { position: sticky; bottom: 12px; z-index: 5; display: flex; gap: 12px 18px; align-items: center; flex-wrap: wrap; margin: 12px 150px 0 0;
-  background: var(--primaria-escura); color: var(--secundaria-clara); border-radius: 16px; padding: 12px 16px; box-shadow: 0 12px 28px rgba(0, 0, 0, .22); }
+  background: var(--fundo-forte); color: var(--secundaria-clara); border-radius: 16px; padding: 12px 16px; box-shadow: 0 12px 28px rgba(0, 0, 0, .22); }
 .ps-barra-envio label { display: flex; gap: 6px; align-items: center; font-size: .85rem; }
 .ps-barra-envio select { width: auto; padding: 6px 10px; }
 .ps-barra-envio .pequeno { color: #c7d3c4; }
@@ -81,7 +81,7 @@
 .lp { background: linear-gradient(135deg, var(--primaria) 0%, var(--primaria-escura) 55%, var(--primaria-escura) 100%); min-height: 100vh; }
 .lp-caixa { max-width: 1040px; margin: 0 auto; padding: 32px 16px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: center; }
 .lp-chamada { color: var(--primaria-clara); }
-.lp-chamada img { background: #fff; border-radius: 16px; padding: 6px; }
+.lp-chamada img { background: var(--card); border-radius: 16px; padding: 6px; }
 .lp-sobre { color: var(--lima); font-weight: 800; letter-spacing: .1em; font-size: .78rem; margin: 18px 0 6px; }
 .lp-chamada h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.05; letter-spacing: -.03em; margin: 0 0 12px; color: #fff; }
 .lp-chamada ul { padding-left: 18px; line-height: 1.8; }
@@ -89,7 +89,7 @@
 .lp-escondido { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .lp-obrigado { text-align: center; padding: 30px 10px; }
 .lp-obrigado strong { font-size: 1.6rem; display: block; margin-bottom: 8px; }
-.ld-codigo { background: var(--primaria-escura); color: var(--secundaria); border-radius: 12px; padding: 14px; overflow-x: auto; font-size: .8rem; white-space: pre-wrap; word-break: break-all; }
+.ld-codigo { background: var(--fundo-forte); color: var(--secundaria); border-radius: 12px; padding: 14px; overflow-x: auto; font-size: .8rem; white-space: pre-wrap; word-break: break-all; }
 @media (max-width: 800px) { .lp-caixa { grid-template-columns: 1fr; } }
 
 /* Integração Omie */

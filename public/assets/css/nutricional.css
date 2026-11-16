@@ -1,5 +1,5 @@
 /* Tabela nutricional no modelo Anvisa (preto e branco, bordas fortes) */
-.tn { width: 100%; max-width: 420px; background: #fff; color: #000; border: 2.5px solid #000; font-family: Arial, Helvetica, sans-serif; }
+.tn { width: 100%; max-width: 420px; background: var(--card); color: #000; border: 2.5px solid #000; font-family: Arial, Helvetica, sans-serif; }
 .tn-titulo { font-weight: 900; font-size: 1.55rem; letter-spacing: -.01em; padding: 4px 8px 2px; border-bottom: 2px solid #000; line-height: 1.1; }
 .tn-porcao { padding: 3px 8px 4px; font-size: 1.05rem; line-height: 1.3; border-bottom: 4px solid #000; }
 .tn table { width: 100%; border-collapse: collapse; font-size: 1.02rem; }

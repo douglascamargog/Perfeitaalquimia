@@ -23,8 +23,9 @@ $icones = asset('img/icones.svg');
 $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
 ?>
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-tema="<?= e(\App\Services\Aparencia::tema(Auth::usuario())) ?>">
 <head>
+  <script>/* tema escuro antes de desenhar a tela (sem "piscar" claro) */(function(){var h=document.documentElement,m=window.matchMedia('(prefers-color-scheme: dark)');function a(){var t=h.dataset.tema;h.classList.toggle('escuro',t==='escuro'||(t==='auto'&&m.matches));}a();m.addEventListener&&m.addEventListener('change',a);window.oneAplicarTema=a;})();</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $totalAtencao ? '(' . $totalAtencao . ') ' : '' ?><?= e($titulo ?? '') ?> · <?= e(config('app_nome')) ?> · <?= e(config('empresa_nome', 'Perfeita Alquimia')) ?></title>
@@ -35,6 +36,8 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
   <?php foreach ($estilos ?? [] as $css): ?>
     <link rel="stylesheet" href="<?= str_starts_with($css, 'https://') ? e($css) : asset('css/' . $css) ?>">
   <?php endforeach; ?>
+  <?php // Tema escuro: versão escura das cores fixas (gerada por ferramentas/gerar_tema_escuro.py) ?>
+  <link rel="stylesheet" href="<?= asset('css/tema-escuro.css') ?>">
   <?php // Cores do sistema: as da pessoa (Meu perfil › Aparência) ou as da empresa ?>
   <?= \App\Services\Aparencia::estilo(Auth::usuario()) ?>
   <link rel="preload" href="<?= asset('fonts/montserrat-latin.woff2') ?>" as="font" type="font/woff2" crossorigin>
@@ -119,6 +122,7 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
       <div class="usuario">
         <details class="online" data-online <?= $online ? '' : 'hidden' ?>><?= \App\Core\Visao::renderizar('layout/_online', ['online' => $online]) ?></details>
         <?php if (\App\Services\TelefoniaService::veDiscador()): ?><?= \App\Core\Visao::renderizar('layout/_discador') ?><?php endif; ?>
+        <button class="botao-icone" type="button" data-tema-alternar title="Trocar entre tema claro e escuro" aria-label="Trocar entre tema claro e escuro"><svg class="icone tema-icone-lua"><use href="<?= $icones ?>#lua"/></svg><svg class="icone tema-icone-sol"><use href="<?= $icones ?>#sol"/></svg></button>
         <a class="botao-icone <?= str_starts_with($caminhoAtual, '/pessoas') ? 'ativo' : '' ?>" href="<?= url('/pessoas') ?>" title="Pessoas: perfis, gostos e aniversários" aria-label="Pessoas" data-icone-pessoas><svg class="icone"><use href="<?= $icones ?>#pessoas"/></svg></a>
         <div class="sino" data-sino>
           <button class="botao-icone" type="button" aria-label="Notificações" aria-haspopup="true" aria-expanded="false" data-sino-botao>

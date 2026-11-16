@@ -70,3 +70,29 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && onePaine
 
 // Menu › Comercial: escolher o setor leva para a mesma aba no setor escolhido
 document.querySelector('[data-setor-escolha]')?.addEventListener('change', (e) => { window.location.href = e.target.value; });
+
+// ---------------------------------------------------------------------
+// Tema claro / escuro (V13.9): o botão 🌙/☀️ do topo troca na hora e guarda a escolha no login da pessoa.
+// "auto" segue o aparelho; o clique sempre vai para o oposto do que está aparecendo agora.
+// ---------------------------------------------------------------------
+(() => {
+  const html = document.documentElement;
+  const base = document.querySelector('meta[name="base"]')?.content || '';
+  const csrf = document.querySelector('meta[name="csrf"]')?.content || '';
+  const escuroAgora = () => html.classList.contains('escuro');
+  const salvar = (tema) => {
+    html.dataset.tema = tema;
+    window.oneAplicarTema?.();
+    const corpo = new FormData(); corpo.append('tema', tema); corpo.append('_csrf', csrf);
+    fetch(`${base}/meu-perfil/tema`, { method: 'POST', body: corpo, headers: { Accept: 'application/json', 'X-CSRF-Token': csrf } }).catch(() => {});
+    document.querySelectorAll('[data-mp-tema] input[name="tema"]').forEach((r) => { r.checked = r.value === tema; });
+  };
+  document.addEventListener('click', (ev) => {
+    if (ev.target.closest('[data-tema-alternar]')) salvar(escuroAgora() ? 'claro' : 'escuro');
+  });
+  // Meu perfil › Aparência: escolher o tema já mostra e salva
+  document.addEventListener('change', (ev) => {
+    const r = ev.target.closest('[data-mp-tema] input[name="tema"]');
+    if (r) salvar(r.value);
+  });
+})();

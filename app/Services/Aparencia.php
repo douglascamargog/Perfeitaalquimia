@@ -62,7 +62,59 @@ class Aparencia
         foreach (self::variaveis($p, $s) as $nome => $valor) {
             $linhas[] = "$nome:$valor";
         }
-        return '<style id="cores-one">:root{' . implode(';', $linhas) . '}</style>';
+        // Modo escuro: os mesmos nomes de variável, com tons escuros calculados a partir das cores da pessoa.
+        // Só na tela (a impressão continua clara). "auto" segue o aparelho (prefers-color-scheme).
+        $escuro = [];
+        foreach (self::variaveisEscuras($p, $s) as $nome => $valor) {
+            $escuro[] = "$nome:$valor";
+        }
+        $bloco = implode(';', $escuro) . ';color-scheme:dark';
+        // A classe "escuro" no <html> é posta pelo script do <head> (tema escuro, ou automático com o aparelho no escuro)
+        return '<style id="cores-one">:root{' . implode(';', $linhas) . '}@media screen{html.escuro{' . $bloco . '}}</style>';
+    }
+
+    /** Tons do modo escuro a partir da primária e da secundária (contrastes conferidos contra o cartão escuro) */
+    public static function variaveisEscuras(string $p, string $s): array
+    {
+        $fundo = self::mistura($p, '#0b1110', 0.86);
+        $card = self::mistura($p, '#141c1b', 0.82);
+        $texto = '#e7eeed';
+        // "primária escura" é usada em títulos e links sobre o cartão: no escuro ela precisa ser CLARA
+        $titulo = self::mistura($p, '#ffffff', 0.7);
+        for ($i = 0; $i < 12 && self::contraste($titulo, $card) < 4.5; $i++) {
+            $titulo = self::mistura($titulo, '#ffffff', 0.2);
+        }
+        $secTitulo = $s;
+        for ($i = 0; $i < 12 && self::contraste($secTitulo, $card) < 3; $i++) {
+            $secTitulo = self::mistura($secTitulo, '#ffffff', 0.2);
+        }
+        return [
+            '--fundo'             => $fundo,
+            '--card'              => $card,
+            '--fundo-forte'       => self::mistura($p, '#000000', 0.35),
+            '--texto'             => $texto,
+            '--texto-suave'       => '#9fb0ad',
+            '--borda'             => self::mistura($p, '#33413f', 0.7),
+            '--primaria-escura'   => $titulo,
+            '--primaria-clara'    => self::mistura($p, $card, 0.78),
+            '--primaria-suave'    => self::mistura($p, $card, 0.62),
+            '--secundaria-escura' => $secTitulo,
+            '--secundaria-clara'  => self::mistura($s, $card, 0.8),
+            '--perigo'            => '#ff8a80',
+            '--perigo-fundo'      => '#3a1f1d',
+            '--aviso'             => '#f5c56b',
+            '--aviso-fundo'       => '#3a2f17',
+            '--sucesso'           => '#7ee2a0',
+            '--sucesso-fundo'     => '#16301f',
+            '--sombra'            => '0 2px 6px rgba(0, 0, 0, .35), 0 10px 30px rgba(0, 0, 0, .25)',
+        ];
+    }
+
+    /** Tema da pessoa: claro | escuro | auto */
+    public static function tema(?array $usuario): string
+    {
+        $t = (string) ($usuario['tema'] ?? 'claro');
+        return in_array($t, ['claro', 'escuro', 'auto'], true) ? $t : 'claro';
     }
 
     /** Todas as variáveis de cor calculadas a partir da primária e da secundária */

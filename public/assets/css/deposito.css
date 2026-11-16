@@ -85,7 +85,7 @@
 .dep-tipos { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 14px; }
 .dep-tipos a { display: inline-flex; gap: 6px; align-items: center; padding: 6px 14px; border-radius: 99px; border: 1px solid var(--borda); background: var(--card); text-decoration: none; color: var(--texto); font-weight: 600; font-size: .84rem; }
 .dep-tipos a b { font-size: .74rem; background: var(--fundo); border-radius: 99px; padding: 1px 8px; }
-.dep-tipos a.ativo { background: var(--primaria-escura); border-color: var(--primaria-escura); color: #fff; }
+.dep-tipos a.ativo { background: var(--fundo-forte); border-color: var(--primaria-escura); color: #fff; }
 .dep-tipos a.ativo b { background: rgba(255, 255, 255, .2); }
 .dep-tipo-selo { display: inline-block; font-size: .7rem; font-weight: 700; padding: 2px 9px; border-radius: 99px; vertical-align: middle; }
 .dep-tipo-selo.tipo-ecommerce { background: #ede7ff; color: #5b3cc4; }

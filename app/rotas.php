@@ -369,6 +369,7 @@ return [
     ['POST', '/meu-perfil',                     'MeuPerfilController@salvar', 'logado'],
     ['POST', '/meu-perfil/one',                 'MeuPerfilController@one',    'logado'],
     ['POST', '/meu-perfil/aparencia',           'MeuPerfilController@aparencia', 'logado'],
+    ['POST', '/meu-perfil/tema',                'MeuPerfilController@tema',   'logado'],
 
     // ---------- Treinamento por setor (V13.0) ----------
     ['GET',  '/treinamento',                    'TreinamentoController@index',     'logado'],

@@ -7,7 +7,7 @@
 .direita { text-align: right; }
 td small { display: block; }
 .ped-link-vendedor { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: var(--secundaria-clara); border: 1px solid var(--secundaria-clara); border-radius: 14px; padding: 10px 14px; margin-bottom: 14px; font-size: .86rem; }
-.ped-link-vendedor code { background: #fff; padding: 3px 8px; border-radius: 8px; overflow-wrap: anywhere; }
+.ped-link-vendedor code { background: var(--card); padding: 3px 8px; border-radius: 8px; overflow-wrap: anywhere; }
 .ped-busca { display: flex; gap: 8px; }
 .ped-busca input { flex: 1; min-width: 0; }
 .ped-clientes { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }

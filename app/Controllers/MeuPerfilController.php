@@ -21,9 +21,30 @@ class MeuPerfilController extends Controller
     }
 
     /** Meu perfil › Aparência: cores do sistema só para esta pessoa */
+    /** Tema claro/escuro/automático (botão do topo, via JavaScript, ou o formulário de Aparência) */
+    public function tema(): void
+    {
+        $tema = (string) ($_POST['tema'] ?? '');
+        if (!in_array($tema, ['claro', 'escuro', 'auto'], true)) {
+            $this->json(['ok' => false], 422);
+            return;
+        }
+        Banco::executar('UPDATE usuarios SET tema = ? WHERE id = ?', [$tema, (int) Auth::id()]);
+        if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')) {
+            $this->json(['ok' => true, 'tema' => $tema]);
+            return;
+        }
+        Sessao::aviso('sucesso', 'Tema salvo.');
+        redirecionar('/meu-perfil#aparencia');
+    }
+
     public function aparencia(): void
     {
         $id = (int) Auth::id();
+        // o formulário de Aparência também traz o tema
+        if (in_array($_POST['tema'] ?? '', ['claro', 'escuro', 'auto'], true)) {
+            Banco::executar('UPDATE usuarios SET tema = ? WHERE id = ?', [$_POST['tema'], $id]);
+        }
         $antes = Banco::um('SELECT cor_primaria, cor_secundaria FROM usuarios WHERE id = ?', [$id]);
         if (!empty($_POST['padrao'])) {
             $dados = ['cor_primaria' => null, 'cor_secundaria' => null];
