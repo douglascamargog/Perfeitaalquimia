@@ -103,6 +103,7 @@ class AdministracaoController extends Controller
             foreach (['api', 'consumer_key', 'consumer_secret', 'code'] as $c) {
                 $erro ??= $gravar($c, '');
             }
+            array_map('unlink', glob(RAIZ . '/storage/cache/tray_token_*.json') ?: []);
             \App\Core\Config::definir('ecommerce.provedor', 'fake');
             $msg = 'Dados da Tray removidos. O e-commerce volta aos números de demonstração.';
         } else {

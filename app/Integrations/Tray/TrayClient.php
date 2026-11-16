@@ -23,6 +23,8 @@ class TrayClient implements EcommerceInterface
     private const POR_PAGINA = 50;          // máximo da Tray
     private const PAUSA_MICROSSEGUNDOS = 350_000; // ~170 req/min, abaixo do limite de 180
     private string $arquivoToken;
+    /** O que aconteceu em cada chamada (para o "Testar conexão" mostrar onde a Tray recusou; nunca guarda chaves) */
+    private array $passos = [];
 
     public function __construct(private string $api, private string $consumerKey, private string $consumerSecret, private string $code)
     {
@@ -161,7 +163,7 @@ class TrayClient implements EcommerceInterface
             $r = $this->get('/orders', ['limit' => 1, 'page' => 1]);
             return [true, 'Conectado à loja. Pedidos encontrados: ' . (int) ($r['paging']['total'] ?? 0) . '.'];
         } catch (\RuntimeException $erro) {
-            return [false, $erro->getMessage()];
+            return [false, $erro->getMessage() . ($this->passos ? ' Passos: ' . implode(' → ', $this->passos) . '.' : '')];
         }
     }
 
@@ -201,9 +203,16 @@ class TrayClient implements EcommerceInterface
         if (!$forcarNovo && !empty($t['access_token']) && strtotime((string) $t['date_expiration_access_token']) > $agora) {
             return $t['access_token'];
         }
+        $novo = null;
         if (!empty($t['refresh_token']) && strtotime((string) $t['date_expiration_refresh_token']) > $agora) {
-            $novo = $this->requisicao('GET', '/auth', ['refresh_token' => $t['refresh_token']]);
-        } else {
+            try {
+                $novo = $this->requisicao('GET', '/auth', ['refresh_token' => $t['refresh_token']]);
+            } catch (\RuntimeException) {
+                // Renovação recusada: esquece a chave guardada e tenta gerar outra com o code
+                @unlink($this->arquivoToken);
+            }
+        }
+        if ($novo === null) {
             if ($this->consumerKey === '' || $this->consumerSecret === '' || $this->code === '') {
                 throw new \RuntimeException('Faltam as chaves da Tray (⚙️ Administração › Tray).');
             }
@@ -262,9 +271,16 @@ class TrayClient implements EcommerceInterface
         curl_close($curl);
 
         if ($resposta === false) {
+            $this->passos[] = $caminho . ' ✗ (sem conexão)';
             throw new \RuntimeException('Sem conexão com a loja Tray: ' . $erroCurl);
         }
         $dados = json_decode((string) $resposta, true);
+        $nomePasso = match (true) {
+            $caminho === '/auth' && $metodo === 'POST' => 'gerar a chave com o code' . ($json ? '' : ' (formulário)'),
+            $caminho === '/auth' => 'renovar a chave',
+            default => 'ler ' . ltrim($caminho, '/'),
+        };
+        $this->passos[] = $nomePasso . ($status >= 200 && $status < 300 ? ' ✓' : ' ✗ (HTTP ' . $status . (is_array($dados) && isset($dados['error_code']) ? ', código ' . $dados['error_code'] : '') . ')');
         // Motivo dado pela Tray (mensagem + causas), para a tela explicar o erro; nunca inclui as chaves
         $motivo = is_array($dados) ? trim(implode(' · ', array_filter(array_merge([(string) ($dados['message'] ?? '')],
             array_map('strval', array_filter((array) ($dados['causes'] ?? []), 'is_scalar')), isset($dados['error_code']) ? ['código ' . $dados['error_code']] : [])))) : '';
@@ -273,7 +289,7 @@ class TrayClient implements EcommerceInterface
             throw new \RuntimeException('A Tray recusou as chaves. Confira o consumer key, o consumer secret e o code em ⚙️ Administração › Tray (o code pode ter expirado: instale o aplicativo de novo na loja).' . $motivo);
         }
         if ($status === 401) {
-            throw new TrayNaoAutorizado('Chave de acesso recusada.');
+            throw new TrayNaoAutorizado('A loja Tray recusou a chave de acesso ao ler os dados' . $motivo . '.');
         }
         if ($status === 429) {
             throw new \RuntimeException('Limite de requisições da Tray atingido. Tente de novo em alguns minutos.');

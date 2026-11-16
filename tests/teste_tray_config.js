@@ -55,7 +55,10 @@ const entrar = async (b, email) => {
     ok((await salvar({ '[data-tray-api]': 'javascript:alert(1)' })).includes('não parece certo'), 'endereço da API estranho é recusado');
     await salvar({ '[data-tray-api]': API, '[data-tray-key]': 'chave-errada-000', '[data-tray-secret]': 'segredo-certo-456' }, 'tray');
     { const m = await testar(); ok(m.includes('recusou as chaves') && m.includes('Invalid code') && !m.includes('chave-errada'), 'chave errada: explica em português que a Tray recusou, com o motivo da Tray (sem mostrar a chave)'); }
-    await salvar({ '[data-tray-key]': 'chave-certa-123' }, 'tray');
+    await salvar({ '[data-tray-key]': 'chave-certa-123', '[data-tray-code]': 'code-sem-acesso-1' }, 'tray');
+    { const m = await testar(); ok(m.includes('código 1000') && m.includes('Passos: gerar a chave com o code ✓ → ler orders ✗ (HTTP 401, código 1000)'),
+        'chave gerada mas recusada depois (erro 1000): a mensagem mostra em qual passo a Tray recusou'); }
+    await salvar({ '[data-tray-code]': 'code-certo-789' }, 'tray');
     const msg = await testar();
     ok(msg.includes('Conectado à loja') && msg.includes('1'), 'chaves certas: gera o Access Token e lê os pedidos da loja');
     const tokens = execSync('ls storage/cache/').toString().split('\n').filter((f) => f.startsWith('tray_token_'));

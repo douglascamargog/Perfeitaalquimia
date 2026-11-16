@@ -17,6 +17,11 @@
  */
 return [
     [
+        'versao' => '13.14', 'data' => '2026-11-17', 'titulo' => 'Diagnóstico da ligação com a Tray',
+        'correcao' => ['A ligação com a loja virtual se recupera sozinha quando a chave de acesso vence.'],
+        'admin' => 'Tray: "Testar conexão" mostra cada passo (gerar a chave com o code, renovar, ler pedidos) e onde a Tray recusou. Se a renovação for recusada, o One tenta gerar uma chave nova com o code. "Remover" também apaga as chaves de acesso guardadas.',
+    ],
+    [
         'versao' => '13.13', 'data' => '2026-11-17', 'titulo' => 'Ajuste na ligação com a loja Tray',
         'correcao' => ['A ligação com a loja virtual funciona em mais tipos de loja Tray.'],
         'admin' => 'Tray: o pedido do token tenta em JSON e, se a loja recusar, em formulário. Quando a Tray recusa, a mensagem do "Testar conexão" mostra o motivo que ela deu (sem as chaves).',
