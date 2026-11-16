@@ -28,7 +28,7 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $totalAtencao ? '(' . $totalAtencao . ') ' : '' ?><?= e($titulo ?? '') ?> · <?= e(config('app_nome')) ?> · <?= e(config('empresa_nome', 'Perfeita Alquimia')) ?></title>
-  <link rel="icon" type="image/svg+xml" href="<?= asset('img/one/one-ola-padrao.svg') ?>">
+  <link rel="icon" type="image/png" href="<?= asset('img/one/one-icone-64.png') ?>">
   <link rel="stylesheet" href="<?= asset('css/base.css') ?>">
   <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
   <?php // CSS extras da tela: $estilos = ['carteira.css'] ou endereços externos (https://...) ?>
@@ -162,20 +162,20 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
 </div>
 <!-- One, o ajudante: botão flutuante; as falas carregam quando a pessoa abre -->
 <button type="button" class="one-botao" data-one-abrir aria-expanded="false" aria-controls="one-painel" title="Falar com o One">
-  <img src="<?= asset('img/one/one-ola-invertido.svg') ?>" alt="" width="40" height="44"><span class="one-botao-texto">One</span>
+  <img src="<?= asset('img/one/one-ola-invertido.webp') ?>" alt="" width="40" height="44"><span class="one-botao-texto">One</span>
 </button>
 <section class="one-painel" id="one-painel" hidden aria-label="One, seu ajudante">
-  <header><img src="<?= asset('img/one/one-piscando-invertido.svg') ?>" alt="" width="36" height="40"><div><strong>One</strong><small>Seu ajudante no sistema</small></div>
+  <header><img src="<?= asset('img/one/one-piscando-invertido.webp') ?>" alt="" width="36" height="40"><div><strong>One</strong><small>Seu ajudante no sistema</small></div>
     <button type="button" class="botao-icone escuro" data-one-fechar aria-label="Fechar">✕</button></header>
   <div class="one-abas" role="tablist" aria-label="One">
     <button type="button" role="tab" aria-selected="true" data-one-aba="dicas">💡 Para você</button>
     <button type="button" role="tab" aria-selected="false" data-one-aba="perguntar">💬 Perguntar</button>
   </div>
-  <div class="one-painel-corpo" data-one-corpo data-one-aba-painel="dicas"><p class="one-carregando"><img src="<?= asset('img/one/one-pensando-padrao.svg') ?>" alt="" width="40">Um instante, estou olhando seus dados…</p></div>
+  <div class="one-painel-corpo" data-one-corpo data-one-aba-painel="dicas"><p class="one-carregando"><img src="<?= asset('img/one/one-pensando-padrao.webp') ?>" alt="" width="40">Um instante, estou olhando seus dados…</p></div>
   <div class="one-chat" data-one-aba-painel="perguntar" hidden>
     <div class="one-conversa" data-one-conversa aria-live="polite">
       <div class="one-chat-vazio" data-one-sugestoes>
-        <img src="<?= asset('img/one/one-ola-padrao.svg') ?>" alt="" width="54" height="60">
+        <img src="<?= asset('img/one/one-ola-padrao.webp') ?>" alt="" width="54" height="60">
         <p>Pergunte do seu jeito, como falaria com um colega. Por exemplo:</p>
         <button type="button" data-one-exemplo>Como faço um orçamento?</button>
         <button type="button" data-one-exemplo>Quanto falta para a minha meta?</button>
@@ -196,7 +196,7 @@ if ($usuarioNov && array_key_exists('versao_vista', $usuarioNov) && empty($usuar
   <div class="nov-fundo" data-novidades>
     <section class="nov-janela" role="dialog" aria-modal="true" aria-labelledby="nov-titulo">
       <header class="nov-topo">
-        <img src="<?= asset('img/one/one-ola-padrao.svg') ?>" alt="" width="54" height="60">
+        <img src="<?= asset('img/one/one-ola-padrao.webp') ?>" alt="" width="54" height="60">
         <div><span class="nov-rotulo">O One foi atualizado</span><h2 id="nov-titulo">O que há de novo</h2></div>
       </header>
       <div class="nov-corpo">

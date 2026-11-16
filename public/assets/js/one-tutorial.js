@@ -8,7 +8,7 @@
 // =====================================================================
 const BASE = document.querySelector('meta[name="base"]')?.content || '';
 const CSRF = document.querySelector('meta[name="csrf"]')?.content || '';
-const img = (humor) => `${BASE}/assets/img/one/one-${humor}-padrao.svg`;
+const img = (humor) => `${BASE}/assets/img/one/one-${humor}-padrao.webp`;
 
 let atual = null; // { t, i, fundo, luz, balao, alvo }
 

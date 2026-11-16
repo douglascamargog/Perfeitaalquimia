@@ -23,7 +23,7 @@
 </head>
 <body class="ap">
 <header class="ap-topo">
-  <img src="<?= asset('img/one/one-ola-invertido.svg') ?>" alt="" width="34" height="37">
+  <img src="<?= asset('img/one/one-ola-invertido.webp') ?>" alt="" width="34" height="37">
   <div class="ap-titulo"><strong>One Vendas</strong><small data-vendedor>&nbsp;</small></div>
   <span class="ap-rede" data-rede>…</span>
 </header>

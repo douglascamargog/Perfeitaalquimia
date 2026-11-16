@@ -17,6 +17,10 @@
  */
 return [
     [
+        'versao' => '13.3', 'data' => '2026-11-16', 'titulo' => 'O One de cara nova',
+        'novo' => ['O One ganhou um visual novo: agora é um brotinho verde, com expressões para cada momento: acenando quando você chega, comemorando as conquistas, pensativo enquanto procura uma resposta e tristinho quando algo dá errado.'],
+    ],
+    [
         'versao' => '13.2', 'data' => '2026-11-16', 'titulo' => 'Treinamento do Comercial aprofundado',
         'novo' => [
             'Trilha nova "Conhecimento de produto" para quem vende: como ler a ficha (porção, quantidade por porção), cada linha (cápsulas, chás, pós, dose única, gotas), as diferenças que confundem o cliente, o que pode e o que não pode ser dito e como montar o mix de cada loja.',

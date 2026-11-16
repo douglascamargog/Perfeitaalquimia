@@ -10,7 +10,7 @@ use App\Core\Sessao;
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= e($titulo ?? '') ?> · <?= e(config('app_nome')) ?> · <?= e(config('empresa_nome', 'Perfeita Alquimia')) ?></title>
-  <link rel="icon" type="image/svg+xml" href="<?= asset('img/one/one-ola-padrao.svg') ?>">
+  <link rel="icon" type="image/png" href="<?= asset('img/one/one-icone-64.png') ?>">
   <link rel="stylesheet" href="<?= asset('css/base.css') ?>">
   <style>
     .pagina-simples { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;

@@ -3,7 +3,7 @@
  * Falas do One (usado no painel flutuante e no card do Início).
  * Variáveis: $saudacao, $falas, $ajuda (opcional: a tela atual explicada), $tutorial (o passo a passo da tela, se houver)
  */
-$img = fn(string $humor, string $variacao = 'padrao') => asset("img/one/one-$humor-$variacao.svg");
+$img = fn(string $humor, string $variacao = 'padrao') => asset("img/one/one-$humor-$variacao.webp");
 ?>
 <div class="one-falas">
   <div class="one-fala one-saudacao">

@@ -13,7 +13,7 @@ import { iniciarTutorial } from './one-tutorial.js';
 const BASE = document.querySelector('meta[name="base"]')?.content || '';
 const CSRF = document.querySelector('meta[name="csrf"]')?.content || '';
 const botao = document.querySelector('[data-one-abrir]');
-const img = (humor) => `${BASE}/assets/img/one/one-${humor}-padrao.svg`;
+const img = (humor) => `${BASE}/assets/img/one/one-${humor}-padrao.webp`;
 const reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const pagina = location.pathname.slice(BASE.length) || '/';
 const chaveHoje = 'one-balao:' + pagina + ':' + new Date().toISOString().slice(0, 10);

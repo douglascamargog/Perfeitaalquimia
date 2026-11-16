@@ -22,7 +22,7 @@ $amanha = date('Y-m-d', strtotime('+1 weekday'));
 </div>
 
 <?php if (!$clientes): ?>
-  <div class="card ped-vazio"><img src="<?= asset('img/one/one-feliz-padrao.svg') ?>" alt="" width="80" height="88"><p>Nenhum cliente atrasado na recompra. Carteira em dia!</p></div>
+  <div class="card ped-vazio"><img src="<?= asset('img/one/one-feliz-padrao.webp') ?>" alt="" width="80" height="88"><p>Nenhum cliente atrasado na recompra. Carteira em dia!</p></div>
 <?php endif; ?>
 <div class="rc-lista">
   <?php foreach ($clientes as $c): $whats = $c['whatsapp'] ?: (strlen((string) $c['telefone']) === 11 ? $c['telefone'] : ''); $pct = min(100, round($c['dias_desde'] / max(1, $c['intervalo_medio_dias']) * 50)); ?>

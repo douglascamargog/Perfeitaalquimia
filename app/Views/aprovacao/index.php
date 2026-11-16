@@ -5,7 +5,7 @@
   <div><div class="sobretitulo">FINANCEIRO · APROVAÇÃO</div><h1>Pedidos para aprovar</h1>
     <p>Mais antigos primeiro. Confira o crédito; ao aprovar, o pedido é liberado no ERP. A recusa exige motivo.</p></div>
 </div>
-<?php if (!$pedidos): ?><div class="card ped-vazio"><img src="<?= asset('img/one/one-feliz-padrao.svg') ?>" alt="" width="90" height="99"><p>Nenhum pedido aguardando aprovação. Tudo em dia!</p></div><?php endif; ?>
+<?php if (!$pedidos): ?><div class="card ped-vazio"><img src="<?= asset('img/one/one-feliz-padrao.webp') ?>" alt="" width="90" height="99"><p>Nenhum pedido aguardando aprovação. Tudo em dia!</p></div><?php endif; ?>
 <div class="ped-fila">
   <?php foreach ($pedidos as $p): $cr = $credito[$p['id']]; ?>
     <article class="card ped-fila-item">

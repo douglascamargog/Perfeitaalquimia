@@ -16,7 +16,7 @@ $demonstracao = Config::get('busca_ia.provedor', 'fake') !== 'claude';
 ?>
 <div class="busca-ia <?= !empty($destaque) ? 'destaque' : '' ?>" data-busca-contatos="<?= (int) $clienteId ?>">
   <div class="busca-ia-topo">
-    <img src="<?= asset('img/one/one-pensando-padrao.svg') ?>" alt="" width="44" height="44" class="busca-ia-one" data-one-img>
+    <img src="<?= asset('img/one/one-pensando-padrao.webp') ?>" alt="" width="44" height="44" class="busca-ia-one" data-one-img>
     <div>
       <strong>Contato desatualizado?</strong>
       <small>O One procura na internet telefone, WhatsApp, e-mail, Instagram e site desta empresa<?= $demonstracao ? ' (modo demonstração: contatos fictícios)' : '' ?>. Você escolhe o que salvar.</small>

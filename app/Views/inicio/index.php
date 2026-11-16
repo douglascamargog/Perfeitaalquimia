@@ -63,7 +63,7 @@ $atalhos = $principal && isset($atalhosFoco[$principal])
         <?php if ($principal !== 'marketing'): ?><a href="<?= url('/marketing/pedir') ?>" data-pedir-marketing><svg class="icone"><use href="<?= $icones ?>#conversa"/></svg>Pedir ao Marketing</a><?php endif; ?>
       </div>
     </div>
-    <img class="b-hero-one" src="<?= asset('img/one/one-' . e($saudacao['humor']) . '-invertido.svg') ?>" alt="One, o ajudante" width="170" height="187">
+    <img class="b-hero-one" src="<?= asset('img/one/one-' . e($saudacao['humor']) . '-invertido.webp') ?>" alt="One, o ajudante" width="170" height="187">
   </section>
 
   <!-- ===== Previsão do tempo (carregada pelo navegador) ===== -->
@@ -286,7 +286,7 @@ $atalhos = $principal && isset($atalhosFoco[$principal])
 
   <!-- ===== One sugere ===== -->
   <section class="b-card b-one <?= $p['funil'] ? 'span-4' : 'span-12' ?>" aria-label="Sugestões do One">
-    <header class="b-topo"><h2><img src="<?= asset('img/one/one-ideia-padrao.svg') ?>" alt="" width="28" height="31"> One sugere</h2><span class="b-chip"><?= count($falas) ?></span></header>
+    <header class="b-topo"><h2><img src="<?= asset('img/one/one-ideia-padrao.webp') ?>" alt="" width="28" height="31"> One sugere</h2><span class="b-chip"><?= count($falas) ?></span></header>
     <ul class="b-sugestoes">
       <?php foreach ($falas as $f): ?>
         <li>
@@ -303,7 +303,7 @@ $atalhos = $principal && isset($atalhosFoco[$principal])
       <header class="b-topo"><h2>Próximos retornos</h2><a class="b-chip" href="<?= url('/agenda') ?>">Ver todos →</a></header>
       <?php if (!$proximos): ?>
         <div class="b-vazio">
-          <img src="<?= asset('img/one/one-piscando-padrao.svg') ?>" alt="" width="70" height="77">
+          <img src="<?= asset('img/one/one-piscando-padrao.webp') ?>" alt="" width="70" height="77">
           <p>Nenhum retorno agendado. Ao registrar um contato, marque o <strong>próximo contato</strong> e ele aparece aqui.</p>
         </div>
       <?php else: ?>
