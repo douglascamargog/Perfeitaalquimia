@@ -17,6 +17,13 @@
  */
 return [
     [
+        'versao' => '13.7', 'data' => '2026-11-16', 'titulo' => 'O One dormindo de verdade',
+        'melhoria' => [
+            'Depois do horário, o One acena, boceja, deita e dorme com os "Zzz".',
+            'O One pensativo ficou mais expressivo: mão no queixo e sobrancelha levantada com um sorrisinho.',
+        ],
+    ],
+    [
         'versao' => '13.6', 'data' => '2026-11-16', 'titulo' => 'Hora de descansar',
         'novo' => [
             'Depois das 17h45 o One dorme e avisa que é hora de descansar.',

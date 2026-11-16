@@ -16,6 +16,7 @@ Cada animação termina com uma pausa, para o One não ficar se mexendo o tempo 
 | `pensando` | pensando  | Procurando uma resposta (Pergunte ao One)                    |
 | `ops`      | triste    | Algo atrasado ou que deu errado                              |
 | `correndo` | correndo  | Indo buscar: carregando as dicas, buscando contatos na web   |
+| `dormindo` | dormindo  | Depois do horário de descanso (acena, boceja, deita e dorme com "Zzz") |
 | `bravo`    | bravo     | Aviso sério: pedido parado há mais de 24h, desconto acima do limite, documento vencido |
 | `furioso`  | furioso   | O mais grave: pedido esperando aprovação há mais de 3 dias (fica vermelho) |
 

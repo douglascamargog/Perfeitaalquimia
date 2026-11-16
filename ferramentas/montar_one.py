@@ -33,10 +33,10 @@ REACOES = {
     'bravo':    ('bravo', [(1, 500), (2, 300), (3, 300), (4, 400), (5, 300), (6, 250), (7, 400), (8, 2200)]),
     # o mais grave (pedido esperando aprovação há dias): fica vermelho de raiva e esfria de novo
     'furioso':  ('furioso', [(1, 400), (2, 250), (3, 250), (4, 300), (5, 350), (6, 250), (5, 350), (7, 400), (8, 1800)]),
-    # pensando: mão no queixo, olha para cima, faz "hmm"
-    'pensando': ('pensando', [(1, 600), (2, 300), (3, 300), (4, 500), (5, 400), (6, 300), (3, 400), (4, 900)]),
-    # ideia / sugestão: pensa e chega na resposta, sorrindo
-    'ideia':    ('pensando', [(3, 300), (4, 300), (6, 250), (7, 300), (8, 3500)]),
+    # pensando: leva a mão ao queixo, levanta a sobrancelha com um sorrisinho e volta
+    'pensando': ('pensando', [(1, 700), (2, 220), (3, 220), (4, 500), (5, 600), (6, 900), (5, 500), (4, 400), (7, 300), (8, 1200)]),
+    # ideia / sugestão: pensa e chega na resposta, com o sorrisinho
+    'ideia':    ('pensando', [(3, 250), (4, 350), (5, 400), (6, 700), (7, 250), (8, 3000)]),
     # algo deu errado / atrasado: triste, com a lágrima
     'ops':      ('triste', [(1, 600), (2, 400), (3, 400), (4, 500), (5, 600), (6, 500), (7, 400), (8, 2500)]),
     # indo buscar / carregando: corre sem parar
@@ -79,7 +79,7 @@ for reacao, (folha, sequencia) in REACOES.items():
     salvar(reacao, [q[n - 1] for n, _ in sequencia], [ms for _, ms in sequencia])
 
 
-def zzz(base: Image.Image, passo: int) -> Image.Image:
+def zzz(base: Image.Image, passo: int, x0: int = LARGURA - 78, y0: int = 150) -> Image.Image:
     """Desenha os "Zzz" subindo em diagonal ao lado da cabeça, crescendo e sumindo (passo 0 a 7)."""
     im = base.copy()
     for fase in (0, 3, 6):  # três letras, cada uma num momento da subida
@@ -87,7 +87,7 @@ def zzz(base: Image.Image, passo: int) -> Image.Image:
         if t > 7:
             continue
         tam = 16 + t * 4
-        x, y = LARGURA - 78 + t * 7, 150 - t * 17
+        x, y = x0 + t * 7, y0 - t * 17
         alfa = int(235 * (1 - max(0, t - 4) / 4))
         camada = Image.new('RGBA', im.size, (0, 0, 0, 0))
         ImageDraw.Draw(camada).text((x, y), 'Z', font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', tam),
@@ -99,8 +99,13 @@ def zzz(base: Image.Image, passo: int) -> Image.Image:
 # Dormindo (depois do horário de descanso). Com a folha ferramentas/one/dormindo.webp, usa ela;
 # sem a folha, monta uma provisória: o quadro de olhos fechados da folha "pensando" + "Zzz" subindo.
 if (FOLHAS / 'dormindo.webp').exists():
+    # acena, boceja, senta e deita; depois fica dormindo (com os "Zzz") uns 11 segundos antes de repetir
+    # (cada quadro ocupa espaço no arquivo: 3 ciclos de "Zzz" deixam a imagem leve)
     q = quadros('dormindo')
-    salvar('dormindo', q + [q[0]], [400] * 8 + [1500])
+    dormindo = [zzz(q[6 + (p % 2)], p, x0=58, y0=165) for p in range(9)]  # deitado: os "Zzz" saem à esquerda da folha
+    seq = q[:6] + dormindo * 3
+    tempos = [700, 900, 500, 500, 600, 700] + [420] * (9 * 3)
+    salvar('dormindo', seq, tempos)
 else:
     olhos_fechados = cache.setdefault('pensando', quadros('pensando'))[4]
     salvar('dormindo', [zzz(olhos_fechados, p) for p in range(8)], [380] * 8)
