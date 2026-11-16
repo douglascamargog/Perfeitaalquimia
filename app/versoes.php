@@ -17,6 +17,11 @@
  */
 return [
     [
+        'versao' => '13.11', 'data' => '2026-11-17', 'titulo' => 'Instalação na loja Tray',
+        'melhoria' => ['A ligação com a loja virtual ficou mais simples de concluir.'],
+        'admin' => 'Instalação do aplicativo na loja Tray: a Tray volta para a URL de retorno com o endereço da loja, o One mostra "Autorizar o One na loja" (usa o consumer key já guardado) e, depois da confirmação, recebe o code e o api_address e conecta sozinho.',
+    ],
+    [
         'versao' => '13.10', 'data' => '2026-11-17', 'titulo' => 'Loja Tray ligada ao One',
         'novo' => ['O painel do E-commerce pode mostrar as vendas reais da loja virtual (Tray), e os pedidos pagos da loja aparecem sozinhos no Depósito para separar.'],
         'admin' => 'Administração › Tray: guarda o endereço da API, o consumer key, o consumer secret e o code (em config/segredos.php, nunca aparecem de novo), mostra a URL de retorno para cadastrar no painel de parceiro da Tray e tem "Testar conexão". Ao instalar o aplicativo na loja, a Tray devolve o code e o endereço da API sozinhos para o One (precisa estar logado como administrador). "Números do E-commerce" escolhe entre a loja e a demonstração.',

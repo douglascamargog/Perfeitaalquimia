@@ -64,6 +64,12 @@ const entrar = async (b, email) => {
     const html = await a.content();
     ok(!html.includes('chave-certa-123') && !html.includes('segredo-certo-456') && html.includes('…-123'), 'a tela nunca mostra o consumer key nem o secret de novo');
 
+    // Etapa "Autorizar": logo depois de instalar, a Tray manda só o endereço da loja
+    await a.goto(BASE + '/tray/retorno?url=' + encodeURIComponent('https://loja-teste.commercesuite.com.br') + '&adm_user=loja&store=391250');
+    const link = await a.getAttribute('[data-tray-autorizar-botao]', 'href');
+    ok(link.startsWith('https://loja-teste.commercesuite.com.br/auth.php?response_type=code&consumer_key=chave-certa-123&callback=') && decodeURIComponent(link).endsWith('/tray/retorno'),
+      'instalação: mostra "Autorizar o One na loja" levando para auth.php da loja com o consumer key e a URL de retorno');
+
     // Painel do E-commerce lê a loja (Tray simulada)
     await a.goto(BASE + '/marketing/ecommerce');
     ok(!(await a.content()).includes('Fatal error'), 'painel do E-commerce abre ligado à Tray');

@@ -150,6 +150,13 @@ class AdministracaoController extends Controller
         $api = self::apiTrayValida((string) ($_GET['api_address'] ?? ''));
         if ($code !== '' && preg_match('/^[A-Za-z0-9_\-.]{8,200}$/', $code) && $api) {
             \App\Core\Sessao::set('tray_instalacao', ['code' => $code, 'api' => $api]);
+            \App\Core\Sessao::remover('tray_loja');
+        } elseif ($code === '') {
+            // 1ª etapa: logo depois de instalar, a Tray manda só o endereço da loja → falta "Autorizar"
+            $loja = self::apiTrayValida((string) ($_GET['url'] ?? $_GET['store_host'] ?? $_GET['store_url'] ?? ''));
+            if ($loja) {
+                \App\Core\Sessao::set('tray_loja', preg_replace('#/web_api$#', '', $loja));
+            }
         }
         $pendente = \App\Core\Sessao::get('tray_instalacao');
         if (!\App\Core\Auth::logado()) {
@@ -160,6 +167,18 @@ class AdministracaoController extends Controller
         if (!\App\Core\Auth::pode('config.gerenciar')) {
             \App\Core\Sessao::aviso('erro', 'Só quem administra o One pode ligar a loja Tray. Peça ao administrador para instalar o aplicativo.');
             redirecionar('/');
+        }
+        $loja = \App\Core\Sessao::get('tray_loja');
+        if (!$pendente && $loja) {
+            $chave = (string) config('integracoes.tray.consumer_key', '');
+            if ($chave === '') {
+                \App\Core\Sessao::aviso('erro', 'Antes de autorizar, cole o consumer key e o consumer secret da Tray aqui e clique em Guardar. Depois instale o aplicativo de novo.');
+                redirecionar('/administracao#tray');
+            }
+            // 2ª etapa: botão "Autorizar" → a loja confirma e volta para cá com o code e o api_address
+            $autorizar = $loja . '/auth.php?' . http_build_query(['response_type' => 'code', 'consumer_key' => $chave, 'callback' => self::urlRetornoTray()]);
+            $this->tela('administracao/tray_autorizar', ['titulo' => 'Autorizar a loja Tray', 'loja' => $loja, 'autorizar' => $autorizar]);
+            return;
         }
         if (!$pendente) {
             \App\Core\Sessao::aviso('erro', 'A Tray não mandou o código de instalação. Instale o aplicativo de novo no painel da loja.');
