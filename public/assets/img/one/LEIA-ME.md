@@ -1,19 +1,21 @@
-# One — mascote da Perfeita Alquimia (V13.3)
+# One — mascote da Perfeita Alquimia
 
-Um brotinho verde. Imagens em WebP com fundo transparente, todas do mesmo tamanho (460 × 500),
-apoiadas na base, para nenhuma ficar esticada nas telas.
+As imagens são **WebP animados** (276 × 300, fundo transparente), montados pela ferramenta
+`ferramentas/montar_one.py` a partir das folhas de sprites em `ferramentas/one/` (8 quadros: 4 colunas × 2 linhas).
+Cada animação termina com uma pausa, para o One não ficar se mexendo o tempo todo.
 
-`one-<expressao>-padrao.webp` (olhando para a direita) e `one-<expressao>-invertido.webp` (espelhado).
+`one-<reacao>-padrao.webp` (olhando para a direita) e `one-<reacao>-invertido.webp` (espelhado).
 
-| id         | Pose                               | Quando usar                                       |
-|------------|------------------------------------|---------------------------------------------------|
-| `ola`      | correndo e acenando                | Boas-vindas e início de conversa                  |
-| `feliz`    | correndo, sorrindo                 | Tarefa concluída, meta batida, confirmação        |
-| `ideia`    | correndo, determinado              | Sugestão ou atalho ("vamos lá!")                  |
-| `piscando` | correndo, sorrindo                 | Dicas rápidas e mensagens leves                   |
-| `pensando` | mão no queixo, olhando para cima   | Enquanto busca dados ou monta a resposta          |
-| `ops`      | triste, com uma lágrima            | Erro, dado não encontrado, algo atrasado          |
-| `bravo`    | mãos na cintura                    | Reservado (alertas sérios)                        |
+| reação     | folha     | Quando aparece                                              |
+|------------|-----------|-------------------------------------------------------------|
+| `ola`      | acenando  | Boas-vindas (login, Início, primeiro passo do tutorial)      |
+| `piscando` | acenando  | Parado, sorrindo e piscando: botão do One, dicas leves       |
+| `feliz`    | acenando  | Conquistas: meta batida, pedido enviado, tutorial aprendido  |
+| `ideia`    | pensando  | Sugestão: pensa e chega na resposta, sorrindo                |
+| `pensando` | pensando  | Procurando uma resposta (Pergunte ao One)                    |
+| `ops`      | triste    | Algo atrasado ou que deu errado                              |
+| `correndo` | correndo  | Indo buscar: carregando as dicas, buscando contatos na web   |
+| `bravo`    | (estático)| Reservado                                                    |
 
-Ícones: `one-icone-64.png` (aba do navegador) e `one-icone-192.png`.
-Para trocar o desenho: mantenha os mesmos nomes de arquivo e o mesmo tamanho.
+Folha nova (ex.: comemorando): coloque em `ferramentas/one/`, acrescente em `REACOES` no `montar_one.py`
+e rode `python3 ferramentas/montar_one.py`.

@@ -162,7 +162,7 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
 </div>
 <!-- One, o ajudante: botão flutuante; as falas carregam quando a pessoa abre -->
 <button type="button" class="one-botao" data-one-abrir aria-expanded="false" aria-controls="one-painel" title="Falar com o One">
-  <img src="<?= asset('img/one/one-ola-invertido.webp') ?>" alt="" width="40" height="44"><span class="one-botao-texto">One</span>
+  <img src="<?= asset('img/one/one-piscando-invertido.webp') ?>" alt="" width="40" height="44"><span class="one-botao-texto">One</span>
 </button>
 <section class="one-painel" id="one-painel" hidden aria-label="One, seu ajudante">
   <header><img src="<?= asset('img/one/one-piscando-invertido.webp') ?>" alt="" width="36" height="40"><div><strong>One</strong><small>Seu ajudante no sistema</small></div>
@@ -171,7 +171,7 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
     <button type="button" role="tab" aria-selected="true" data-one-aba="dicas">💡 Para você</button>
     <button type="button" role="tab" aria-selected="false" data-one-aba="perguntar">💬 Perguntar</button>
   </div>
-  <div class="one-painel-corpo" data-one-corpo data-one-aba-painel="dicas"><p class="one-carregando"><img src="<?= asset('img/one/one-pensando-padrao.webp') ?>" alt="" width="40">Um instante, estou olhando seus dados…</p></div>
+  <div class="one-painel-corpo" data-one-corpo data-one-aba-painel="dicas"><p class="one-carregando"><img src="<?= asset('img/one/one-correndo-padrao.webp') ?>" alt="" width="40">Um instante, estou olhando seus dados…</p></div>
   <div class="one-chat" data-one-aba-painel="perguntar" hidden>
     <div class="one-conversa" data-one-conversa aria-live="polite">
       <div class="one-chat-vazio" data-one-sugestoes>

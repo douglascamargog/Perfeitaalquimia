@@ -193,7 +193,7 @@ const formPergunta = document.querySelector('[data-one-pergunte]');
 const conversa = document.querySelector('[data-one-conversa]');
 function bolha(quem, html) {
   const b = el('div', { class: 'one-msg ' + quem });
-  if (quem.startsWith('one')) b.append(el('img', { src: img('ola'), alt: '', width: '28', height: '31' }));
+  if (quem.startsWith('one')) b.append(el('img', { src: img('piscando'), alt: '', width: '28', height: '31' }));
   const corpo = el('div', { class: 'one-msg-corpo' });
   corpo.innerHTML = html;
   b.append(corpo);

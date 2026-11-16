@@ -15,7 +15,7 @@ function escapar(texto) {
 /** Troca a carinha do One (pensando, ideia, ops...) */
 function carinha(caixa, nome) {
   const img = caixa.querySelector('[data-one-img]');
-  if (img) img.src = img.src.replace(/one-[a-z]+-padrao\.svg/, `one-${nome}-padrao.svg`);
+  if (img) img.src = img.src.replace(/one-[a-z]+-padrao\.webp/, `one-${nome}-padrao.webp`);
 }
 
 async function chamar(url, opcoes = {}) {
@@ -64,7 +64,7 @@ document.addEventListener('click', async (evento) => {
     const area = caixa.querySelector('[data-resultado]');
     const nova = botao.hasAttribute('data-buscar');
     botao.disabled = true;
-    carinha(caixa, 'pensando');
+    carinha(caixa, 'correndo'); // indo buscar na internet
     caixa.classList.add('procurando');
     area.innerHTML = nova ? '<p class="busca-ia-procurando">O One está procurando na internet… <small>(a busca real pode levar até 1 minuto)</small></p>' : '<p class="pequeno suave">Carregando…</p>';
     try {

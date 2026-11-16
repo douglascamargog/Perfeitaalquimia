@@ -17,6 +17,11 @@
  */
 return [
     [
+        'versao' => '13.4', 'data' => '2026-11-16', 'titulo' => 'O One ganhou vida',
+        'novo' => ['O One agora se mexe e reage ao que está acontecendo: acena quando você chega, pisca quando está só esperando você, pensa com a mão no queixo enquanto procura uma resposta, fica tristinho quando algo está atrasado e sai correndo quando vai buscar alguma coisa para você.'],
+        'melhoria' => ['Ele não fica mais correndo o tempo todo: no canto da tela, fica parado e sorrindo.'],
+    ],
+    [
         'versao' => '13.3', 'data' => '2026-11-16', 'titulo' => 'O One de cara nova',
         'novo' => ['O One ganhou um visual novo: agora é um brotinho verde, com expressões para cada momento: acenando quando você chega, comemorando as conquistas, pensativo enquanto procura uma resposta e tristinho quando algo dá errado.'],
     ],
