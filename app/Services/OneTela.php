@@ -44,7 +44,7 @@ class OneTela
         // Nas outras telas: a dica importante do One que é desta tela (as mesmas do painel)
         if (!$b && $comDicas) { // $comDicas = false quando quem pergunta já são as dicas (evita uma pedir a outra sem fim)
             foreach (OneAssistente::falas($pagina) as $f) {
-                if (in_array($f['humor'] ?? '', ['ops', 'ideia'], true) && !empty($f['link']) && strtok($f['link'], '?') === $pagina) {
+                if (in_array($f['humor'] ?? '', ['ops', 'ideia', 'bravo', 'furioso'], true) && !empty($f['link']) && strtok($f['link'], '?') === $pagina) {
                     $b = $f + ['acoes' => []];
                     break;
                 }

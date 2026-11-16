@@ -17,6 +17,13 @@
  */
 return [
     [
+        'versao' => '13.5', 'data' => '2026-11-16', 'titulo' => 'Mais reações do One',
+        'novo' => [
+            'O One pula de alegria nas suas conquistas (pedido enviado, meta batida, agenda zerada) e traz balões e chapeuzinho nos aniversários e quando a equipe bate a meta.',
+            'E fica bravo, de mãos na cintura, quando algo sério está parado, como um pedido esperando aprovação há mais de um dia. Se passar de três dias, ele fica vermelho de raiva.',
+        ],
+    ],
+    [
         'versao' => '13.4', 'data' => '2026-11-16', 'titulo' => 'O One ganhou vida',
         'novo' => ['O One agora se mexe e reage ao que está acontecendo: acena quando você chega, pisca quando está só esperando você, pensa com a mão no queixo enquanto procura uma resposta, fica tristinho quando algo está atrasado e sai correndo quando vai buscar alguma coisa para você.'],
         'melhoria' => ['Ele não fica mais correndo o tempo todo: no canto da tela, fica parado e sorrindo.'],

@@ -10,12 +10,14 @@ Cada animação termina com uma pausa, para o One não ficar se mexendo o tempo 
 |------------|-----------|-------------------------------------------------------------|
 | `ola`      | acenando  | Boas-vindas (login, Início, primeiro passo do tutorial)      |
 | `piscando` | acenando  | Parado, sorrindo e piscando: botão do One, dicas leves       |
-| `feliz`    | acenando  | Conquistas: meta batida, pedido enviado, tutorial aprendido  |
+| `feliz`    | comemorando | Conquistas: meta batida, pedido enviado, tela aprendida (pula de alegria) |
+| `festa`    | festa     | Aniversário e meta da equipe (balões e chapeuzinho)          |
 | `ideia`    | pensando  | Sugestão: pensa e chega na resposta, sorrindo                |
 | `pensando` | pensando  | Procurando uma resposta (Pergunte ao One)                    |
 | `ops`      | triste    | Algo atrasado ou que deu errado                              |
 | `correndo` | correndo  | Indo buscar: carregando as dicas, buscando contatos na web   |
-| `bravo`    | (estático)| Reservado                                                    |
+| `bravo`    | bravo     | Aviso sério: pedido parado há mais de 24h, desconto acima do limite, documento vencido |
+| `furioso`  | furioso   | O mais grave: pedido esperando aprovação há mais de 3 dias (fica vermelho) |
 
 Folha nova (ex.: comemorando): coloque em `ferramentas/one/`, acrescente em `REACOES` no `montar_one.py`
 e rode `python3 ferramentas/montar_one.py`.

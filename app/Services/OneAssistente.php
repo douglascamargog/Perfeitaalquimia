@@ -69,13 +69,13 @@ class OneAssistente
         }
         // Produtos: documentos vencidos ou vencendo (Responsável Técnica)
         if (Auth::pode('produtos.tecnico') && Foco::tem('producao') && ($docs = ProdutoService::documentosVencendo(99))) {
-            $falas[] = ['humor' => 'ops', 'texto' => count($docs) . ' documento(s) de produto vencido(s) ou vencendo (o primeiro: ' . $docs[0]['titulo'] . ' — ' . $docs[0]['produto'] . ', ' . data_br($docs[0]['validade']) . ').',
+            $falas[] = ['humor' => $docs[0]['validade'] < date('Y-m-d') ? 'bravo' : 'ops', 'texto' => count($docs) . ' documento(s) de produto vencido(s) ou vencendo (o primeiro: ' . $docs[0]['titulo'] . ' — ' . $docs[0]['produto'] . ', ' . data_br($docs[0]['validade']) . ').',
                 'link' => '/produtos?situacao=vencendo', 'acao' => 'Ver documentos'];
         }
         // Matérias-primas: laudos e documentos vencidos ou vencendo (Produção e Qualidade)
         if (((Auth::pode('producao.gerenciar') && Foco::tem('producao')) || \App\Models\Usuario::temFuncao((int) Auth::id(), 'qualidade'))
             && ($docsMp = ItemCompraService::documentosVencendo(99))) {
-            $falas[] = ['humor' => 'ops', 'texto' => count($docsMp) . ' laudo(s) ou documento(s) de matéria-prima vencido(s) ou vencendo (o primeiro: ' . $docsMp[0]['item'] . ', ' . data_br($docsMp[0]['validade']) . ').',
+            $falas[] = ['humor' => $docsMp[0]['validade'] < date('Y-m-d') ? 'bravo' : 'ops', 'texto' => count($docsMp) . ' laudo(s) ou documento(s) de matéria-prima vencido(s) ou vencendo (o primeiro: ' . $docsMp[0]['item'] . ', ' . data_br($docsMp[0]['validade']) . ').',
                 'link' => '/producao/materias/' . (int) $docsMp[0]['item_id'] . '?aba=documentos', 'acao' => 'Ver documento'];
         }
         // Desenvolvimento de Produto: projetos esperando a pessoa
@@ -166,7 +166,7 @@ class OneAssistente
         // Financeiro: pedidos com desconto acima do limite e itens de notas do Omie para ligar
         if (Auth::pode('pedidos.aprovar') && Foco::tem('aprovacao', 'diretoria')
             && ($n = (int) Banco::valor("SELECT COUNT(*) FROM pedidos WHERE situacao = 'aguardando_aprovacao' AND desconto_acima_limite = 1"))) {
-            $f[] = ['humor' => 'ops', 'texto' => "$n pedido(s) com desconto da vendedora acima do limite: confira antes de aprovar.", 'link' => '/aprovacao', 'acao' => 'Ver na Aprovação'];
+            $f[] = ['humor' => 'bravo', 'texto' => "$n pedido(s) com desconto da vendedora acima do limite: confira antes de aprovar.", 'link' => '/aprovacao', 'acao' => 'Ver na Aprovação'];
         }
         if (Auth::pode('compras.lancar') && ($n = count(CompraLancamentoService::pendentes()))) {
             $f[] = ['humor' => 'ideia', 'texto' => "$n item(ns) de notas de compra do Omie esperando você dizer a qual item do One correspondem.", 'link' => '/financeiro/compras?aba=omie', 'acao' => 'Ligar itens'];
@@ -186,7 +186,9 @@ class OneAssistente
             $f[] = ['humor' => $mes >= $ant ? 'feliz' : 'pensando', 'texto' => 'Faturado no mês até agora: ' . dinheiro($mes) . $comp . '.', 'link' => Auth::pode('painel.ver') ? '/resultados' : '/', 'acao' => 'Ver resultados'];
             $parados = (int) Banco::valor("SELECT COUNT(*) FROM pedidos WHERE situacao = 'aguardando_aprovacao' AND criado_em < NOW() - INTERVAL 24 HOUR");
             if ($parados) {
-                $f[] = ['humor' => 'ops', 'texto' => "$parados pedido(s) esperando aprovação há mais de 24 horas. Cliente esperando é venda em risco.", 'link' => '/aprovacao', 'acao' => 'Ver aprovação'];
+                // há dias parado: o One fica vermelho de raiva; mais de 24 horas: bravo
+                $diasParado = (int) Banco::valor("SELECT COUNT(*) FROM pedidos WHERE situacao = 'aguardando_aprovacao' AND criado_em < NOW() - INTERVAL 72 HOUR");
+                $f[] = ['humor' => $diasParado ? 'furioso' : 'bravo', 'texto' => "$parados pedido(s) esperando aprovação há mais de 24 horas. Cliente esperando é venda em risco.", 'link' => '/aprovacao', 'acao' => 'Ver aprovação'];
             }
             $cob = (float) Banco::valor("SELECT COALESCE(SUM(valor_total), 0) FROM cobrancas WHERE situacao = 'aberta'");
             if ($cob > 0) {
@@ -254,10 +256,10 @@ class OneAssistente
         }
         $eu = array_filter($hoje, fn($a) => (int) $a['id'] === $id);
         if ($eu) {
-            return ['humor' => 'feliz', 'texto' => 'Feliz aniversário! 🎉 A equipe toda torce por você hoje.'];
+            return ['humor' => 'festa', 'texto' => 'Feliz aniversário! 🎉 A equipe toda torce por você hoje.'];
         }
         $nomes = array_map(fn($a) => $a['nome'], $hoje); // para os colegas: o nome do funcionário
-        return ['humor' => 'feliz', 'texto' => 'Hoje é aniversário de ' . implode(' e ', $nomes) . '! 🎉 Que tal mandar os parabéns?'];
+        return ['humor' => 'festa', 'texto' => 'Hoje é aniversário de ' . implode(' e ', $nomes) . '! 🎉 Que tal mandar os parabéns?'];
     }
 
     /** Produção: matérias-primas para comprar e produtos para reabastecer */
@@ -381,7 +383,7 @@ class OneAssistente
                 : null;
         }
         if ($q['atingida']) {
-            return ['humor' => 'feliz', 'texto' => 'A equipe bateu a meta do mês! 🎉 ' . dinheiro($q['vendido']) . ' vendidos.', 'link' => '/meu-mes', 'acao' => 'Ver equipe'];
+            return ['humor' => 'festa', 'texto' => 'A equipe bateu a meta do mês! 🎉 ' . dinheiro($q['vendido']) . ' vendidos.', 'link' => '/meu-mes', 'acao' => 'Ver equipe'];
         }
         $noRitmo = $q['projecao_mes'] !== null && $q['projecao_mes'] >= $q['meta'];
         return ['humor' => $noRitmo ? 'feliz' : 'pensando',

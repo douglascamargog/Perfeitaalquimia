@@ -25,8 +25,14 @@ REACOES = {
     'ola':      ('acenando', [(1, 160), (2, 160), (3, 160), (4, 200), (3, 160), (7, 160), (8, 300), (1, 4000)]),
     # dicas leves: parado, sorrindo, e dá uma piscadinha de vez em quando
     'piscando': ('acenando', [(1, 3500), (5, 220), (1, 2500), (8, 400)]),
-    # conquista: acena animado, continência e piscadela (até chegar a folha "comemorando")
-    'feliz':    ('acenando', [(3, 180), (4, 200), (5, 220), (6, 220), (3, 180), (5, 260), (1, 2500)]),
+    # conquista pessoal (pedido enviado, meta batida, agenda zerada, tela aprendida): pula de alegria
+    'feliz':    ('comemorando', [(1, 300), (2, 160), (3, 160), (4, 140), (5, 140), (6, 160), (7, 160), (8, 300), (2, 160), (4, 140), (5, 140), (8, 2600)]),
+    # festa (aniversário, meta da equipe): balões e chapeuzinho
+    'festa':    ('festa', [(1, 500), (2, 300), (3, 300), (4, 260), (5, 300), (6, 300), (7, 300), (8, 2200)]),
+    # aviso sério (pedido parado, desconto acima do limite, documento vencido): mãos na cintura
+    'bravo':    ('bravo', [(1, 500), (2, 300), (3, 300), (4, 400), (5, 300), (6, 250), (7, 400), (8, 2200)]),
+    # o mais grave (pedido esperando aprovação há dias): fica vermelho de raiva e esfria de novo
+    'furioso':  ('furioso', [(1, 400), (2, 250), (3, 250), (4, 300), (5, 350), (6, 250), (5, 350), (7, 400), (8, 1800)]),
     # pensando: mão no queixo, olha para cima, faz "hmm"
     'pensando': ('pensando', [(1, 600), (2, 300), (3, 300), (4, 500), (5, 400), (6, 300), (3, 400), (4, 900)]),
     # ideia / sugestão: pensa e chega na resposta, sorrindo
@@ -62,7 +68,7 @@ def quadros(folha: str) -> list[Image.Image]:
 def salvar(nome: str, imagens: list[Image.Image], tempos: list[int]) -> None:
     for variacao, lista in (('padrao', imagens), ('invertido', [ImageOps.mirror(i) for i in imagens])):
         arquivo = SAIDA / f'one-{nome}-{variacao}.webp'
-        lista[0].save(arquivo, 'WEBP', save_all=True, append_images=lista[1:], duration=tempos, loop=0, quality=86, method=6,
+        lista[0].save(arquivo, 'WEBP', save_all=True, append_images=lista[1:], duration=tempos, loop=0, quality=86, method=4,
                       lossless=False, allow_mixed=False)
         print(f'{arquivo.name}: {len(lista)} quadros, {arquivo.stat().st_size // 1024} KB')
 
