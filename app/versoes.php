@@ -17,6 +17,18 @@
  */
 return [
     [
+        'versao' => '13.2', 'data' => '2026-11-16', 'titulo' => 'Treinamento do Comercial aprofundado',
+        'novo' => [
+            'Trilha nova "Conhecimento de produto" para quem vende: como ler a ficha (porção, quantidade por porção), cada linha (cápsulas, chás, pós, dose única, gotas), as diferenças que confundem o cliente, o que pode e o que não pode ser dito e como montar o mix de cada loja.',
+            'Casos práticos em cada módulo: situações do dia a dia (cliente que pede desconto, pedido abaixo do mínimo, loja que fechou...) com o que fazer. É só clicar para ver a resposta.',
+        ],
+        'melhoria' => [
+            'Televendas, Externo, Prospecção e Terceirização reescritos com passo a passo e prints das telas do One, erros comuns e provas mais completas.',
+            'As regras aparecem com os valores de hoje: pedido mínimo de cada região, formas de pagamento, limite de desconto e dias para a Reativação. Mudou a regra, o treinamento acompanha.',
+        ],
+        'admin' => 'Os prints do treinamento são gerados com os dados de demonstração (ferramentas/capturar_treinamento.js) e vêm no pacote. Pontos marcados "Confira com a sua gestão" (prazos de entrega, troca e devolução, mínimos de terceirização) pedem a regra oficial da empresa: dá para escrever em Treinamento › Editar. Próxima etapa: Fábrica, Marketing, Financeiro e gestão.',
+    ],
+    [
         'versao' => '13.1', 'data' => '2026-11-16', 'titulo' => 'Ajuste no passo a passo do One',
         'correcao' => ['O passo a passo do One aberto em "O que dá pra fazer aqui?" mostrava a palavra "null" embaixo dos botões. Não mostra mais.'],
     ],

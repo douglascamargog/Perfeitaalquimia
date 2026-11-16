@@ -94,6 +94,17 @@ class TreinamentoService
                 $vizinhos[$v] = true;
             }
         }
+        // Trilhas para vários setores (ex.: Conhecimento de produto): funcao_slug vazio e a coluna "vizinhos"
+        // diz quais funções a fazem
+        foreach ($trilhas as $chave => $t) {
+            if ($chave === 'integracao' || $t['funcao_slug'] !== null) {
+                continue;
+            }
+            $para = array_filter(array_map('trim', explode(',', (string) $t['vizinhos'])));
+            if (array_intersect($para, $funcoes)) {
+                $blocos[] = ['chave' => $chave, 'titulo' => $t['titulo'], 'icone' => $t['icone'], 'descricao' => $t['descricao'], 'tipo' => 'setor', 'modulos' => self::modulos((int) $t['id'], 'setor')];
+            }
+        }
         $modsVizinhos = [];
         foreach (array_keys($vizinhos) as $v) {
             if (isset($trilhas[$v]) && !in_array($v, $funcoes, true)) {
@@ -304,23 +315,34 @@ class TreinamentoService
 
     /**
      * Texto simples → HTML seguro. Tudo é escapado; só viram HTML:
-     *  ## Título · ### Subtítulo · "- item" (lista) · "1. item" (lista numerada) · "> destaque" · "! atenção"
-     *  **negrito** · [texto](/tela-do-sistema) · ![descrição](media/arquivo.webp) (só imagens da biblioteca de mídia)
+     *  ## Título · ### Subtítulo · "- item" (lista) · "1. item" (lista numerada) · "> destaque" · "! atenção / confira"
+     *  "?? situação || o que fazer" → caso prático (abre ao clicar)
+     *  **negrito** · [texto](/tela-do-sistema)
+     *  ![legenda](assets/img/treinamento/tela.jpg) ou ![legenda](media/...) numa linha sozinha → print com legenda
+     *  {{config:chave}} → o valor atual da configuração (ex.: {{config:pedidos.desconto_max_pct}})
+     *  {{pedido_minimo}} · {{condicoes_pagamento}} · {{produtos:Cápsulas}} → tabelas montadas com os dados atuais
      */
     public static function html(string $texto): string
     {
         $linha = function (string $t): string {
             $t = e($t);
             $t = preg_replace('/\*\*(.+?)\*\*/u', '<strong>$1</strong>', $t);
-            $t = preg_replace_callback('/!\[([^\]]*)\]\((media\/[A-Za-z0-9_\/.\-]+)\)/', fn($m) => '<img src="' . e(url('/' . $m[2])) . '" alt="' . $m[1] . '" loading="lazy">', $t);
+            $t = preg_replace_callback('/\{\{config:([a-z0-9_.]+)\}\}/', function ($m) {
+                $v = Config::get($m[1], '—');
+                return '<b class="tr-regra" title="Valor atual em Configurações">' . e(is_array($v) ? implode(', ', $v) : (string) $v) . '</b>';
+            }, $t);
+            $t = preg_replace_callback('/!\[([^\]]*)\]\(((?:media|assets\/img\/treinamento)\/[A-Za-z0-9_\/.\-]+)\)/', fn($m) => '<img src="' . e(url('/' . $m[2])) . '" alt="' . $m[1] . '" loading="lazy">', $t);
             return preg_replace_callback('/\[([^\]]+)\]\((\/[A-Za-z0-9_\/\-?=&;.]*)\)/', fn($m) => str_starts_with($m[2], '//') ? $m[1] : '<a href="' . e(url(html_entity_decode($m[2]))) . '">' . $m[1] . '</a>', $t);
         };
         $html = [];
         $lista = null;
         $itens = [];
-        $fechar = function () use (&$html, &$lista, &$itens) {
+        $continuar = 0; // lista numerada interrompida só por um print continua a contagem (3, 4, 5...)
+        $fechar = function () use (&$html, &$lista, &$itens, &$continuar) {
             if ($lista) {
-                $html[] = "<$lista>" . implode('', array_map(fn($i) => "<li>$i</li>", $itens)) . "</$lista>";
+                $inicio = $lista === 'ol' && $continuar ? ' start="' . ($continuar + 1) . '"' : '';
+                $html[] = "<$lista$inicio>" . implode('', array_map(fn($i) => "<li>$i</li>", $itens)) . "</$lista>";
+                $continuar = $lista === 'ol' ? $continuar + count($itens) : 0;
             }
             $lista = null;
             $itens = [];
@@ -341,7 +363,18 @@ class TreinamentoService
             if (trim($l) === '') {
                 continue;
             }
-            if (str_starts_with($l, '### ')) {
+            $ehPrint = (bool) preg_match('/^!\[[^\]]*\]\((?:media|assets\/img\/treinamento)\//', $l);
+            if (!$ehPrint) {
+                $continuar = 0; // qualquer outro bloco recomeça a numeração
+            }
+            if (preg_match('/^!\[([^\]]*)\]\(((?:media|assets\/img\/treinamento)\/[A-Za-z0-9_\/.\-]+)\)$/', $l, $m)) {
+                $html[] = '<figure class="tr-print"><img src="' . e(url('/' . $m[2])) . '" alt="' . e($m[1]) . '" loading="lazy">' . ($m[1] !== '' ? '<figcaption>' . $linha($m[1]) . '</figcaption>' : '') . '</figure>';
+            } elseif (preg_match('/^\{\{(pedido_minimo|condicoes_pagamento|produtos:[^}]+)\}\}$/u', $l, $m)) {
+                $html[] = self::bloco($m[1]);
+            } elseif (str_starts_with($l, '?? ')) {
+                [$caso, $resposta] = array_pad(explode('||', substr($l, 3), 2), 2, '');
+                $html[] = '<details class="tr-caso"><summary><span>🧩 Caso prático</span>' . $linha(trim($caso)) . '</summary><p>' . $linha(trim($resposta)) . '</p></details>';
+            } elseif (str_starts_with($l, '### ')) {
                 $html[] = '<h4>' . $linha(substr($l, 4)) . '</h4>';
             } elseif (str_starts_with($l, '## ')) {
                 $html[] = '<h3>' . $linha(substr($l, 3)) . '</h3>';
@@ -355,6 +388,41 @@ class TreinamentoService
         }
         $fechar();
         return implode("\n", $html);
+    }
+
+    /** Blocos com os dados atuais do sistema (as regras mudam em Configurações e o treinamento acompanha) */
+    private static function bloco(string $nome): string
+    {
+        if ($nome === 'pedido_minimo') {
+            $linhas = Banco::todos('SELECT r.nome, r.pedido_minimo, (SELECT GROUP_CONCAT(ru.uf ORDER BY ru.uf SEPARATOR \', \') FROM regiao_ufs ru WHERE ru.regiao_id = r.id) ufs FROM regioes r ORDER BY r.pedido_minimo');
+            return '<table class="tabela tr-tabela"><thead><tr><th>Região</th><th>Estados</th><th>Pedido mínimo</th></tr></thead><tbody>'
+                . implode('', array_map(fn($r) => '<tr><td>' . e($r['nome']) . '</td><td class="suave">' . e((string) $r['ufs']) . '</td><td><b class="tr-regra">' . e(dinheiro((float) $r['pedido_minimo'])) . '</b></td></tr>', $linhas))
+                . '</tbody></table>';
+        }
+        if ($nome === 'condicoes_pagamento') {
+            $linhas = Banco::todos('SELECT c.nome, c.desconto_pct, c.valor_minimo, f.nome forma, f.bloqueia_com_atraso FROM condicoes_pagamento c JOIN formas_pagamento f ON f.id = c.forma_pagamento_id WHERE c.ativa = 1 AND f.ativa = 1 ORDER BY f.ordem, c.id');
+            $regras = fn($c) => implode(' · ', array_filter([
+                (float) $c['desconto_pct'] > 0 ? number_format((float) $c['desconto_pct'], 0, ',', '.') . '% de desconto' : '',
+                (float) $c['valor_minimo'] > 0 ? 'pedido a partir de ' . dinheiro((float) $c['valor_minimo']) : '',
+                $c['bloqueia_com_atraso'] ? 'bloqueado para cliente com título em atraso' : '',
+            ])) ?: '—';
+            return '<table class="tabela tr-tabela"><thead><tr><th>Condição</th><th>Forma</th><th>Regras</th></tr></thead><tbody>'
+                . implode('', array_map(fn($c) => '<tr><td><b>' . e($c['nome']) . '</b></td><td>' . e($c['forma']) . '</td><td class="suave">' . e($regras($c)) . '</td></tr>', $linhas))
+                . '</tbody></table>';
+        }
+        // produtos:Categoria → vitrine com os produtos da linha (do cadastro único)
+        $categoria = trim(substr($nome, 9));
+        $lista = array_values(array_filter(AcademiaService::produtos(), fn($p) => ($p['categoria'] ?? '') === $categoria));
+        if (!$lista) {
+            return '';
+        }
+        $html = '<div class="tr-produtos">';
+        foreach (array_slice($lista, 0, 40) as $p) {
+            $html .= '<a class="tr-produto" href="' . e(url('/academia/produtos/' . $p['slug'])) . '">'
+                . (!empty($p['imagem']) ? '<img src="' . e($p['imagem']) . '" alt="" loading="lazy">' : '<span class="tr-produto-sem"></span>')
+                . '<span><strong>' . e($p['nome']) . '</strong><small>' . e(trim(($p['embalagem'] ?? '') . ' · ' . ($p['chamada'] ?? ''), ' ·')) . '</small></span></a>';
+        }
+        return $html . '</div>' . (count($lista) > 40 ? '<p class="suave">E mais ' . (count($lista) - 40) . ' na <a href="' . e(url('/academia/produtos')) . '">Biblioteca de produtos</a>.</p>' : '');
     }
 
     /** Busca nos módulos (para o "Pergunte ao One" sem IA): [['titulo','resumo','link']] */

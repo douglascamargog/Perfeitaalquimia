@@ -30,16 +30,37 @@ const blocos = (p) => p.locator('[data-tr-bloco]').evaluateAll((l) => l.map((e) 
   const tv = await entrar(b, 'televendas1@demo.local');
   await tv.goto(BASE + '/treinamento');
   const bt = await blocos(tv);
-  ok(bt.join(',') === 'integracao,televendas,vizinhos', 'televendas vê: Integração → Televendas → Áreas com que tem contato');
+  ok(bt.join(',') === 'integracao,televendas,produtos,vizinhos', 'televendas vê: Integração → Televendas → Conhecimento de produto → Áreas com que tem contato');
   const viz = await tv.locator('[data-tr-bloco="vizinhos"]').innerText();
   ok(viz.includes('Como trabalha o Financeiro') && viz.includes('Como trabalha o Depósito') && !viz.includes('Como trabalha o Televendas'), 'áreas vizinhas: Financeiro, Depósito... (e não o próprio setor)');
   await tv.screenshot({ path: SAIDA + '/treinamento-meu.png', fullPage: true });
+
+  // V13.2: Conhecimento de produto, prints, regras atuais e casos práticos
+  ok((await blocos(tv)).includes('produtos'), 'televendas tem a trilha "Conhecimento de produto"');
+  const modPed = sql("select id from trein_modulos where chave='tv-pedido'");
+  await tv.goto(BASE + '/treinamento/modulo/' + modPed);
+  const imgs = await tv.locator('[data-tr-conteudo] figure.tr-print img').evaluateAll((l) => l.map((i) => i.getAttribute('src')));
+  let imgsOk = imgs.length >= 4;
+  for (const src of imgs) { const r = await tv.request.get(BASE.replace(/\/$/, '') + src.replace(/^https?:\/\/[^/]+/, '')); if (!r.ok()) imgsOk = false; }
+  ok(imgsOk, 'módulo com prints das telas (' + imgs.length + ' imagens, todas abrem)');
+  const conteudo = await tv.locator('[data-tr-conteudo]').innerText();
+  ok(!conteudo.includes('{{') && conteudo.includes(sql("select replace(format(pedido_minimo,2,'de_DE'),'','') from regioes order by pedido_minimo limit 1")) && conteudo.includes(sql("select valor from configuracoes where chave='pedidos.desconto_max_pct'") + '%'), 'regras com os valores atuais (pedido mínimo por região e limite de desconto)');
+  sql("update configuracoes set valor='7' where chave='pedidos.desconto_max_pct'");
+  await tv.reload();
+  ok((await tv.locator('[data-tr-conteudo]').innerText()).includes('7%'), 'mudou a configuração: o treinamento mostra o valor novo');
+  sql("update configuracoes set valor='10' where chave='pedidos.desconto_max_pct'");
+  ok(await tv.locator('.tr-caso').count() >= 2 && !(await tv.locator('.tr-caso p').first().isVisible()), 'casos práticos começam fechados');
+  await tv.locator('.tr-caso summary').first().click();
+  ok(await tv.locator('.tr-caso p').first().isVisible(), 'clicou no caso: aparece o que fazer');
+  const modCap = sql("select id from trein_modulos where chave='pd-capsulas'");
+  await tv.goto(BASE + '/treinamento/modulo/' + modCap);
+  ok(await tv.locator('.tr-produto').count() >= 10 && (await tv.locator('.tr-produto').first().getAttribute('href')).includes('/academia/produtos/'), 'linha de cápsulas: vitrine com os produtos atuais e link para a ficha');
 
   // Produção não vê a trilha do Televendas
   const pr = await entrar(b, 'producao@demo.local');
   await pr.goto(BASE + '/treinamento');
   const bp = await blocos(pr);
-  ok(bp.includes('producao') && !bp.includes('televendas'), 'Produção vê a trilha dela, não a do Televendas');
+  ok(bp.includes('producao') && !bp.includes('televendas') && !bp.includes('produtos'), 'Produção vê a trilha dela (não a do Televendas nem a de produto)');
   ok((await pr.locator('[data-tr-bloco="vizinhos"]').innerText()).includes('Como trabalha a Qualidade'), 'Produção tem a Qualidade nas áreas vizinhas');
   // Financeiro (perfil) tem a trilha de aprovação, além da Cobrança (função)
   const fi = await entrar(b, 'financeiro@demo.local');

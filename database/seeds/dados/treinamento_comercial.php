@@ -1,95 +1,281 @@
 <?php
 /**
- * Treinamento (V13.0) — trilhas do Comercial, Cobrança, Financeiro e Diretoria.
- * Formato igual ao de treinamento_integracao.php. Cada trilha tem um módulo "vizinho": como o setor trabalha,
- * para os setores que têm contato com ele.
+ * Treinamento — trilhas do Comercial (Televendas, Externo, Prospecção, Terceirização). V13.2: aprofundado.
+ * Formato: [chave, tipo (setor|vizinho), título, resumo, minutos, texto, [[pergunta, [opções], índice da certa, explicação], ...]]
+ * No texto: ![legenda](assets/img/treinamento/x.jpg) = print (ferramentas/capturar_treinamento.js) ·
+ *   {{config:chave}} = valor atual da configuração · {{pedido_minimo}} / {{condicoes_pagamento}} = tabelas atuais ·
+ *   ?? situação || o que fazer = caso prático · ! = atenção (inclui "confira com a sua gestão": regra que a empresa precisa validar).
  */
 
-// ---------- textos usados em mais de uma trilha ----------
+// =====================================================================
+// Módulos usados em mais de uma trilha
+// =====================================================================
+$rotina = <<<'TXT'
+## Objetivo
+Ao final deste módulo você sabe **por onde começar o dia**, o que olhar em cada tela e como terminar o dia sem deixar nenhum cliente sem próximo passo.
+
+## A tela de entrada: o seu Início
+Ao entrar, o One mostra o resumo do seu dia: retornos de hoje e atrasados, sua meta, aniversariantes e avisos. Cada cartão leva direto para o assunto.
+![O Início da vendedora: retornos de hoje, meta e avisos do dia](assets/img/treinamento/inicio-vendedora.jpg)
+
+## Meu mês: a meta e o ritmo
+Em [Meu mês](/meu-mes) você vê a meta do mês, quanto já vendeu e **quanto precisa por dia útil** para chegar lá. "Para hoje" junta os contatos mais importantes do dia.
+![Meu mês: o anel mostra a meta; "Para hoje" lista os contatos do dia](assets/img/treinamento/meu-mes.jpg)
+
+## A rotina que funciona (passo a passo)
+1. **Abra o Meu mês** (2 minutos): veja quanto falta e o ritmo do dia.
+2. **Agenda, atrasados primeiro.** Retorno atrasado é cliente esperando. Conclua ou reagende cada um.
+3. **Agenda de hoje.** Os retornos que você combinou para hoje.
+4. **Recompra.** Clientes que já deveriam ter comprado de novo, em ordem de valor.
+5. **Reativação.** Seus clientes sem comprar há mais de {{config:carteira.dias_inatividade}} dias.
+6. **Carteira filtrada.** Use o tempo que sobrar para os clientes "Em negociação" e "Aguardando retorno" do funil.
+7. **Antes de sair:** todo cliente com quem você falou tem o contato registrado e o próximo passo agendado.
+
+> Regra de ouro: terminou a conversa → **registre** e **agende**. Cliente sem próximo passo é cliente esquecido.
+
+## Erros comuns
+- Começar ligando para clientes "aleatórios" e deixar os atrasados para depois.
+- Combinar um retorno de boca e não agendar: ele não aparece na Agenda e se perde.
+- Registrar só "liguei": escreva o que foi combinado (produtos, valores, prazo, quem decide).
+
+?? São 9h e você tem 6 retornos atrasados, 4 para hoje e 13 clientes na Recompra. Por onde começa? || Pelos 6 atrasados (o cliente já esperava seu contato), depois os 4 de hoje. A Recompra vem em seguida, começando pelos primeiros da lista, que valem mais.
+?? O cliente pediu para você ligar "semana que vem". O que fazer antes de desligar? || Combine o dia (e se possível o horário), agende na ficha em Agendar e registre o que ele precisa ver até lá. No dia, ele aparece na sua Agenda.
+TXT;
+$rotinaPerguntas = [
+    ['Qual a ordem certa para começar o dia?', ['Recompra, depois Agenda de hoje', 'Agenda: atrasados primeiro, depois os de hoje, e então Recompra', 'Reativação primeiro', 'Ligar para clientes novos'], 1, 'Atrasados são clientes que já esperavam o seu contato.'],
+    ['Onde ver quanto precisa vender por dia útil para bater a meta?', ['No Meu mês', 'Na Biblioteca de produtos', 'Na Agenda', 'Em Configurações'], 0, 'O Meu mês mostra a meta, o vendido e o ritmo necessário.'],
+    ['O cliente pediu retorno na semana que vem. O correto é:', ['Lembrar de cabeça', 'Agendar na ficha do cliente (vai para a Agenda no dia)', 'Anotar num papel', 'Mandar mensagem só no dia'], 1, 'O agendamento coloca o cliente na sua Agenda no dia certo.'],
+    ['Depois de quantos dias sem compra o cliente aparece na Reativação (configuração atual)?', ['30', '60', 'O número definido em Configurações (o módulo mostra o valor atual)', 'Nunca aparece'], 2, 'O número é configurável; o treinamento mostra o valor atual.'],
+];
+
 $carteira = <<<'TXT'
+## Objetivo
+Saber encontrar qualquer cliente, entender a situação dele em segundos e **registrar tudo** o que acontece, para você e para quem vier depois.
+
 ## A sua carteira
-Todo cliente tem **um responsável**. Os seus estão em [Carteira](/carteira): Visão geral, Lista, Funil e Mapa.
-- Use os **filtros** (cidade, etapa, segmento, situação de compra) para montar a lista do dia.
-- O **funil** mostra a etapa de cada negociação: Validar cadastro → Não abordado → Contato realizado → Em negociação → Proposta enviada → Aguardando retorno → Cliente ativo.
+Todo cliente tem **um responsável**. Os seus estão em [Carteira](/carteira), com quatro abas:
+- **Visão geral:** números da carteira e o mapa.
+- **Lista:** a tabela com filtros. É a mais usada no dia a dia.
+- **Funil:** cada cliente na etapa da negociação.
+- **Mapa:** onde estão os clientes (ótimo para planejar visitas).
+![Carteira › Lista: filtros no alto e os clientes em ordem](assets/img/treinamento/carteira-lista.jpg)
 
-## A ficha do cliente
-Clique no nome do cliente para abrir a ficha. Nela:
-1. **Registre cada contato** (ligação, WhatsApp, visita): vai para a linha do tempo com o seu nome e a data.
-2. **Agende o próximo contato**: aparece na sua [Agenda](/agenda) no dia.
-3. Veja **o que ele mais compra** e use **"Repetir último pedido"**.
-4. Faça **pedido** ou **orçamento** dali mesmo.
+### Filtros que valem ouro
+- **Situação de compra:** "sem compra há 60 dias" é uma lista pronta de ligações.
+- **Etapa:** veja só quem está "Em negociação" ou "Aguardando retorno".
+- **Cidade/UF:** para campanhas regionais ou rotas.
+- **Segmento:** produtos naturais, suplementos, farmácia.
 
-> Regra de ouro: terminou a conversa? Registre o que foi combinado e agende o próximo passo. Cliente sem próximo passo é cliente esquecido.
+## O funil (etapas da negociação)
+Validar cadastro → Não abordado → Contato realizado → Em negociação → Proposta enviada → Aguardando retorno → **Cliente ativo** (ou Sem interesse / Inativo).
+![Carteira › Funil: arraste o cliente para a etapa em que ele está](assets/img/treinamento/carteira-funil.jpg)
+Mantenha a etapa sempre certa: é por ela que a gestão enxerga as negociações em andamento.
 
-! Cliente sem compra há muitos dias aparece em Reativação, e passou do tempo normal de recompra aparece em Recompra. Os dois continuam com você.
+## A ficha do cliente (o lugar mais importante do sistema)
+Clique no nome do cliente para abrir a ficha.
+![A ficha: dados, compras dos últimos 12 meses, próxima compra prevista e os atalhos](assets/img/treinamento/ficha-cliente.jpg)
+O que olhar antes de ligar:
+1. **Os quatro números do topo:** quanto comprou em 12 meses, ticket médio, última compra e **próxima compra prevista**.
+2. **Selos:** "Em cobrança" quer dizer título em atraso (o boleto fica bloqueado).
+3. **O que mais compra:** a base da sua oferta de reposição.
+4. **Próximas atividades** e a **linha do tempo**: o que já foi conversado, por quem e quando.
+
+## Registrar na linha do tempo
+A caixa da linha do tempo tem três abas:
+- **📝 Anotação:** qualquer informação (dá para anexar print ou PDF, como o pedido que o cliente mandou por WhatsApp).
+![Aba Anotação: escreva e anexe prints](assets/img/treinamento/ficha-cliente-anotacao.jpg)
+- **📞 Contato:** canal (ligação, WhatsApp, visita), resumo da conversa e o próximo contato.
+![Aba Contato: canal, resumo e próximo contato](assets/img/treinamento/ficha-cliente-contato.jpg)
+- **📅 Agendar:** o que, dia, hora e para quem. Vai para a Agenda e avisa no dia.
+![Aba Agendar: entra na Agenda do dia escolhido](assets/img/treinamento/ficha-cliente-agendar.jpg)
+
+### Como escrever um bom registro
+Ruim: "Liguei." · Bom: "Falei com Ana (compradora). Quer repor magnésios e colágeno; decide sexta, depois de ver o estoque. Mandar orçamento quinta."
+
+## A Agenda
+Em [Agenda](/agenda): atrasados no topo, depois os de hoje e a semana. Ao fazer o contato, **conclua**. Não deu? **Reagende** com um clique.
+![Agenda: atrasados em destaque e a semana](assets/img/treinamento/agenda.jpg)
+
+## Atalhos da ficha
+- **Ligar / WhatsApp / Rota:** abrem direto, e a ligação fica registrada.
+- **Mensagem pronta:** escolha o modelo; o texto vem com o nome da loja e o seu link do catálogo.
+- **Buscar contatos com IA:** quando ninguém atende, procura telefones e e-mails novos da empresa.
+- **Gerar acesso ao catálogo:** o cliente passa a ver preços e pedir sozinho pelo catálogo.
+
+! Dados do cliente são para o trabalho: não tire print da carteira para grupos pessoais (LGPD).
+
+?? Você abre a ficha e vê o selo "Em cobrança". O cliente quer fazer um pedido grande no boleto. O que dizer? || Explique com cuidado que, com título em aberto, o pedido pode ser feito com Pix ou cartão, e que regularizando o título o boleto volta. Não prometa boleto, porque o sistema bloqueia. Se ele quiser negociar o atraso, registre e avise a Cobrança.
+?? A colega saiu de férias e você assumiu um cliente dela que liga pedindo "aquele preço que ela combinou". || Abra a linha do tempo da ficha: o combinado deve estar registrado. Se estiver, siga. Se não estiver, não confirme de memória: diga que vai checar e retorne no mesmo dia (registre e agende).
 TXT;
 $carteiraPerguntas = [
-    ['Terminou uma ligação com o cliente. O que não pode faltar?', ['Nada, só desligar', 'Registrar o contato e agendar o próximo passo', 'Mandar um áudio para a gestora', 'Exportar a carteira'], 1, 'O registro e o próximo contato mantêm o histórico e a Agenda em dia.'],
-    ['Onde aparece o retorno que você agendou na ficha?', ['Na Agenda, no dia marcado', 'No catálogo', 'Só no e-mail', 'Na Biblioteca de produtos'], 0, 'Os retornos agendados entram na Agenda.'],
-    ['Cliente que passou do tempo normal entre uma compra e outra aparece em:', ['Recompra', 'Cobrança', 'Configurações', 'Auditoria'], 0, 'A Recompra lista quem passou do intervalo médio de compra.'],
+    ['Qual aba da linha do tempo usar para registrar uma ligação com o resumo e o próximo contato?', ['Anotação', 'Contato', 'Agendar', 'Nenhuma: não precisa registrar'], 1, 'A aba Contato guarda canal, resumo e próximo contato.'],
+    ['O que significa o selo "Em cobrança" na ficha?', ['Cliente novo', 'Cliente com título em atraso: boleto bloqueado', 'Cliente VIP', 'Cliente sem vendedora'], 1, 'Com título em atraso, só Pix ou cartão.'],
+    ['Qual registro está bom?', ['"Liguei."', '"Falei com Ana (compradora): quer repor magnésios, decide sexta; mandar orçamento quinta."', '"Cliente chato."', '"Ok."'], 1, 'Quem, o quê, quando e o próximo passo.'],
+    ['Ninguém atende no telefone do cadastro. Qual recurso da ficha ajuda?', ['Buscar contatos com IA', 'Apagar o cliente', 'Mudar o segmento', 'Exportar CSV'], 0, 'Ela procura telefones e e-mails novos da empresa.'],
+    ['Você assumiu um cliente de uma colega. Onde ver o que já foi combinado?', ['Na linha do tempo da ficha', 'No WhatsApp da colega', 'Em Configurações', 'Na Biblioteca de produtos'], 0, 'Tudo registrado fica na ficha, com autor e data.'],
 ];
 
 $pedido = <<<'TXT'
-## Montando o pedido
-Em [Pedidos](/pedidos) › **Novo pedido** (ou pela ficha do cliente):
-1. Escolha o cliente: a **tabela de preço** dele (Lojista, Distribuidor ou Terceirização) vem sozinha.
-2. Coloque os produtos por **unidade** (não vendemos kits).
-3. O carrinho mostra **quanto falta para o pedido mínimo** da região e a **faixa de campanha** que o pedido já alcançou.
-4. Escolha a **forma de pagamento**. Cliente com título em atraso não pode boleto: só Pix ou cartão.
-5. Envie: o pedido vai para a **aprovação do Financeiro** e depois para o Omie.
+## Objetivo
+Montar um pedido **certo na primeira vez**: preço do cliente, pedido mínimo, campanha, desconto e pagamento, sem voltar do Financeiro.
 
-## Orçamento por link
-Em [Orçamentos](/orcamentos) você monta e manda um **link pelo WhatsApp**. O cliente abre, muda quantidades e aprova: **vira pedido sozinho**. Use **Modelos de pedido** para listas que você manda sempre.
+## Passo a passo: pedido no sistema
+1. Na ficha do cliente, clique em **Novo pedido** (ou em [Pedidos](/pedidos) › Novo pedido e escolha o cliente).
+2. A **tabela de preço do cliente** (Lojista, Distribuidor ou Terceirização) já vem aplicada. Não existe preço "de cabeça".
+3. Digite as **quantidades** por unidade (não vendemos kits). Use a busca para achar o produto pelo nome ou código; "só escolhidos" mostra o que já entrou.
+![Novo pedido: produtos com o preço do cliente e a quantidade de cada um](assets/img/treinamento/pedido-novo.jpg)
+4. Acompanhe o **resumo** ao lado: total, faixa de campanha, pedido mínimo e formas de pagamento disponíveis.
+![O resumo do pedido: campanha, desconto, pedido mínimo atingido e pagamento](assets/img/treinamento/pedido-carrinho.jpg)
+5. Escolha a **condição de pagamento** e escreva na **observação** o que for combinado de entrega.
+6. **Enviar pedido:** ele vai para o ERP como orçamento e para a **aprovação do Financeiro**.
 
-## Campanhas e descontos
-Veja em [Campanhas](/campanhas) o que está no ar. O desconto que você pode dar tem limite configurado; acima dele, precisa de aprovação.
+## Pedido mínimo por região
+O carrinho mostra quanto falta para o mínimo da região do cliente. Valores atuais:
+{{pedido_minimo}}
 
-! Nunca prometa prazo de entrega, troca ou desconto que dependa de aprovação antes de confirmar.
+## Formas e condições de pagamento
+{{condicoes_pagamento}}
+Cliente com título em atraso não pode usar boleto: o sistema bloqueia e mostra só Pix e cartão.
+
+## Desconto da vendedora
+Você pode dar até **{{config:pedidos.desconto_max_pct}}%** de desconto sem aprovação, por item ou no pedido todo. Acima disso, o pedido vai com o pedido de aprovação e o Financeiro decide. **Explique o motivo na observação.**
+
+## Campanhas
+Quando há campanha no ar, o resumo mostra a faixa atingida e **quanto falta para a próxima** (ex.: "faltam R$ 1.550 para frete grátis"). Use isso na conversa: "Com mais R$ 1.550 você ganha o frete; quer completar com o colágeno que acabou?". Veja as campanhas em [Campanhas](/campanhas).
+![Campanhas no ar: período, para quem vale e as faixas](assets/img/treinamento/campanhas.jpg)
+
+## Orçamento por link (WhatsApp)
+Em vez de enviar, clique em **Gerar orçamento para o cliente**: ele recebe um link, abre no celular, muda quantidades e **aprova**. Aprovado, **vira pedido sozinho**. O orçamento vale {{config:orcamento.validade_dias}} dias.
+![Orçamentos: o que foi enviado, aberto e aprovado](assets/img/treinamento/orcamentos.jpg)
+Acompanhe tudo em [Orçamentos](/orcamentos): enviados, abertos pelo cliente, aprovados e vencidos.
+**Modelos de pedido** guardam listas que você manda sempre (ex.: "reposição chás farmácia").
+
+## Depois de enviar
+Acompanhe em [Pedidos](/pedidos): Aguardando aprovação → Aprovado → Faturado (ou Recusado, com o motivo). Você recebe o aviso no sino em cada mudança.
+![Pedidos: a situação de cada pedido](assets/img/treinamento/pedidos-lista.jpg)
+
+## Erros comuns
+- Prometer prazo de entrega antes do pedido ser aprovado e separado.
+- Dar desconto acima do limite sem explicar o motivo, e o pedido volta.
+- Esquecer o pedido mínimo e descobrir só no fim da ligação: olhe a barra enquanto monta.
+- Usar condição de outro canal (loja virtual, campanha encerrada).
+
+! Confira com a sua gestão: prazos de entrega por região e política de troca e devolução. Até lá, não prometa nada que não esteja escrito.
+
+?? O pedido deu R$ 380 e o mínimo da região do cliente é maior. O cliente diz que só precisa disso agora. || Mostre o que falta e ofereça complementos que ele já compra (veja "O que mais compra" na ficha) ou a campanha do mês. Se mesmo assim não fechar, agende o retorno para quando ele precisar repor mais e registre.
+?? O cliente pede 15% de desconto e o seu limite é menor. || Ofereça primeiro o que não depende de aprovação: a faixa da campanha, o desconto do Pix, completar para frete grátis. Se ainda assim precisar, envie com o desconto e o motivo na observação, avisando o cliente que depende de aprovação. Não confirme antes.
+?? O cliente aprovou o orçamento pelo link, mas mudou as quantidades. || Normal: o pedido nasce com o que ele aprovou. Confira em Pedidos e, se algo não fizer sentido (ex.: quantidade muito alta), ligue para confirmar antes da aprovação do Financeiro.
 TXT;
 $pedidoPerguntas = [
-    ['O cliente tem título em atraso. Que formas de pagamento ele pode usar?', ['Qualquer uma', 'Só Pix ou cartão', 'Só boleto', 'Nenhuma'], 1, 'Com título em atraso, o boleto fica bloqueado.'],
-    ['Depois que você envia o pedido, ele vai para:', ['O Depósito separar na hora', 'A aprovação do Financeiro', 'O Marketing', 'Direto para o cliente'], 1, 'O Financeiro aprova e então o pedido segue para o Omie.'],
-    ['O que acontece quando o cliente aprova o orçamento pelo link?', ['Nada, a vendedora precisa digitar de novo', 'Vira pedido sozinho', 'Vai para a Cobrança', 'É apagado'], 1, 'Orçamento aprovado pelo link vira pedido automaticamente.'],
+    ['De onde vem o preço dos produtos no pedido?', ['A vendedora digita', 'Da tabela de preço do cliente (Lojista, Distribuidor ou Terceirização)', 'Do site', 'Do concorrente'], 1, 'A tabela do cliente vem aplicada automaticamente.'],
+    ['O cliente tem título em atraso. Quais formas aparecem?', ['Todas', 'Só Pix e cartão', 'Só boleto', 'Nenhuma'], 1, 'O boleto fica bloqueado.'],
+    ['Desconto acima do seu limite:', ['É proibido', 'Vai com pedido de aprovação; explique o motivo na observação', 'Passa sem ninguém ver', 'Só pelo catálogo'], 1, 'Acima do limite, o Financeiro decide.'],
+    ['O cliente aprovou o orçamento pelo link. O que acontece?', ['Nada', 'Vira pedido sozinho', 'Vai para a Cobrança', 'Precisa digitar de novo'], 1, 'Orçamento aprovado vira pedido.'],
+    ['O resumo diz "faltam R$ 1.550 para frete grátis". Melhor atitude:', ['Ignorar', 'Oferecer completar com produtos que o cliente já compra', 'Dar o frete grátis por conta', 'Cancelar o pedido'], 1, 'Use a campanha para aumentar o pedido com o que faz sentido para a loja.'],
+    ['Quando você pode prometer o prazo de entrega?', ['Antes de montar o pedido', 'Só seguindo a política da empresa, depois de aprovado', 'Sempre "amanhã"', 'Nunca fale de prazo'], 1, 'Prazo depende de aprovação e separação; siga a política.'],
 ];
 
 $atendimento = <<<'TXT'
-## Prepare o contato
-- Leia o **histórico** na ficha antes de ligar.
-- Confirme com quem você fala e quem cuida das compras.
-- Apresente-se: "Sou [seu nome], da Perfeita Alquimia, fabricante de produtos naturais e suplementos de São Leopoldo."
+## Objetivo
+Conduzir a conversa como consultora: **entender a loja antes de oferecer**, responder objeções sem desconto automático e nunca prometer o que o produto não faz.
 
-## Pergunte antes de oferecer
-- Quais linhas têm mais saída na sua loja hoje?
-- Você busca reposição ou novidades para o mix?
-- Qual o investimento deste pedido e para quando precisa?
-- Tem algum item parado ou fornecedor que não está atendendo bem?
+## Antes de ligar (1 minuto)
+- Ficha: última compra, o que mais compra, títulos, último registro.
+- Defina o **objetivo da ligação**: repor? apresentar campanha? recuperar? Uma ligação, um objetivo.
 
-## Falas para objeções
-- **"Está caro":** "Você está comparando o valor por unidade ou o total? Me diz a apresentação e a quantidade que eu confiro."
-- **"Vou pensar":** "Claro. O que falta avaliar: os produtos, o investimento ou o momento? Posso te procurar em [data]?"
-- **"Esse produto trata minha condição?":** "Posso te passar a composição e o rótulo. Para saber se é adequado, é preciso falar com um profissional de saúde."
+## Abertura
+> "Oi, [nome]! Aqui é [seu nome], da Perfeita Alquimia. Tudo bem? Te liguei porque [motivo: está chegando a época da sua reposição / começou a campanha do mês]. Tem dois minutinhos?"
 
-## Conheça os produtos
-Estude as fichas na [Biblioteca de produtos](/academia/produtos): Conheça o produto, Composição, Uso e cuidados e No atendimento.
+## Diagnóstico: perguntas que vendem
+- "Como estão saindo os magnésios / colágenos / chás?"
+- "O que os seus clientes mais pedem que você não tem?"
+- "Tem algum item parado na prateleira?"
+- "Qual investimento você pensa para esse pedido e para quando precisa?"
+- "Quem mais participa da decisão?"
+Escute e **anote na ficha** enquanto fala.
+
+## Oferta
+- Ofereça **poucos itens, com motivo**: "Você vende bem o 8+ Magnésio; o Citrato de Magnésio atende quem procura outra forma do mineral."
+- Use **reposição** (o que ele já vende) + **um item novo** com argumento.
+- Mostre a **campanha** e quanto falta para a próxima faixa.
+
+## Objeções (e como responder)
+- **"Está caro."** "Você compara por unidade ou o pedido total? Me diz qual produto e quantidade, que eu confiro. Às vezes o Pix ou a faixa da campanha já resolvem."
+- **"Estou com estoque."** "Ótimo! Quais estão saindo mais? Posso deixar agendado para [data] e já separo a campanha para você."
+- **"Vou pensar."** "Claro. O que falta avaliar: os produtos, o valor ou o momento? Te procuro em [data]?" (e **agende**).
+- **"O fornecedor X faz mais barato."** "Entendo. O nosso diferencial é a fabricação própria, a composição de cada fórmula e a reposição rápida. Quer comparar um item lado a lado?"
+- **"Esse produto trata [doença]?"** "Posso te passar a composição e o rótulo. Suplemento não é remédio; para saber se é indicado para alguém, o ideal é um profissional de saúde."
+
+## Fechamento
+Resuma o pedido, confirme pagamento e entrega e diga o próximo passo: "Vou mandar o orçamento agora pelo WhatsApp; é só aprovar no link."
+
+## Mensagens prontas
+Em [Mensagens prontas](/mensagens) há modelos de prospecção, reativação, recompra, cobrança e pós-venda. Na ficha, escolha o modelo: o nome da loja e o seu link entram sozinhos.
+![Mensagens prontas: modelos com {nome} e {link_vendedor}](assets/img/treinamento/mensagens.jpg)
+
+! Nunca diga que um suplemento "cura", "trata" ou "previne" doença. Dúvida técnica: registre e encaminhe para a Responsável Técnica.
+
+?? A loja diz que "magnésio é tudo igual" e quer o mais barato. || Explique sem desmerecer: o mineral é o mesmo, o que muda é o composto e a quantidade de magnésio por porção (está na ficha). Mostre os dois na Biblioteca e deixe a loja escolher pelo perfil dos clientes dela.
+?? Uma cliente pergunta se pode indicar um chá para a filha de 5 anos. || Não indique. Diga que o rótulo traz as advertências e que, para crianças, quem orienta é o pediatra. Ofereça mandar a ficha do produto.
+?? O comprador diz "manda a tabela inteira que eu vejo". || Mande, mas não pare aí: pergunte as 2 ou 3 linhas que mais vendem e marque um retorno curto para montar o pedido junto. Lista sem conversa raramente vira pedido.
 TXT;
 $atendimentoPerguntas = [
-    ['Qual o melhor começo de conversa com um lojista novo?', ['Mandar a lista completa de produtos', 'Fazer perguntas para entender a loja antes de oferecer', 'Oferecer desconto logo de cara', 'Pedir o pedido mínimo'], 1, 'Perguntas primeiro: a oferta fica certa para a loja.'],
-    ['O cliente diz "está caro". O que perguntar?', ['Nada, dar desconto', 'Se ele compara preço por unidade ou o total, e qual apresentação', 'Se ele quer desistir', 'O CNPJ dele'], 1, 'Investigue a comparação antes de falar de condição.'],
-    ['Onde estudar a composição e as falas de um produto?', ['Na Biblioteca de produtos', 'Na Auditoria', 'Em Configurações', 'No sino'], 0, 'A Biblioteca tem as fichas para estudo.'],
+    ['O que fazer antes de oferecer produtos?', ['Mandar a tabela completa', 'Fazer perguntas de diagnóstico sobre a loja', 'Dar desconto', 'Falar da concorrência'], 1, 'Perguntas primeiro: a oferta fica certa.'],
+    ['"Vou pensar." A melhor resposta é:', ['"Tá bom, tchau."', 'Perguntar o que falta avaliar e agendar o retorno', 'Dar 20% de desconto', 'Insistir até ele comprar'], 1, 'Descubra a dúvida e agende.'],
+    ['O cliente pergunta se o produto trata uma doença. Você:', ['Diz que sim', 'Explica que suplemento não é remédio e passa a composição', 'Inventa um estudo', 'Muda de assunto'], 1, 'Nunca prometa tratamento ou cura.'],
+    ['"Magnésio é tudo igual." O argumento correto:', ['"É sim, leva o mais barato."', 'O mineral é o mesmo; mudam o composto e a quantidade por porção', '"O nosso é remédio."', '"Não sei."'], 1, 'Composto e quantidade por porção estão na ficha.'],
+    ['Onde estão os modelos de mensagem com o nome da loja e o seu link?', ['Mensagens prontas (e na ficha do cliente)', 'Configurações', 'Auditoria', 'Biblioteca'], 0, 'Na ficha, escolha o modelo e o texto vem pronto.'],
 ];
 
-$vizFinanceiro = <<<'TXT'
-## O que o Financeiro faz com o seu pedido
-1. Confere o **crédito** do cliente e se há **títulos em atraso**.
-2. Confere a **forma de pagamento** e as condições (prazo, parcelas, descontos acima do limite).
-3. **Aprova** (o pedido segue para o Omie) ou **recusa com o motivo**; você recebe o aviso no sino.
+$recompra = <<<'TXT'
+## Objetivo
+Vender mais para quem **já compra**: é o cliente mais barato de conquistar e o que mais rende.
 
-## Como ajudar o pedido a passar rápido
-- Cadastro do cliente completo (CNPJ, endereço, e-mail para nota).
-- Forma de pagamento certa: cliente com atraso só paga com Pix ou cartão.
-- Desconto acima do seu limite? Explique o motivo na observação.
+## Como o One calcula a recompra
+Cada cliente tem o **próprio ritmo**: o One calcula o intervalo médio entre as compras (ex.: "compra a cada ~26 dias") e mostra a **próxima compra prevista** na ficha. Passou do prazo? O cliente entra em [Recompra](/recompra).
+![Recompra: os mais valiosos e mais atrasados primeiro](assets/img/treinamento/recompra.jpg)
 
-> Pedido recusado não é o fim: leia o motivo, ajuste com o cliente e envie de novo.
+## Passo a passo na Recompra
+1. Comece pelo topo (o One ordena por quanto o cliente compra × quanto está atrasado).
+2. Abra a ficha e veja **o que mais compra**: a reposição se monta sozinha.
+3. Ligue ou use a mensagem pronta de recompra:
+> "{{config:recompra.mensagem}}"
+4. Fechou? Pedido ou orçamento por link. Não fechou? Agende (o botão está no próprio cartão).
+
+## Reativação
+Clientes sem comprar há mais de **{{config:carteira.dias_inatividade}} dias** aparecem em [Reativação](/reativacao). Eles continuam na sua carteira.
+![Reativação: os seus clientes parados há mais tempo](assets/img/treinamento/reativacao.jpg)
+- Pergunte o que mudou: trocou de fornecedor? Fechou uma linha? Mudou o comprador?
+- Ofereça a campanha do mês e um produto novo com argumento.
+- **Registre o motivo** de não ter comprado: ajuda a empresa a entender as perdas.
+- Se a loja fechou ou não quer mais contato, mova no funil para "Sem interesse" ou "Inativo", com o motivo.
+
+> Quando um cliente da Reativação volta a comprar, o One comemora com você. 🎉
+
+?? O cliente da Recompra diz que agora compra de um concorrente porque o prazo de entrega é menor. || Registre o motivo (é informação valiosa). Pergunte quais itens ele ainda não acha lá e ofereça esses. Agende um retorno em 30 dias. Se o prazo for um problema recorrente, avise a gestão.
+?? Na Reativação aparece uma loja que você sabe que fechou. || Mova no funil para "Inativo" e registre "loja fechada". Assim ela sai das suas filas e não pesa nos números.
+TXT;
+$recompraPerguntas = [
+    ['Como o One sabe que um cliente está atrasado na recompra?', ['Pelo intervalo médio entre as compras dele', 'Pela cidade', 'Pelo segmento', 'Sorteio'], 0, 'Cada cliente tem o próprio ritmo.'],
+    ['Por que começar a Recompra pelo topo da lista?', ['Ordem alfabética', 'Os primeiros valem mais: compram mais e estão mais atrasados', 'São os mais novos', 'Tanto faz'], 1, 'A lista é ordenada por valor × atraso.'],
+    ['Na Reativação, a loja diz que fechou. O que fazer?', ['Deixar como está', 'Mover para "Inativo" e registrar o motivo', 'Apagar a ficha', 'Mandar para a Cobrança'], 1, 'O motivo ajuda a empresa e limpa a sua fila.'],
+    ['O cliente reativado fica com quem?', ['Com você (sua carteira)', 'Com a Diretoria', 'Com o Marketing', 'Sem dono'], 0, 'A reativação fica com a vendedora da carteira.'],
+];
+
+$vizComercial = <<<'TXT'
+## O que o Comercial faz
+O Comercial atende os **lojistas** (B2B): Televendas por telefone e WhatsApp, Externo visitando as lojas, Prospecção buscando lojas novas e Terceirização atendendo quem fabrica com a marca própria. Cada cliente tem uma **vendedora responsável** na Carteira, e tudo o que é combinado fica na **linha do tempo** da ficha.
+
+## Como o trabalho do Comercial chega até você
+- **Financeiro:** pedidos para aprovar, com a observação da vendedora (desconto, prazo, combinado).
+- **Depósito:** pedidos aprovados e faturados para separar; a observação traz combinados de entrega.
+- **Marketing:** pedidos de arte e material em Pedir ao Marketing; leads dos anúncios viram contatos da Prospecção.
+- **Produção:** produtos em falta que a vendedora precisa prometer ao cliente.
+
+## Como ajudar o Comercial
+- Aprove ou recuse rápido e **com motivo claro**.
+- Avise quando um produto vai faltar ou atrasar: a vendedora avisa o cliente antes de ele reclamar.
+- Precisa falar de um cliente? Abra a ficha e leia a linha do tempo antes de ligar para ele.
 TXT;
 
 return [
@@ -98,58 +284,40 @@ return [
      'vizinhos' => 'financeiro,deposito,marketing,cobranca,producao',
      'descricao' => 'Atendimento e vendas por telefone e WhatsApp para lojistas de todo o Brasil.',
      'modulos' => [
-        ['tv-papel', 'setor', 'O papel do televendas', 'Entender o lojista, montar o mix certo e acompanhar até a entrega.', 6, <<<'TXT'
-## O que se espera de você
-O televendas cuida do relacionamento com os lojistas da sua carteira: **reposição**, **novidades** e **reativação**. Você é a voz da empresa para a loja.
+        ['tv-papel', 'setor', 'A rotina do televendas', 'Por onde começar o dia, o que olhar e como terminar sem pendência.', 12, $rotina, $rotinaPerguntas],
+        ['tv-carteira', 'setor', 'Carteira, ficha do cliente e agenda', 'Encontrar, entender e registrar: o cliente inteiro numa tela.', 18, $carteira, $carteiraPerguntas],
+        ['tv-pedido', 'setor', 'Pedido, orçamento, campanhas e descontos', 'Do carrinho ao pedido aprovado, certo na primeira vez.', 18, $pedido, $pedidoPerguntas],
+        ['tv-atendimento', 'setor', 'Abordagem, diagnóstico e objeções', 'Como conduzir a conversa e responder sem dar desconto à toa.', 15, $atendimento, $atendimentoPerguntas],
+        ['tv-recompra', 'setor', 'Recompra e reativação', 'Os clientes que mais rendem: quem já compra.', 10, $recompra, $recompraPerguntas],
+        ['tv-ligacoes', 'setor', 'Ligações, WhatsApp e o discador', 'Ligar pelo sistema, registrar e acompanhar os seus números.', 8, <<<'TXT'
+## Objetivo
+Usar os canais de contato pelo próprio One, para que tudo fique registrado sem trabalho extra.
 
-## A rotina que funciona
-1. Abra [Meu mês](/meu-mes): veja a meta e o "Para hoje".
-2. Comece pela [Agenda](/agenda): **atrasados primeiro**, depois os de hoje.
-3. Passe pela [Recompra](/recompra): clientes que já deveriam ter comprado de novo.
-4. Use o tempo livre para [Reativação](/reativacao) e para a lista filtrada da [Carteira](/carteira).
-5. No fim do dia: tudo registrado e o próximo contato agendado.
+## Ligar pela ficha
+O botão **Ligar** da ficha liga para o cliente. Com o Ligue Talk conectado, a ligação e a gravação aparecem sozinhas no Acompanhamento e na ficha. Sem a integração, registre com um clique no fim da ligação.
 
-## O que você pode e o que precisa de aprovação
-- Pode: montar pedido e orçamento, aplicar campanha, dar desconto até o seu limite.
-- Precisa de aprovação: desconto acima do limite, prazo especial, troca ou devolução.
+## WhatsApp
+**WhatsApp** na ficha abre a conversa com o número do cliente. Use as **mensagens prontas**: escolha o modelo, revise o texto e envie. Registre o resumo na aba Contato se a conversa gerou algo importante.
+
+## O discador
+Para as funções com o discador ligado (Televendas e Cobrança, no padrão; o admin escolhe em Configurações), o ícone de telefone no topo abre o discador: uma fila de ligações para fazer em sequência, com a ficha de cada cliente.
+
+## O que a gestão acompanha
+Em Acompanhamento, a gestora vê ligações, gravações, mensagens, agenda e meta de cada pessoa da equipe. Não é para vigiar: é para ajudar quem precisa e repetir o que dá certo.
+
+## Boas práticas
+- Ligue em horário comercial da loja; evite o horário de abertura e o de almoço.
+- No WhatsApp, uma mensagem curta e uma pergunta por vez.
+- Áudio só se o cliente usar áudio com você.
+
+?? O cliente só responde por WhatsApp e não atende ligações. || Registre essa preferência na ficha (aba Anotação) e use o WhatsApp com mensagens curtas e o orçamento por link. Ninguém da equipe vai insistir em ligar.
 TXT, [
-            ['Por onde começar o dia no televendas?', ['Pela Agenda, atrasados primeiro', 'Ligando para clientes aleatórios', 'Pelo Marketing', 'Pela Auditoria'], 0, 'Atrasados primeiro, depois os de hoje.'],
-            ['Desconto acima do seu limite:', ['Pode dar sem falar com ninguém', 'Precisa de aprovação', 'É proibido sempre', 'Só no catálogo'], 1, 'Acima do limite configurado, o desconto passa por aprovação.'],
+            ['Com o Ligue Talk conectado, onde aparecem as ligações?', ['Somente no celular', 'Sozinhas na ficha do cliente e no Acompanhamento', 'Em lugar nenhum', 'No Marketing'], 1, 'A integração registra ligações e gravações.'],
+            ['O cliente prefere WhatsApp. O que fazer?', ['Ligar mesmo assim todo dia', 'Registrar a preferência na ficha e usar WhatsApp', 'Parar de atender', 'Mandar para outra vendedora'], 1, 'A preferência registrada vale para toda a equipe.'],
         ]],
-        ['tv-carteira', 'setor', 'Carteira, ficha do cliente e agenda', 'Como organizar seus clientes e nunca esquecer um retorno.', 8, $carteira, $carteiraPerguntas],
-        ['tv-pedido', 'setor', 'Pedido, orçamento e campanhas', 'Do carrinho ao pedido aprovado.', 8, $pedido, $pedidoPerguntas],
-        ['tv-atendimento', 'setor', 'Abordagem, falas e objeções', 'Perguntas que vendem e respostas para as objeções comuns.', 10, $atendimento, $atendimentoPerguntas],
-        ['tv-recompra', 'setor', 'Recompra e reativação', 'Os clientes que mais rendem: quem já compra.', 6, <<<'TXT'
-## Recompra
-O One calcula o **intervalo médio** entre as compras de cada cliente. Passou do prazo, ele entra em [Recompra](/recompra). Os primeiros da lista valem mais (o quanto compram × quanto estão atrasados).
-
-> Fala: "Oi, [nome]! Como foi a saída dos produtos do último pedido? Quais estão acabando? Posso montar a reposição com base no que teve mais procura."
-
-## Reativação
-Clientes **sem comprar há muitos dias** (o número é configurado pela empresa) aparecem em [Reativação](/reativacao). Eles **continuam com você**. Ofereça a campanha do mês, pergunte o que mudou na loja e registre o motivo de não ter comprado.
-
-## Mensagens prontas
-Use as [Mensagens prontas](/mensagens) de reativação no WhatsApp: {nome} e {link_vendedor} entram sozinhos.
-
-! Quando o cliente reativado faz o pedido, o One comemora com você. 🎉
-TXT, [
-            ['Como o One sabe que um cliente está "atrasado" na recompra?', ['Pelo intervalo médio entre as compras dele', 'Pelo humor da vendedora', 'Pela cidade', 'Pelo segmento'], 0, 'Cada cliente tem o próprio ritmo de compra.'],
-            ['Cliente em Reativação continua com quem?', ['Com você, a vendedora responsável', 'Com a Diretoria', 'Com o Marketing', 'Com ninguém'], 0, 'A reativação fica com a vendedora da carteira.'],
-        ]],
-        ['tv-vizinho', 'vizinho', 'Como trabalha o Televendas', 'Para quem recebe o trabalho do televendas.', 4, <<<'TXT'
-## O que o televendas faz
-Atende os lojistas por telefone e WhatsApp: reposição, novidades, campanhas e reativação. Cada cliente tem uma vendedora responsável na Carteira.
-
-## O que o televendas precisa de você
-- **Financeiro:** aprovação rápida dos pedidos e o motivo claro quando recusar.
-- **Depósito:** prazo de despacho e o rastreio, para avisar o cliente.
-- **Marketing:** artes e materiais pedidos em Pedir ao Marketing.
-- **Produção:** previsão de produtos em falta.
-
-## Onde ver o que o televendas está fazendo
-O histórico de cada cliente está na ficha (linha do tempo). Os pedidos estão em [Pedidos](/pedidos).
-TXT, [
-            ['Onde fica o histórico de contatos do televendas com um cliente?', ['Na linha do tempo da ficha do cliente', 'No e-mail da vendedora', 'Em lugar nenhum', 'Na Auditoria apenas'], 0, 'Tudo é registrado na ficha.'],
+        ['tv-vizinho', 'vizinho', 'Como trabalha o Comercial', 'Para quem recebe o trabalho das vendedoras.', 5, $vizComercial, [
+            ['Onde fica o histórico de contatos com um cliente?', ['Na linha do tempo da ficha', 'No e-mail da vendedora', 'Na Auditoria apenas', 'Em lugar nenhum'], 0, 'Tudo é registrado na ficha.'],
+            ['Como ajudar o Comercial quando um produto vai faltar?', ['Avisar com antecedência', 'Esperar o cliente reclamar', 'Não falar nada', 'Cancelar os pedidos'], 0, 'A vendedora avisa o cliente antes do problema.'],
         ]],
     ]],
     // =====================================================================
@@ -157,56 +325,87 @@ TXT, [
      'vizinhos' => 'financeiro,deposito,marketing,televendas',
      'descricao' => 'Visitas às lojas, pedidos pelo app no celular (mesmo sem internet) e a sua carteira.',
      'modulos' => [
-        ['ex-app', 'setor', 'O app do externo, mesmo sem internet', 'Instalar, anotar pedidos offline e enviar sem duplicar.', 8, <<<'TXT'
-## Instalar no celular
-Abra o One no celular, entre em **App do externo** e escolha **"Adicionar à tela inicial"**. Ele abre como um aplicativo.
+        ['ex-app', 'setor', 'O app do externo, mesmo sem internet', 'Instalar, anotar pedidos offline e enviar sem duplicar.', 14, <<<'TXT'
+## Objetivo
+Usar o celular como o seu escritório: carteira, produtos, preços e pedidos, **mesmo sem internet**.
+
+## Instalar (uma vez)
+1. No celular, abra o One no navegador (Chrome no Android, Safari no iPhone) e entre com o seu login.
+2. Abra **App do externo** no menu.
+3. Toque em **"Adicionar à tela inicial"** (no menu do navegador). O ícone do One aparece como um aplicativo.
 
 ## Antes de sair para a rota
-Abra o app **com internet**: ele guarda a sua carteira, os produtos e os preços no celular.
+Abra o app **com internet** (Wi-Fi da empresa ou de casa) e toque em **Sincronizar**. O app guarda no celular a sua carteira, os produtos e os seus preços. Se os dados ficarem mais de {{config:app.dias_cache}} dias sem atualizar, o app avisa.
+![O app no celular: a carteira, com Novo pedido, Registrar visita, Ligar, WhatsApp e Mapa em cada cliente](assets/img/treinamento/app-externo.jpg)
 
-## Pedido sem internet
-1. Escolha o cliente e os produtos.
-2. Salve: o pedido fica **"aguardando envio"**.
-3. Quando a internet voltar, ele é **enviado sozinho** (ou ao abrir o app).
-4. Status: aguardando envio → enviado → aprovado.
+## Fazendo um pedido na loja (passo a passo)
+1. Ache o cliente (busca por nome, cidade ou CNPJ).
+2. Toque em **Novo pedido**, coloque as quantidades e confira o total e o pedido mínimo.
+3. Escolha o pagamento e salve.
+4. Sem internet, o pedido fica **"aguardando envio"**. Quando a internet voltar (ou ao abrir o app), ele vai sozinho.
+5. Acompanhe em **Pedidos**: aguardando envio → enviado → aprovado.
 
-> Cada pedido tem um código gerado no celular: mesmo que o envio aconteça duas vezes, o sistema **não duplica**.
+> Cada pedido recebe um código feito no celular. Se o envio acontecer duas vezes (sinal ruim), o sistema reconhece e **não duplica**.
 
-! Antes de sair da loja, confira com o cliente quantidades e forma de pagamento.
+## Registrar a visita
+Mesmo sem pedido, toque em **Registrar visita** e escreva o que viu e combinou. Vai para a linha do tempo da ficha.
+
+## Erros comuns
+- Sair para a rota sem sincronizar: os preços podem estar desatualizados.
+- Desinstalar o app com pedidos "aguardando envio" (eles estão só no celular!).
+- Anotar pedido no papel "para passar depois".
+
+! Pedidos "aguardando envio" ficam só no seu celular até a internet voltar. Não troque de aparelho nem limpe os dados do navegador antes de enviá-los.
+
+?? Você está numa cidade sem sinal e fez 3 pedidos. Chegando ao hotel, o Wi-Fi funciona. O que acontece? || Abra o app: os 3 pedidos são enviados sozinhos e passam para "enviado". Confira em Pedidos. Não precisa digitar de novo.
+?? O cliente diz que o preço do app está diferente do que a televendas passou semana passada. || Sincronize o app (pode haver tabela nova ou campanha encerrada) e confira na ficha a tabela do cliente. Na dúvida, registre e confirme com a gestão antes de fechar.
 TXT, [
-            ['Você anotou um pedido sem internet. O que acontece?', ['Perde o pedido', 'Fica aguardando envio e vai sozinho quando a internet voltar', 'Precisa digitar de novo no computador', 'Vai por SMS'], 1, 'O app guarda e envia quando houver conexão.'],
-            ['O pedido pode ser duplicado se o envio acontecer duas vezes?', ['Sim, sempre', 'Não: cada pedido tem um código único', 'Só às sextas', 'Depende do cliente'], 1, 'O servidor ignora o mesmo código repetido.'],
-            ['O que fazer antes de sair para a rota?', ['Nada', 'Abrir o app com internet para atualizar carteira e preços', 'Desinstalar o app', 'Mandar a carteira por e-mail'], 1, 'Assim os dados ficam guardados no celular.'],
+            ['Você fez um pedido sem internet. O que acontece?', ['Perde o pedido', 'Fica "aguardando envio" e vai sozinho quando a internet voltar', 'Precisa digitar de novo', 'Vai por SMS'], 1, 'O app guarda e envia quando houver conexão.'],
+            ['O envio pode duplicar o pedido?', ['Sim, sempre', 'Não: cada pedido tem um código único', 'Só às sextas', 'Depende do cliente'], 1, 'O servidor ignora o mesmo código repetido.'],
+            ['O que fazer antes de sair para a rota?', ['Nada', 'Sincronizar o app com internet', 'Desinstalar o app', 'Mandar a carteira por e-mail'], 1, 'Assim carteira e preços ficam atualizados no celular.'],
+            ['Por que não desinstalar o app com pedidos "aguardando envio"?', ['Porque é proibido', 'Porque esses pedidos ainda estão só no celular', 'Porque apaga a carteira da empresa', 'Não tem problema'], 1, 'Envie antes de trocar de aparelho.'],
         ]],
-        ['ex-visita', 'setor', 'A visita que vende', 'Preparar, conduzir e registrar a visita.', 7, <<<'TXT'
-## Antes da visita
-- Veja na ficha: o que o cliente mais compra, o último pedido e os títulos em aberto.
-- Planeje a rota no **Mapa** da [Carteira](/carteira).
+        ['ex-visita', 'setor', 'A visita que vende', 'Preparar a rota, conduzir a visita e registrar.', 12, <<<'TXT'
+## Objetivo
+Transformar cada visita em pedido ou, no mínimo, em informação e próximo passo.
 
-## Na loja
-- Olhe a gôndola: o que está faltando, o que está parado.
-- Pergunte o que tem saída e o que os clientes da loja procuram.
-- Mostre a **campanha do mês** e os lançamentos.
-- Feche o pedido no app ou no sistema.
+## Planejar a semana
+- Use o **Mapa** da [Carteira](/carteira) para agrupar clientes por cidade.
+![Carteira › Visão geral: o mapa mostra onde estão os clientes](assets/img/treinamento/carteira-visao.jpg)
+- Priorize: recompra atrasada, clientes grandes e quem está "Em negociação".
+- Avise o cliente antes ("passo aí quinta de manhã?"): visita marcada vende mais.
+
+## Na loja (roteiro de 15 minutos)
+1. **Gôndola:** o que está faltando? O que está parado? Como estão expostos os nossos produtos?
+2. **Conversa:** o que sai mais? O que os clientes pedem e a loja não tem?
+3. **Oferta:** reposição do que gira + 1 novidade com argumento + campanha do mês.
+4. **Material:** precisa de display, cartaz ou amostra? Peça em Pedir ao Marketing.
+5. **Fechamento:** pedido no app; confirme pagamento e entrega.
 
 ## Depois da visita
-Registre a visita na ficha e **agende o próximo contato**. Combine se a reposição vai ser pelo televendas ou na próxima visita.
+Registre (o que viu, o que combinou) e **agende o próximo contato**. Combine se a reposição será pela televendas ou na próxima visita, e escreva isso na ficha para ninguém ligar em duplicidade.
+
+?? A loja tem nossos produtos escondidos na última prateleira. || Ofereça ajuda para reorganizar (sem mexer sem permissão), sugira um display e peça o material ao Marketing. Registre na ficha com uma foto.
+?? O comprador não está; quem atende é um funcionário. || Deixe o recado e a campanha, pergunte o melhor horário do comprador, registre e agende uma ligação. Não feche pedido sem quem decide.
 TXT, [
             ['Onde planejar a rota de visitas?', ['No Mapa da Carteira', 'Na Biblioteca de produtos', 'Em Comunicados', 'No sino'], 0, 'O mapa mostra os clientes por cidade.'],
-            ['Depois da visita, o que fazer?', ['Nada', 'Registrar a visita e agendar o próximo contato', 'Apagar o cliente', 'Mandar para a Cobrança'], 1, 'Histórico e próximo passo sempre.'],
+            ['Depois da visita, sempre:', ['Nada', 'Registrar a visita e agendar o próximo contato', 'Apagar o cliente', 'Mandar para a Cobrança'], 1, 'Histórico e próximo passo.'],
+            ['A loja precisa de um display. Onde pedir?', ['Pedir ao Marketing', 'No WhatsApp pessoal', 'Na Agenda', 'Ao Depósito'], 0, 'O pedido vira tarefa do Marketing.'],
         ]],
-        ['ex-carteira', 'setor', 'Carteira, ficha do cliente e agenda', 'Como organizar seus clientes e nunca esquecer um retorno.', 8, $carteira, $carteiraPerguntas],
-        ['ex-pedido', 'setor', 'Pedido, orçamento e campanhas', 'Do carrinho ao pedido aprovado.', 8, $pedido, $pedidoPerguntas],
+        ['ex-carteira', 'setor', 'Carteira, ficha do cliente e agenda', 'Encontrar, entender e registrar: o cliente inteiro numa tela.', 18, $carteira, $carteiraPerguntas],
+        ['ex-pedido', 'setor', 'Pedido, orçamento, campanhas e descontos', 'Do carrinho ao pedido aprovado, certo na primeira vez.', 18, $pedido, $pedidoPerguntas],
+        ['ex-atendimento', 'setor', 'Abordagem, diagnóstico e objeções', 'Como conduzir a conversa e responder sem dar desconto à toa.', 15, $atendimento, $atendimentoPerguntas],
         ['ex-vizinho', 'vizinho', 'Como trabalha o Vendedor externo', 'Para quem recebe o trabalho do externo.', 4, <<<'TXT'
 ## O que o externo faz
-Visita as lojas, mostra os produtos na gôndola e anota pedidos no **app do celular**, que funciona sem internet. Os pedidos chegam com a origem "app".
+Visita as lojas, olha a gôndola, apresenta os produtos e anota pedidos no **app do celular**, que funciona sem internet. Os pedidos chegam com a origem "app".
 
 ## Como ajudar
-- **Financeiro:** pedidos do app chegam em lote quando a internet volta; confira normalmente.
-- **Depósito:** pedidos de rota costumam ter combinado de entrega; veja a observação.
-- **Televendas:** algumas lojas alternam visita e telefone; combine na ficha quem faz o próximo contato.
+- **Financeiro:** pedidos do app podem chegar em lote quando a internet volta; confira normalmente.
+- **Depósito:** pedidos de rota costumam ter combinado de entrega; leia a observação.
+- **Televendas:** algumas lojas alternam visita e telefone. Combine na ficha quem faz o próximo contato.
+- **Marketing:** displays e materiais para as lojas visitadas.
 TXT, [
-            ['Os pedidos do externo podem chegar em lote. Por quê?', ['Porque o app guarda os pedidos sem internet e envia quando a conexão volta', 'Porque o externo esquece', 'Porque o sistema trava', 'Porque são pedidos falsos'], 0, 'O app funciona offline.'],
+            ['Por que os pedidos do externo podem chegar em lote?', ['O app guarda os pedidos sem internet e envia depois', 'O externo esquece', 'O sistema trava', 'São pedidos falsos'], 0, 'O app funciona offline.'],
         ]],
     ]],
     // =====================================================================
@@ -214,51 +413,73 @@ TXT, [
      'vizinhos' => 'televendas,externo,marketing',
      'descricao' => 'Encontrar lojas novas, fazer o primeiro contato e passar o cliente pronto para a carteira.',
      'modulos' => [
-        ['pr-tela', 'setor', 'A tela de Prospecção', 'Leads para abordar, base de CNPJs e leads do site.', 7, <<<'TXT'
+        ['pr-tela', 'setor', 'A tela de Prospecção', 'Leads para abordar, base de CNPJs e leads do site.', 14, <<<'TXT'
+## Objetivo
+Encontrar as lojas certas, abordar no tempo certo e entregar para a carteira um **cliente com cadastro validado e histórico completo**.
+
 ## De onde vêm os leads
-- **Base de CNPJs:** em "Encontrar empresas", escolha estado e cidade; aparecem empresas ativas dos segmentos dos nossos clientes. As que **já estão na carteira** vêm marcadas.
-- **Site e anúncios:** formulários criam o lead sozinhos, com a campanha (UTM) de origem.
-- **Indicações e eventos:** cadastre na Carteira.
+1. **Base de CNPJs (Encontrar empresas):** escolha UF e cidade; aparecem empresas ativas com os CNAEs dos nossos clientes (produtos naturais, farmácias, suplementos). As que **já estão na carteira** vêm marcadas.
+![Encontrar empresas: as que já são clientes aparecem marcadas](assets/img/treinamento/prospeccao-empresas.jpg)
+2. **Site e anúncios:** o formulário cria o lead sozinho, com a campanha de origem (UTM). Entra na etapa "{{config:leads.etapa_inicial}}" e, conforme a configuração, já com uma tarefa "Retornar lead" para hoje.
+3. **Indicações, feiras e eventos:** cadastre em Carteira › Novo estabelecimento.
 
-## O caminho do lead
-1. Envie para o funil.
-2. Primeiro contato (ligação ou WhatsApp com mensagem pronta).
-3. Diagnóstico: o que a loja vende, quem compra, quando.
-4. Primeiro pedido → o cliente passa para uma **vendedora** da carteira.
+## A tela
+![Prospecção: aguardando primeiro contato, abordados, convertidos e de onde vêm os leads](assets/img/treinamento/prospeccao.jpg)
+- **Aguardando:** ninguém falou com eles ainda. Lead do site esfria rápido: **retorne no mesmo dia**.
+- **Abordados:** já houve contato; acompanhe no funil.
+- **Convertidos:** fizeram o primeiro pedido.
 
-> Valide o cadastro antes: CNPJ, nome fantasia, telefone e cidade certos evitam retrabalho.
+## Passo a passo do lead até a carteira
+1. **Validar o cadastro:** CNPJ ativo, nome fantasia, cidade, telefone e quem compra.
+2. **Primeiro contato** (ligação ou mensagem pronta de prospecção). A etapa vai para "{{config:carteira.etapa_apos_contato}}".
+3. **Diagnóstico:** perfil da loja, linhas que vende, volume, quem decide.
+4. **Proposta:** orçamento por link com poucos itens certeiros.
+5. **Primeiro pedido** → o cliente passa para uma **vendedora** da carteira, com tudo registrado.
+
+## Erros comuns
+- Abordar sem olhar se a loja já é cliente de outra vendedora (a busca marca!).
+- Deixar lead do site para "amanhã".
+- Passar o cliente sem registrar o diagnóstico: a vendedora começa do zero.
+
+?? Um lead do Instagram preencheu o formulário às 10h. Você só viu às 16h. || Ligue ainda hoje. Se não atender, mande a mensagem pronta e agende para amanhã cedo. Registre a origem que veio no lead (a campanha), porque ela mostra ao Marketing qual anúncio funciona.
+?? Na busca por CNPJ, a farmácia que você quer abordar já aparece marcada como cliente. || Não aborde: ela tem uma vendedora responsável. Se achar que a loja está abandonada, avise a gestão.
 TXT, [
-            ['Como saber se uma empresa da base de CNPJs já é nossa cliente?', ['Ela aparece marcada como já na carteira', 'Não tem como saber', 'Ligando para ela', 'Pela cor do logotipo'], 0, 'A busca marca quem já está na carteira.'],
-            ['Lead que fez o primeiro pedido:', ['Fica na Prospecção para sempre', 'Passa para uma vendedora da carteira', 'Vai para a Cobrança', 'É apagado'], 1, 'Convertido, ele vai para a carteira de uma vendedora.'],
+            ['Como saber se uma empresa da base de CNPJs já é cliente?', ['Ela aparece marcada', 'Não tem como', 'Ligando para ela', 'Pelo logotipo'], 0, 'A busca marca quem já está na carteira.'],
+            ['Lead do site deve ser retornado:', ['No mesmo dia', 'Em uma semana', 'Quando der', 'Só se ligar de novo'], 0, 'Lead esfria rápido.'],
+            ['Lead que fez o primeiro pedido:', ['Fica na Prospecção', 'Passa para uma vendedora da carteira', 'Vai para a Cobrança', 'É apagado'], 1, 'Convertido, ele vai para a carteira.'],
+            ['O que não pode faltar ao passar o cliente para a carteira?', ['O diagnóstico registrado na ficha', 'Um presente', 'O seu telefone pessoal', 'Nada'], 0, 'A vendedora continua de onde você parou.'],
         ]],
-        ['pr-abordagem', 'setor', 'Primeiro contato e diagnóstico', 'Como abrir a conversa com uma loja que não nos conhece.', 8, $atendimento, $atendimentoPerguntas],
-        ['pr-mensagens', 'setor', 'Mensagens prontas e WhatsApp', 'Modelos com {nome} e {link_vendedor}.', 5, <<<'TXT'
+        ['pr-abordagem', 'setor', 'Primeiro contato e diagnóstico', 'Abrir a conversa com uma loja que não nos conhece.', 15, $atendimento, $atendimentoPerguntas],
+        ['pr-mensagens', 'setor', 'Mensagens prontas e o link da vendedora', 'Modelos com {nome} e {link_vendedor} e o catálogo do cliente.', 8, <<<'TXT'
 ## Mensagens prontas
-Em [Mensagens prontas](/mensagens) há modelos de **prospecção**, **reativação** e **cobrança**. Na ficha do cliente, escolha o modelo: o One troca {nome} pelo nome do contato e {link_vendedor} pelo **seu link do catálogo**.
+Em [Mensagens prontas](/mensagens) há modelos por categoria. Na ficha do cliente, escolha o modelo: o One troca **{nome}** pelo nome da loja e **{link_vendedor}** pelo **seu link do catálogo**. Revise e envie pelo WhatsApp.
+![Mensagens prontas por categoria](assets/img/treinamento/mensagens.jpg)
 
 ## O link da vendedora
-Pedidos feitos pelo cliente no catálogo usando o **seu link** (/catalogo/v/seu-código) entram para você.
+Pedidos feitos pelo cliente no catálogo usando o seu link entram **para você**. O catálogo mostra os produtos sem preço; o preço aparece quando o cliente entra com o acesso dele (na ficha: **Gerar acesso ao catálogo**).
 
 ## Boas práticas no WhatsApp
-- Mensagem curta, com o seu nome e o da empresa.
-- Uma pergunta por mensagem.
-- Não mande lista de preços sem saber a necessidade.
+- Primeira mensagem: quem você é, de onde fala e **uma** pergunta.
+- Não mande a tabela inteira de cara.
+- Responda rápido; se não puder, avise quando vai responder.
 - Cliente pediu para parar? Registre e respeite.
+
+?? A loja pede o catálogo com preços pelo WhatsApp. || Gere o acesso ao catálogo na ficha e mande o seu link: ela vê os preços da tabela dela e pode pedir sozinha. Os pedidos entram para você.
 TXT, [
-            ['O que é {link_vendedor} numa mensagem pronta?', ['O link do catálogo da vendedora: pedidos por ele entram para ela', 'O WhatsApp da empresa', 'O site da Anvisa', 'Um erro'], 0, 'Pedidos pelo link da vendedora vão para ela.'],
+            ['O que é {link_vendedor}?', ['O link do catálogo da vendedora: pedidos por ele entram para ela', 'O WhatsApp da empresa', 'Um erro', 'O site da Anvisa'], 0, 'Pedidos pelo seu link são seus.'],
+            ['Como a loja passa a ver preços no catálogo?', ['Ela vê sem login', 'Com o acesso gerado na ficha (CNPJ e senha ou código)', 'Pelo Instagram', 'Nunca vê'], 1, 'Preço só aparece com login do cliente.'],
         ]],
         ['pr-vizinho', 'vizinho', 'Como trabalha a Prospecção', 'Para quem recebe os clientes novos.', 4, <<<'TXT'
 ## O que a Prospecção faz
 Encontra lojas novas (base de CNPJs, site, anúncios), faz o primeiro contato e o diagnóstico. Quando o lead faz o primeiro pedido, ele **passa para uma vendedora** da carteira.
 
 ## O que chega para você
-- Cliente novo com cadastro validado e o histórico do primeiro contato na ficha.
-- Leia a linha do tempo antes de ligar: o cliente não precisa repetir o que já contou.
+Cliente novo com cadastro validado e o diagnóstico na ficha. **Leia a linha do tempo antes de ligar**: o cliente não precisa repetir o que já contou.
 
 ## Marketing e Prospecção
 Os leads dos anúncios chegam com a campanha de origem; o Marketing acompanha quantos viraram clientes em Leads do site.
 TXT, [
-            ['Recebeu um cliente novo da Prospecção. O que fazer antes de ligar?', ['Ler a linha do tempo da ficha', 'Pedir o CNPJ de novo', 'Mandar a tabela inteira', 'Nada'], 0, 'O histórico do primeiro contato está na ficha.'],
+            ['Recebeu um cliente da Prospecção. Antes de ligar:', ['Ler a linha do tempo da ficha', 'Pedir o CNPJ de novo', 'Mandar a tabela inteira', 'Nada'], 0, 'O histórico do primeiro contato está na ficha.'],
         ]],
     ]],
     // =====================================================================
@@ -266,182 +487,73 @@ TXT, [
      'vizinhos' => 'producao,qualidade,tecnica,financeiro,deposito',
      'descricao' => 'Clientes que fabricam com a marca deles: produtos por cliente, pedidos e rótulos.',
      'modulos' => [
-        ['te-area', 'setor', 'A área de Terceirização', 'Clientes, pedidos, produtos por cliente e rótulos.', 8, <<<'TXT'
+        ['te-area', 'setor', 'A área de Terceirização', 'Clientes, pedidos, produtos por cliente e rótulos.', 14, <<<'TXT'
+## Objetivo
+Atender quem fabrica **com a marca própria** sem deixar a produção parar por falta de rótulo, informação ou aprovação.
+
 ## As abas
 Em [Terceirização](/terceirizacao):
-- **Clientes:** quem produz com a gente.
-- **Pedidos:** os pedidos de produção de cada cliente (podem ser mistos, com produtos da nossa marca).
-- **Produtos por cliente:** o produto com a marca do cliente, ligado à nossa fórmula.
+![Terceirização: clientes, pedidos, produtos por cliente e rótulos](assets/img/treinamento/terceirizacao.jpg)
+- **Clientes:** quem produz com a gente, com os números de cada um.
+- **Pedidos:** os pedidos de produção (podem ser **mistos**: produtos com a marca do cliente e produtos da nossa marca no mesmo pedido).
+- **Produtos por cliente:** o produto com a marca do cliente, **ligado à nossa fórmula** (ficha técnica). O preço é o combinado com aquele cliente.
 - **Rótulos:** o estoque dos rótulos que o cliente envia.
 
-## Rótulos do cliente
-O rótulo é do cliente: **sem rótulo, não dá para produzir**. O alerta avisa quando o saldo não cobre as ordens planejadas. Avise o cliente com antecedência.
+## Rótulos: o ponto mais sensível
+O rótulo é do cliente: **sem rótulo, não há produção**. O One compara o saldo de rótulos com as ordens planejadas e **alerta** quando não vai dar.
+![Rótulos: saldo de cada produto e o alerta de falta](assets/img/treinamento/terceirizacao-rotulos.jpg)
+- Avise o cliente **assim que** o alerta aparecer (prazo de gráfica costuma ser longo).
+- Quando os rótulos chegam, a Qualidade dá entrada e o saldo sobe.
+- Na ordem de produção, os rótulos baixam junto com as matérias-primas.
 
-## Do pedido à entrega
-Pedido aprovado → ordem de produção (baixa matérias-primas e rótulos) → Qualidade → Depósito despacha.
+## Do pedido à entrega (passo a passo)
+1. Pedido do cliente (no sistema, com os produtos dele).
+2. Aprovação do Financeiro (condições do contrato).
+3. **Ordem de produção:** baixa matérias-primas e rótulos.
+4. Qualidade confere; o produto acabado entra no estoque.
+5. Depósito separa na aba Terceirização e despacha.
+
+! Confira com a sua gestão: quantidade mínima por lote, prazo padrão de produção e o que está no contrato de cada cliente.
+
+?? O cliente quer 3.000 unidades para daqui a 10 dias e o saldo de rótulos é de 1.200. || Avise na hora: com 1.200 rótulos dá para produzir 1.200. Combine a produção parcial ou a data em que os rótulos chegam. Registre na ficha e avise a Produção.
+?? Um pedido misto chegou: 500 unidades com a marca do cliente e 12 caixas de chá da nossa marca. || É normal: o sistema separa as linhas. As da marca do cliente vão para a produção (com rótulo dele); as nossas saem do estoque acabado. Confira os dois prazos com o cliente.
 TXT, [
-            ['Por que o estoque de rótulos do cliente é importante?', ['Sem rótulo do cliente não dá para produzir', 'Porque é bonito', 'Não é importante', 'Porque vai para o catálogo'], 0, 'O rótulo é do cliente: sem ele, a produção para.'],
-            ['Onde fica o produto com a marca do cliente?', ['Em Produtos por cliente', 'Na Biblioteca de produtos', 'Em Campanhas', 'No catálogo público'], 0, 'Cada produto do cliente fica ligado à nossa fórmula.'],
+            ['Sem o rótulo do cliente:', ['Produz com o nosso', 'Não há produção', 'Produz sem rótulo', 'Tanto faz'], 1, 'O rótulo é do cliente: sem ele, a produção para.'],
+            ['O produto "por cliente" está ligado a:', ['A nossa fórmula (ficha técnica)', 'O catálogo público', 'O Instagram', 'Nada'], 0, 'A ficha técnica alimenta a ordem de produção.'],
+            ['Apareceu o alerta de rótulos. Quando avisar o cliente?', ['Assim que aparecer', 'No dia da produção', 'Quando ele perguntar', 'Nunca'], 0, 'Gráfica demora; avise cedo.'],
+            ['Pedido misto é:', ['Erro do sistema', 'Produtos com a marca do cliente e da nossa marca no mesmo pedido', 'Pedido cancelado', 'Pedido de amostra'], 1, 'O sistema separa as linhas.'],
         ]],
-        ['te-projeto', 'setor', 'Novos projetos de marca própria', 'Do briefing ao primeiro lote.', 6, <<<'TXT'
-## Um projeto novo
-Produto novo de um cliente passa pelas etapas de [Produtos novos](/desenvolvimento): briefing, fórmula (Responsável Técnica), embalagem e rótulo (Marketing e Qualidade), documentos e aprovação.
+        ['te-projeto', 'setor', 'Novos projetos de marca própria', 'Do briefing ao primeiro lote.', 10, <<<'TXT'
+## O caminho de um produto novo
+Produto novo de um cliente passa pelas etapas de [Produtos novos](/desenvolvimento): briefing → fórmula (Responsável Técnica) → embalagem e rótulo (Marketing e Qualidade) → documentos → aprovação → primeiro lote.
 
-## O que combinar com o cliente
-- Fórmula e apresentação (cápsula, pó, gota...).
-- Quantidade mínima e prazo do primeiro lote.
-- Quem fornece o rótulo e a embalagem.
-- Documentos e registros que ele precisa.
+## O briefing (o que perguntar ao cliente)
+- Qual produto, para qual público e em qual apresentação (cápsula, pó, gota, chá)?
+- Tem fórmula de referência ou quer a nossa?
+- Quantidade do primeiro lote e frequência de recompra.
+- Quem faz o rótulo e a embalagem? Já tem marca registrada?
+- Precisa de algum documento ou laudo específico?
 
-! Prazo de produção depende de matéria-prima e rótulo. Confirme com a Produção antes de prometer.
+## Prazos
+O prazo depende de matéria-prima, rótulo e agenda da fábrica. **Confirme com a Produção antes de prometer.**
+
+?? O cliente quer lançar "o mesmo colágeno do concorrente". || Peça a lista de ingredientes e quantidades do produto de referência e passe para a Responsável Técnica avaliar no projeto. Nada de prometer igual antes da análise técnica.
 TXT, [
-            ['Antes de prometer prazo do primeiro lote ao cliente:', ['Confirme com a Produção', 'Prometa uma semana', 'Pergunte ao Marketing', 'Não precisa confirmar'], 0, 'O prazo depende de matéria-prima, rótulo e agenda da fábrica.'],
+            ['Antes de prometer prazo do primeiro lote:', ['Confirmar com a Produção', 'Prometer uma semana', 'Perguntar ao Marketing', 'Não precisa'], 0, 'Depende de matéria-prima, rótulo e agenda.'],
+            ['Quem avalia a fórmula de um produto novo?', ['A Responsável Técnica', 'O Depósito', 'O cliente sozinho', 'A Cobrança'], 0, 'A etapa de fórmula é da Técnica.'],
         ]],
-        ['te-carteira', 'setor', 'Carteira, ficha do cliente e agenda', 'Como organizar seus clientes e nunca esquecer um retorno.', 8, $carteira, $carteiraPerguntas],
-        ['te-vizinho', 'vizinho', 'Como trabalha a Terceirização', 'Para Produção, Qualidade, Técnica e Depósito.', 4, <<<'TXT'
+        ['te-carteira', 'setor', 'Carteira, ficha do cliente e agenda', 'Encontrar, entender e registrar: o cliente inteiro numa tela.', 18, $carteira, $carteiraPerguntas],
+        ['te-vizinho', 'vizinho', 'Como trabalha a Terceirização', 'Para Produção, Qualidade, Técnica e Depósito.', 5, <<<'TXT'
 ## O que a Terceirização faz
-Atende empresas que vendem produtos **com a marca delas**, fabricados por nós. Cuida dos pedidos, dos produtos por cliente e do estoque de rótulos que o cliente envia.
+Atende empresas que vendem produtos **com a marca delas**, fabricados por nós: pedidos, produtos por cliente (ligados à nossa fórmula) e o estoque dos rótulos que o cliente envia.
 
 ## Como isso chega em você
-- **Produção:** ordens de produção com rótulo do cliente; sem rótulo, avise a Terceirização.
-- **Qualidade e Técnica:** fórmula e documentos dos produtos do cliente.
+- **Produção:** ordens com rótulo do cliente; sem rótulo, avise a Terceirização.
+- **Qualidade:** entrada dos rótulos do cliente; conferência do lote.
+- **Técnica:** fórmulas e documentos dos produtos do cliente.
 - **Depósito:** pedidos de terceirização têm separação própria (aba Terceirização).
 TXT, [
-            ['A ordem de um produto de terceirização está sem rótulo. Quem avisar?', ['A Terceirização, que fala com o cliente', 'O Marketing', 'Ninguém', 'O Depósito'], 0, 'O rótulo vem do cliente; a Terceirização cuida disso.'],
-        ]],
-    ]],
-    // =====================================================================
-    ['chave' => 'cobranca', 'funcao' => 'cobranca', 'titulo' => 'Cobrança', 'icone' => '💳',
-     'vizinhos' => 'financeiro,televendas',
-     'descricao' => 'Recuperar títulos em atraso com respeito, registrar promessas e manter o cliente comprando.',
-     'modulos' => [
-        ['co-tela', 'setor', 'A tela de Cobrança', 'Funil, lista, promessas e títulos do ERP.', 7, <<<'TXT'
-## Como funciona
-Em [Cobrança](/cobranca) estão os clientes com **títulos em atraso**, num funil próprio. Os títulos vêm do ERP ("Ler títulos vencidos do ERP").
-
-## O dia a dia
-1. Comece pelos maiores valores e mais atrasados.
-2. Registre cada **tentativa** de contato.
-3. Cliente prometeu pagar? Registre a **promessa** com a data: ela aparece para você no dia.
-4. Arraste o cliente para a etapa certa.
-
-## Buscar contatos
-Cliente sem telefone que atenda? Use "Buscar contatos" na ficha para encontrar contatos novos.
-
-> Enquanto houver atraso, o cliente só compra com Pix ou cartão: o boleto fica bloqueado.
-TXT, [
-            ['O cliente prometeu pagar na sexta. O que fazer?', ['Registrar a promessa com a data', 'Esperar e ver', 'Apagar o título', 'Mandar para a Prospecção'], 0, 'A promessa aparece para você no dia combinado.'],
-            ['Cliente com atraso pode comprar?', ['Não, nunca', 'Sim, só com Pix ou cartão', 'Sim, com boleto', 'Só com aprovação da Diretoria'], 1, 'O boleto fica bloqueado enquanto houver atraso.'],
-        ]],
-        ['co-conversa', 'setor', 'Como cobrar sem perder o cliente', 'Falas e cuidados na conversa de cobrança.', 6, <<<'TXT'
-## O tom da conversa
-Cobrança boa **mantém o cliente comprando**. Seja direta e gentil.
-> "Oi, [nome], tudo bem? Aqui é [seu nome], da Perfeita Alquimia. Identificamos o título de [data] em aberto. Aconteceu alguma coisa? Como posso te ajudar a regularizar?"
-
-## Cuidados
-- Fale só com o responsável financeiro da loja.
-- Nunca exponha a dívida para outras pessoas.
-- Combine data e forma de pagamento e **registre a promessa**.
-- Mensagens prontas de cobrança estão em [Mensagens prontas](/mensagens).
-
-! Ameaça, constrangimento ou contato fora do horário comercial não são permitidos.
-TXT, [
-            ['Com quem falar sobre o título em atraso?', ['Com o responsável financeiro da loja', 'Com qualquer funcionário', 'Com os clientes da loja', 'Com a vendedora concorrente'], 0, 'A dívida não pode ser exposta a outras pessoas.'],
-        ]],
-        ['co-vizinho', 'vizinho', 'Como trabalha a Cobrança', 'Para vendedoras e Financeiro.', 4, <<<'TXT'
-## O que a Cobrança faz
-Recupera os títulos em atraso com um funil próprio, registra tentativas e promessas de pagamento e tenta manter o cliente ativo.
-
-## Como você participa
-- **Vendedora:** na ficha, "Enviar para a Cobrança" passa o cliente com o histórico. Combine com a Cobrança antes de oferecer prazo a quem está em atraso.
-- **Financeiro:** a baixa do pagamento no ERP tira o cliente da Cobrança.
-TXT, [
-            ['Cliente da sua carteira está em atraso. Antes de oferecer prazo:', ['Combine com a Cobrança', 'Ofereça boleto em 90 dias', 'Ignore o atraso', 'Cancele o cliente'], 0, 'A Cobrança acompanha o acordo.'],
-        ]],
-    ]],
-    // =====================================================================
-    ['chave' => 'financeiro', 'funcao' => 'financeiro', 'titulo' => 'Financeiro', 'icone' => '💰',
-     'vizinhos' => 'televendas,cobranca,deposito,qualidade',
-     'descricao' => 'Aprovação de pedidos, crédito, compras da empresa e relatórios de vendas.',
-     'modulos' => [
-        ['fi-aprovacao', 'setor', 'Aprovação de pedidos', 'Crédito, pagamento e o motivo da recusa.', 7, <<<'TXT'
-## A fila
-Em [Aprovação](/aprovacao) estão os pedidos esperando você. Para cada um:
-1. **Crédito:** limite, títulos em aberto e em atraso.
-2. **Pagamento:** com atraso, só Pix ou cartão.
-3. **Condições:** descontos acima do limite da vendedora, prazos e parcelas.
-4. **Aprove** (vai ao Omie como orçamento/etapa a aprovar) ou **recuse com o motivo**.
-
-> O motivo da recusa chega para a vendedora no sino. Seja claro: "título de 10/10 em aberto; aceitar Pix".
-TXT, [
-            ['Ao recusar um pedido, o que não pode faltar?', ['O motivo claro', 'Um emoji', 'O CNPJ do Financeiro', 'Nada'], 0, 'A vendedora precisa saber o que ajustar.'],
-            ['Para onde vai o pedido aprovado?', ['Para o Omie', 'Para o Marketing', 'Para a Prospecção', 'Para o lixo'], 0, 'Aprovado, ele segue para o ERP.'],
-        ]],
-        ['fi-compras', 'setor', 'Compras da empresa e fornecedores', 'Notas, itens, recorrência e notas do Omie.', 7, <<<'TXT'
-## Compras da empresa
-Em [Compras da empresa](/financeiro/compras) fica tudo o que a empresa compra: matéria-prima, embalagem, rótulo e uso e consumo.
-- **Lançar compra:** nota à mão; o estoque do item sobe e o último preço do fornecedor atualiza.
-- **Do Omie:** notas de entrada chegam sozinhas; item novo você liga uma vez a um item do One.
-- **Itens comprados:** recorrência, quanto dura e próxima compra prevista.
-
-## Fornecedores
-Em [Fornecedores](/financeiro/fornecedores): o que cada um fornece, preços comparados, notas e documentos (laudos, certificados) com validade.
-TXT, [
-            ['Lançou uma nota de compra à mão. O que acontece com o estoque do item?', ['Sobe sozinho', 'Não muda', 'Zera', 'Vai para o Marketing'], 0, 'O lançamento soma no estoque do item.'],
-        ]],
-        ['fi-relatorios', 'setor', 'Relatórios de vendas', 'Painel, recorrência e impressão.', 5, <<<'TXT'
-## Painel de vendas
-Em [Resultados](/painel): faturamento, pedidos, ticket médio e recorrência, por vendedor, função, região e período. Imprima em A4 ou exporte em CSV.
-
-## Recompra e inatividade
-O painel mostra clientes sem compra há 30, 60 e 90 dias e o alerta de recompra.
-TXT, [
-            ['Onde ver faturamento por vendedor e período?', ['No Painel de vendas (Resultados)', 'Na Agenda', 'No Treinamento', 'Nas Mensagens prontas'], 0, 'O painel tem os filtros de período, vendedor e região.'],
-        ]],
-        ['fi-vizinho', 'vizinho', 'Como trabalha o Financeiro', 'O que acontece com o seu pedido depois que você envia.', 4, $vizFinanceiro, [
-            ['Como ajudar o seu pedido a ser aprovado rápido?', ['Cadastro completo e forma de pagamento certa', 'Mandar várias vezes', 'Ligar para a diretoria', 'Não preencher a observação'], 0, 'Cadastro e pagamento corretos evitam recusa.'],
-            ['O pedido foi recusado. E agora?', ['Ler o motivo, ajustar com o cliente e enviar de novo', 'Desistir do cliente', 'Reclamar no grupo', 'Apagar o pedido'], 0, 'O motivo diz o que ajustar.'],
-        ]],
-    ]],
-    // =====================================================================
-    ['chave' => 'diretoria', 'funcao' => 'diretoria', 'titulo' => 'Diretoria', 'icone' => '🧭',
-     'vizinhos' => 'televendas,financeiro,producao,marketing',
-     'descricao' => 'Acompanhar a empresa pelos números e aprovar o que for pedido.',
-     'modulos' => [
-        ['di-numeros', 'setor', 'A empresa pelos números', 'Início, Resultados, metas e alertas.', 6, <<<'TXT'
-## Onde olhar
-- **Início:** faturado do mês, pedidos parados, cobrança e alertas de produção.
-- [Resultados](/painel): painel de vendas, equipe, acompanhamento e metas.
-- **Produção:** matéria-prima acabando e reabastecimento.
-- **Compras:** notas novas e gastos por categoria.
-
-## O que a Diretoria aprova
-Pedidos especiais, compras acima do limite e o que os setores pedirem. Os pedidos de aprovação chegam no sino.
-
-> A Diretoria vê quase tudo **em modo leitura** (👁): consulta sem mexer no trabalho dos setores.
-TXT, [
-            ['Por que a Diretoria vê muitas telas com o olho 👁?', ['Porque acompanha sem mexer no trabalho dos setores', 'Porque o sistema está com erro', 'Porque não tem acesso', 'Porque é proibido'], 0, 'Modo leitura: acompanha sem alterar.'],
-        ]],
-        ['di-config', 'setor', 'Regras que a Diretoria decide', 'Pedido mínimo, condições, metas e o que fica nas Configurações.', 5, <<<'TXT'
-## Toda regra comercial é configurável
-Pedido mínimo por região, dias de inatividade, condições de pagamento, descontos, etapas do funil e segmentos ficam em **Configurações**: mudar não precisa de programador.
-
-## Metas
-As metas por vendedor e por função ficam em [Metas](/metas) e alimentam o "Meu mês" de cada pessoa.
-
-## Treinamento da equipe
-Em [Treinamento da equipe](/treinamento/equipe) você acompanha quem já fez o treinamento e as notas.
-TXT, [
-            ['Mudar o pedido mínimo de uma região precisa de programador?', ['Não: fica nas Configurações', 'Sim, sempre', 'Só no fim do ano', 'Só pelo Omie'], 0, 'Regras comerciais são configuráveis.'],
-        ]],
-        ['di-vizinho', 'vizinho', 'Como trabalha a Diretoria', 'O que a Diretoria acompanha e aprova.', 3, <<<'TXT'
-## O que a Diretoria faz
-Acompanha a empresa pelos números (vendas, cobrança, produção, compras) e aprova o que os setores pedem.
-
-## Como pedir uma aprovação
-Pelo próprio fluxo do sistema (compras, pedidos especiais): o pedido chega no sino da Diretoria. Explique o motivo na observação.
-TXT, [
-            ['Como a Diretoria fica sabendo de uma aprovação pendente?', ['Pelo sino, no próprio fluxo do sistema', 'Por boato', 'Só em reunião', 'Não fica sabendo'], 0, 'Os pedidos de aprovação chegam no sino.'],
+            ['Ordem de terceirização sem rótulo. Quem avisar?', ['A Terceirização, que fala com o cliente', 'O Marketing', 'Ninguém', 'O Depósito'], 0, 'O rótulo vem do cliente.'],
         ]],
     ]],
 ];
