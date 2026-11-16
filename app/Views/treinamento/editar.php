@@ -26,7 +26,7 @@ use App\Core\Visao;
 </div>
 
 <h2 class="tr-h2" id="tutoriais">Tutoriais das telas (o passo a passo do One)</h2>
-<div class="card tabela-rolavel">
+<div class="card tabela-rolagem">
   <table class="tabela">
     <thead><tr><th>Tela</th><th>Endereço</th><th>Passos</th><th></th></tr></thead>
     <tbody>

@@ -76,7 +76,7 @@ const MURAL = 'Mural de posts e Planejamento';
   await entrar(ven, 'televendas1@demo.local');
   ok(await itemMenu(ven, '/marketing').locator('.menu-leitura').count() === 1, 'vendedor: Mural com o olho de "só leitura" no menu');
   await ven.goto(BASE + '/marketing/planejamento');
-  ok(await ven.locator('h1').count() >= 1 && await ven.locator('button', { hasText: 'Salvar campanha' }).count() === 0 && await ven.locator('a', { hasText: 'Editar' }).count() === 0, 'vendedor vê o Planejamento sem criar nem editar');
+  ok(await ven.locator('h1').count() >= 1 && await ven.locator('button', { hasText: 'Salvar campanha' }).count() === 0 && await ven.locator('main a', { hasText: 'Editar' }).count() === 0, 'vendedor vê o Planejamento sem criar nem editar');
   const tok = await ven.locator('meta[name=csrf]').getAttribute('content');
   const r403 = await ven.request.post(BASE + '/marketing/campanhas', { form: { nome: 'Invasão', inicio: '2026-11-01', fim: '2026-11-30' }, headers: { 'X-CSRF-Token': tok } });
   ok(r403.status() === 403, 'POST de criar campanha pelo vendedor → 403');

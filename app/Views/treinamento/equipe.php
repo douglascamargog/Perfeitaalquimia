@@ -12,7 +12,7 @@ use App\Core\Visao;
   <label>Setor<select name="setor" onchange="this.form.submit()"><option value="">Todos</option>
     <?php foreach ($funcoes as $f): ?><option value="<?= e($f['slug']) ?>" <?= $setor === $f['slug'] ? 'selected' : '' ?>><?= e($f['nome']) ?></option><?php endforeach; ?></select></label>
 </form>
-<div class="card tabela-rolavel">
+<div class="card tabela-rolagem">
   <table class="tabela tr-equipe" data-tr-equipe>
     <thead><tr><th>Pessoa</th><th>Setor</th><th>Módulos</th><th>Média</th><th>Telas aprendidas</th><th>Último estudo</th><th class="sem-impressao"></th></tr></thead>
     <tbody>
