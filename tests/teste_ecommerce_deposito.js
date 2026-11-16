@@ -42,6 +42,8 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
   // ---------- Fila: filtro e ordem ----------
   const eco = sql("select id from pedidos where tipo_venda='ecommerce' and expedicao='aguardando' order by id limit 1");
   sql(`update pedidos set expedicao_limite = now() - interval 15 minute where id=${eco}`);
+  // os outros pedidos do e-commerce ficam no prazo (senão, depois do horário de corte do dia, eles também estariam atrasados)
+  sql(`update pedidos set expedicao_limite = now() + interval 1 day where tipo_venda='ecommerce' and id<>${eco} and expedicao_limite < now()`);
   await d.p.goto(BASE + '/deposito');
   ok(await d.p.locator('[data-tipos] [data-tipo="ecommerce"]').count() === 1 && await d.p.locator('[data-tipos] [data-tipo="lojista"]').count() === 1
     && await d.p.locator('[data-tipos] [data-tipo="terceirizacao"]').count() === 1, 'filtro Lojistas · E-commerce · Terceirização');
