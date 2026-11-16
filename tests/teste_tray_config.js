@@ -54,7 +54,7 @@ const entrar = async (b, email) => {
     ok((await testar()).includes('Faltam dados'), 'sem consumer key/secret: "Testar conexão" diz o que falta');
     ok((await salvar({ '[data-tray-api]': 'javascript:alert(1)' })).includes('não parece certo'), 'endereço da API estranho é recusado');
     await salvar({ '[data-tray-api]': API, '[data-tray-key]': 'chave-errada-000', '[data-tray-secret]': 'segredo-certo-456' }, 'tray');
-    ok((await testar()).includes('recusou as chaves'), 'chave errada: explica em português que a Tray recusou');
+    { const m = await testar(); ok(m.includes('recusou as chaves') && m.includes('Invalid code') && !m.includes('chave-errada'), 'chave errada: explica em português que a Tray recusou, com o motivo da Tray (sem mostrar a chave)'); }
     await salvar({ '[data-tray-key]': 'chave-certa-123' }, 'tray');
     const msg = await testar();
     ok(msg.includes('Conectado à loja') && msg.includes('1'), 'chaves certas: gera o Access Token e lê os pedidos da loja');

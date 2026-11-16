@@ -207,7 +207,17 @@ class TrayClient implements EcommerceInterface
             if ($this->consumerKey === '' || $this->consumerSecret === '' || $this->code === '') {
                 throw new \RuntimeException('Faltam as chaves da Tray (⚙️ Administração › Tray).');
             }
-            $novo = $this->requisicao('POST', '/auth', [], ['consumer_key' => $this->consumerKey, 'consumer_secret' => $this->consumerSecret, 'code' => $this->code]);
+            $chaves = ['consumer_key' => $this->consumerKey, 'consumer_secret' => $this->consumerSecret, 'code' => $this->code];
+            try {
+                $novo = $this->requisicao('POST', '/auth', [], $chaves);
+            } catch (\RuntimeException $erroJson) {
+                // Algumas lojas só aceitam o formato de formulário: tenta de novo assim antes de desistir
+                try {
+                    $novo = $this->requisicao('POST', '/auth', [], $chaves, false);
+                } catch (\RuntimeException) {
+                    throw $erroJson;
+                }
+            }
         }
         if (empty($novo['access_token'])) {
             throw new \RuntimeException('A Tray não devolveu a chave de acesso. Confira consumer key, secret e code (o code pode ter expirado: gere outro no painel da loja).');
@@ -231,7 +241,7 @@ class TrayClient implements EcommerceInterface
         }
     }
 
-    private function requisicao(string $metodo, string $caminho, array $query, array $corpo = []): array
+    private function requisicao(string $metodo, string $caminho, array $query, array $corpo = [], bool $json = true): array
     {
         if ($this->api === '') {
             throw new \RuntimeException('Falta o endereço da API da loja (⚙️ Administração › Tray).');
@@ -242,8 +252,9 @@ class TrayClient implements EcommerceInterface
             CURLOPT_HTTPHEADER => ['Accept: application/json'], CURLOPT_USERAGENT => 'One/1.0']);
         if ($metodo === 'POST') {
             // A Tray recebe o corpo em JSON (doc oficial: POST {api_address}/auth)
-            curl_setopt_array($curl, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => json_encode($corpo),
-                CURLOPT_HTTPHEADER => ['Accept: application/json', 'Content-Type: application/json']]);
+            curl_setopt_array($curl, $json
+                ? [CURLOPT_POST => true, CURLOPT_POSTFIELDS => json_encode($corpo), CURLOPT_HTTPHEADER => ['Accept: application/json', 'Content-Type: application/json']]
+                : [CURLOPT_POST => true, CURLOPT_POSTFIELDS => http_build_query($corpo)]);
         }
         $resposta = curl_exec($curl);
         $status = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -254,8 +265,12 @@ class TrayClient implements EcommerceInterface
             throw new \RuntimeException('Sem conexão com a loja Tray: ' . $erroCurl);
         }
         $dados = json_decode((string) $resposta, true);
+        // Motivo dado pela Tray (mensagem + causas), para a tela explicar o erro; nunca inclui as chaves
+        $motivo = is_array($dados) ? trim(implode(' · ', array_filter(array_merge([(string) ($dados['message'] ?? '')],
+            array_map('strval', array_filter((array) ($dados['causes'] ?? []), 'is_scalar')), isset($dados['error_code']) ? ['código ' . $dados['error_code']] : [])))) : '';
+        $motivo = $motivo !== '' ? ' (Tray: ' . mb_substr(strip_tags($motivo), 0, 200) . ')' : '';
         if ($caminho === '/auth' && ($status === 400 || $status === 401)) {
-            throw new \RuntimeException('A Tray recusou as chaves. Confira o consumer key, o consumer secret e o code em ⚙️ Administração › Tray (o code pode ter expirado: instale o aplicativo de novo na loja).');
+            throw new \RuntimeException('A Tray recusou as chaves. Confira o consumer key, o consumer secret e o code em ⚙️ Administração › Tray (o code pode ter expirado: instale o aplicativo de novo na loja).' . $motivo);
         }
         if ($status === 401) {
             throw new TrayNaoAutorizado('Chave de acesso recusada.');
@@ -266,7 +281,7 @@ class TrayClient implements EcommerceInterface
         if ($status >= 400 || !is_array($dados)) {
             // Nunca registrar o access_token: o log guarda só o caminho e o código
             error_log("Tray $metodo $caminho → HTTP $status");
-            throw new \RuntimeException('A Tray respondeu com erro (' . $status . ')' . (is_array($dados) && !empty($dados['message']) ? ': ' . $dados['message'] : '') . '.');
+            throw new \RuntimeException('A Tray respondeu com erro (HTTP ' . $status . ')' . $motivo . '.');
         }
         return $dados;
     }

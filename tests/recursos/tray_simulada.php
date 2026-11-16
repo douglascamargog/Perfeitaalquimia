@@ -5,10 +5,10 @@
 header('Content-Type: application/json');
 $caminho = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 if ($caminho === '/web_api/auth' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_POST = json_decode((string) file_get_contents('php://input'), true) ?: [];   // a Tray recebe JSON
+    $_POST = json_decode((string) file_get_contents('php://input'), true) ?: $_POST;   // JSON (ou formulário)
     if (($_POST['consumer_key'] ?? '') !== 'chave-certa-123' || ($_POST['consumer_secret'] ?? '') !== 'segredo-certo-456' || ($_POST['code'] ?? '') !== 'code-certo-789') {
         http_response_code(401);
-        echo '{"message":"Unauthorized","code":401}';
+        echo '{"message":"Unauthorized","code":401,"causes":["Invalid code"]}';
         return;
     }
     http_response_code(201);
