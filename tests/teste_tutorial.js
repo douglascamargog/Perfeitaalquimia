@@ -69,6 +69,13 @@ const esperarBalao = async (p, ms = 6000) => { try { await balao(p).waitFor({ ti
   await v.click('#one-painel [data-one-ajuda]');
   ok(await esperarBalao(v) && (await balao(v).innerText()).includes('Carteira'), 'pelo One ("O que dá pra fazer aqui?") abre o passo a passo da tela');
   ok(await v.locator('#one-painel').isHidden(), 'o painel do One fecha para a tela aparecer');
+  let semNull = true;
+  for (let i = 0; i < 8; i++) {
+    if ((await balao(v).innerText()).includes('null')) semNull = false;
+    if (!(await v.locator('[data-tut-proximo]').count())) break;
+    await v.click('[data-tut-proximo]');
+  }
+  ok(semNull, 'aberto pelo One: nenhum "null" escrito no balão');
   await v.keyboard.press('Escape');
   ok(await balao(v).count() === 0, 'Esc fecha o tutorial');
 

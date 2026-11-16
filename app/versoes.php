@@ -17,6 +17,10 @@
  */
 return [
     [
+        'versao' => '13.1', 'data' => '2026-11-16', 'titulo' => 'Ajuste no passo a passo do One',
+        'correcao' => ['O passo a passo do One aberto em "O que dá pra fazer aqui?" mostrava a palavra "null" embaixo dos botões. Não mostra mais.'],
+    ],
+    [
         'versao' => '13.0', 'data' => '2026-11-16', 'titulo' => 'Treinamento novo, feito para cada setor',
         'novo' => [
             'Treinamento refeito: cada setor tem a sua trilha (Televendas, Externo, Produção, Marketing, Depósito, Qualidade, Financeiro e todos os outros), mais a Integração para todo mundo e "Áreas com que você tem contato", que explica como trabalham os setores que conversam com o seu.',

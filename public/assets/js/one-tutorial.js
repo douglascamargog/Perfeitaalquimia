@@ -79,7 +79,7 @@ function mostrarPasso(i) {
   const ultimo = i === t.passos.length - 1;
   atual.alvo = alvoDo(passo);
   if (atual.alvo) atual.alvo.scrollIntoView({ block: 'center', behavior: 'instant' });
-  balao.replaceChildren(
+  balao.replaceChildren(...[
     el('div', { class: 'tut-topo' },
       el('img', { src: img(ultimo ? 'feliz' : i === 0 ? 'ola' : 'ideia'), alt: '', width: '40', height: '44' }),
       el('div', {}, el('strong', {}, t.titulo), el('small', {}, `Passo ${i + 1} de ${t.passos.length}`)),
@@ -94,7 +94,7 @@ function mostrarPasso(i) {
           : el('button', { type: 'button', class: 'botao pequeno', 'data-tut-aprendi': '' }, 'Aprendi tudo desta tela ✓'))
         : el('button', { type: 'button', class: 'botao pequeno', 'data-tut-proximo': '' }, 'Próximo →')),
     t.automatico && !ultimo ? el('small', { class: 'tut-nota' }, 'Enquanto você não marcar que aprendeu, eu mostro de novo quando você voltar aqui.') : null,
-  );
+  ].filter(Boolean)); // replaceChildren escreveria "null" na tela
   posicionar();
   requestAnimationFrame(posicionar); // depois de rolar a tela
   balao.querySelector('[data-tut-proximo], [data-tut-aprendi]')?.focus({ preventScroll: true });
