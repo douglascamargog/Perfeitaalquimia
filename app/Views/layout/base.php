@@ -160,9 +160,10 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
     </main>
   </div>
 </div>
-<!-- One, o ajudante: botão flutuante; as falas carregam quando a pessoa abre -->
-<button type="button" class="one-botao" data-one-abrir aria-expanded="false" aria-controls="one-painel" title="Falar com o One">
-  <img src="<?= asset('img/one/one-piscando-invertido.webp') ?>" alt="" width="40" height="44"><span class="one-botao-texto">One</span>
+<!-- One, o ajudante: botão flutuante; as falas carregam quando a pessoa abre (depois do horário de descanso, ele dorme) -->
+<?php $descansar = \App\Core\Auth::logado() && \App\Services\OneAssistente::horaDeDescansar(); ?>
+<button type="button" class="one-botao" data-one-abrir aria-expanded="false" aria-controls="one-painel" title="Falar com o One" <?= $descansar ? 'data-one-descanso="' . e('Já passou das ' . str_replace(':', 'h', (string) \App\Core\Config::get('one.hora_descanso', '17:45')) . '. Hora de descansar! Termine o que estiver fazendo e até amanhã. 😴') . '"' : '' ?>>
+  <img src="<?= asset('img/one/one-' . ($descansar ? 'dormindo' : 'piscando') . '-invertido.webp') ?>" alt="" width="40" height="44"><span class="one-botao-texto">One</span>
 </button>
 <section class="one-painel" id="one-painel" hidden aria-label="One, seu ajudante">
   <header><img src="<?= asset('img/one/one-piscando-invertido.webp') ?>" alt="" width="36" height="40"><div><strong>One</strong><small>Seu ajudante no sistema</small></div>

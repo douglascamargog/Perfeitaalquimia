@@ -12,7 +12,7 @@ Saída: public/assets/img/one/one-<reacao>-padrao.webp e one-<reacao>-invertido.
 Precisa do Pillow (pip install pillow).
 """
 from pathlib import Path
-from PIL import Image, ImageOps
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 RAIZ = Path(__file__).resolve().parent.parent
 FOLHAS = RAIZ / 'ferramentas' / 'one'
@@ -77,6 +77,33 @@ cache: dict[str, list[Image.Image]] = {}
 for reacao, (folha, sequencia) in REACOES.items():
     q = cache.setdefault(folha, quadros(folha))
     salvar(reacao, [q[n - 1] for n, _ in sequencia], [ms for _, ms in sequencia])
+
+
+def zzz(base: Image.Image, passo: int) -> Image.Image:
+    """Desenha os "Zzz" subindo em diagonal ao lado da cabeça, crescendo e sumindo (passo 0 a 7)."""
+    im = base.copy()
+    for fase in (0, 3, 6):  # três letras, cada uma num momento da subida
+        t = (passo + fase) % 9
+        if t > 7:
+            continue
+        tam = 16 + t * 4
+        x, y = LARGURA - 78 + t * 7, 150 - t * 17
+        alfa = int(235 * (1 - max(0, t - 4) / 4))
+        camada = Image.new('RGBA', im.size, (0, 0, 0, 0))
+        ImageDraw.Draw(camada).text((x, y), 'Z', font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', tam),
+                                    fill=(2, 81, 80, alfa), stroke_width=2, stroke_fill=(255, 255, 255, alfa))
+        im = Image.alpha_composite(im, camada)
+    return im
+
+
+# Dormindo (depois do horário de descanso). Com a folha ferramentas/one/dormindo.webp, usa ela;
+# sem a folha, monta uma provisória: o quadro de olhos fechados da folha "pensando" + "Zzz" subindo.
+if (FOLHAS / 'dormindo.webp').exists():
+    q = quadros('dormindo')
+    salvar('dormindo', q + [q[0]], [400] * 8 + [1500])
+else:
+    olhos_fechados = cache.setdefault('pensando', quadros('pensando'))[4]
+    salvar('dormindo', [zzz(olhos_fechados, p) for p in range(8)], [380] * 8)
 
 # Ícones (aba do navegador): o One parado, sorrindo
 icone = cache['acenando'][0]

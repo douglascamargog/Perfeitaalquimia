@@ -28,6 +28,8 @@ recriar_banco() {
   rm -f storage/omie_fake/pedidos.json
   mysql -uroot -e "DROP DATABASE IF EXISTS $BANCO; CREATE DATABASE $BANCO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
   php database/migrar.php > tests/saida/instalacao.log 2>&1
+  # o One dormindo depois das 17h45 mudaria os balões dos testes conforme a hora: desligado (teste_one_reacoes liga)
+  mysql -uroot $BANCO -e "UPDATE configuracoes SET valor = '' WHERE chave = 'one.hora_descanso'"
 }
 
 if [ $# -gt 0 ]; then LISTA="$*"; else LISTA=$(ls tests/teste_*.js | sed 's#tests/teste_##; s#\.js$##'); fi

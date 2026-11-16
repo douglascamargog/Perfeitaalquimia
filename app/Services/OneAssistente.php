@@ -19,13 +19,54 @@ use App\Models\Tarefa;
  */
 class OneAssistente
 {
-    /** Saudação conforme o horário */
+    /** Já passou do horário de descanso? (Configurações › One: one.hora_descanso, padrão 17:45) */
+    public static function horaDeDescansar(): bool
+    {
+        $limite = (string) Config::get('one.hora_descanso', '17:45');
+        return preg_match('/^\d{1,2}:\d{2}$/', $limite) === 1 && date('H:i') >= str_pad($limite, 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Saudação do Início e do painel do One. A expressão muda com o dia da pessoa, nesta ordem:
+     * aniversário (balões) → depois do horário de descanso (dormindo) → retornos atrasados (preocupado) →
+     * meta batida (pulando) → manhã (acenando) → tarde (sorrindo).
+     * Devolve humor, periodo ("Bom dia"), frase (para o Início) e texto (saudação completa, para o painel).
+     */
     public static function saudacao(): array
     {
         $hora = (int) date('G');
         $periodo = $hora < 12 ? 'Bom dia' : ($hora < 18 ? 'Boa tarde' : 'Boa noite');
-        $nome = EquipeService::comoChamar(Auth::usuario()); // o apelido da própria pessoa
-        return ['humor' => 'ola', 'texto' => "$periodo, $nome! Eu sou o One. Separei o que merece sua atenção hoje."];
+        $usuario = Auth::usuario();
+        $id = (int) ($usuario['id'] ?? 0);
+        $nome = EquipeService::comoChamar($usuario); // o apelido da própria pessoa
+        [$humor, $frase] = ['ola', 'Eu sou o One, seu ajudante. Separei abaixo o que merece sua atenção hoje.'];
+
+        $aniversario = !empty($usuario['data_nascimento']) && substr((string) $usuario['data_nascimento'], 5) === date('m-d');
+        if ($aniversario) {
+            [$humor, $frase] = ['festa', 'Feliz aniversário! 🎉 A equipe toda torce por você hoje. Separei abaixo o que merece sua atenção.'];
+        } elseif (self::horaDeDescansar()) {
+            [$humor, $frase] = ['dormindo', 'Já passou das ' . str_replace(':', 'h', (string) Config::get('one.hora_descanso', '17:45')) . ': hora de descansar! Termine o que estiver fazendo e até amanhã. 😴'];
+        } else {
+            $agenda = $id ? Tarefa::agenda($id) : ['atrasadas' => []];
+            $atrasadas = count($agenda['atrasadas'] ?? []);
+            $metaBatida = false;
+            if ($id && Auth::pode('meu_mes.usar')) {
+                try {
+                    $m = MetaService::indicadores($id, date('Y-m'));
+                    $metaBatida = $m['config']['meta'] > 0 && !empty($m['atingida']);
+                } catch (\Throwable) {
+                    $metaBatida = false;
+                }
+            }
+            if ($atrasadas) {
+                [$humor, $frase] = ['ops', "Você tem $atrasadas retorno(s) atrasado(s). Bora começar por eles? Separei o resto abaixo."];
+            } elseif ($metaBatida) {
+                [$humor, $frase] = ['feliz', 'Meta do mês batida! 🎉 Que orgulho. Separei abaixo o que merece sua atenção hoje.'];
+            } elseif ($hora >= 12) {
+                $humor = 'piscando';
+            }
+        }
+        return ['humor' => $humor, 'periodo' => $periodo, 'frase' => $frase, 'texto' => "$periodo, $nome! " . ($humor === 'ola' ? 'Eu sou o One. Separei o que merece sua atenção hoje.' : $frase)];
     }
 
     /**

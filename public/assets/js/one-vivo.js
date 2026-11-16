@@ -159,6 +159,12 @@ window.One = { dizer: (humor, texto) => mostrar(humor, [el('p', {}, texto)]), tu
       setTimeout(tentar, festejou ? 3500 : 700);
       return;
     }
+    // Depois do horário de descanso: o One (dormindo) avisa uma vez por dia que é hora de descansar
+    const chaveDescanso = 'one-descanso:' + new Date().toISOString().slice(0, 10);
+    if (botao.dataset.oneDescanso && !lido(chaveDescanso) && !festejou) {
+      setTimeout(() => { mostrar('dormindo', [el('p', {}, botao.dataset.oneDescanso)]); guardar(chaveDescanso, 'visto'); }, 1200);
+      return;
+    }
     if (d.balao) {
       botao.classList.add('tem-dica'); // pontinho: o One tem algo para falar
       botao.dataset.dica = d.balao.texto;

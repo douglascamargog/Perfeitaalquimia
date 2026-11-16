@@ -17,6 +17,14 @@
  */
 return [
     [
+        'versao' => '13.6', 'data' => '2026-11-16', 'titulo' => 'Hora de descansar',
+        'novo' => [
+            'Depois das 17h45 o One dorme e avisa que é hora de descansar.',
+            'O "bom dia" do Início muda com o seu dia: no seu aniversário o One aparece com balões; com retornos atrasados, preocupado; com a meta batida, pulando de alegria.',
+        ],
+        'admin' => 'O horário de descanso fica em Configurações › One (IA) › "Hora de descansar" (vazio desliga).',
+    ],
+    [
         'versao' => '13.5', 'data' => '2026-11-16', 'titulo' => 'Mais reações do One',
         'novo' => [
             'O One pula de alegria nas suas conquistas (pedido enviado, meta batida, agenda zerada) e traz balões e chapeuzinho nos aniversários e quando a equipe bate a meta.',

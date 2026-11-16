@@ -54,8 +54,8 @@ $atalhos = $principal && isset($atalhosFoco[$principal])
   <section class="b-card b-hero span-6" aria-label="Saudação">
     <div class="b-hero-texto">
       <span class="b-etiqueta"><?= e(ucfirst($p['data_extenso'])) ?></span>
-      <h1><?= e(explode(',', explode('!', $saudacao['texto'])[0])[0]) ?>,<br><span><?= e($primeiroNome) ?></span></h1>
-      <p>Eu sou o One, seu ajudante. Separei abaixo o que merece sua atenção hoje.</p>
+      <h1><?= e($saudacao['periodo']) ?>,<br><span><?= e($primeiroNome) ?></span></h1>
+      <p data-saudacao-frase><?= e($saudacao['frase']) ?></p>
       <div class="b-atalhos">
         <?php foreach (array_slice($atalhos, 0, 3) as $i => [$rotulo, $link, $icone]): ?>
           <a class="<?= $i === 0 ? 'b-atalho-forte' : '' ?>" href="<?= url($link) ?>"><svg class="icone"><use href="<?= $icones ?>#<?= $icone ?>"/></svg><?= e($rotulo) ?></a>
@@ -63,7 +63,7 @@ $atalhos = $principal && isset($atalhosFoco[$principal])
         <?php if ($principal !== 'marketing'): ?><a href="<?= url('/marketing/pedir') ?>" data-pedir-marketing><svg class="icone"><use href="<?= $icones ?>#conversa"/></svg>Pedir ao Marketing</a><?php endif; ?>
       </div>
     </div>
-    <img class="b-hero-one" src="<?= asset('img/one/one-' . e($saudacao['humor']) . '-invertido.webp') ?>" alt="One, o ajudante" width="170" height="187">
+    <img class="b-hero-one" data-hero-one="<?= e($saudacao['humor']) ?>" src="<?= asset('img/one/one-' . e($saudacao['humor']) . '-invertido.webp') ?>" alt="One, o ajudante" width="170" height="187">
   </section>
 
   <!-- ===== Previsão do tempo (carregada pelo navegador) ===== -->
