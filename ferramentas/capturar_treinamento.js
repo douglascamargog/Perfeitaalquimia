@@ -57,6 +57,53 @@ const PRINTS = [
   ['ficha-produto', 'televendas1@demo.local', '/academia/produtos/magnesio', {}],
   ['ficha-produto-atendimento', 'televendas1@demo.local', '/academia/produtos/magnesio?aba=atendimento', {}],
   ['aprovacao', 'financeiro@demo.local', '/aprovacao', {}],
+  // ---------------- Fábrica ----------------
+  ['producao', 'producao@demo.local', '/producao', {}],
+  ['producao-ordens', 'producao@demo.local', '/producao/ordens', {}],
+  ['producao-ordem-nova', 'producao@demo.local', '/producao/ordens/nova', {}],
+  ['producao-ordem', 'producao@demo.local', '/producao/ordens', { abrir: 'table a[href*="/producao/ordens/"]' }],
+  ['producao-materias', 'producao@demo.local', '/producao/materias', {}],
+  ['producao-materia', 'producao@demo.local', '/producao/materias', { abrir: 'table a[href*="/producao/materias/"]' }],
+  ['producao-fichas', 'tecnica@demo.local', '/producao/fichas', {}],
+  ['producao-ficha', 'tecnica@demo.local', '/producao/fichas', { abrir: 'table a[href*="/producao/fichas/"]' }],
+  ['producao-acabados', 'producao@demo.local', '/producao/acabados', {}],
+  ['producao-rotulos', 'producao@demo.local', '/producao/rotulos', {}],
+  ['produto-tecnico', 'tecnica@demo.local', '/produtos/magnesio', {}],
+  ['desenvolvimento', 'tecnica@demo.local', '/desenvolvimento', {}],
+  ['desenvolvimento-projeto', 'tecnica@demo.local', '/desenvolvimento', { abrir: 'a[href*="/desenvolvimento/"][data-projeto], [data-projeto] a[href*="/desenvolvimento/"]' }],
+  ['qualidade-compras', 'qualidade@demo.local', '/compras', {}],
+  ['qualidade-compra-nova', 'qualidade@demo.local', '/compras/novo', {}],
+  ['deposito', 'deposito@demo.local', '/deposito', {}],
+  ['deposito-separar', 'deposito@demo.local', '/deposito', { abrir: '[data-fila] a[href*="/deposito/"]' }],
+  ['deposito-recebimento', 'deposito@demo.local', '/deposito/recebimento', {}],
+  ['deposito-lotes', 'deposito@demo.local', '/deposito/lotes', {}],
+  // ---------------- Marketing ----------------
+  ['marketing-inicio', 'marketing@demo.local', '/marketing/inicio', {}],
+  ['marketing-pedir', 'televendas1@demo.local', '/marketing/pedir', {}],
+  ['marketing-mural', 'social@demo.local', '/marketing', {}],
+  ['marketing-feed', 'social@demo.local', '/marketing/feed', {}],
+  ['marketing-post-novo', 'social@demo.local', '/marketing/posts/novo', {}],
+  ['marketing-planejamento', 'marketing@demo.local', '/marketing/planejamento', {}],
+  ['ecommerce', 'ecommerce@demo.local', '/marketing/ecommerce', {}],
+  ['catalogo-admin', 'marketing@demo.local', '/produtos/catalogo', {}],
+  ['leads', 'marketing@demo.local', '/leads', {}],
+  // ---------------- Financeiro e gestão ----------------
+  ['cobranca', 'financeiro@demo.local', '/cobranca', {}],
+  ['cobranca-caso', 'financeiro@demo.local', '/cobranca', { espera: 300, acoes: async (p) => { await p.locator('[data-funil] [data-abrir-cliente]').first().click(); await p.waitForTimeout(1500); } }],
+  ['financeiro-compras', 'financeiro@demo.local', '/financeiro/compras', {}],
+  ['financeiro-fornecedores', 'financeiro@demo.local', '/financeiro/fornecedores', {}],
+  ['painel', 'gestor@demo.local', '/painel', {}],
+  ['equipe-vendas', 'gestor@demo.local', '/equipe', {}],
+  ['acompanhamento', 'gestor@demo.local', '/acompanhamento', {}],
+  ['metas', 'gestor@demo.local', '/metas', {}],
+  ['carteiras', 'gestor@demo.local', '/carteiras', {}],
+  ['inicio-diretoria', 'diretoria@demo.local', '/', {}],
+  ['configuracoes', 'admin@demo.local', '/configuracoes', {}],
+  ['usuarios', 'admin@demo.local', '/usuarios', {}],
+  ['integracao', 'admin@demo.local', '/integracao', {}],
+  ['treinamento-equipe', 'gestor@demo.local', '/treinamento/equipe', {}],
+  ['pessoas', 'televendas1@demo.local', '/pessoas', {}],
+  ['comunicados', 'admin@demo.local', '/comunicados', {}],
 ];
 
 async function cliente(p) {
@@ -89,6 +136,11 @@ async function cliente(p) {
     await p.goto(BASE + endereco.replace('{cliente}', clienteId));
     await p.addStyleTag({ content: LIMPAR });
     await p.waitForTimeout(op.espera || 600);
+    if (op.abrir) {
+      const link = p.locator(op.abrir).first();
+      if (await link.count()) { await Promise.all([p.waitForLoadState(), link.click()]); await p.addStyleTag({ content: LIMPAR }); await p.waitForTimeout(500); }
+      else console.log('   (sem item para abrir em ' + nome + ')');
+    }
     if (op.acoes) { await op.acoes(p); await p.waitForTimeout(400); }
     const arquivo = path.join(PASTA, nome + '.jpg');
     let feito = false;

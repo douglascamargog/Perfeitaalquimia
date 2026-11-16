@@ -59,13 +59,15 @@ class TreinamentoService
         return $lista;
     }
 
-    /** Funções da pessoa (slugs) — mais o perfil "financeiro", que tem trilha própria (aprovação de pedidos) */
+    /** Funções da pessoa (slugs) — mais as trilhas dos perfis Financeiro, Gestão e Administração */
     public static function funcoesDe(array $usuario): array
     {
         $slugs = array_column($usuario['funcoes'] ?? \App\Models\Usuario::funcoesDe((int) $usuario['id']), 'slug');
         $perfil = (string) Banco::valor('SELECT p.slug FROM usuarios u JOIN perfis p ON p.id = u.perfil_id WHERE u.id = ?', [(int) $usuario['id']]);
-        if ($perfil === 'financeiro' && !in_array('financeiro', $slugs, true)) {
-            $slugs[] = 'financeiro';
+        // perfis com trilha própria: Financeiro (aprovação), Gestão (gestor e gestor de setor) e Administração (admin)
+        $porPerfil = ['financeiro' => 'financeiro', 'gestor' => 'gestor', 'gestor_setor' => 'gestor', 'admin' => 'admin'][$perfil] ?? null;
+        if ($porPerfil && !in_array($porPerfil, $slugs, true)) {
+            $slugs[] = $porPerfil;
         }
         return $slugs;
     }

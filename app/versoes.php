@@ -17,6 +17,14 @@
  */
 return [
     [
+        'versao' => '13.8', 'data' => '2026-11-17', 'titulo' => 'Treinamento aprofundado para todos os setores',
+        'novo' => ['Trilhas novas: "Gestão comercial", para gestores (metas, carteiras, acompanhamento e o treinamento do time), e "Administração do One", para quem administra (pessoas e acessos, configurações, integrações e atualizações).'],
+        'melhoria' => [
+            'Produção, Responsável Técnica, Qualidade, Depósito, Marketing, Social Media, Gestor de Marketing, E-commerce, Cobrança, Financeiro e Diretoria reescritos com passo a passo, prints das telas, casos práticos e provas mais completas.',
+            'As regras aparecem com os valores de hoje também nesses setores: horários de corte do e-commerce, dias de atraso da cobrança, previsão de matéria-prima, meta de posts por semana e outros.',
+        ],
+    ],
+    [
         'versao' => '13.7', 'data' => '2026-11-16', 'titulo' => 'O One dormindo de verdade',
         'melhoria' => [
             'Depois do horário, o One acena, boceja, deita e dorme com os "Zzz".',

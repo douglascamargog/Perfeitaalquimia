@@ -38,12 +38,14 @@ TXT, [
 ## O sistema se chama One
 O One junta numa tela só o que antes ficava espalhado: clientes, pedidos, catálogo, produção, marketing e treinamento. O mascote ajudante também se chama One.
 
+![O Início: o resumo do dia, com o One, a busca, o sino e o menu](assets/img/treinamento/inicio-vendedora.jpg)
+
 ## O que você precisa saber logo no primeiro dia
 1. **Seu login é só seu.** Não empreste a senha: tudo o que é feito fica registrado com o seu nome.
 2. **Menu:** as telas ficam agrupadas por área. 🔒 = tela que não é do seu acesso; 👁 = você só consulta.
 3. **Busca rápida:** aperte **/** em qualquer tela para achar cliente, produto ou código.
 4. **Sino:** avisos de pedidos, tarefas, recados e metas.
-5. **O One:** clique no mascote no canto da tela. Ele dá dicas, responde perguntas e mostra o passo a passo de cada tela em "O que dá pra fazer aqui?".
+5. **O One:** clique no mascote (o brotinho) no canto da tela. Ele dá dicas, responde perguntas e mostra o passo a passo de cada tela em "O que dá pra fazer aqui?".
 
 ## O tutorial de cada tela
 Na primeira vez em cada tela, o One mostra o passo a passo. Ele **volta a mostrar** até você clicar em **"Aprendi tudo desta tela"**. Quando você aprender todas as telas do seu acesso, ele comemora e para de abrir sozinho.
@@ -109,6 +111,7 @@ TXT, [
 
 ## Conhecer a equipe
 Em [Pessoas](/pessoas) você vê o perfil dos colegas, deixa recados e elogios e descobre os aniversariantes. Mantenha o seu perfil atualizado: foto, status e um pouco sobre você.
+![Pessoas: os colegas, com setor, status e aniversário](assets/img/treinamento/pessoas.jpg)
 
 ## Pergunte ao One
 Abra o One e escreva a dúvida do jeito que falaria com um colega: "como faço um orçamento?", "quanto falta para a minha meta?". Ele responde com o caminho certo no sistema.

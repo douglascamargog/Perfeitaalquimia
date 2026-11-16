@@ -68,6 +68,16 @@ const blocos = (p) => p.locator('[data-tr-bloco]').evaluateAll((l) => l.map((e) 
   const bf = await blocos(fi);
   ok(bf.includes('cobranca') && bf.includes('financeiro'), 'perfil Financeiro: trilha do Financeiro + Cobrança');
 
+  // V13.8: trilhas por perfil (Gestão e Administração) e a Fábrica com prints
+  const ge = await entrar(b, 'gestor@demo.local');
+  await ge.goto(BASE + '/treinamento');
+  ok((await blocos(ge)).includes('gestor'), 'gestor tem a trilha "Gestão comercial"');
+  const ad = await entrar(b, 'admin@demo.local');
+  await ad.goto(BASE + '/treinamento');
+  ok((await blocos(ad)).includes('admin'), 'admin tem a trilha "Administração do One"');
+  await pr.goto(BASE + '/treinamento/modulo/' + sql("select id from trein_modulos where chave='pd-ordens'"));
+  ok(await pr.locator('[data-tr-conteudo] figure.tr-print').count() >= 3 && await pr.locator('.tr-caso').count() >= 2, 'Produção: ordens de produção com prints e casos práticos');
+
   // Módulo e prova (a resposta certa não vai para a tela)
   const mod = sql("select id from trein_modulos where chave='tv-pedido'");
   await tv.goto(BASE + '/treinamento/modulo/' + mod);
@@ -171,7 +181,7 @@ const blocos = (p) => p.locator('[data-tr-bloco]').evaluateAll((l) => l.map((e) 
   await cel.goto(BASE + '/treinamento/modulo/' + mod);
   ok(await cel.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'celular: módulo e prova sem rolagem para o lado');
 
-  const erros = [tv, pr, fi, g, mk, cel].flatMap((p) => p.erros);
+  const erros = [tv, pr, fi, g, mk, cel, ge, ad].flatMap((p) => p.erros);
   ok(erros.length === 0, 'sem erros de JavaScript' + (erros[0] ? ': ' + erros[0] : ''));
   await b.close();
   process.exit(falhas ? 1 : 0);
