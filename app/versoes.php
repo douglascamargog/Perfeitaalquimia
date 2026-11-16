@@ -17,6 +17,11 @@
  */
 return [
     [
+        'versao' => '13.12', 'data' => '2026-11-17', 'titulo' => 'Conectar a loja Tray com um clique',
+        'melhoria' => ['Ligar a loja virtual ao One ficou mais rápido.'],
+        'admin' => 'Administração › Tray › "Conectar à loja Tray": com o consumer key e o secret guardados, digite o endereço da loja e o One abre a autorização da própria loja (auth.php). Ao confirmar, a Tray volta com o code e o api_address e a loja fica conectada. O pedido do token agora vai em JSON, como pede a documentação oficial da Tray.',
+    ],
+    [
         'versao' => '13.11', 'data' => '2026-11-17', 'titulo' => 'Instalação na loja Tray',
         'melhoria' => ['A ligação com a loja virtual ficou mais simples de concluir.'],
         'admin' => 'Instalação do aplicativo na loja Tray: a Tray volta para a URL de retorno com o endereço da loja, o One mostra "Autorizar o One na loja" (usa o consumer key já guardado) e, depois da confirmação, recebe o code e o api_address e conecta sozinho.',

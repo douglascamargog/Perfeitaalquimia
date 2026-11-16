@@ -112,6 +112,13 @@ $icones = asset('img/icones.svg');
       </div>
       <small class="suave">As chaves ficam guardadas só no servidor, no mesmo arquivo protegido da chave da IA, e não aparecem de novo. Nunca mande as chaves por WhatsApp ou e-mail.</small>
     </form>
+    <form method="post" action="<?= url('/administracao/tray/conectar') ?>" class="adm-chave" style="margin-top:10px"><?= csrf_campo() ?>
+      <div class="adm-chave-linha">
+        <label style="flex:2;min-width:240px">Conectar à loja (depois de guardar o consumer key e o secret)<input type="text" name="loja" value="<?= e($tApi ? preg_replace('#/web_api$#', '', $tApi) : '') ?>" placeholder="https://sualoja.commercesuite.com.br" spellcheck="false" data-tray-loja></label>
+        <button class="botao pequeno" type="submit" data-tray-conectar <?= ($tKey && $tSecret) ? '' : 'disabled' ?>>Conectar à loja Tray</button>
+      </div>
+      <small class="suave">Abre a loja para você autorizar o One (entre com o login da loja, se pedir). Ao confirmar, a Tray volta para cá e a loja fica conectada.</small>
+    </form>
     <form method="post" action="<?= url('/administracao/tray/testar') ?>" style="margin-top:10px"><?= csrf_campo() ?>
       <button class="botao contorno pequeno" type="submit" data-testar-tray>Testar conexão</button>
       <span class="pequeno suave">gera o Access Token e lê o último pedido da loja</span></form>

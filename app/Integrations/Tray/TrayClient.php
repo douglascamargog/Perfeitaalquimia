@@ -8,7 +8,7 @@ namespace App\Integrations\Tray;
  *   - O aplicativo recebe da Tray "consumer key" e "consumer secret" (cadastro de parceiro/aplicativo).
  *   - A loja autoriza o aplicativo e recebe um "code" (painel da loja › Meus Aplicativos) e o "api_address"
  *     (endereço da loja + /web_api, ex.: https://www.sualoja.com.br/web_api).
- *   - POST {api_address}/auth (consumer_key, consumer_secret, code) → access_token + refresh_token + validades.
+ *   - POST {api_address}/auth (JSON: consumer_key, consumer_secret, code) → access_token (HTTP 201) + refresh_token + validades.
  *   - GET  {api_address}/auth?refresh_token=... → tokens novos quando o access_token vence.
  *   Os tokens ficam em storage/cache/tray_token_*.json (um por loja/chave; fora do git e fora da web).
  *
@@ -241,7 +241,9 @@ class TrayClient implements EcommerceInterface
         curl_setopt_array($curl, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 40, CURLOPT_CONNECTTIMEOUT => 10,
             CURLOPT_HTTPHEADER => ['Accept: application/json'], CURLOPT_USERAGENT => 'One/1.0']);
         if ($metodo === 'POST') {
-            curl_setopt_array($curl, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => http_build_query($corpo)]);
+            // A Tray recebe o corpo em JSON (doc oficial: POST {api_address}/auth)
+            curl_setopt_array($curl, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => json_encode($corpo),
+                CURLOPT_HTTPHEADER => ['Accept: application/json', 'Content-Type: application/json']]);
         }
         $resposta = curl_exec($curl);
         $status = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);

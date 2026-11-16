@@ -64,6 +64,15 @@ const entrar = async (b, email) => {
     const html = await a.content();
     ok(!html.includes('chave-certa-123') && !html.includes('segredo-certo-456') && html.includes('…-123'), 'a tela nunca mostra o consumer key nem o secret de novo');
 
+    // "Conectar à loja": leva para auth.php da loja com o consumer key e a URL de retorno
+    await a.goto(BASE + '/administracao#tray');
+    ok(await a.locator('[data-tray-conectar]').isEnabled(), 'com as chaves guardadas, o botão "Conectar à loja Tray" fica liberado');
+    const resp = await a.request.post(BASE + '/administracao/tray/conectar', { maxRedirects: 0,
+      form: { loja: 'https://loja-teste.commercesuite.com.br/admin', _csrf: await a.locator('meta[name=csrf]').getAttribute('content') } });
+    const u = new URL(resp.headers().location);
+    ok(u.origin + u.pathname === 'https://loja-teste.commercesuite.com.br/auth.php' && u.searchParams.get('response_type') === 'code' && u.searchParams.get('consumer_key') === 'chave-certa-123' && u.searchParams.get('callback').endsWith('/tray/retorno'),
+      '"Conectar à loja Tray" abre a autorização da própria loja (auth.php) com o consumer key e a URL de retorno');
+
     // Etapa "Autorizar": logo depois de instalar, a Tray manda só o endereço da loja
     await a.goto(BASE + '/tray/retorno?url=' + encodeURIComponent('https://loja-teste.commercesuite.com.br') + '&adm_user=loja&store=391250');
     const link = await a.getAttribute('[data-tray-autorizar-botao]', 'href');

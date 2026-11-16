@@ -5,12 +5,14 @@
 header('Content-Type: application/json');
 $caminho = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 if ($caminho === '/web_api/auth' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $_POST = json_decode((string) file_get_contents('php://input'), true) ?: [];   // a Tray recebe JSON
     if (($_POST['consumer_key'] ?? '') !== 'chave-certa-123' || ($_POST['consumer_secret'] ?? '') !== 'segredo-certo-456' || ($_POST['code'] ?? '') !== 'code-certo-789') {
         http_response_code(401);
         echo '{"message":"Unauthorized","code":401}';
         return;
     }
-    echo json_encode(['code' => 200, 'message' => 'Ok', 'access_token' => 'token-acesso-1', 'refresh_token' => 'token-renova-1',
+    http_response_code(201);
+    echo json_encode(['code' => 201, 'message' => 'Created tokens', 'access_token' => 'token-acesso-1', 'refresh_token' => 'token-renova-1',
         'date_expiration_access_token' => date('Y-m-d H:i:s', time() + 3 * 3600), 'date_expiration_refresh_token' => date('Y-m-d H:i:s', time() + 30 * 86400),
         'date_activated' => date('Y-m-d H:i:s'), 'api_host' => 'http://127.0.0.1:8096/web_api', 'store_id' => '391250']);
     return;

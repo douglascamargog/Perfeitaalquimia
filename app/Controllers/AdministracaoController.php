@@ -153,7 +153,7 @@ class AdministracaoController extends Controller
             \App\Core\Sessao::remover('tray_loja');
         } elseif ($code === '') {
             // 1ª etapa: logo depois de instalar, a Tray manda só o endereço da loja → falta "Autorizar"
-            $loja = self::apiTrayValida((string) ($_GET['url'] ?? $_GET['store_host'] ?? $_GET['store_url'] ?? ''));
+            $loja = self::apiTrayValida((string) ($_GET['url'] ?? $_GET['store'] ?? $_GET['store_host'] ?? $_GET['store_url'] ?? ''));
             if ($loja) {
                 \App\Core\Sessao::set('tray_loja', preg_replace('#/web_api$#', '', $loja));
             }
@@ -192,5 +192,19 @@ class AdministracaoController extends Controller
         }
         \App\Core\Sessao::aviso($erro ? 'erro' : 'sucesso', $erro ?? 'Loja Tray conectada (' . parse_url($pendente['api'], PHP_URL_HOST) . '). Confira o consumer key e o consumer secret e clique em "Testar conexão".');
         redirecionar('/administracao#tray');
+    }
+
+    /** "Conectar à loja": leva para a tela de autorização da própria loja Tray (etapa 1 do OAuth da Tray) */
+    public function conectarTray(): void
+    {
+        $loja = self::apiTrayValida((string) ($_POST['loja'] ?? ''));
+        $chave = (string) config('integracoes.tray.consumer_key', '');
+        if (!$loja || $chave === '' || (string) config('integracoes.tray.consumer_secret', '') === '') {
+            \App\Core\Sessao::aviso('erro', !$loja ? 'Digite o endereço da loja (ex.: https://sualoja.commercesuite.com.br).' : 'Guarde antes o consumer key e o consumer secret.');
+            redirecionar('/administracao#tray');
+        }
+        $loja = preg_replace('#/(web_api|admin.*|painel.*)$#', '', $loja);
+        header('Location: ' . $loja . '/auth.php?' . http_build_query(['response_type' => 'code', 'consumer_key' => $chave, 'callback' => self::urlRetornoTray()]));
+        exit;
     }
 }
