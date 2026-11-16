@@ -73,4 +73,105 @@ class AdministracaoController extends Controller
         \App\Core\Sessao::set('ligue_usuarios', $ok ? array_slice($usuarios, 0, 100) : null);
         redirecionar('/administracao#ligue-talk');
     }
+
+    // ------------------------------------------------------------------ Tray (loja virtual)
+
+    /** Endereço de retorno da instalação do aplicativo (cadastrado no painel de parceiro da Tray) */
+    public static function urlRetornoTray(): string
+    {
+        $https = ($_SERVER['HTTPS'] ?? '') === 'on' || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+        $host = preg_replace('/[^A-Za-z0-9.\-:]/', '', (string) ($_SERVER['HTTP_HOST'] ?? 'localhost'));
+        return ($https ? 'https' : 'http') . '://' . $host . url('/tray/retorno');
+    }
+
+    /** Valida o endereço da API da loja: https://.../web_api (ou http só em teste local) */
+    private static function apiTrayValida(string $api): ?string
+    {
+        $api = rtrim(trim($api), '/');
+        if ($api !== '' && !preg_match('#^https?://#i', $api)) {
+            $api = 'https://' . $api;
+        }
+        return preg_match('#^https?://[A-Za-z0-9.\-]+(:\d+)?(/[A-Za-z0-9_\-./]*)?$#', $api) ? $api : null;
+    }
+
+    /** Guardar as chaves da Tray (config/segredos.php) e escolher de onde vêm os números do e-commerce */
+    public function tray(): void
+    {
+        $gravar = fn(string $campo, string $valor) => \App\Services\ChaveIA::gravar(['integracoes', 'tray', $campo], $valor);
+        $erro = null;
+        if (!empty($_POST['remover'])) {
+            foreach (['api', 'consumer_key', 'consumer_secret', 'code'] as $c) {
+                $erro ??= $gravar($c, '');
+            }
+            \App\Core\Config::definir('ecommerce.provedor', 'fake');
+            $msg = 'Dados da Tray removidos. O e-commerce volta aos números de demonstração.';
+        } else {
+            $api = trim((string) ($_POST['api'] ?? ''));
+            if ($api !== '') {
+                $valida = self::apiTrayValida($api);
+                $erro = $valida ? $gravar('api', $valida) : 'O endereço da API não parece certo. É o endereço da loja seguido de /web_api (ex.: https://www.sualoja.com.br/web_api).';
+            }
+            foreach (['consumer_key', 'consumer_secret', 'code'] as $c) {
+                $v = trim((string) ($_POST[$c] ?? ''));
+                if (!$erro && $v !== '') {
+                    $erro = preg_match('/^[A-Za-z0-9_\-.]{8,200}$/', $v) ? $gravar($c, $v) : 'O campo "' . str_replace('_', ' ', $c) . '" tem caracteres estranhos: copie de novo, sem espaços.';
+                }
+            }
+            if (!$erro && in_array($_POST['provedor'] ?? '', ['fake', 'tray'], true)) {
+                \App\Core\Config::definir('ecommerce.provedor', $_POST['provedor']);
+            }
+            $msg = 'Tray salva. Agora clique em "Testar conexão".';
+        }
+        if (!$erro) {
+            \App\Core\Auditoria::registrar('configuracao', null, 'tray', null, ['provedor' => $_POST['provedor'] ?? null, 'chaves_trocadas' => array_values(array_filter(['consumer_key', 'consumer_secret', 'code', 'api'], fn($c) => trim((string) ($_POST[$c] ?? '')) !== ''))]);
+        }
+        \App\Core\Sessao::aviso($erro ? 'erro' : 'sucesso', $erro ?? $msg);
+        redirecionar('/administracao#tray');
+    }
+
+    /** Testar a conexão com a loja (gera o Access Token na primeira vez) */
+    public function testarTray(): void
+    {
+        $cliente = new \App\Integrations\Tray\TrayClient((string) config('integracoes.tray.api', ''), (string) config('integracoes.tray.consumer_key', ''),
+            (string) config('integracoes.tray.consumer_secret', ''), (string) config('integracoes.tray.code', ''));
+        @set_time_limit(60);
+        [$ok, $mensagem] = $cliente->testarConexao();
+        \App\Core\Sessao::aviso($ok ? 'sucesso' : 'erro', 'Tray: ' . $mensagem);
+        redirecionar('/administracao#tray');
+    }
+
+    /**
+     * Retorno da instalação: a Tray manda o navegador de quem instalou o aplicativo para cá, com o "code" e o
+     * "api_address" da loja. Só quem administra o One pode gravar; sem login, guarda na sessão e pede para entrar.
+     */
+    public function retornoTray(): void
+    {
+        $code = (string) ($_GET['code'] ?? '');
+        $api = self::apiTrayValida((string) ($_GET['api_address'] ?? ''));
+        if ($code !== '' && preg_match('/^[A-Za-z0-9_\-.]{8,200}$/', $code) && $api) {
+            \App\Core\Sessao::set('tray_instalacao', ['code' => $code, 'api' => $api]);
+        }
+        $pendente = \App\Core\Sessao::get('tray_instalacao');
+        if (!\App\Core\Auth::logado()) {
+            \App\Core\Sessao::set('voltar_para', '/tray/retorno');
+            \App\Core\Sessao::aviso('aviso', 'Entre com o login de administrador do One para concluir a ligação com a loja Tray.');
+            redirecionar('/entrar');
+        }
+        if (!\App\Core\Auth::pode('config.gerenciar')) {
+            \App\Core\Sessao::aviso('erro', 'Só quem administra o One pode ligar a loja Tray. Peça ao administrador para instalar o aplicativo.');
+            redirecionar('/');
+        }
+        if (!$pendente) {
+            \App\Core\Sessao::aviso('erro', 'A Tray não mandou o código de instalação. Instale o aplicativo de novo no painel da loja.');
+            redirecionar('/administracao#tray');
+        }
+        \App\Core\Sessao::remover('tray_instalacao');
+        $erro = \App\Services\ChaveIA::gravar(['integracoes', 'tray', 'api'], $pendente['api'])
+            ?? \App\Services\ChaveIA::gravar(['integracoes', 'tray', 'code'], $pendente['code']);
+        if (!$erro) {
+            \App\Core\Auditoria::registrar('configuracao', null, 'tray_instalada', null, ['api' => $pendente['api']]);
+        }
+        \App\Core\Sessao::aviso($erro ? 'erro' : 'sucesso', $erro ?? 'Loja Tray conectada (' . parse_url($pendente['api'], PHP_URL_HOST) . '). Confira o consumer key e o consumer secret e clique em "Testar conexão".');
+        redirecionar('/administracao#tray');
+    }
 }

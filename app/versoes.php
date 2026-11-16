@@ -17,6 +17,11 @@
  */
 return [
     [
+        'versao' => '13.10', 'data' => '2026-11-17', 'titulo' => 'Loja Tray ligada ao One',
+        'novo' => ['O painel do E-commerce pode mostrar as vendas reais da loja virtual (Tray), e os pedidos pagos da loja aparecem sozinhos no Depósito para separar.'],
+        'admin' => 'Administração › Tray: guarda o endereço da API, o consumer key, o consumer secret e o code (em config/segredos.php, nunca aparecem de novo), mostra a URL de retorno para cadastrar no painel de parceiro da Tray e tem "Testar conexão". Ao instalar o aplicativo na loja, a Tray devolve o code e o endereço da API sozinhos para o One (precisa estar logado como administrador). "Números do E-commerce" escolhe entre a loja e a demonstração.',
+    ],
+    [
         'versao' => '13.9', 'data' => '2026-11-17', 'titulo' => 'Modo escuro',
         'novo' => [
             'Modo escuro: clique no botão 🌙 no alto da tela e o One fica escuro na hora (clique no ☀️ para voltar). Fica guardado no seu login.',

@@ -30,7 +30,7 @@ class TrayClient implements EcommerceInterface
         if ($this->api !== '' && !preg_match('#^https?://#i', $this->api)) {
             $this->api = 'https://' . $this->api;
         }
-        // Um arquivo por loja + chave: trocar as chaves no config.php gera um token novo (não reaproveita o antigo)
+        // Um arquivo por loja + chave: trocar as chaves (Administração › Tray) gera um token novo (não reaproveita o antigo)
         $this->arquivoToken = RAIZ . '/storage/cache/tray_token_' . substr(sha1($this->api . '|' . $this->consumerKey . '|' . $this->code), 0, 12) . '.json';
     }
 
@@ -155,7 +155,7 @@ class TrayClient implements EcommerceInterface
     public function testarConexao(): array
     {
         if ($this->api === '' || $this->consumerKey === '' || $this->consumerSecret === '' || $this->code === '') {
-            return [false, 'Faltam dados da Tray no config.php (api, consumer_key, consumer_secret, code).'];
+            return [false, 'Faltam dados da Tray: confira em ⚙️ Administração › Tray o endereço da API, o consumer key, o consumer secret e o code de instalação.'];
         }
         try {
             $r = $this->get('/orders', ['limit' => 1, 'page' => 1]);
@@ -205,7 +205,7 @@ class TrayClient implements EcommerceInterface
             $novo = $this->requisicao('GET', '/auth', ['refresh_token' => $t['refresh_token']]);
         } else {
             if ($this->consumerKey === '' || $this->consumerSecret === '' || $this->code === '') {
-                throw new \RuntimeException('Faltam as chaves da Tray no config.php.');
+                throw new \RuntimeException('Faltam as chaves da Tray (⚙️ Administração › Tray).');
             }
             $novo = $this->requisicao('POST', '/auth', [], ['consumer_key' => $this->consumerKey, 'consumer_secret' => $this->consumerSecret, 'code' => $this->code]);
         }
@@ -234,7 +234,7 @@ class TrayClient implements EcommerceInterface
     private function requisicao(string $metodo, string $caminho, array $query, array $corpo = []): array
     {
         if ($this->api === '') {
-            throw new \RuntimeException('Falta o endereço da API da loja (api_address) no config.php.');
+            throw new \RuntimeException('Falta o endereço da API da loja (⚙️ Administração › Tray).');
         }
         usleep(self::PAUSA_MICROSSEGUNDOS);
         $curl = curl_init($this->api . $caminho . ($query ? '?' . http_build_query($query) : ''));
@@ -253,7 +253,7 @@ class TrayClient implements EcommerceInterface
         }
         $dados = json_decode((string) $resposta, true);
         if ($caminho === '/auth' && ($status === 400 || $status === 401)) {
-            throw new \RuntimeException('A Tray recusou as chaves. Confira consumer key, consumer secret e code no config.php (o code pode ter expirado: gere outro em Meus Aplicativos, no painel da loja).');
+            throw new \RuntimeException('A Tray recusou as chaves. Confira o consumer key, o consumer secret e o code em ⚙️ Administração › Tray (o code pode ter expirado: instale o aplicativo de novo na loja).');
         }
         if ($status === 401) {
             throw new TrayNaoAutorizado('Chave de acesso recusada.');

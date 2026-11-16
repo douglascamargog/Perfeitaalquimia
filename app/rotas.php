@@ -16,7 +16,10 @@ return [
     ['POST', '/administracao/testar-ia', 'AdministracaoController@testarIa', 'config.gerenciar'],
     ['POST', '/administracao/chave-ia', 'AdministracaoController@chaveIa', 'config.gerenciar'],
     ['POST', '/administracao/ligue-talk', 'AdministracaoController@ligueTalk', 'config.gerenciar'],
-    ['POST', '/administracao/ligue-talk/testar', 'AdministracaoController@testarLigueTalk', 'config.gerenciar'], // engrenagem do topo: só as telas que a pessoa pode abrir
+    ['POST', '/administracao/ligue-talk/testar', 'AdministracaoController@testarLigueTalk', 'config.gerenciar'],
+    ['POST', '/administracao/tray',             'AdministracaoController@tray',            'config.gerenciar'],
+    ['POST', '/administracao/tray/testar',      'AdministracaoController@testarTray',      'config.gerenciar'],
+    ['GET',  '/tray/retorno',                   'AdministracaoController@retornoTray',     'publico'], // engrenagem do topo: só as telas que a pessoa pode abrir
     ['GET',  '/minha-senha',   'AuthController@formSenha',  'logado'],
     ['POST', '/minha-senha',   'AuthController@trocarSenha', 'logado'],
 

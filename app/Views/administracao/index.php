@@ -77,4 +77,43 @@ $icones = asset('img/icones.svg');
       </div>
     <?php endif; ?>
   </section>
+  <?php
+  $tApi = (string) config('integracoes.tray.api', '');
+  $tKey = (string) config('integracoes.tray.consumer_key', '');
+  $tSecret = (string) config('integracoes.tray.consumer_secret', '');
+  $tCode = (string) config('integracoes.tray.code', '');
+  $tModo = (string) \App\Core\Config::get('ecommerce.provedor', 'fake');
+  $final = fn(string $v) => $v ? '(cadastrado: …' . e(mb_substr($v, -4)) . '; para trocar, cole o novo)' : '(nenhum cadastrado)';
+  ?>
+  <section class="card adm-one" id="tray" data-tray style="margin-top:16px">
+    <h2 style="margin:0 0 6px;font-size:1rem">🛒 Tray (loja virtual) <small class="suave"><?= $tModo === 'tray' ? 'ligado à loja' . ($tApi ? ' ' . e(parse_url($tApi, PHP_URL_HOST)) : '') : 'demonstração (números de exemplo)' ?></small></h2>
+    <p class="pequeno" style="margin:0">Ligado à Tray, o painel do E-commerce mostra as vendas reais da loja e os pedidos pagos aparecem sozinhos no Depósito para separar. O consumer key e o consumer secret vêm no e-mail da Tray; o endereço da API e o code chegam sozinhos quando a loja instala o aplicativo.</p>
+    <div class="pequeno" style="margin:8px 0;padding:8px 10px;border-radius:10px;background:var(--fundo)">
+      <strong>URL de retorno (callback) do aplicativo</strong> — cadastre no painel de parceiro da Tray:<br>
+      <code data-tray-retorno style="user-select:all;word-break:break-all"><?= e(\App\Controllers\AdministracaoController::urlRetornoTray()) ?></code>
+    </div>
+    <form method="post" action="<?= url('/administracao/tray') ?>" class="adm-chave" autocomplete="off"><?= csrf_campo() ?>
+      <div class="adm-chave-linha">
+        <label style="flex:2;min-width:240px">Endereço da API da loja (api_address)<input type="text" name="api" value="<?= e($tApi) ?>" placeholder="https://www.sualoja.com.br/web_api" spellcheck="false" data-tray-api></label>
+        <label style="flex:1;min-width:180px">Code de instalação <small class="suave"><?= $final($tCode) ?></small><input type="password" name="code" autocomplete="new-password" spellcheck="false" data-tray-code></label>
+      </div>
+      <div class="adm-chave-linha">
+        <label style="flex:1;min-width:200px">Consumer key <small class="suave"><?= $final($tKey) ?></small><input type="password" name="consumer_key" autocomplete="new-password" spellcheck="false" data-tray-key></label>
+        <label style="flex:1;min-width:200px">Consumer secret <small class="suave"><?= $final($tSecret) ?></small><input type="password" name="consumer_secret" autocomplete="new-password" spellcheck="false" data-tray-secret></label>
+      </div>
+      <div class="adm-chave-linha">
+        <label>Números do E-commerce
+          <select name="provedor" data-tray-modo>
+            <option value="tray" <?= $tModo === 'tray' ? 'selected' : '' ?>>Da loja Tray (reais)</option>
+            <option value="fake" <?= $tModo !== 'tray' ? 'selected' : '' ?>>Demonstração (exemplo)</option>
+          </select></label>
+        <button class="botao pequeno" type="submit">Guardar</button>
+        <?php if ($tApi || $tKey || $tSecret || $tCode): ?><button class="botao contorno pequeno" type="submit" name="remover" value="1" data-confirmar="Remover os dados da Tray? O E-commerce volta aos números de demonstração.">Remover</button><?php endif; ?>
+      </div>
+      <small class="suave">As chaves ficam guardadas só no servidor, no mesmo arquivo protegido da chave da IA, e não aparecem de novo. Nunca mande as chaves por WhatsApp ou e-mail.</small>
+    </form>
+    <form method="post" action="<?= url('/administracao/tray/testar') ?>" style="margin-top:10px"><?= csrf_campo() ?>
+      <button class="botao contorno pequeno" type="submit" data-testar-tray>Testar conexão</button>
+      <span class="pequeno suave">gera o Access Token e lê o último pedido da loja</span></form>
+  </section>
 <?php endif; ?>
