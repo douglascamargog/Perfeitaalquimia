@@ -19,6 +19,7 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
   await p.click('[data-one-abrir]');
   ok(await p.locator('[data-one-aba="dicas"][aria-selected="true"]').count() === 1 && await p.locator('[data-one-aba-painel="perguntar"]').isHidden(), 'painel abre na aba "Para você" (dicas); a conversa fica na aba "Perguntar"');
   await p.click('[data-one-aba="perguntar"]');
+  await p.click('[data-one-especialista="geral"]'); // a vendedora abre no especialista de Vendas (V15.0); aqui o teste usa o One geral
   ok((await p.locator('.one-pergunte-nota').innerText()).includes('aulas'), 'sem IA ligada (padrão): o One avisa que responde com as aulas e os dados do sistema');
   const respostas = () => p.locator('.one-msg.one:not(.pensando)');
   const perguntar = async (t) => { const n = await respostas().count(); await p.fill('[data-one-pergunte] input', t); await p.press('[data-one-pergunte] input', 'Enter'); await p.waitForFunction((x) => document.querySelectorAll('.one-msg.one:not(.pensando)').length > x, n); return respostas().last().innerText(); };
