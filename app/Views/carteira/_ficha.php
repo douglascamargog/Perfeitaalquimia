@@ -61,7 +61,8 @@ $linkSeguro = function (?string $url): string {
         <button class="botao contorno pequeno" type="submit" title="Ligar pelo Ligue Talk"><svg class="icone"><use href="<?= $icones ?>#telefone"/></svg>Ligar</button></form>
     <?php endif; ?>
     <?php if ($whats): ?><a class="botao contorno pequeno" href="https://wa.me/55<?= e($whats) ?>" target="_blank" rel="noopener noreferrer"><svg class="icone"><use href="<?= $icones ?>#conversa"/></svg>WhatsApp</a><?php endif; ?>
-    <?php if ($enderecoMapa): ?><a class="botao contorno pequeno" href="https://www.google.com/maps/search/?api=1&query=<?= rawurlencode($enderecoMapa) ?>" target="_blank" rel="noopener noreferrer"><svg class="icone"><use href="<?= $icones ?>#externo"/></svg>Rota</a><?php endif; ?>
+    <?php if ($enderecoMapa): ?><a class="botao contorno pequeno" href="https://www.google.com/maps/search/?api=1&query=<?= rawurlencode(!empty($c['lat']) ? $c['lat'] . ',' . $c['lng'] : $enderecoMapa) ?>" target="_blank" rel="noopener noreferrer"><svg class="icone"><use href="<?= $icones ?>#externo"/></svg>Rota</a><?php endif; ?>
+    <a class="botao contorno pequeno" href="<?= url('/carteira/clientes/' . (int) $c['id'] . '/localizacao') ?>" data-ajustar-mapa title="<?= !empty($c['lat']) ? 'Ponto exato no mapa' . (($c['geo_precisao'] ?? '') === 'manual' ? ' (ajustado à mão)' : '') : 'Ponto aproximado na cidade' ?>">📍 <?= !empty($c['lat']) ? 'Local no mapa' : 'Ajustar no mapa' ?></a>
     <a class="botao contorno pequeno" href="<?= url("/carteira/clientes/$id/editar") ?>"><svg class="icone"><use href="<?= $icones ?>#editar"/></svg>Editar cadastro</a>
     <?php if (!$pagina): ?><a class="botao pequeno" href="<?= url("/carteira/clientes/$id") ?>"><svg class="icone"><use href="<?= $icones ?>#externo"/></svg>Abrir página completa</a><?php endif; ?>
   </div>

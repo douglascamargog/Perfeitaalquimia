@@ -156,6 +156,7 @@ No cPanel › Cron Jobs, cadastre (troque o caminho pelo da sua conta):
 | Todo dia às 6h | `php /home/USUARIO/public_html/cron/fila_reativacao.php` | Manda para a fila de reativação os clientes sem compra há X dias |
 | A cada 30 min | `php /home/USUARIO/public_html/cron/sincronizar_erp.php` | Preços e estoque do ERP; reenvia pedidos pendentes; traz o faturamento (NF) |
 | Todo dia às 7h | `php /home/USUARIO/public_html/cron/cobranca.php` | Lê títulos vencidos/pagos do ERP e trata promessas vencidas |
+| De hora em hora | `php /home/USUARIO/public_html/cron/geocodificar.php` | Localiza no mapa (Google Maps) as lojas da Carteira sem ponto exato ou com endereço mudado |
 | A cada 15 min | `php /home/USUARIO/public_html/cron/pedidos_ecommerce.php` | Copia os pedidos da Tray (loja + marketplaces) para o painel do E-commerce e manda os pagos com nota para o Depósito |
 
 ## Logins de demonstração

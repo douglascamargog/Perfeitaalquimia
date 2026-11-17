@@ -72,7 +72,7 @@ function iniciar(el) {
     if (contagem) {
       contagem.textContent = nivel === 'uf' ? `${total.toLocaleString('pt-BR')} estabelecimentos em ${itens.length} estados`
         : nivel === 'cidade' ? `${total.toLocaleString('pt-BR')} estabelecimentos em ${itens.length} cidades visíveis`
-        : `${itens.length.toLocaleString('pt-BR')} estabelecimentos visíveis`;
+        : `${itens.length.toLocaleString('pt-BR')} estabelecimentos visíveis · ${itens.filter((i) => Number(i.exato)).length.toLocaleString('pt-BR')} no endereço exato`;
     }
     return itens;
   }
@@ -82,10 +82,11 @@ function iniciar(el) {
     botao.type = 'button';
     if (nivel === 'ponto') {
       const [lng, lat] = posicaoAproximada(item);
-      botao.className = 'pino-loja' + (item.tipo === 'cliente' ? ' cliente' : '');
+      // Ponto aproximado (sem endereço localizado) fica mais apagado: não é a posição real da loja
+      botao.className = 'pino-loja' + (item.tipo === 'cliente' ? ' cliente' : '') + (Number(item.exato) ? '' : ' aproximado');
       botao.style.setProperty('--cor', CORES[item.segmento] || '#c9cfc9');
       botao.setAttribute('aria-label', item.nome);
-      botao.title = `${item.nome} · ${item.cidade}`;
+      botao.title = `${item.nome} · ${item.cidade}` + (Number(item.exato) ? '' : ' (posição aproximada)');
       botao.addEventListener('click', (e) => {
         e.stopPropagation();
         new maplibregl.Popup({ offset: 12, maxWidth: '320px' }).setLngLat([lng, lat]).setDOMContent(popup(item)).addTo(mapa);

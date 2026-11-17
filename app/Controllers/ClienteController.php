@@ -262,7 +262,41 @@ class ClienteController extends Controller
         $this->formulario($cliente);
     }
 
-    private function formulario(?array $cliente): void
+/** Ajustar o ponto da loja no mapa (arrastar) */
+    public function localizacao(string $id): void
+    {
+        $cliente = Cliente::buscar((int) $id);
+        if (!$cliente || !Cliente::podeVer($cliente)) {
+            Sessao::aviso('erro', 'Cliente não encontrado na sua carteira.');
+            redirecionar('/carteira/lista');
+        }
+        $cidade = Banco::um('SELECT lat, lng FROM cidades WHERE id = ?', [(int) $cliente['cidade_id']]);
+        $this->tela('carteira/localizacao', ['titulo' => 'Localização no mapa', 'c' => $cliente, 'cidade' => $cidade,
+            'estilos' => ['carteira.css', 'https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css'],
+            'scripts' => ['https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js', 'localizacao.js']]);
+    }
+
+    public function salvarLocalizacao(string $id): void
+    {
+        $cliente = Cliente::buscar((int) $id);
+        if (!$cliente || !Cliente::podeVer($cliente)) {
+            redirecionar('/carteira/lista');
+        }
+        if (!empty($_POST['automatico'])) {
+            \App\Services\LocalizacaoService::voltarAutomatico((int) $id);
+            $msg = 'Localização volta para o automático (pelo endereço).';
+        } elseif (\App\Services\LocalizacaoService::ajustar((int) $id, (float) str_replace(',', '.', (string) ($_POST['lat'] ?? '')), (float) str_replace(',', '.', (string) ($_POST['lng'] ?? '')))) {
+            $msg = 'Localização salva. O ponto da loja fica aqui no mapa.';
+        } else {
+            Sessao::aviso('erro', 'Esse ponto está fora do Brasil. Arraste o marcador até a loja.');
+            redirecionar('/carteira/clientes/' . (int) $id . '/localizacao');
+        }
+        Auditoria::registrar('cliente', (int) $id, 'localizacao', ['lat' => $cliente['lat'], 'lng' => $cliente['lng']], ['lat' => $_POST['lat'] ?? null, 'lng' => $_POST['lng'] ?? null, 'automatico' => !empty($_POST['automatico'])]);
+        Sessao::aviso('sucesso', $msg);
+        redirecionar('/carteira/clientes/' . (int) $id);
+    }
+
+        private function formulario(?array $cliente): void
     {
         $this->tela('carteira/form', [
             'titulo'     => $cliente ? 'Editar cadastro' : 'Novo estabelecimento',

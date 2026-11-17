@@ -10,7 +10,7 @@ $query = http_build_query(array_filter($filtros));
 <section class="painel-mapa">
   <div class="card painel-mapa-principal">
     <div class="mapa-moldura grande"><div class="mapa" data-mapa data-filtros="<?= e($query) ?>" aria-label="Mapa da carteira"></div><div class="mapa-carregando" data-mapa-carregando>Carregando mapa…</div></div>
-    <div class="mapa-rodape"><span data-mapa-contagem>—</span><span>Pontos sem endereço exato ficam em posição aproximada dentro da cidade.</span></div>
+    <div class="mapa-rodape"><span data-mapa-contagem>—</span><span>Pontos apagados estão em posição aproximada na cidade; abra a loja e use "📍 Ajustar no mapa" para colocar no lugar certo.</span></div>
   </div>
   <div class="card painel-mapa-lado">
     <h4>Presença</h4>

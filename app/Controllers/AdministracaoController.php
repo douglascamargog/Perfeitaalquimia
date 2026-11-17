@@ -208,4 +208,44 @@ class AdministracaoController extends Controller
         header('Location: ' . $loja . '/auth.php?' . http_build_query(['response_type' => 'code', 'consumer_key' => $chave, 'callback' => self::urlRetornoTray()]));
         exit;
     }
+
+    // ------------------------------------------------------------------ Google Maps (localização das lojas)
+
+    /** Guardar ou remover a chave do Google Maps */
+    public function googleMaps(): void
+    {
+        $chave = trim((string) ($_POST['chave'] ?? ''));
+        $erro = null;
+        if (!empty($_POST['remover'])) {
+            $erro = \App\Services\ChaveIA::gravar(['integracoes', 'google', 'maps_chave'], '');
+            $msg = 'Chave do Google Maps removida. Os pontos que já foram localizados continuam no mapa.';
+        } elseif (!preg_match('/^[A-Za-z0-9_\-]{20,100}$/', $chave)) {
+            $erro = 'A chave do Google Maps não parece certa: ela começa com "AIza" e não tem espaços.';
+        } else {
+            $erro = \App\Services\ChaveIA::gravar(['integracoes', 'google', 'maps_chave'], $chave);
+            $msg = 'Chave guardada. Clique em "Testar" e depois em "Localizar agora".';
+        }
+        if (!$erro) {
+            \App\Core\Auditoria::registrar('configuracao', null, 'google_maps', null, ['chave_trocada' => empty($_POST['remover']), 'removida' => !empty($_POST['remover'])]);
+        }
+        \App\Core\Sessao::aviso($erro ? 'erro' : 'sucesso', $erro ?? $msg);
+        redirecionar('/administracao#google-maps');
+    }
+
+    public function testarGoogleMaps(): void
+    {
+        [$ok, $mensagem] = \App\Services\LocalizacaoService::testar();
+        \App\Core\Sessao::aviso($ok ? 'sucesso' : 'erro', 'Google Maps: ' . $mensagem);
+        redirecionar('/administracao#google-maps');
+    }
+
+    /** Localiza uma leva de lojas agora (sem esperar o cron) */
+    public function localizarLojas(): void
+    {
+        @set_time_limit(300);
+        $r = \App\Services\LocalizacaoService::rodada(max(10, (int) \App\Core\Config::get('carteira.geo_por_rodada', 200)));
+        \App\Core\Sessao::aviso($r['erro'] && !$r['achadas'] ? 'erro' : 'sucesso', "Mapa: {$r['achadas']} loja(s) localizada(s) no endereço"
+            . ($r['nao_achadas'] ? ", {$r['nao_achadas']} sem endereço preciso (continuam aproximadas na cidade)" : '') . '.' . ($r['erro'] ? ' ' . $r['erro'] : ''));
+        redirecionar('/administracao#google-maps');
+    }
 }

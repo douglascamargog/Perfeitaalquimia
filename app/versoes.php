@@ -17,6 +17,16 @@
  */
 return [
     [
+        'versao' => '14.2', 'data' => '2026-11-17', 'titulo' => 'Lojas no lugar certo do mapa',
+        'novo' => ['Botão "📍 Ajustar no mapa" na ficha da loja: arraste o marcador até a porta da loja e salve.'],
+        'melhoria' => [
+            'O mapa da Carteira passa a mostrar cada loja no endereço dela (pelo Google Maps), e não mais espalhada perto do centro da cidade.',
+            'Pontos que ainda estão em posição aproximada aparecem mais apagados no mapa.',
+            'O botão "Rota" da ficha usa o ponto exato da loja.',
+        ],
+        'admin' => 'Administração › Google Maps: cole a chave da API (Google Cloud › Credenciais, com a "Geocoding API" ativada), clique em Testar e em Localizar agora. Cron de hora em hora: cron/geocodificar.php (lojas por rodada em Configurações › Carteira). Só o endereço comercial da loja vai para o Google. Endereço não achado na mesma cidade continua aproximado; endereço corrigido é localizado de novo; ponto ajustado à mão não muda sozinho.',
+    ],
+    [
         'versao' => '14.1', 'data' => '2026-11-17', 'titulo' => 'E-commerce igual à Tray e mapa novo',
         'melhoria' => [
             'Vendas por estado com o mapa de verdade do Brasil: cada estado pintado conforme as vendas, com o ranking ao lado. Clique no estado para filtrar.',

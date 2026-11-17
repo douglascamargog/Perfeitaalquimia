@@ -20,7 +20,10 @@ return [
     ['POST', '/administracao/tray',             'AdministracaoController@tray',            'config.gerenciar'],
     ['POST', '/administracao/tray/conectar',    'AdministracaoController@conectarTray',    'config.gerenciar'],
     ['POST', '/administracao/tray/testar',      'AdministracaoController@testarTray',      'config.gerenciar'],
-    ['GET',  '/tray/retorno',                   'AdministracaoController@retornoTray',     'publico'], // engrenagem do topo: só as telas que a pessoa pode abrir
+    ['GET',  '/tray/retorno',                   'AdministracaoController@retornoTray',     'publico'],
+    ['POST', '/administracao/google-maps',      'AdministracaoController@googleMaps',      'config.gerenciar'],
+    ['POST', '/administracao/google-maps/testar', 'AdministracaoController@testarGoogleMaps', 'config.gerenciar'],
+    ['POST', '/administracao/google-maps/localizar', 'AdministracaoController@localizarLojas', 'config.gerenciar'], // engrenagem do topo: só as telas que a pessoa pode abrir
     ['GET',  '/minha-senha',   'AuthController@formSenha',  'logado'],
     ['POST', '/minha-senha',   'AuthController@trocarSenha', 'logado'],
 
@@ -67,6 +70,8 @@ return [
     ['GET',  '/carteira/clientes/{id}',         'ClienteController@pagina',      'carteira.ver_propria|carteira.ver_todas'],
     ['GET',  '/carteira/clientes/{id}/ficha',   'ClienteController@ficha',       'carteira.ver_propria|carteira.ver_todas'],
     ['GET',  '/carteira/clientes/{id}/editar',  'ClienteController@editar',      'carteira.ver_propria|carteira.ver_todas'],
+    ['GET',  '/carteira/clientes/{id}/localizacao', 'ClienteController@localizacao', 'carteira.ver_propria|carteira.ver_todas'],
+    ['POST', '/carteira/clientes/{id}/localizacao', 'ClienteController@salvarLocalizacao', 'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}',         'ClienteController@atualizar',   'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/ficha',   'ClienteController@salvar',      'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/contato', 'ClienteController@contato',     'carteira.ver_propria|carteira.ver_todas'],

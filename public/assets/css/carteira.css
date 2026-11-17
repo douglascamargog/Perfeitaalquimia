@@ -144,6 +144,7 @@
   box-shadow: 0 0 0 3px rgba(255, 255, 255, .8), 0 4px 10px rgba(10, 30, 15, .23); cursor: pointer; }
 .pino-loja.cliente { width: 19px; height: 19px; border-width: 3px; box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--secundaria), 0 6px 16px #0003; }
 .pino-loja:hover, .pino-loja:focus-visible { transform: scale(1.5); z-index: 5; }
+.pino-loja.aproximado { opacity: .5; border-style: dashed; }
 .pino-grupo { appearance: none; min-width: 38px; height: 38px; padding: 0 9px; border-radius: 100px; border: 3px solid var(--secundaria); background: var(--fundo-forte); color: #fff;
   font: 800 12px/1 var(--fonte); cursor: pointer; box-shadow: 0 3px 0 var(--primaria-escura), 0 5px 18px #0003; }
 .pino-grupo.estado { min-width: 48px; height: 48px; font-size: 13px; }
@@ -316,3 +317,6 @@ details.ficha-secao[open] > summary::before { content: '▾ '; }
 .lt-pdf { font-size: .8rem; }
 .cl-tarefas li { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .cl-tarefas li form { margin: 0; flex: none; }
+
+/* Ajustar o ponto da loja no mapa (V14.2) */
+.mapa-localizacao { height: min(62vh, 520px); border-radius: 18px; overflow: hidden; border: 1px solid var(--borda); background: var(--fundo); }

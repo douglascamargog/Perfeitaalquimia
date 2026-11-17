@@ -149,6 +149,18 @@ Até ligar, o painel **Marketing › E-commerce** mostra números simulados. Par
 O One só lê os pedidos. Não grava nada na loja e não guarda nome, CPF, e-mail, telefone ou endereço de comprador (só cidade e estado).
 Pedidos aguardando pagamento e cancelados não entram no faturamento.
 
+## Mapa da Carteira com o endereço exato (Google Maps)
+
+1. No **Google Cloud** (console.cloud.google.com): crie um projeto, ative a **Geocoding API** e crie uma **chave de API**
+   (Credenciais › Criar credenciais › Chave de API). Restrinja a chave à Geocoding API. A cobrança precisa estar ativa;
+   o Google dá uma cota grátis por mês, suficiente para localizar as lojas aos poucos.
+2. No One, como admin: **⚙️ Administração › Google Maps**: cole a chave, **Guardar**, **Testar** e **Localizar agora**.
+3. Cron de hora em hora (cPanel › Cron Jobs), para localizar o resto e os endereços que mudarem:
+   ```
+   0 * * * * php /home/doug9130/public_html/one/cron/geocodificar.php
+   ```
+Loja que o Google não achar com precisão fica aproximada na cidade; dá para acertar em **📍 Ajustar no mapa**, na ficha da loja.
+
 ## 10. Trazer o trabalho da Carteira atual
 
 Na Carteira atual (`/carteira`), use **Backup JSON** para baixar o arquivo. No One: **Carteira › Importar** › envie o arquivo › confira a pré-visualização › Confirmar.

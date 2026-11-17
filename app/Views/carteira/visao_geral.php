@@ -116,7 +116,7 @@ $linkLista = fn(array $extra = []) => url('/carteira/lista') . '?' . e(http_buil
         <a class="botao contorno pequeno" href="<?= url('/carteira/mapa') . ($query ? '?' . e($query) : '') ?>">Tela cheia ↗</a>
       </div>
       <div class="mapa-moldura"><div class="mapa" data-mapa data-filtros="<?= e($query) ?>" aria-label="Mapa da carteira"></div><div class="mapa-carregando" data-mapa-carregando>Carregando mapa…</div></div>
-      <div class="mapa-rodape"><span data-mapa-contagem>—</span><span>Pontos sem endereço exato ficam em posição aproximada dentro da cidade.</span></div>
+      <div class="mapa-rodape"><span data-mapa-contagem>—</span><span>Pontos apagados estão em posição aproximada na cidade; abra a loja e use "📍 Ajustar no mapa" para colocar no lugar certo.</span></div>
     </div>
     <div class="card painel-mapa-lado">
       <h4>Principais cidades</h4>
