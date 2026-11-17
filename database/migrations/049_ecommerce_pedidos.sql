@@ -38,7 +38,6 @@ CREATE TABLE IF NOT EXISTS ecommerce_pedidos (
   cidade              VARCHAR(80)   NULL,
   uf                  CHAR(2)       NULL,
   cliente_hash        CHAR(16)      NULL,
-  cliente_novo        TINYINT(1)    NULL,
   detalhado           TINYINT(1)    NOT NULL DEFAULT 0,       -- 1 = já leu o pedido completo
   atualizado_em       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uq_eco_tray (origem, tray_id),

@@ -24,8 +24,7 @@ $bf = date('Y-m-d', strtotime('fourth thursday of november ' . date('Y') . ' +1 
 
 // ---------- E-commerce simulado (primeiro: as campanhas usam os produtos que mais vendem no site) ----------
 $r = EcommerceService::sincronizar();
-$topo = fn(string $mesRef, int $pos) => Banco::valor('SELECT p.id FROM ecommerce_produtos_mes e JOIN produtos p ON p.slug = e.produto_ref
-    WHERE e.mes = ? ORDER BY e.faturamento DESC LIMIT 1 OFFSET ' . $pos, [$mesRef]);
+$topo = fn(string $mesRef, int $pos) => EcommerceService::produtoNoTopo($mesRef, $pos);
 
 // ---------- Campanhas ----------
 $campanhas = [
@@ -82,4 +81,4 @@ for ($dia = 1, $i = 0; $dia <= (int) date('t'); $dia += ($i % 3 === 2 ? 2 : 1), 
     $total++;
 }
 
-return "Marketing (demonstração): 3 campanhas, $total posts no mês e {$r['dias']} dias de e-commerce simulado.";
+return "Marketing (demonstração): 3 campanhas, $total posts no mês e {$r['novos']} pedidos de e-commerce simulados.";

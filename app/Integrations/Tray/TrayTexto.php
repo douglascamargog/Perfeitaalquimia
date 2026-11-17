@@ -122,6 +122,14 @@ class TrayTexto
         };
     }
 
+    /** "Maria Souza Lima" → "Maria L." */
+    public static function nomeCurto(string $nome): string
+    {
+        $partes = preg_split('/\s+/u', trim($nome)) ?: [];
+        $partes = array_values(array_filter($partes));
+        return $partes ? $partes[0] . (count($partes) > 1 ? ' ' . mb_substr(end($partes), 0, 1) . '.' : '') : '';
+    }
+
     /** Data/valor seguros */
     private static function data(?string $v): ?string
     {
@@ -215,6 +223,8 @@ class TrayTexto
             // Código anônimo: só serve para saber se a pessoa já comprou antes (não dá para voltar ao cliente)
             'cliente_hash' => !empty($o['customer_id']) ? substr(hash('sha256', 'one-eco|' . $o['customer_id']), 0, 16) : null,
             'detalhado' => 1,
+            // Só para o Depósito conferir a etiqueta (primeiro nome + inicial); NÃO é gravado em ecommerce_pedidos
+            'comprador' => self::nomeCurto((string) ($endereco['recipient'] ?? '') ?: (string) ($cliente['name'] ?? '')),
             'itens' => $itens,
         ];
     }

@@ -46,7 +46,7 @@ class PainelInicio
             'recompra'     => $ve('recompra.ver', 'comercial') ? VendasService::qtdRecompra() : null,
             'rotulos'      => ($ve('terceirizacao.ver', 'terceirizacao') || $ve('terceirizacao.editar', 'terceirizacao')) ? TerceirizacaoService::alertas() : null,
             'producao'     => ($ve('producao.gerenciar', 'producao', 'diretoria') || $ve('producao.ver', 'producao', 'diretoria')) ? ProducaoService::alertas() : null,
-            'ecommerce'    => $ve('ecommerce.ver', 'marketing', 'diretoria') && Banco::valor('SELECT 1 FROM ecommerce_resumo_diario LIMIT 1') ? EcommerceService::painel(date('Y-m')) : null,
+            'ecommerce'    => $ve('ecommerce.ver', 'marketing', 'diretoria') ? EcommerceService::resumoInicio() : null,
         ];
     }
 

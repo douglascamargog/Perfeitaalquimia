@@ -17,20 +17,18 @@ use App\Integrations\Integracoes;
  */
 class EcommercePedidoService
 {
-    /** Canais: chave => [nome, cor do selo] */
-    public const CANAIS = [
-        'mercado_livre' => ['Mercado Livre', 'amarelo'],
-        'shopee'        => ['Shopee', 'laranja'],
-        'amazon'        => ['Amazon', 'azul'],
-        'loja'          => ['Loja própria', 'verde'],
-    ];
+    /** Canais: chave => [nome, cor do selo] (os mesmos do painel do E-commerce) */
+    public static function canais(): array
+    {
+        return array_map(fn($c) => [$c[0], $c[1]], \App\Integrations\Tray\TrayTexto::CANAIS);
+    }
 
     /** Tipos de pedido na separação (filtro do Depósito) */
     public const TIPOS = ['lojista' => 'Lojistas', 'ecommerce' => 'E-commerce', 'terceirizacao' => 'Terceirização'];
 
     public static function nomeCanal(?string $canal): string
     {
-        return self::CANAIS[$canal][0] ?? ($canal ? ucfirst(str_replace('_', ' ', $canal)) : 'E-commerce');
+        return $canal ? \App\Integrations\Tray\TrayTexto::nomeCanal($canal) : 'E-commerce';
     }
 
     /**
@@ -42,16 +40,22 @@ class EcommercePedidoService
         $desde = Banco::valor("SELECT MAX(criado_em) FROM pedidos WHERE tipo_venda = 'ecommerce'");
         $desde = $desde ? date('Y-m-d H:i:s', strtotime($desde . ' -3 days')) : date('Y-m-d 00:00:00', strtotime('-3 days'));
         $r = ['novos' => 0, 'na_fila' => 0, 'cancelados' => 0];
-        foreach (Integracoes::ecommerce()->pedidosParaSeparar($desde) as $t) {
+        $loja = Integracoes::ecommerce();
+        if ($loja->nome() === 'fake') {
+            $lista = $loja->pedidosParaSeparar($desde);
+        } else {
+            // Loja real: a mesma leitura do painel do E-commerce (pedidos novos/alterados, já completos)
+            $sinc = EcommerceService::sincronizar();
+            $lista = array_map([self::class, 'doPedidoDaLoja'], array_values(array_filter($sinc['detalhes'], fn($p) => $p['status_tipo'] !== 'aguardando')));
+        }
+        foreach ($lista as $t) {
             $codigo = mb_substr(trim((string) ($t['codigo'] ?? '')), 0, 40);
             if ($codigo === '' || empty($t['itens'])) {
                 continue;
             }
             $p = Banco::um('SELECT id, situacao, expedicao FROM pedidos WHERE tray_codigo = ?', [$codigo]);
             if (!empty($t['cancelado'])) {
-                if ($p && $p['situacao'] !== 'cancelado' && in_array($p['expedicao'], [null, 'aguardando'], true)) {
-                    Banco::executar("UPDATE pedidos SET situacao = 'cancelado', expedicao = NULL WHERE id = ?", [$p['id']]);
-                    PedidoService::historico((int) $p['id'], 'cancelado', 'Cancelado na Tray (marketplace): saiu da fila do Depósito.', null);
+                if ($p && self::cancelar($p)) {
                     $r['cancelados']++;
                 }
                 continue;
@@ -72,10 +76,64 @@ class EcommercePedidoService
                 $r['na_fila']++;
             }
         }
+        // Loja real: confere TODOS os pedidos que ainda estão no Depósito (um cancelamento antigo também precisa sair da fila)
+        if ($loja->nome() !== 'fake') {
+            foreach (Banco::todos("SELECT p.id, p.situacao, p.expedicao FROM pedidos p JOIN ecommerce_pedidos e ON e.tray_id = p.tray_codigo AND e.origem = 'tray'
+                WHERE p.tipo_venda = 'ecommerce' AND p.situacao <> 'cancelado' AND e.status_tipo = 'cancelado'") as $p) {
+                if (self::cancelar($p)) {
+                    $r['cancelados']++;
+                }
+            }
+        }
         if ($r['novos'] || $r['na_fila'] || $r['cancelados']) {
             Auditoria::registrar('integracao', null, 'tray_pedidos', null, $r + ['usuario' => $usuarioId]);
         }
         return $r;
+    }
+
+    /**
+     * Cancelado na Tray: sai da fila em qualquer etapa antes de despachar (com aviso ao Depósito).
+     * Já despachado: só avisa (uma vez). Devolve true quando tirou da fila.
+     */
+    private static function cancelar(array $p): bool
+    {
+        if ($p['situacao'] === 'cancelado') {
+            return false;
+        }
+        if ($p['expedicao'] === 'despachado') {
+            if (!Banco::valor("SELECT 1 FROM pedido_historico WHERE pedido_id = ? AND texto LIKE 'Cancelado na Tray depois de despachado%'", [$p['id']])) {
+                PedidoService::historico((int) $p['id'], (string) $p['situacao'], 'Cancelado na Tray depois de despachado: combinar a devolução com o comprador.', null);
+                self::avisarDeposito((int) $p['id'], 'Pedido do e-commerce cancelado depois de despachado');
+            }
+            return false;
+        }
+        $etapa = (string) $p['expedicao'];
+        Banco::executar("UPDATE pedidos SET situacao = 'cancelado', expedicao = NULL WHERE id = ?", [$p['id']]);
+        PedidoService::historico((int) $p['id'], 'cancelado', 'Cancelado na Tray: saiu da fila do Depósito'
+            . (in_array($etapa, ['separando', 'separado'], true) ? ' (já estava sendo separado: devolver os produtos à prateleira).' : '.'), null);
+        if (in_array($etapa, ['aguardando', 'separando', 'separado'], true)) {
+            self::avisarDeposito((int) $p['id'], 'Pedido do e-commerce cancelado na Tray: não separar');
+        }
+        return true;
+    }
+
+    private static function avisarDeposito(int $pedidoId, string $titulo): void
+    {
+        NotificacaoService::avisar(NotificacaoService::destinatarios('deposito.operar', 'deposito'), 'pedido_cancelado', $titulo,
+            '/deposito/' . $pedidoId, ['pedido_id' => $pedidoId]);
+    }
+
+    /** Pedido completo da loja (TrayTexto::pedido) → formato da importação do Depósito */
+    private static function doPedidoDaLoja(array $p): array
+    {
+        return [
+            'codigo' => $p['tray_id'], 'numero_marketplace' => $p['marketplace_pedido'] ?? '', 'canal' => $p['canal'],
+            'criado_em' => $p['data_hora'], 'nf' => $p['nf_numero'] ?: (!empty($p['tem_nf']) ? 'emitida' : null), 'nf_em' => $p['nf_em'] ?? null,
+            'cancelado' => $p['status_tipo'] === 'cancelado', 'comprador' => $p['comprador'] ?? '', 'cidade' => $p['cidade'] ?? '', 'uf' => $p['uf'] ?? '',
+            'total' => $p['total'],
+            'itens' => array_map(fn($i) => ['ref' => $i['produto_ref'] ?: (string) $i['ean'], 'nome' => $i['nome'] . ($i['variacao'] ? ' — ' . $i['variacao'] : ''),
+                'quantidade' => $i['quantidade'], 'preco' => $i['preco']], $p['itens'] ?? []),
+        ];
     }
 
     /**
@@ -117,7 +175,7 @@ class EcommercePedidoService
     /** Cria o pedido no One (sem fila ainda): cliente técnico do canal, itens ligados aos produtos pelo código */
     private static function criar(array $t, string $codigo): int
     {
-        $canal = array_key_exists($t['canal'] ?? '', self::CANAIS) ? $t['canal'] : 'loja';
+        $canal = array_key_exists($t['canal'] ?? '', self::canais()) ? $t['canal'] : 'loja';
         $cliente = self::clienteDoCanal($canal);
         $tabela = (int) (Banco::valor('SELECT id FROM tabelas_preco ORDER BY id LIMIT 1') ?: 1);
         $forma = (int) (Banco::valor('SELECT id FROM formas_pagamento ORDER BY id LIMIT 1') ?: 1);
@@ -139,7 +197,7 @@ class EcommercePedidoService
                 $preco = round((float) ($it['preco'] ?? 0), 2);
                 Banco::inserir('pedido_itens', array_filter([
                     'pedido_id' => $id, 'produto_id' => $produto['id'] ?? null, 'codigo' => $produto['codigo'] ?? ($ref ?: null),
-                    'nome' => mb_substr((string) ($produto['nome'] ?? ($it['nome'] ?? 'Produto')), 0, 200), 'quantidade' => $qtd,
+                    'nome' => mb_substr((string) ($produto['nome'] ?? \App\Integrations\Tray\TrayTexto::nome((string) ($it['nome'] ?? 'Produto'))), 0, 200), 'quantidade' => $qtd,
                     'preco_unitario' => $preco, 'total' => round($qtd * $preco, 2),
                 ], fn($v) => $v !== null));
             }

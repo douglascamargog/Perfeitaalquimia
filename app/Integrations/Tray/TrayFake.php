@@ -4,9 +4,9 @@ namespace App\Integrations\Tray;
 use App\Core\Banco;
 
 /**
- * Loja virtual SIMULADA (demonstração). Números determinísticos (sempre os mesmos para a mesma data),
+ * Loja virtual SIMULADA (demonstração). Pedidos determinísticos (sempre os mesmos para a mesma data),
  * com sazonalidade: fim de semana mais fraco, pico na Black Friday e em dezembro, janeiro mais calmo.
- * Os produtos são os do cadastro da Academia (mesmos nomes do site).
+ * Canais: loja própria, Mercado Livre, Shopee, Amazon, Magalu. Os produtos são os do cadastro (mesmos nomes do site).
  */
 class TrayFake implements EcommerceInterface
 {
@@ -18,64 +18,139 @@ class TrayFake implements EcommerceInterface
         return 'fake';
     }
 
-    public function resumoPorDia(string $desde, string $ate): array
+    /** Pedidos simulados por dia (sempre os mesmos para a mesma data), já completos */
+    public function pedidosAlterados(string $desde, string $ate, int $pagina = 1): array
     {
-        $dias = [];
+        $todos = [];
         $ate = min($ate, date('Y-m-d')); // não inventa o futuro
         for ($d = $desde; $d <= $ate; $d = date('Y-m-d', strtotime("$d +1 day"))) {
-            $semente = crc32("tray-$d");
-            $semana = (int) date('N', strtotime($d)) >= 6 ? .7 : 1;
-            $pico = substr($d, 5) === $this->blackFriday((int) substr($d, 0, 4)) ? 4.2 : 1;
-            $pedidos = (int) round((14 + $semente % 9) * self::SAZONAL[(int) substr($d, 5, 2)] * $semana * $pico * $this->crescimento($d));
-            if ($d === date('Y-m-d')) {
-                $pedidos = (int) round($pedidos * min(1, (int) date('G') / 22)); // hoje: só o que já entrou
-            }
-            $ticket = 148 + ($semente >> 5) % 45 + ($pico > 1 ? -18 : 0);
-            $dias[] = [
-                'data' => $d, 'pedidos' => $pedidos, 'faturamento' => round($pedidos * $ticket, 2),
-                'visitas' => (int) round($pedidos / (0.016 + (($semente >> 9) % 8) / 1000)), 'novos_clientes' => (int) round($pedidos * (.86 + (($semente >> 12) % 12) / 100)), // clientes que compraram (alguns compram 2x)
-            ];
+            array_push($todos, ...$this->pedidosDoDia($d));
         }
-        return $dias;
+        $porPagina = 500;
+        return ['pedidos' => array_slice($todos, ($pagina - 1) * $porPagina, $porPagina), 'total' => count($todos), 'por_pagina' => $porPagina];
     }
 
-    public function produtosMaisVendidos(string $mes, int $limite = 10): array
+    public function pedidoCompleto(string $id): ?array
     {
-        $produtos = Banco::todos('SELECT id, slug, nome FROM produtos WHERE ativo = 1 ORDER BY id LIMIT 60');
-        if (!$produtos) {
+        if (!preg_match('/^D(\d{8})-(\d+)$/', $id, $m)) {
+            return null;
+        }
+        $dia = substr($m[1], 0, 4) . '-' . substr($m[1], 4, 2) . '-' . substr($m[1], 6, 2);
+        foreach ($this->pedidosDoDia($dia) as $p) {
+            if ($p['tray_id'] === $id) {
+                return $p;
+            }
+        }
+        return null;
+    }
+
+    public function statusDaLoja(): array
+    {
+        return ['AGUARDANDO PAGAMENTO' => 'open', 'A ENVIAR' => 'open', 'ENVIADO' => 'closed', 'FINALIZADO' => 'closed', 'CANCELADO' => 'closed'];
+    }
+
+    /** Quantos pedidos no dia (fim de semana mais fraco, pico na Black Friday, sazonalidade e crescimento) */
+    private function quantosNoDia(string $d): int
+    {
+        $semente = crc32("tray-$d");
+        $semana = (int) date('N', strtotime($d)) >= 6 ? .7 : 1;
+        $pico = substr($d, 5) === $this->blackFriday((int) substr($d, 0, 4)) ? 4.2 : 1;
+        $n = (int) round((14 + $semente % 9) * self::SAZONAL[(int) substr($d, 5, 2)] * $semana * $pico * $this->crescimento($d));
+        if ($d === date('Y-m-d')) {
+            $n = (int) round($n * min(1, (int) date('G') / 22)); // hoje: só o que já entrou
+        }
+        return $n;
+    }
+
+    private ?array $produtos = null;
+
+    /** Pedidos completos de um dia, no formato de TrayTexto::pedido */
+    private function pedidosDoDia(string $d): array
+    {
+        $this->produtos ??= Banco::todos('SELECT slug, codigo, nome FROM produtos WHERE ativo = 1 ORDER BY id LIMIT 60');
+        if (!$this->produtos) {
             return [];
         }
-        $total = array_sum(array_column($this->resumoPorDia("$mes-01", date('Y-m-t', strtotime("$mes-01"))), 'faturamento'));
-        $pesos = [];
-        foreach ($produtos as $p) {
-            $pesos[$p['slug']] = 1 + crc32($p['slug'] . $mes) % 100;
-        }
-        arsort($pesos);
-        $soma = array_sum($pesos);
-        $nomes = array_column($produtos, 'nome', 'slug');
+        $canais = [['loja', 'LOJA VIRTUAL', 46], ['mercado_livre', 'Mercado Livre', 28], ['shopee', 'Shopee', 14], ['amazon', 'Amazon', 7], ['magalu', 'Magalu', 3], ['manual', 'PARTICULAR', 2]];
+        $cidades = [['Porto Alegre', 'RS', 14], ['São Paulo', 'SP', 16], ['Canoas', 'RS', 5], ['Caxias do Sul', 'RS', 5], ['Curitiba', 'PR', 7], ['Florianópolis', 'SC', 5],
+            ['Belo Horizonte', 'MG', 6], ['Rio de Janeiro', 'RJ', 8], ['Campinas', 'SP', 5], ['Salvador', 'BA', 4], ['Recife', 'PE', 3], ['Goiânia', 'GO', 3],
+            ['Brasília', 'DF', 4], ['Novo Hamburgo', 'RS', 3], ['Fortaleza', 'CE', 3], ['Manaus', 'AM', 1], ['Belém', 'PA', 2], ['Joinville', 'SC', 3], ['Vitória', 'ES', 2], ['Campo Grande', 'MS', 1]];
+        $envios = [['loja', 'PAC', 'Correios', 18.9], ['loja', 'Sedex', 'Correios', 29.9], ['loja', 'Jadlog', 'Jadlog', 21.5], ['mercado_livre', 'Mercado Envios', 'Mercado Envios', 0], ['shopee', 'Shopee Xpress', 'Shopee Xpress', 0], ['amazon', 'Amazon DBA', 'Amazon', 0], ['magalu', 'Magalu Entregas', 'Magalu', 0], ['manual', 'Retirada', '', 0]];
+        $sorteia = function (array $lista, int $s) {
+            $total = array_sum(array_column($lista, count($lista[0]) - 1));
+            $alvo = $s % $total;
+            foreach ($lista as $item) {
+                $alvo -= $item[count($item) - 1];
+                if ($alvo < 0) {
+                    return $item;
+                }
+            }
+            return $lista[0];
+        };
+        $idade = (int) ((strtotime('today') - strtotime($d)) / 86400);
         $lista = [];
-        foreach (array_slice($pesos, 0, $limite, true) as $slug => $peso) {
-            $fat = round($total * $peso / $soma * 2.2, 2); // os 10 primeiros concentram boa parte das vendas
-            $preco = 39.9 + crc32($slug) % 90;
-            $lista[] = ['produto_ref' => $slug, 'nome' => $nomes[$slug], 'quantidade' => max(1, (int) round($fat / $preco)), 'faturamento' => $fat];
+        $n = $this->quantosNoDia($d);
+        for ($i = 1; $i <= $n; $i++) {
+            $s = crc32("pedido-$d-$i");
+            [$canal, $canalNome] = $sorteia($canais, $s);
+            [$cidade, $uf] = $sorteia($cidades, $s >> 3);
+            $minuto = 7 * 60 + (int) (($s >> 5) % (16 * 60)); // das 7h às 23h (mais à noite)
+            if ($d === date('Y-m-d') && $minuto > (int) date('G') * 60 + (int) date('i')) {
+                $minuto = max(0, (int) date('G') * 60 - $i);
+            }
+            $hora = sprintf('%02d:%02d:%02d', intdiv($minuto, 60), $minuto % 60, $s % 60);
+            // Itens
+            $itens = [];
+            $qtdItens = 1 + ($s >> 7) % 3;
+            for ($k = 0; $k < $qtdItens; $k++) {
+                $pr = $this->produtos[(($s >> (9 + $k)) + $k * 7) % count($this->produtos)];
+                $preco = round(39.9 + crc32($pr['slug']) % 90, 2);
+                $itens[] = ['produto_ref' => $pr['slug'], 'ean' => null, 'nome' => $pr['nome'], 'variacao' => null, 'categoria' => ['Suplementos', 'Chás e ervas', 'Óleos', 'Cápsulas'][crc32($pr['slug']) % 4],
+                    'quantidade' => 1 + ($s >> (11 + $k)) % 2, 'preco' => $preco, 'custo' => round($preco * .42, 2), 'imagem' => null];
+            }
+            $subtotal = round(array_sum(array_map(fn($it) => $it['preco'] * $it['quantidade'], $itens)), 2);
+            $cupom = $canal === 'loja' && $s % 7 === 0 ? ['BEMVINDO10', 'ALQUIMIA15', 'FRETEGRATIS'][$s % 3] : null;
+            $desconto = $cupom ? round($subtotal * ($cupom === 'ALQUIMIA15' ? .15 : ($cupom === 'BEMVINDO10' ? .10 : 0)), 2) : 0;
+            $envio = array_values(array_filter($envios, fn($e) => $e[0] === $canal));
+            $envio = $envio[$s % count($envio)];
+            $frete = $cupom === 'FRETEGRATIS' || $subtotal >= 199 ? 0 : $envio[3];
+            $pagamento = $canal === 'loja' ? [['Pix', 'pix'], ['Cartão de crédito', 'cartao'], ['Cartão de crédito', 'cartao'], ['Boleto', 'boleto']][($s >> 13) % 4]
+                : ['Pagamento no ' . $canalNome, 'outro'];
+            // Situação conforme a idade do pedido
+            $sorte = ($s >> 15) % 100;
+            $tipo = match (true) {
+                $sorte < 4 => 'cancelado',
+                $pagamento[1] === 'boleto' && $sorte < 14 && $idade < 4 => 'aguardando',
+                $idade === 0 => $sorte < 20 ? 'aguardando' : 'pago',
+                $idade <= 2 => $sorte < 70 ? 'pago' : 'enviado',
+                $idade <= 8 => $sorte < 55 ? 'enviado' : 'entregue',
+                default => 'entregue',
+            };
+            $status = ['aguardando' => 'AGUARDANDO PAGAMENTO', 'pago' => 'A ENVIAR', 'enviado' => 'ENVIADO', 'entregue' => 'FINALIZADO', 'cancelado' => 'CANCELADO'][$tipo];
+            $prazo = date('Y-m-d', strtotime("$d +" . (3 + $s % 6) . ' days'));
+            $enviadoEm = in_array($tipo, ['enviado', 'entregue'], true) ? date('Y-m-d', strtotime("$d +" . (($s >> 17) % 10 < 8 ? 1 : 4) . ' days')) : null;
+            $id = 'D' . str_replace('-', '', $d) . '-' . $i;
+            $lista[] = [
+                'tray_id' => $id, 'data_hora' => "$d $hora", 'modificado_em' => "$d $hora",
+                'status' => $status, 'status_tipo' => $tipo, 'status_cor' => null,
+                'canal' => $canal, 'canal_nome' => $canalNome,
+                'marketplace_pedido' => in_array($canal, ['loja', 'manual'], true) ? null : strtoupper(substr($canal, 0, 2)) . '-' . (2000000000 + $s % 999999999),
+                'marketplace_envio' => $canal === 'mercado_livre' ? ['me2', 'fulfillment'][$s % 2] : null,
+                'marketplace_status' => in_array($canal, ['loja', 'manual'], true) ? null : ['aguardando' => 'payment_required', 'pago' => 'ready_to_ship', 'enviado' => 'shipped', 'entregue' => 'delivered', 'cancelado' => 'cancelled'][$tipo],
+                'parceiro' => null,
+                'total' => round($subtotal - $desconto + $frete, 2), 'subtotal' => $subtotal, 'desconto' => $desconto, 'frete' => $frete,
+                'custo' => round(array_sum(array_map(fn($it) => $it['custo'] * $it['quantidade'], $itens)), 2), 'cupom' => $cupom,
+                'itens_qtd' => array_sum(array_column($itens, 'quantidade')),
+                'pagamento' => $pagamento[0], 'pagamento_tipo' => $pagamento[1], 'pago_em' => $tipo === 'aguardando' ? null : $d,
+                'envio' => $envio[1], 'transportadora' => $envio[2] ?: null, 'prazo_entrega' => $prazo, 'enviado_em' => $enviadoEm,
+                'entregue' => $tipo === 'entregue' ? 1 : 0, 'tem_nf' => in_array($tipo, ['enviado', 'entregue'], true) || ($tipo === 'pago' && $sorte % 2 === 0) ? 1 : 0,
+                'nf_numero' => null, 'nf_em' => null,
+                'cidade' => $cidade, 'uf' => $uf,
+                'cliente_hash' => substr(hash('sha256', 'demo|' . (($s >> 4) % 100 < 72 ? "$d-$i" : 'fiel-' . ($s % 400))), 0, 16),
+                'detalhado' => 1, 'itens' => $itens,
+            ];
         }
         return $lista;
-    }
-
-    public function pedidosRecentes(int $limite = 10): array
-    {
-        $cidades = [['Porto Alegre', 'RS'], ['Canoas', 'RS'], ['Caxias do Sul', 'RS'], ['São Paulo', 'SP'], ['Curitiba', 'PR'], ['Florianópolis', 'SC'],
-            ['Belo Horizonte', 'MG'], ['Rio de Janeiro', 'RJ'], ['Novo Hamburgo', 'RS'], ['Campinas', 'SP']];
-        $situacoes = ['Aguardando pagamento', 'Pago', 'Pago', 'Em separação', 'Enviado', 'Enviado', 'Entregue'];
-        $pedidos = [];
-        $base = (int) (strtotime('today') / 3600);
-        for ($i = 0; $i < $limite; $i++) {
-            $s = crc32('pedido' . ($base - $i * 3));
-            [$cidade, $uf] = $cidades[$s % count($cidades)];
-            $pedidos[] = ['numero' => (string) (48000 + intdiv($base, 3) % 9000 - $i), 'data' => date('Y-m-d H:i', strtotime('-' . ($i * 97 + $s % 60) . ' minutes')),
-                'valor' => round(89 + $s % 420 + ($s >> 8) % 100 / 100, 2), 'situacao' => $situacoes[min(count($situacoes) - 1, intdiv($i, 2) + $s % 2)], 'cidade' => $cidade, 'uf' => $uf];
-        }
-        return $pedidos;
     }
 
     /**

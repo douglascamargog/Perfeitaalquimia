@@ -13,10 +13,11 @@ namespace App\Integrations\Tray;
  *   Os tokens ficam em storage/cache/tray_token_*.json (um por loja/chave; fora do git e fora da web).
  *
  * Consultas usadas (somente leitura):
- *   - GET /orders?access_token=&date=AAAA-MM-DD,AAAA-MM-DD 23:59:59&limit=50&page=N   (pedidos do período)
- *   - GET /products_solds?access_token=&sort=id_desc&limit=50&page=N                (itens vendidos)
+ *   - GET /orders?modified=AAAA-MM-DD,AAAA-MM-DD&limit=50&page=N   (pedidos alterados no período, só o cabeçalho)
+ *   - GET /orders/{id}/complete                                     (pedido completo: itens, cidade/UF, nota, marketplace)
+ *   - GET /orders/statuses                                          (status da loja, para classificar os personalizados)
  * Limites da Tray: 180 requisições/minuto e 10 mil/dia por loja → pausa entre chamadas e uso pelo cron.
- * LGPD: nada do comprador é guardado (nem nome, nem e-mail); só números.
+ * LGPD: nada do comprador é guardado (nem nome, nem e-mail); só cidade/UF e um código anônimo (TrayTexto).
  */
 class TrayClient implements EcommerceInterface
 {
@@ -42,116 +43,61 @@ class TrayClient implements EcommerceInterface
     }
 
     // ------------------------------------------------------------------
-    // Dados
+    // Pedidos (V14.0): o One guarda uma cópia local (EcommerceService::sincronizar)
     // ------------------------------------------------------------------
 
-    public function resumoPorDia(string $desde, string $ate): array
+    public function pedidosAlterados(string $desde, string $ate, int $pagina = 1): array
     {
-        $dias = [];
-        $clientes = [];
-        foreach ($this->pedidosDoPeriodo($desde, $ate) as $o) {
-            $dia = substr((string) $o['date'], 0, 10);
-            $dias[$dia] ??= ['data' => $dia, 'pedidos' => 0, 'faturamento' => 0.0, 'visitas' => null, 'novos_clientes' => 0];
-            $dias[$dia]['pedidos']++;
-            $dias[$dia]['faturamento'] += (float) $o['total'];
-            // "Clientes que compraram" no dia (pessoas diferentes, contadas pelo código, sem guardar quem é)
-            if (!isset($clientes[$dia][$o['customer_id'] ?? ''])) {
-                $clientes[$dia][$o['customer_id'] ?? ''] = true;
-                $dias[$dia]['novos_clientes']++;
+        $r = $this->get('/orders', ['modified' => "$desde,$ate", 'limit' => self::POR_PAGINA, 'page' => $pagina, 'sort' => 'id_asc']);
+        $pedidos = [];
+        foreach ($r['Orders'] ?? [] as $linha) {
+            if (!empty($linha['Order']['id'])) {
+                $pedidos[] = TrayTexto::pedido($linha['Order'], false, $this->statusDaLoja());
             }
         }
-        // Dias sem pedido também entram (com zero), para o gráfico não pular dias
-        for ($d = $desde; $d <= min($ate, date('Y-m-d')); $d = date('Y-m-d', strtotime("$d +1 day"))) {
-            $dias[$d] ??= ['data' => $d, 'pedidos' => 0, 'faturamento' => 0.0, 'visitas' => null, 'novos_clientes' => 0];
-            $dias[$d]['faturamento'] = round($dias[$d]['faturamento'], 2);
-        }
-        ksort($dias);
-        return array_values($dias);
+        return ['pedidos' => $pedidos, 'total' => (int) ($r['paging']['total'] ?? count($pedidos)), 'por_pagina' => self::POR_PAGINA];
     }
 
-    public function produtosMaisVendidos(string $mes, int $limite = 10): array
+    public function pedidoCompleto(string $id): ?array
     {
-        $pedidos = $this->pedidosDoPeriodo("$mes-01", date('Y-m-t', strtotime("$mes-01")));
-        if (!$pedidos) {
-            return [];
+        if (!preg_match('/^\d+$/', $id)) {
+            return null;
         }
-        $validos = array_flip(array_map(fn($o) => (string) $o['id'], $pedidos));
-        $menorPedido = min(array_map(fn($o) => (int) $o['id'], $pedidos));
+        $o = $this->get("/orders/$id/complete", [])['Order'] ?? null;
+        return $o ? TrayTexto::pedido($o, true, $this->statusDaLoja()) : null;
+    }
 
-        // Itens vendidos do mais novo para o mais antigo, até passar do primeiro pedido do mês
-        $soma = [];
-        for ($pagina = 1; $pagina <= 400; $pagina++) {
-            $r = $this->get('/products_solds', ['sort' => 'id_desc', 'limit' => self::POR_PAGINA, 'page' => $pagina]);
-            $itens = $r['ProductsSolds'] ?? [];
-            foreach ($itens as $linha) {
-                $i = $linha['ProductsSold'] ?? [];
-                if (!isset($validos[(string) ($i['order_id'] ?? '')])) {
-                    continue; // pedido de outro mês ou cancelado
+    private ?array $status = null;
+
+    public function statusDaLoja(): array
+    {
+        if ($this->status !== null) {
+            return $this->status;
+        }
+        $this->status = [];
+        try {
+            for ($pagina = 1; $pagina <= 5; $pagina++) {
+                $r = $this->get('/orders/statuses', ['limit' => self::POR_PAGINA, 'page' => $pagina]);
+                foreach ($r['OrderStatuses'] ?? [] as $linha) {
+                    $st = $linha['OrderStatus'] ?? [];
+                    if (!empty($st['status'])) {
+                        $this->status[(string) $st['status']] = (string) ($st['type'] ?? '');
+                    }
                 }
-                $ref = (string) $i['product_id'];
-                $soma[$ref] ??= ['produto_ref' => $ref, 'nome' => (string) ($i['original_name'] ?? $i['name'] ?? $ref), 'quantidade' => 0, 'faturamento' => 0.0];
-                $soma[$ref]['quantidade'] += (int) $i['quantity'];
-                $soma[$ref]['faturamento'] += (float) $i['price'] * (int) $i['quantity'];
+                if ($pagina * self::POR_PAGINA >= (int) ($r['paging']['total'] ?? 0)) {
+                    break;
+                }
             }
-            $ultimo = end($itens);
-            if (!$itens || (int) ($ultimo['ProductsSold']['order_id'] ?? 0) < $menorPedido || count($itens) < self::POR_PAGINA) {
-                break;
-            }
+        } catch (\RuntimeException) {
+            // Sem a lista de status, a classificação usa só o nome do status (TrayTexto::statusTipo)
         }
-        usort($soma, fn($a, $b) => $b['faturamento'] <=> $a['faturamento']);
-        return array_map(fn($p) => ['faturamento' => round($p['faturamento'], 2)] + $p, array_slice($soma, 0, $limite));
+        return $this->status;
     }
 
-    public function pedidosRecentes(int $limite = 10): array
-    {
-        $r = $this->get('/orders', ['sort' => 'id_desc', 'limit' => min($limite, self::POR_PAGINA), 'page' => 1]);
-        return array_map(fn($linha) => [
-            'numero'   => (string) $linha['Order']['id'],
-            'data'     => (string) $linha['Order']['date'],
-            'valor'    => (float) $linha['Order']['total'],
-            'situacao' => mb_convert_case(mb_strtolower((string) $linha['Order']['status']), MB_CASE_TITLE),
-            'cidade'   => '', 'uf' => '', // a listagem não traz endereço; não buscamos dados do comprador
-        ], $r['Orders'] ?? []);
-    }
-
-    /**
-     * Pedidos pagos alterados desde $desde, com itens e nota. API da Tray: /orders (lista) e /orders/{id}/complete (detalhe).
-     * Campos de marketplace e nota variam conforme a integração da loja: conferir com a Tray ao ligar a loja real.
-     */
+    /** Loja real: o Depósito usa a cópia local (EcommercePedidoService); este método não é usado */
     public function pedidosParaSeparar(string $desde): array
     {
-        $lista = [];
-        for ($pagina = 1; $pagina <= 20; $pagina++) {
-            $r = $this->get('/orders', ['modified' => substr($desde, 0, 10) . ',' . date('Y-m-d'), 'limit' => self::POR_PAGINA, 'page' => $pagina, 'sort' => 'id_asc']);
-            foreach ($r['Orders'] ?? [] as $linha) {
-                $id = (string) ($linha['Order']['id'] ?? '');
-                $status = mb_strtoupper((string) ($linha['Order']['status'] ?? ''));
-                if ($id === '' || str_contains($status, 'AGUARDANDO PAGAMENTO')) {
-                    continue; // ainda não pago
-                }
-                $o = ($this->get("/orders/$id/complete", [])['Order'] ?? []) ?: $linha['Order'];
-                $origem = mb_strtoupper(implode(' ', [(string) ($o['point_sale'] ?? ''), (string) ($o['partner_id'] ?? ''), (string) ($o['MarketplaceOrder'][0]['MarketplaceOrder']['marketplace_name'] ?? '')]));
-                $canal = str_contains($origem, 'MERCADO') ? 'mercado_livre' : (str_contains($origem, 'SHOPEE') ? 'shopee' : (str_contains($origem, 'AMAZON') ? 'amazon' : 'loja'));
-                $nota = $o['OrderInvoice'][0]['OrderInvoice'] ?? null;
-                $nome = trim((string) ($o['Customer']['name'] ?? ''));
-                $partes = preg_split('/\s+/', $nome) ?: [];
-                $lista[] = [
-                    'codigo' => $id, 'numero_marketplace' => (string) ($o['MarketplaceOrder'][0]['MarketplaceOrder']['marketplace_order_id'] ?? ($o['external_code'] ?? '')),
-                    'canal' => $canal, 'criado_em' => trim(($o['date'] ?? date('Y-m-d')) . ' ' . ($o['hour'] ?? '00:00:00')),
-                    'nf' => $nota ? (string) ($nota['number'] ?? '') : null, 'nf_em' => $nota ? (string) ($nota['issue_date'] ?? date('Y-m-d H:i:s')) : null,
-                    'cancelado' => str_contains($status, 'CANCEL'),
-                    'comprador' => $partes ? $partes[0] . (count($partes) > 1 ? ' ' . mb_substr(end($partes), 0, 1) . '.' : '') : '',
-                    'cidade' => (string) ($o['Customer']['city'] ?? ''), 'uf' => (string) ($o['Customer']['state'] ?? ''),
-                    'total' => (float) ($o['total'] ?? 0),
-                    'itens' => array_map(fn($p) => ['ref' => (string) ($p['ProductsSold']['reference'] ?? ($p['ProductsSold']['ean'] ?? '')), 'nome' => (string) ($p['ProductsSold']['name'] ?? 'Produto'),
-                        'quantidade' => (int) ($p['ProductsSold']['quantity'] ?? 1), 'preco' => (float) ($p['ProductsSold']['price'] ?? 0)], $o['ProductsSold'] ?? []),
-                ];
-            }
-            if ($pagina * self::POR_PAGINA >= (int) ($r['paging']['total'] ?? 0)) {
-                break;
-            }
-        }
-        return $lista;
+        return [];
     }
 
     public function testarConexao(): array
@@ -165,30 +111,6 @@ class TrayClient implements EcommerceInterface
         } catch (\RuntimeException $erro) {
             return [false, $erro->getMessage() . ($this->passos ? ' Passos: ' . implode(' → ', $this->passos) . '.' : '')];
         }
-    }
-
-    // ------------------------------------------------------------------
-    // Pedidos (paginados), sem os cancelados
-    // ------------------------------------------------------------------
-
-    private function pedidosDoPeriodo(string $desde, string $ate): array
-    {
-        $pedidos = [];
-        for ($pagina = 1; $pagina <= 400; $pagina++) {
-            $r = $this->get('/orders', ['date' => "$desde,$ate 23:59:59", 'limit' => self::POR_PAGINA, 'page' => $pagina, 'sort' => 'id_asc']);
-            foreach ($r['Orders'] ?? [] as $linha) {
-                $o = $linha['Order'] ?? [];
-                if (str_contains(mb_strtoupper((string) ($o['status'] ?? '')), 'CANCEL')) {
-                    continue;
-                }
-                $pedidos[] = $o;
-            }
-            $total = (int) ($r['paging']['total'] ?? 0);
-            if ($pagina * self::POR_PAGINA >= $total) {
-                break;
-            }
-        }
-        return $pedidos;
     }
 
     // ------------------------------------------------------------------
