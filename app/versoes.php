@@ -17,6 +17,18 @@
  */
 return [
     [
+        'versao' => '15.0', 'data' => '2026-11-17', 'titulo' => 'Especialistas do One e área de Fórmulas',
+        'novo' => [
+            'Especialistas do One: no chat do One (aba Perguntar) há um assistente para cada setor — Vendas, Prospecção, Marketing, Formulação, Cobrança e Terceirização. O chat abre no especialista do seu setor.',
+            'Cada especialista conhece o trabalho e os dados do setor: para quem ligar hoje, condições comerciais, lojas para prospectar, números do e-commerce, matérias-primas e fichas, casos de cobrança, rótulos de marca própria.',
+            'Fórmulas (menu Produtos): a Responsável Técnica cria e testa fórmulas com as contas na hora — massa da porção, % de cada ingrediente, se cabe na cápsula, custo por porção, por pote e do lote piloto, e o que falta de estoque.',
+            'Versões das fórmulas com comparação (o que entrou, saiu e mudou), registro de testes e do lote piloto.',
+            'A fórmula aprovada vira a ficha técnica do produto, e a Produção é avisada no sino. Nos Produtos novos, a etapa da ficha técnica tem o botão "Criar fórmula".',
+        ],
+        'melhoria' => ['O botão "🧪 Perguntar ao especialista" na fórmula abre o especialista que já sabe qual fórmula está aberta.', 'Treinamento: módulos "Fórmulas no One" e "Seu especialista no One".'],
+        'admin' => 'Administração › Especialistas do One: instruções de cada especialista (o que você editar não é trocado nas atualizações), quem abre direto em cada um, exemplos de pergunta e o uso do mês. Cada especialista só usa as consultas do setor e sempre com o acesso da própria pessoa; as de clientes continuam dependendo de "A IA pode consultar dados de clientes". Fórmulas: permissões formulas.ver / formulas.editar / formulas.aprovar em Administração › Acessos (Técnica edita e aprova; Diretoria aprova; Qualidade, Produção e Gestor veem).',
+    ],
+    [
         'versao' => '14.2', 'data' => '2026-11-17', 'titulo' => 'Lojas no lugar certo do mapa',
         'novo' => ['Botão "📍 Ajustar no mapa" na ficha da loja: arraste o marcador até a porta da loja e salve.'],
         'melhoria' => [

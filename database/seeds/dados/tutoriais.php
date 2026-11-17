@@ -223,6 +223,22 @@ return [
         [$cab, 'A ordem das etapas de um produto novo, a função responsável e quem aprova.'],
         ['form.card', 'Ajuste e salve: os projetos novos seguem esta ordem.'],
     ]],
+    ['/formulas/', 'Fórmula', [
+        [$cab, 'A fórmula: código, versão e situação. "Nova versão" guarda a atual e abre uma cópia para mudar.'],
+        ['[data-itens]', 'Ingredientes por porção (pote, tampa e rótulo por embalagem). A % e o custo de cada um aparecem na hora.'],
+        ['[data-resumo]', 'As contas: massa da porção, ocupação da cápsula, custo por porção, embalagem e lote, e o que falta de estoque.'],
+        ['[data-testes]', 'Registre os testes e o lote piloto.'],
+        ['[data-perguntar-especialista]', 'O especialista em Formulação já sabe qual fórmula está aberta: pergunte de custo, cápsulas e alternativas.'],
+    ]],
+    ['/formulas', 'Fórmulas', [
+        [$cab, 'Todas as fórmulas, com a última versão de cada uma.'],
+        ['[data-formulas]', 'Cada cartão: forma, porção, ingredientes e custo por embalagem.'],
+        [$acoes, '"+ Nova fórmula" começa uma fórmula. A aprovada vira a ficha técnica do produto.'],
+    ]],
+    ['/administracao/especialistas', 'Especialistas do One', [
+        [$cab, 'Os assistentes de cada setor: o jeito de trabalhar (instruções), quem abre direto em cada um e o uso do mês.'],
+        ['[data-especialista]', 'Edite as instruções, as funções e os exemplos de pergunta; desligue o que não for usar.'],
+    ]],
     ['/desenvolvimento', 'Produtos novos', [
         [$cab, 'Produtos novos: do briefing ao lançamento, etapa por etapa.'],
         ['.dp-quadro', 'Cada coluna é uma etapa; cada cartão é um projeto.'],

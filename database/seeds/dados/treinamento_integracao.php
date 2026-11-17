@@ -103,6 +103,24 @@ TXT, [
             ['Posso mandar a planilha da carteira para o meu e-mail pessoal?', ['Sim, para trabalhar em casa', 'Não: dados de clientes não saem da empresa', 'Sim, se apagar depois', 'Só se for pequena'], 1, 'LGPD: dados de clientes só para o trabalho, dentro dos canais da empresa.'],
             ['O cliente pediu para não receber mais mensagens. O certo é:', ['Continuar mandando promoções', 'Registrar na ficha e respeitar', 'Passar o cliente para outra vendedora', 'Apagar o cliente'], 1, 'Registre a preferência na ficha e respeite a decisão.'],
         ]],
+        ['int-especialistas', 'setor', 'Seu especialista no One', 'Um assistente para cada setor, dentro do chat do One.', 4, <<<'TXT'
+## Um especialista para o seu setor
+No chat do One (aba **Perguntar**), a fileira do alto mostra os especialistas que você pode usar:
+- **One**: dúvidas do sistema, seus números e produtos;
+- **Vendas**, **Prospecção**, **Marketing**, **Formulação**, **Cobrança** e **Terceirização**: cada um conhece o trabalho, as telas e os dados do setor.
+O chat abre no especialista do seu setor. Cada um tem a sua conversa e exemplos de pergunta.
+
+## Do que eles sabem
+- Usam os dados reais do sistema, **com o seu acesso**: ninguém vê o que não poderia ver na tela.
+- Exemplos: "para quem eu ligo hoje?" (Vendas), "quais lojas prospectar em Canoas?" (Prospecção), "como está o e-commerce?" (Marketing),
+  "quanto custa a fórmula por pote?" (Formulação), "quais casos priorizar?" (Cobrança), "quais rótulos estão acabando?" (Terceirização).
+- Eles só consultam e orientam: nada é alterado sem você.
+
+> Com a IA desligada pelo administrador, os especialistas respondem com as aulas do Treinamento.
+TXT, [
+            ['O especialista do One pode ver dados que você não vê nas telas?', ['Não: ele usa o seu acesso', 'Sim, todos', 'Só os de clientes', 'Só à noite'], 0, 'Sempre com o seu login e as suas permissões.'],
+            ['O especialista altera pedidos ou cadastros?', ['Não, só consulta e orienta', 'Sim, sozinho', 'Só pedidos', 'Só clientes'], 0, 'Você continua fazendo nas telas.'],
+        ]],
         ['int-comunicacao', 'setor', 'Comunicação no dia a dia', 'Sino, recados, comunicados, Pessoas e o Pergunte ao One.', 5, <<<'TXT'
 ## Onde as coisas chegam
 - **Sino:** avisos do sistema para você (pedido aprovado, tarefa nova, meta batida, pedido do Marketing pronto).

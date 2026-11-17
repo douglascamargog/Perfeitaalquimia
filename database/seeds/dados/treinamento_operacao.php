@@ -402,6 +402,41 @@ TXT, [
      'vizinhos' => 'producao,qualidade,gestor_marketing',
      'descricao' => 'Fórmulas, fichas técnicas, tabela nutricional, rotulagem, documentos e aprovação das ordens.',
      'modulos' => [
+        ['tc-formulas', 'setor', 'Fórmulas no One', 'Criar, testar e aprovar fórmulas; a aprovada vira a ficha técnica.', 15, <<<'TXT'
+## A sua área de fórmulas
+Em [Fórmulas](/formulas) ficam todas as fórmulas, cada uma com código (F-0001) e versões. O cartão mostra a forma, a porção e o **custo por embalagem**.
+![Fórmulas: lista](assets/img/treinamento/formulas.jpg)
+
+## Passo a passo: uma fórmula nova
+1. **+ Nova fórmula** (ou **Criar fórmula** na etapa de ficha técnica de um produto novo: a fórmula já nasce ligada ao projeto e ao produto).
+2. Preencha a forma (cápsula, pó, sachê...), a **porção** (ex.: 2 cápsulas), as **porções por embalagem** e, se for cápsula, quanto cabe nela (mg).
+3. Coloque os ingredientes **por porção** (mcg, mg, g, ml ou un). Pote, tampa, lacre e rótulo vão **por embalagem**.
+   Ingrediente que ainda não existe em Matérias-primas: deixe "não cadastrada" e escreva o nome.
+4. Veja as **contas na hora**: massa da porção, % de cada ingrediente, ocupação da cápsula (avisa quando não cabe), custo por porção, por embalagem e do lote piloto, e o que falta de estoque.
+![Editor da fórmula com as contas](assets/img/treinamento/formula-editor.jpg)
+5. **Salvar fórmula.**
+
+## Testes e versões
+- Registre cada teste (data, tamanho, resultado e observações): a fórmula passa para **Em teste**.
+- Mudou algo importante? **Nova versão**: a anterior fica guardada como estava, e **Comparar versões** mostra o que entrou, saiu e mudou (e o custo).
+
+## Aprovar = gerar a ficha técnica
+Para aprovar: produto ligado, todos os ingredientes cadastrados e unidades que convertem. Ao aprovar:
+1. A fórmula **vira a ficha técnica** do produto (quantidade por unidade fabricada, na unidade da matéria-prima: kg, g, L, un).
+2. A ficha anterior fica guardada no histórico da fórmula.
+3. A **Produção** recebe o aviso; o projeto do produto novo registra a aprovação.
+
+## O especialista em Formulação
+O botão **🧪 Perguntar ao especialista** abre o One no especialista de Formulação, que já sabe qual fórmula está aberta: custo, cápsulas, estoque, alternativas de matéria-prima.
+> Ele ajuda com contas e ideias, mas a conferência da norma vigente da Anvisa (constituintes, limites por porção, alegações e rotulagem) é sempre sua.
+
+?? A fórmula em cápsula ficou com 112% de ocupação. || Reduza o excipiente, troque o ativo por uma forma mais concentrada, aumente para 3 cápsulas por porção ou use uma cápsula maior. Crie uma nova versão e compare o custo.
+TXT, [
+            ['A fórmula aprovada:', ['Vira a ficha técnica do produto', 'Fica só guardada', 'Vai para o catálogo', 'Apaga a ficha sem guardar'], 0, 'E a ficha anterior fica no histórico.'],
+            ['Pote, tampa e rótulo entram na fórmula:', ['Por embalagem', 'Por porção', 'Não entram', 'Por cápsula'], 0, 'Quantidade por pote/frasco.'],
+            ['Para mudar uma fórmula já aprovada:', ['Crie uma nova versão', 'Edite direto', 'Apague e faça outra', 'Peça ao Marketing'], 0, 'A aprovada não muda; a nova versão guarda o histórico.'],
+            ['Quem confere a legislação da Anvisa?', ['A Responsável Técnica', 'O especialista do One sozinho', 'A vendedora', 'Ninguém'], 0, 'O One ajuda, a Técnica confere.'],
+        ]],
         ['tc-produtos', 'setor', 'A parte técnica dos produtos', 'Composição, ficha técnica, tabela nutricional e documentos.', 14, <<<'TXT'
 ## A página do produto
 Em [Produtos](/produtos), cada produto tem abas técnicas: composição, ficha técnica, embalagens e **documentos** (laudos, registros) com **validade**.

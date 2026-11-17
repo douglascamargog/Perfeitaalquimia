@@ -85,6 +85,8 @@ const PRINTS = [
   ['marketing-post-novo', 'social@demo.local', '/marketing/posts/novo', {}],
   ['marketing-planejamento', 'marketing@demo.local', '/marketing/planejamento', {}],
   ['ecommerce', 'ecommerce@demo.local', '/marketing/ecommerce', { recorte: '.bento' }],
+  ['formulas', 'tecnica@demo.local', '/formulas', {}],
+  ['formula-editor', 'tecnica@demo.local', '/formulas/1', {}],
   ['ecommerce-canais', 'ecommerce@demo.local', '/marketing/ecommerce', { recorte: '[data-eco-canais]' }],
   ['ecommerce-pedidos', 'ecommerce@demo.local', '/marketing/ecommerce/pedidos', {}],
   ['catalogo-admin', 'marketing@demo.local', '/produtos/catalogo', {}],
