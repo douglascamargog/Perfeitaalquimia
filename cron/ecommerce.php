@@ -3,8 +3,9 @@
  * Tarefa agendada: copia os pedidos da loja virtual (Tray: loja própria + marketplaces) para o painel do e-commerce.
  * Não duplica: cada pedido é atualizado no lugar.
  *
- * Configure no cPanel (Cron Jobs) para rodar a cada 30 minutos:
- *     */30 * * * *  php /home/USUARIO/public_html/cron/ecommerce.php
+ * Configure no cPanel (Cron Jobs) para rodar a cada 30 minutos
+ * (campo minuto: barra-30, ou seja, de 30 em 30; os demais campos com asterisco):
+ *     php /home/USUARIO/public_html/cron/ecommerce.php
  */
 if (PHP_SAPI !== 'cli') {
     exit('Use pelo cron.');
