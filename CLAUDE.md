@@ -9,11 +9,15 @@ A Perfeita Alquimia é uma fabricante de suplementos e produtos naturais (RS) qu
 distribuidores e clientes de terceirização/marca própria em todo o Brasil.
 
 Este sistema substitui o **Leads2b** (CRM) e os **dois catálogos de pedido** (Catálogo Mobile e o dos externos),
-e vai trabalhar integrado ao **Omie** (novo ERP, no lugar do Nota10) e ao **Ligue Talk** (telefonia/WhatsApp).
+e trabalha integrado ao **Omie** (ERP, no lugar do Nota10), ao **Ligue Talk** (telefonia/WhatsApp) e à **Tray** (loja virtual e marketplaces).
 O sistema de RH fica **fora do escopo**.
 
-**Entrega atual: Fase 0 — protótipo completo para apresentar à diretoria** e aprovar a contratação do Omie.
-Todos os módulos navegáveis, com **dados simulados no lugar do Omie**.
+**Situação atual: SISTEMA DEFINITIVO EM PRODUÇÃO.** O One (nome do sistema) não é mais protótipo nem apresentação:
+roda na **HostGator** com os dados reais da empresa e é integrado ao **Omie** de verdade.
+- Toda mudança é pensada para quem usa todo dia: nada de quebrar tela, perder dado ou mudar regra sem avisar (seção 14).
+- Os dados simulados (`OmieFake`, `TrayFake`, seeds `_demo`) existem só para **testes automáticos e instalação de teste**, nunca em produção.
+- Antes de mexer em algo que fala com o Omie, a Tray, o Ligue Talk ou o Google, lembrar que é o sistema real da empresa:
+  testar contra o simulado (pasta `tests/recursos/`) e explicar ao usuário o que muda na integração real.
 
 Quem mantém o projeto: uma única pessoa (designer/diretor de marketing, não programador), com Claude Code no plano Pro.
 Portanto: código simples, legível, comentado em português, poucas dependências, fácil de editar.
@@ -23,10 +27,13 @@ Portanto: código simples, legível, comentado em português, poucas dependênci
 - **Back-end:** PHP 8.x + MySQL/MariaDB (PDO, prepared statements sempre).
 - **Front-end:** HTML + CSS + JavaScript puro (ES modules). Sem React/Vue/build step.
   Bibliotecas permitidas via CDN: MapLibre GL (mapa, já usado na Carteira), Chart.js (gráficos). Nada além disso sem perguntar.
-- **Protótipo:** HostGator (hospedagem compartilhada, Apache, cron disponível, sem Node/processos permanentes).
-- **Definitivo:** servidor próprio da empresa. O código não pode depender de nada específico da HostGator.
+- **Produção (definitivo):** HostGator — hospedagem compartilhada, Apache, PHP 8, MySQL, cron disponível, **sem Node nem processos permanentes**.
+  Tudo que roda sozinho é **cron** (a cada 15/30/60 min ou diário); nada de fila em memória, websocket ou serviço contínuo.
+  Mantém o código portável (sem depender de recurso exclusivo da HostGator), caso um dia mude de servidor.
 - **App do externo:** PWA (manifest + service worker + IndexedDB) servido pelo mesmo sistema.
-- Configurações sensíveis (banco, chaves do Omie) em `config/config.php`, **fora do git** (`config.example.php` versionado).
+- Configurações sensíveis (banco) em `config/config.php`, **fora do git** (`config.example.php` versionado).
+  Chaves das integrações (IA, Tray, Ligue Talk, Google Maps...) são cadastradas pela tela **⚙️ Administração** e ficam em
+  `config/segredos.php` (fora do git, permissão 600, nunca mostradas de novo na tela). Nunca pedir chave ou senha no chat.
 
 ## 3. Estrutura de pastas (proposta — confirmar em modo de planejamento)
 
@@ -37,13 +44,14 @@ Portanto: código simples, legível, comentado em português, poucas dependênci
   /Models          → acesso ao banco
   /Services        → regras de negócio (pedido mínimo, carteira, recompra...)
   /Integrations
-    /Omie          → OmieClient (real) + OmieFake (dados simulados) com a MESMA interface
-    /LigueTalk     → idem (plano B: registro manual)
+    /Omie          → OmieClient (real, em produção) + OmieFake (simulado, só testes) com a MESMA interface
+    /LigueTalk     → idem (modo manual como plano B)
+    /Tray          → TrayClient (real) + TrayFake (simulado) + TrayTexto (tradução dos dados)
   /Views           → templates PHP
 /config            → config.php (fora do git), config.example.php
 /database
   /migrations      → SQL numerado: 001_usuarios.sql, 002_clientes.sql...
-  /seeds           → dados simulados do protótipo
+  /seeds           → dados essenciais (idempotentes) e de demonstração (`_demo`, só instalação nova)
 /cron              → scripts agendados (sincronização Omie, fila de reativação)
 /referencias       → arquivos originais (não servir na web)
 ```
@@ -58,8 +66,9 @@ Portanto: código simples, legível, comentado em português, poucas dependênci
    condições de pagamento, descontos, parcelas, pedido mínimo por região, dias de inatividade, etapas do funil, segmentos.
 4. **Omie é a fonte da verdade** de produtos, preços, estoque, faturamento, financeiro e dados fiscais do cliente.
    **O sistema é a fonte da verdade** de prospecção, funil, histórico, tarefas, carteira/vendedor responsável, catálogo, metas e treinamento.
-5. **Toda integração externa passa por uma interface** em `/app/Integrations`. O protótipo usa a versão Fake;
-   trocar para a real deve ser só mudar a configuração.
+5. **Toda integração externa passa por uma interface** em `/app/Integrations`. **Produção usa a versão real**;
+   a versão Fake/simulada fica para os testes automáticos e a instalação de teste. Trocar entre elas é só configuração.
+   Limites das APIs (Omie, Tray) são respeitados com cópia local + cron + leitura incremental, nunca consultando a API a cada tela aberta.
 6. **Segurança:** login individual (fim da senha compartilhada), `password_hash`/`password_verify`, sessão segura,
    token CSRF em todo formulário/POST, escape de toda saída (`htmlspecialchars`), log de auditoria
    (quem, o quê, quando) em alterações de clientes, pedidos e configurações.
@@ -99,7 +108,7 @@ Portanto: código simples, legível, comentado em português, poucas dependênci
 ### 6.2 Prospecção automática
 - Base pública de CNPJs da Receita Federal filtrada pelos CNAEs dos clientes atuais.
 - Usuário escolhe UF/cidade → lista empresas ativas, marcando as que já estão na carteira → botão "enviar para o funil".
-- **Protótipo:** amostra simulada de um estado (RS). Importação da base real é fase posterior.
+- **Hoje:** amostra de um estado (RS). Importar a base real da Receita é uma etapa futura (pedir ao usuário antes).
 
 ### 6.3 Catálogo B2B com pedido (substitui os dois catálogos)
 - Página pública com produtos, fotos e descrições, **sem preço e sem estoque**.
@@ -121,7 +130,7 @@ Portanto: código simples, legível, comentado em português, poucas dependênci
 ### 6.5 Fluxo do pedido
 1. Origem: catálogo (cliente), sistema (vendedor) ou app (externo).
 2. Validações: pedido mínimo da região, tabela de preço do cliente, forma de pagamento, crédito.
-3. Envio ao Omie como **orçamento / etapa a aprovar** (no protótipo: OmieFake).
+3. Envio ao Omie como **orçamento / etapa a aprovar** (nos testes: OmieFake).
 4. Financeiro aprova.
 5. Status e faturamento voltam para a linha do tempo do cliente.
 
@@ -147,10 +156,13 @@ Portanto: código simples, legível, comentado em português, poucas dependênci
 ### 6.9 Extras
 - **Mensagens prontas** de WhatsApp (prospecção, reativação, cobrança) com variáveis `{nome}`, `{link_vendedor}`; abre `wa.me`.
 - **Captura de leads** do site/anúncios: endpoint de formulário que cria lead no funil com UTM.
-- **Ligue Talk:** botão "registrar ligação" com 1 clique (plano B) até confirmar API/webhook.
+- **Ligue Talk:** API configurada em ⚙️ Administração › Ligue Talk; o modo manual (1 clique) continua como plano B.
 - **Gamificação:** só deixar estrutura prevista (fase final).
 
-## 7. Integração Omie (para quando sair do Fake)
+## 7. Integração Omie (em produção)
+- **Próximo passo combinado:** conferir o `OmieClient` contra o Omie real (nomes exatos de métodos e campos em developer.omie.com.br)
+  e levar as chaves para uma tela em ⚙️ Administração › Omie (como Tray e Ligue Talk), com "Testar conexão".
+  Hoje o Omie liga por `config.php` (`integracoes.erp = 'omie'` + app_key/app_secret).
 - API JSON por POST: `https://app.omie.com.br/api/v1/<grupo>/<recurso>/` com `{"call","app_key","app_secret","param":[...]}`.
 - Autenticação por App Key + App Secret (chave fixa, sem OAuth). Tela de configuração para admin trocar as chaves.
 - Limites: 240 req/min por IP+App Key+método, 4 simultâneas, 100 registros por página → fila com espera e retentativa.
@@ -170,13 +182,12 @@ Portanto: código simples, legível, comentado em português, poucas dependênci
 - Limpo, moderno e fácil de usar; responsivo (catálogo e app são usados no celular).
 - Telas de relatório com botão de imprimir e CSS de impressão em A4.
 
-## 10. Dados simulados do protótipo
-- Usuários de exemplo, um por perfil e por função, com nomes fictícios.
-- Clientes: as 499 lojas da referência + amostra fictícia de outros estados.
-- Pedidos e faturamento fictícios dos últimos 12 meses (para o painel e o alerta de recompra).
-- Três tabelas de preço (Lojista, Distribuidor, Terceirização) com valores fictícios.
-- Matérias-primas e fichas técnicas de exemplo.
-- Marcar claramente na interface: "Ambiente de demonstração — dados simulados".
+## 10. Dados de demonstração (só para testes e instalação de teste)
+- Ficam nos seeds `_demo` (usuários fictícios por perfil e função, lojas, pedidos de 12 meses, tabelas de preço,
+  matérias-primas, fórmulas, e-commerce simulado). **Nunca rodam numa atualização** do sistema em produção.
+- Os testes automáticos (`bash tests/rodar.sh`) recriam um banco de teste com esses dados; nunca rodar os testes
+  apontando para o banco de produção.
+- A faixa "Ambiente de demonstração" só aparece quando `modo_demo` está ligado no `config.php` (em produção: desligado).
 
 ## 11. Uso de modelos (economizar limite do plano Pro)
 | Tarefa | Modelo |
@@ -189,28 +200,35 @@ Portanto: código simples, legível, comentado em português, poucas dependênci
 - Uma conversa nova por módulo; use `/model` para trocar e `/compact` em sessões longas.
 - Não reler arquivos grandes sem necessidade; não reescrever arquivos inteiros para mudanças pequenas.
 
-## 12. Ordem de construção da Fase 0
-1. Base: estrutura de pastas, conexão, migrations, login por usuário, perfis, layout geral.
-2. Carteira e CRM (a partir de `dashboard.html`) + importação das 499 lojas.
-3. Catálogo B2B (público + login do cliente + link por vendedor + carrinho com pedido mínimo).
-4. Fluxo de pedidos + OmieFake + tela de aprovação do financeiro.
-5. Painel de vendas, metas e alerta de recompra.
-6. App PWA do externo (offline).
-7. Academia (migração + biblioteca de mídia).
-8. Produção e matérias-primas.
-9. Prospecção (amostra RS) + mensagens prontas + captura de leads.
-10. Revisão geral, dados de demonstração e roteiro de apresentação para a diretoria.
+## 12. Histórico e forma de trabalhar agora
+- A Fase 0 (protótipo para a diretoria) foi concluída e aprovada; o sistema virou o definitivo.
+- Agora é **evolução contínua em produção**: cada pedido do usuário vira uma versão (seção 14), testada antes de entregar.
+- Pedidos grandes ou módulos novos: planejamento primeiro (regra 8), depois implementação em partes com um commit cada.
 
-## 13. Pendências (não inventar — usar placeholder configurável)
-- Resposta do Ligue Talk sobre API/webhook.
-- Condições de pagamento, descontos e prazos definitivos.
-- Tabela de pedido mínimo por região.
-- Carteiras exportadas por vendedor.
-- Lista de CNAEs dos clientes atuais.
+## 13. Decisões já tomadas (não refazer sem o usuário pedir)
+- **Tray (e-commerce):** chaves e "Conectar à loja" em ⚙️ Administração › Tray; o One guarda cópia local dos pedidos
+  (cron `pedidos_ecommerce.php` a cada 15 min). Venda conta só com **pagamento confirmado** (`has_payment`), como a
+  "Performance da loja" da Tray. Pedido cancelado na Tray sai da fila do Depósito em qualquer etapa antes de despachar.
+  Nada de nome/CPF/e-mail/endereço do comprador no One (só cidade/UF).
+- **Mapa da Carteira:** localização exata pelo **Google Maps** (chave em ⚙️ Administração › Google Maps, cron `geocodificar.php`),
+  com "Ajustar no mapa" na ficha. Vendas por estado do e-commerce usam o mapa SVG do Brasil (`app/dados/brasil_estados.php`).
+- **One com IA (Claude):** chave em ⚙️ Administração; **especialistas por setor** (Vendas, Prospecção, Marketing, Formulação,
+  Cobrança, Terceirização) editáveis em ⚙️ Administração › Especialistas do One; só consultam, sempre com o acesso da pessoa.
+- **Fórmulas** (Responsável Técnica): a fórmula **aprovada vira a ficha técnica** do produto.
+- **Treinamento** por setor + tutorial do One em cada tela; conteúdo em `database/seeds/dados/` (seed novo para recarregar).
+- **Modo escuro** com botão no topo; cores escuras geradas por `ferramentas/gerar_tema_escuro.py` (rodar ao mudar CSS).
+
+## 13.1 Pendências (não inventar — usar placeholder configurável)
+- Conferir o `OmieClient` com o Omie real e criar a tela de chaves do Omie (seção 7).
+- Condições de pagamento, descontos e prazos definitivos (hoje configuráveis em Configurações).
+- Tabela de pedido mínimo por região definitiva.
+- Lista de CNAEs dos clientes atuais (prospecção) e importação da base real de CNPJs.
+- Homologação do aplicativo na Tray (prazo de 120 dias a partir do envio das credenciais).
 
 ## 14. Versões novas com o sistema em uso (regras para não perder dados)
 
-O sistema se chama **One** (e o mascote ajudante também). Ele já roda com dados reais da equipe. Toda mudança deve respeitar:
+O sistema se chama **One** (e o mascote ajudante também). Ele é o **sistema definitivo** da empresa, na HostGator, com os dados reais
+e integrado ao Omie. Toda mudança deve respeitar:
 
 1. **Nunca editar uma migration já publicada.** Mudança no banco = arquivo NOVO numerado em `database/migrations/` (ex.: `006_...sql`).
 2. **Migrations só acrescentam:** `CREATE TABLE`, `ADD COLUMN` (com DEFAULT), `CREATE INDEX`. Nada de `DROP TABLE`, `DROP COLUMN`,
