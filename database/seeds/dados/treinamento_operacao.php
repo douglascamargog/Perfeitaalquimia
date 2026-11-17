@@ -228,10 +228,32 @@ TXT, [
      'vizinhos' => 'deposito,marketing,financeiro',
      'descricao' => 'Loja virtual e marketplaces: perguntas, campanhas, cadastros e envios.',
      'modulos' => [
-        ['ec-loja', 'setor', 'A loja virtual e os marketplaces', 'Números, pedidos e o que acompanhar todo dia.', 10, <<<'TXT'
-## Os números
-Em [E-commerce](/marketing/ecommerce): pedidos, faturamento e produtos mais vendidos no período.
-![E-commerce: pedidos, faturamento e mais vendidos](assets/img/treinamento/ecommerce.jpg)
+        ['ec-loja', 'setor', 'A loja virtual e os marketplaces', 'O painel do E-commerce, os pedidos e o que acompanhar todo dia.', 14, <<<'TXT'
+## O painel
+Em [E-commerce](/marketing/ecommerce) estão as vendas da loja própria **e** dos marketplaces (Mercado Livre, Shopee, Amazon, Magalu), copiadas da Tray a cada 30 minutos.
+![Painel do E-commerce](assets/img/treinamento/ecommerce.jpg)
+
+1. Escolha o **período** (hoje, 7 dias, este mês, 90 dias, 12 meses ou datas livres) e, se quiser, um **canal**, um **estado** ou uma **situação**.
+2. Os números comparam com o período anterior do mesmo tamanho (▲ subiu, ▼ caiu).
+3. **Faturamento** conta só pedidos **pagos, enviados ou entregues**. Os que estão aguardando pagamento e os cancelados aparecem à parte.
+
+## Vendas por canal
+Cada cartão mostra quanto cada canal vendeu, o ticket médio, a fatia do total e os cancelamentos. Clique no cartão para ver só aquele canal.
+![Vendas por canal](assets/img/treinamento/ecommerce-canais.jpg)
+
+## O que mais o painel mostra
+- **Caminho dos pedidos:** feitos → pagos → com nota → enviados → entregues (e cancelados).
+- **Quando as pessoas compram:** dia da semana × hora. Use para programar posts, anúncios e ofertas.
+- **Produtos e categorias** que mais vendem, em qual canal cada produto vende mais e os que **pararam de vender**.
+- **Formas de pagamento** (e quanto cada uma cancela), **envio e transportadoras** (frete médio e % enviado no prazo).
+- **Estados e cidades** que mais compram, e os **cupons** mais usados.
+- **Alertas:** pedido pago sem nota há mais de {{config:ecommerce.alerta_horas_nf}} horas, pedido que passou do prazo sem ser enviado e cancelamentos acima do normal.
+
+## Os pedidos
+Em **Todos os pedidos** está a lista completa, com busca pelo número da loja, do marketplace ou pelo cupom, e a **planilha** para baixar. Clique no número para ver o pedido: produtos, valores, pagamento, envio, o número no marketplace e em que etapa ele está no Depósito.
+![Lista de pedidos do e-commerce](assets/img/treinamento/ecommerce-pedidos.jpg)
+
+Por segurança (LGPD), o One **não guarda** nome, CPF, e-mail, telefone nem endereço do comprador: só a cidade e o estado. Dados do comprador, só no painel da Tray.
 
 ## A rotina diária
 1. Responder as **perguntas** dos marketplaces (a nota da loja depende do tempo de resposta).
@@ -248,6 +270,9 @@ Pedido que entra depois do horário sai no dia seguinte: considere isso nas ofer
 ?? Uma oferta relâmpago vai gerar muitos pedidos às 16h. || Avise o Depósito com antecedência: os pedidos depois do horário de corte saem no dia seguinte, e o prazo do anúncio precisa considerar isso.
 TXT, [
             ['Por que responder rápido as perguntas dos marketplaces?', ['A nota e a visibilidade da loja dependem disso', 'Não importa', 'Por causa do Omie', 'Para gastar tempo'], 0, 'Tempo de resposta conta na reputação.'],
+            ['O faturamento do painel do E-commerce conta:', ['Só pedidos pagos, enviados ou entregues', 'Todos os pedidos, até os cancelados', 'Só os aguardando pagamento', 'Só a loja própria'], 0, 'Aguardando pagamento e cancelados aparecem separados.'],
+            ['Onde ver em que horário as pessoas mais compram?', ['No mapa de calor "Quando as pessoas compram"', 'Na Cobrança', 'No Depósito', 'Não dá para ver'], 0, 'Dia da semana × hora, para programar posts e ofertas.'],
+            ['O One guarda o CPF e o telefone do comprador do site?', ['Não: só cidade e estado (LGPD)', 'Sim, de todos', 'Só dos marketplaces', 'Só do Mercado Livre'], 0, 'Dados do comprador ficam só na Tray.'],
             ['Pedido do Mercado Livre que entra depois do horário de corte:', ['Sai no mesmo dia', 'Sai no dia seguinte', 'É cancelado', 'Vai para a Cobrança'], 1, 'O horário de corte vale para o despacho.'],
         ]],
         ['ec-cadastro', 'setor', 'Cadastro de produtos e envios FULL', 'Fotos, descrições e estoque nos centros de distribuição.', 8, <<<'TXT'
@@ -271,6 +296,7 @@ Cuida da loja virtual e dos marketplaces: cadastros, perguntas, campanhas, ofert
 
 ## Para o Depósito
 Pedidos do e-commerce têm **horário de corte** por marketplace e aparecem separados na fila. Pedido fora do prazo prejudica a reputação da loja.
+Se o pedido for **cancelado na Tray**, ele sai sozinho da fila (mesmo se já estiver sendo separado) e o Depósito recebe um aviso no sino: devolva os produtos à prateleira.
 TXT, [
             ['Pedidos do e-commerce no Depósito:', ['Têm horário de corte e aparecem separados', 'São iguais aos de lojista', 'Não passam pelo Depósito', 'Vão para a Cobrança'], 0, 'Têm aba e prazo próprios.'],
         ]],

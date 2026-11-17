@@ -59,7 +59,7 @@ class EcommerceService
             $ultimo = (string) Config::get('ecommerce.sinc_ate', '');
             $meses = max(1, min(24, (int) Config::get('ecommerce.meses_historico', 12)));
             $desde = $ultimo !== '' && strtotime($ultimo) ? date('Y-m-d', strtotime("$ultimo -1 day")) : date('Y-m-01', strtotime("-$meses months"));
-            $ate = date('Y-m-d');
+            $ate = date('Y-m-d', strtotime('+1 day')); // folga para diferença de fuso entre a loja e o servidor
 
             // 1. Cabeçalhos dos pedidos alterados
             $pagina = 1;
@@ -75,7 +75,7 @@ class EcommerceService
                 }
                 $pagina++;
             } while (($pagina - 1) * max(1, (int) $lote['por_pagina']) < (int) $lote['total'] && $pagina <= 400);
-            self::estado('ecommerce.sinc_ate', $ate);
+            self::estado('ecommerce.sinc_ate', date('Y-m-d'));
 
             // 2. Pedido completo dos novos/alterados (mais recentes primeiro)
             $limite = $limiteDetalhes ?? max(10, (int) Config::get('ecommerce.detalhes_por_rodada', 300));

@@ -43,7 +43,8 @@ class DepositoController extends Controller
     public function ver(string $id): void
     {
         $p = D::pedido((int) $id);
-        if (!$p || $p['expedicao'] === null) {
+        // Pedido do e-commerce cancelado na Tray: abre só para mostrar o aviso (quem clicou no sino entende o que houve)
+        if (!$p || ($p['expedicao'] === null && !($p['situacao'] === 'cancelado' && $p['tipo_venda'] === 'ecommerce'))) {
             Sessao::aviso('erro', 'Este pedido não está na fila do depósito.');
             redirecionar('/deposito');
         }

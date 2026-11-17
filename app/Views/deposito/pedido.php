@@ -7,9 +7,10 @@ use App\Core\Sessao;
 use App\Core\Visao;
 use App\Services\DepositoService as D;
 
-[$er, $ec] = D::ETAPAS[$p['expedicao']] ?? [$p['expedicao'], 'cinza'];
+[$er, $ec] = ($p['situacao'] ?? '') === 'cancelado' ? ['Cancelado', 'vermelho'] : (D::ETAPAS[$p['expedicao']] ?? [(string) $p['expedicao'], 'cinza']);
 $acao = fn(string $a) => url('/deposito/' . (int) $p['id'] . '/' . $a);
-$editavel = $pode && in_array($p['expedicao'], ['aguardando', 'separando'], true);
+$cancelado = ($p['situacao'] ?? '') === 'cancelado';
+$editavel = $pode && !$cancelado && in_array($p['expedicao'], ['aguardando', 'separando'], true);
 $antigo = (array) Sessao::antigo('item', []);
 $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceirizacao_produto_id']));
 ?>
@@ -31,12 +32,13 @@ $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceiriza
       <form method="post" action="<?= $acao('urgente') ?>"><?= csrf_campo() ?><input type="hidden" name="urgente" value="<?= $p['expedicao_prioridade'] ? '0' : '1' ?>">
         <button class="botao contorno pequeno" type="submit"><?= $p['expedicao_prioridade'] ? 'Tirar urgência' : 'Marcar urgente' ?></button></form>
     <?php endif; ?>
-    <?php if ($pode && $p['expedicao'] === 'aguardando'): ?>
+    <?php if ($pode && !$cancelado && $p['expedicao'] === 'aguardando'): ?>
       <form method="post" action="<?= $acao('comecar') ?>"><?= csrf_campo() ?><button class="botao lima" type="submit">Começar a separar</button></form>
     <?php endif; ?>
   </div>
 </div>
 
+<?php if ($cancelado): ?><p class="aviso erro" data-dep-cancelado>🚫 <strong><?= $p['tipo_venda'] === 'ecommerce' ? 'Cancelado na Tray' : 'Pedido cancelado' ?>: não separar.</strong> Se já separou, devolva os produtos à prateleira.</p><?php endif; ?>
 <?php if ($terceirizado): ?><p class="aviso alerta">Pedido com produto de <strong>terceirização</strong>: vai com o rótulo do cliente.</p><?php endif; ?>
 <?php if ($p['observacoes']): ?><p class="aviso">Observação do pedido: <?= e($p['observacoes']) ?></p><?php endif; ?>
 <?php if (!empty($p['campanha_brindes'])): ?><p class="aviso atencao" data-brinde-separar>🎁 Colocar o brinde da campanha na caixa: <strong><?= e($p['campanha_brindes']) ?></strong></p><?php endif; ?>

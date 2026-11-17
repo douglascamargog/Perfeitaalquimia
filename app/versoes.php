@@ -17,6 +17,23 @@
  */
 return [
     [
+        'versao' => '14.0', 'data' => '2026-11-17', 'titulo' => 'E-commerce completo: loja própria e marketplaces',
+        'novo' => [
+            'Painel do E-commerce novo: vendas da loja própria e dos marketplaces (Mercado Livre, Shopee, Amazon, Magalu), com filtros de período, canal, estado e situação.',
+            'Vendas por canal, caminho dos pedidos (pagos, com nota, enviados, entregues, cancelados) e os dias e horários em que as pessoas mais compram.',
+            'Produtos e categorias que mais vendem, os que pararam de vender, formas de pagamento, transportadoras, envio no prazo, estados, cidades e cupons.',
+            'Lista com todos os pedidos da loja, busca pelo número do marketplace, a página de cada pedido e a planilha para baixar.',
+            'Alertas: pedido pago sem nota, pedido que passou do prazo sem sair e cancelamentos acima do normal.',
+        ],
+        'melhoria' => ['O treinamento do E-commerce mostra o painel novo.'],
+        'correcao' => [
+            'Os números do e-commerce não contam mais pedidos aguardando pagamento nem cancelados como venda.',
+            'Pedido cancelado na loja sai sozinho da fila do Depósito, mesmo se já estiver sendo separado, e o Depósito recebe um aviso.',
+            'Nomes de produtos da loja aparecem limpos, sem códigos estranhos como <br /> e <strong>.',
+        ],
+        'admin' => 'O One guarda uma cópia dos pedidos da Tray (tabelas ecommerce_pedidos e ecommerce_pedido_itens), lida a cada 30 minutos pelo cron/ecommerce.php: primeiro a lista dos pedidos alterados e depois o pedido completo, no máximo "Pedidos completos lidos por rodada" (padrão 300) por vez, para respeitar o limite da Tray (10 mil por dia). Na primeira vez busca 12 meses aos poucos. Configurações › E-commerce (Tray): meses de histórico, pedidos por rodada e as horas do alerta de nota. LGPD: nada de nome, CPF, e-mail, telefone ou endereço do comprador.',
+    ],
+    [
         'versao' => '13.14', 'data' => '2026-11-17', 'titulo' => 'Diagnóstico da ligação com a Tray',
         'correcao' => ['A ligação com a loja virtual se recupera sozinha quando a chave de acesso vence.'],
         'admin' => 'Tray: "Testar conexão" mostra cada passo (gerar a chave com o code, renovar, ler pedidos) e onde a Tray recusou. Se a renovação for recusada, o One tenta gerar uma chave nova com o code. "Remover" também apaga as chaves de acesso guardadas.',

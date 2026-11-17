@@ -44,9 +44,23 @@ class EcommercePedidoService
         if ($loja->nome() === 'fake') {
             $lista = $loja->pedidosParaSeparar($desde);
         } else {
-            // Loja real: a mesma leitura do painel do E-commerce (pedidos novos/alterados, já completos)
+            // Loja real: a mesma leitura do painel do E-commerce (cópia local dos pedidos)
             $sinc = EcommerceService::sincronizar();
-            $lista = array_map([self::class, 'doPedidoDaLoja'], array_values(array_filter($sinc['detalhes'], fn($p) => $p['status_tipo'] !== 'aguardando')));
+            $lidos = array_column($sinc['detalhes'], null, 'tray_id');
+            $dias = max(1, (int) Config::get('ecommerce.dias_deposito', 60));
+            // Interessam: pagos que ainda não estão no Depósito e os que já estão mas ganharam a nota
+            $lista = [];
+            foreach (Banco::todos("SELECT e.tray_id FROM ecommerce_pedidos e LEFT JOIN pedidos p ON p.tray_codigo = e.tray_id
+                WHERE e.origem = 'tray' AND e.detalhado = 1 AND (
+                  (p.id IS NULL AND e.status_tipo = 'pago' AND e.data_hora > NOW() - INTERVAL $dias DAY)
+                  OR (p.id IS NOT NULL AND p.situacao NOT IN ('faturado', 'cancelado') AND e.tem_nf = 1 AND e.status_tipo <> 'cancelado'))
+                ORDER BY e.data_hora LIMIT 200") as $c) {
+                // O nome curto do comprador (para a etiqueta) não fica na cópia local: lê o pedido de novo se não veio agora
+                $completo = $lidos[$c['tray_id']] ?? $loja->pedidoCompleto((string) $c['tray_id']);
+                if ($completo) {
+                    $lista[] = self::doPedidoDaLoja($completo);
+                }
+            }
         }
         foreach ($lista as $t) {
             $codigo = mb_substr(trim((string) ($t['codigo'] ?? '')), 0, 40);

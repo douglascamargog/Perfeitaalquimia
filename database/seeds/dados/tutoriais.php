@@ -163,10 +163,19 @@ return [
         [$cab, 'Planejamento: campanhas e datas comemorativas na linha do tempo.'],
         ['.mk-gantt-trilho, section.card', 'Cada barra é uma campanha. Planeje com antecedência as datas importantes.'],
     ]],
+    ['/marketing/ecommerce/pedidos', 'Pedidos do e-commerce', [
+        [$cab, 'Todos os pedidos da loja e dos marketplaces.'],
+        ['.eco-filtros', 'Busque pelo número da loja, do marketplace ou pelo cupom, e filtre por canal, situação e datas.'],
+        ['[data-eco-tabela]', 'Clique no número para ver produtos, valores, envio e a etapa no Depósito.'],
+        [$acoes, '"Planilha" baixa a lista (sem dados pessoais).'],
+    ]],
     ['/marketing/ecommerce', 'E-commerce', [
-        [$cab, 'Desempenho da loja virtual e dos marketplaces.'],
-        ['.bento', 'Pedidos, faturamento e produtos mais vendidos no período.'],
-        [$acoes, 'Teste a conexão e atualize os números por aqui.'],
+        [$cab, 'Vendas da loja própria e dos marketplaces, copiadas da Tray.'],
+        ['[data-eco-filtros]', 'Escolha o período, o canal, o estado ou a situação.'],
+        ['[data-eco-faturamento]', 'Faturamento conta só os pedidos pagos, enviados ou entregues, comparado com o período anterior.'],
+        ['[data-eco-canais]', 'Quanto cada canal vendeu. Clique num cartão para ver só ele.'],
+        ['[data-eco-calor]', 'Os dias e horários em que as pessoas mais compram.'],
+        [$acoes, '"Atualizar agora" busca os pedidos novos; "Todos os pedidos" abre a lista completa.'],
     ]],
     ['/marketing', 'Mural de posts', [
         [$cab, 'O calendário do Instagram, com aprovação.'],

@@ -84,7 +84,9 @@ const PRINTS = [
   ['marketing-feed', 'social@demo.local', '/marketing/feed', {}],
   ['marketing-post-novo', 'social@demo.local', '/marketing/posts/novo', {}],
   ['marketing-planejamento', 'marketing@demo.local', '/marketing/planejamento', {}],
-  ['ecommerce', 'ecommerce@demo.local', '/marketing/ecommerce', {}],
+  ['ecommerce', 'ecommerce@demo.local', '/marketing/ecommerce', { recorte: '.bento' }],
+  ['ecommerce-canais', 'ecommerce@demo.local', '/marketing/ecommerce', { recorte: '[data-eco-canais]' }],
+  ['ecommerce-pedidos', 'ecommerce@demo.local', '/marketing/ecommerce/pedidos', {}],
   ['catalogo-admin', 'marketing@demo.local', '/produtos/catalogo', {}],
   ['leads', 'marketing@demo.local', '/leads', {}],
   // ---------------- Financeiro e gestão ----------------
@@ -127,6 +129,7 @@ async function cliente(p) {
       const ctx = await b.newContext(op.celular ? { ...base, viewport: { width: 390, height: 780 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } : { ...base, viewport: { width: 1280, height: 760 } });
       const p = await ctx.newPage();
       await p.route(/open-meteo/, (r) => r.fulfill({ body: '{}' }));
+      await p.route('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/**', (r) => r.fulfill({ path: path.join(__dirname, '..', 'tests', 'recursos', 'chart.umd.js'), contentType: 'text/javascript' }));
       await p.goto(BASE + '/entrar'); await p.fill('#email', email); await p.fill('#senha', SENHA); await p.click('button[type=submit]'); await p.waitForLoadState();
       if (await p.locator('[data-novidades-ok]').count()) { await p.click('[data-novidades-ok]'); await p.waitForLoadState(); }
       sessoes[chave] = p;
