@@ -33,7 +33,7 @@ class OnePergunta
     }
 
     /** Responde e devolve ['texto', 'ia' => bool] */
-    public static function perguntar(string $pergunta, string $especialista = ''): array
+    public static function perguntar(string $pergunta, string $especialista = '', string $tela = ''): array
     {
         $esp = OneEspecialistas::escolher($especialista ?: OneEspecialistas::padrao());
         $chaveConversa = 'one_conversa_' . ($esp['slug'] ?? 'geral');
@@ -53,7 +53,10 @@ class OnePergunta
         }
         $historico = (array) Sessao::get($chaveConversa, []);
         try {
-            $r = $ia->responder($pergunta, $historico, $esp);
+            // A tela em que a pessoa está (ex.: a fórmula aberta) vai junto, para o especialista saber do que se trata
+            $contexto = preg_match('#^/formulas/(\d+)#', $tela, $m) && in_array('formula_aberta', OneEspecialistas::consultas($esp) ?? [], true)
+                ? '[A pessoa está com a fórmula id ' . (int) $m[1] . ' aberta na tela. Use formula_aberta com esse id quando a pergunta for sobre ela.] ' : '';
+            $r = $ia->responder($contexto . $pergunta, $historico, $esp);
         } catch (\Throwable $e) {
             error_log('OnePergunta: ' . $e->getMessage());
             $r = ['texto' => 'Ops, algo deu errado aqui. Tente de novo.', 'consultas' => [], 'tokens_entrada' => 0, 'tokens_saida' => 0, 'custo' => 0, 'situacao' => 'erro'];

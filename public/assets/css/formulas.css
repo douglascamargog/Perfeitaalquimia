@@ -1,0 +1,50 @@
+/* Fórmulas (V15.0) */
+.fm-filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+.fm-filtros input[type="search"], .fm-filtros select { max-width: 230px; }
+.fm-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.fm-cartao { display: grid; gap: 4px; text-decoration: none; color: var(--texto); transition: transform .15s, box-shadow .15s; }
+.fm-cartao:hover { transform: translateY(-2px); box-shadow: var(--sombra); }
+.fm-cartao header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.fm-codigo { font-size: .74rem; font-weight: 800; color: var(--texto-suave); letter-spacing: .04em; }
+.fm-cartao strong { font-size: 1.02rem; color: var(--verde-escuro); }
+.fm-cartao small { color: var(--texto-suave); font-size: .78rem; }
+.fm-custo { font-size: 1.15rem; font-weight: 800; color: var(--verde-escuro); margin-top: 4px; }
+.fm-custo small { font-weight: 500; }
+.fm-alerta { color: #b45309; font-size: .82rem; }
+.fm-ruim { color: var(--perigo) !important; font-weight: 800; }
+.fm-vazio { text-align: center; color: var(--texto-suave); }
+.fm-form, .fm-editor { display: grid; gap: 12px; }
+.fm-linha { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.fm-linha label { flex: 1; min-width: 120px; }
+.fm-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; align-items: start; margin-bottom: 14px; }
+.fm-lado { display: grid; gap: 14px; position: sticky; top: 76px; }
+.fm-titulo { font-size: 1rem; margin: 6px 0 0; }
+.fm-itens { min-width: 860px; }
+.fm-itens td { vertical-align: top; }
+.fm-itens select, .fm-itens input { width: 100%; }
+.fm-itens td:first-child { min-width: 240px; }
+.fm-itens td:first-child input { margin-top: 4px; font-size: .8rem; }
+.fm-itens [data-item-qtd] { width: 100px; }
+.fm-itens [data-item-unidade] { min-width: 72px; }
+.fm-itens [data-item-base] { min-width: 112px; }
+.fm-itens [data-item-funcao] { min-width: 132px; }
+.fm-acoes button[disabled] { opacity: .45; cursor: not-allowed; }
+.fm-resumo h2, .fm-acoes h2 { font-size: 1rem; margin: 0 0 8px; }
+.fm-resumo dl { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; margin: 0; font-size: .86rem; }
+.fm-resumo dt { color: var(--texto-suave); }
+.fm-resumo dd { margin: 0; text-align: right; font-weight: 700; }
+.fm-resumo .forte { font-size: 1.05rem; color: var(--verde-escuro); font-weight: 800; }
+.fm-resumo ul, .fm-pendencias { margin: 6px 0 0; padding-left: 18px; font-size: .8rem; }
+.fm-pendencias { color: #b45309; }
+.fm-acoes { display: grid; gap: 8px; align-content: start; justify-items: start; }
+.fm-acoes h3 { font-size: .86rem; margin: 8px 0 0; }
+.fm-versoes, .fm-testes, .fm-historico { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: .84rem; }
+.fm-versoes a[aria-current] { font-weight: 800; }
+.fm-entrou li { color: var(--sucesso); }
+.fm-saiu li { color: var(--perigo); }
+/* Telas até 1500px: as contas vão para cima (lado a lado) e a tabela de ingredientes ganha a largura toda */
+@media (max-width: 1500px) {
+  .fm-layout { grid-template-columns: 1fr; }
+  .fm-lado { position: static; order: -1; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+}
+@media print { .fm-lado .fm-acoes, [data-perguntar-especialista], [data-item-mais], [data-item-tirar] { display: none !important; } }

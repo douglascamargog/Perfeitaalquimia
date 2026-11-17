@@ -132,6 +132,9 @@ html.escuro .eco-legenda i { background: linear-gradient(90deg, color-mix(in srg
 html.escuro .eco-sit.sit-aguardando { background: color-mix(in srgb, #fef3c7 18%, var(--card)); color: color-mix(in srgb, #92400e 45%, #ffffff); }
 html.escuro .eco-sit.sit-enviado { background: color-mix(in srgb, #dbeafe 18%, var(--card)); color: color-mix(in srgb, #1e40af 45%, #ffffff); }
 html.escuro .eco-sit.sit-entregue { background: color-mix(in srgb, #e0e7ff 18%, var(--card)); color: color-mix(in srgb, #3730a3 45%, #ffffff); }
+/* formulas.css */
+html.escuro .fm-alerta { color: color-mix(in srgb, #b45309 45%, #ffffff); }
+html.escuro .fm-pendencias { color: color-mix(in srgb, #b45309 45%, #ffffff); }
 /* graficos.css */
 html.escuro .s2, html.escuro .grafico-legenda i.s2, html.escuro .grafico-pilha .s2 { background: color-mix(in srgb, #b9cfc5 18%, var(--card)); }
 html.escuro .legenda-evolucao i.real { background: var(--secundaria, color-mix(in srgb, #caff4d 18%, var(--card))); }

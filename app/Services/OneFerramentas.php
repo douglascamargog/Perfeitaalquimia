@@ -84,6 +84,14 @@ class OneFerramentas
             $lista[] = self::def('ficha_de_produto', 'Ficha técnica (fórmula de produção) de um produto: matérias-primas por unidade, perda, custo por unidade e a composição/porção cadastrada.',
                 ['produto' => ['type' => 'string', 'description' => 'Nome ou código do produto']], ['produto']);
         }
+        if (Auth::pode('formulas.ver') || Auth::pode('formulas.editar')) {
+            $lista[] = self::def('formula_aberta', 'Uma fórmula da área de Fórmulas com todas as contas: ingredientes (quantidade, função, % da porção, custo, estoque, fornecedor), massa da porção, ocupação da cápsula, custo por porção/embalagem/lote e faltas de estoque.',
+                ['formula_id' => ['type' => 'integer', 'description' => 'Id da fórmula (vem do contexto da tela ou de buscar_formulas)']], ['formula_id']);
+            $lista[] = self::def('calcular_formula', 'Recalcula uma fórmula para outro tamanho de lote: custo do lote e o que falta de estoque.',
+                ['formula_id' => ['type' => 'integer', 'description' => 'Id da fórmula'], 'lote' => ['type' => 'integer', 'description' => 'Unidades (embalagens) do lote']], ['formula_id', 'lote']);
+            $lista[] = self::def('buscar_formulas', 'Lista as fórmulas (última versão) por nome ou código, com situação, forma, porção e custo por embalagem.',
+                ['busca' => ['type' => 'string', 'description' => 'Nome ou código F-0001 (vazio = todas)']], ['busca']);
+        }
         if (Auth::pode('cobranca.ver') && (bool) Config::get('one.ia_dados_clientes', false)) {
             $lista[] = self::def('casos_de_cobranca', 'Casos de cobrança abertos (da pessoa ou de todos, conforme o acesso): cliente, valor, dias de atraso, etapa, promessa e tentativas. Máximo 20, mais urgentes primeiro.', [], []);
             $lista[] = self::def('mensagens_cobranca', 'Mensagens prontas de cobrança para UM caso (lembrete, segunda via, acordo), já com o nome, o valor e o vencimento.',
@@ -134,6 +142,11 @@ class OneFerramentas
             'datas_e_campanhas' => self::datasCampanhas(),
             'materias_primas' => self::materiasPrimas((string) ($e['busca'] ?? '')),
             'ficha_de_produto' => self::fichaProduto((string) ($e['produto'] ?? '')),
+            'formula_aberta' => FormulaService::paraEspecialista((int) ($e['formula_id'] ?? 0)),
+            'calcular_formula' => FormulaService::paraEspecialista((int) ($e['formula_id'] ?? 0), max(1, (int) ($e['lote'] ?? 100))),
+            'buscar_formulas' => ['formulas' => array_map(fn($f) => ['id' => (int) $f['id'], 'codigo' => $f['codigo'] . ' v' . $f['versao'], 'nome' => $f['nome'],
+                'situacao' => FormulaService::SITUACOES[$f['situacao']][0] ?? $f['situacao'], 'forma' => FormulaService::FORMAS[$f['forma']] ?? $f['forma'],
+                'custo_por_embalagem' => dinheiro($f['calculo']['custo_embalagem']), 'link' => '/formulas/' . $f['id']], array_slice(FormulaService::lista(['busca' => mb_substr(trim((string) ($e['busca'] ?? '')), 0, 60)]), 0, 20))],
             'casos_de_cobranca' => self::casosCobranca(),
             'mensagens_cobranca' => self::mensagensCobranca((int) ($e['caso_id'] ?? 0)),
             'clientes_terceirizacao' => self::clientesTerceirizacao(),

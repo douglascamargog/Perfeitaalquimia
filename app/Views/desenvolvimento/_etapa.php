@@ -15,6 +15,11 @@ $ch = (string) $p['checagem'];
   <?php elseif ($falta): ?><ul class="dp-falta" data-falta><?php foreach ($falta as $x): ?><li><?= e($x) ?></li><?php endforeach; ?></ul>
   <?php elseif ($ch !== 'lancamento'): ?><p class="dp-ok">Tudo pronto nesta etapa.</p><?php endif; ?>
   <?php if (isset($atalhos[$ch])): ?><p><a class="botao contorno pequeno" href="<?= $aba($atalhos[$ch][0]) ?>"><?= $atalhos[$ch][1] ?> →</a></p><?php endif; ?>
+  <?php if ($ch === 'ficha' && \App\Core\Auth::pode('formulas.ver')): $fmls = \App\Core\Banco::todos('SELECT id, codigo, versao, situacao FROM formulas WHERE dp_projeto_id = ? ORDER BY id DESC', [(int) $p['id']]); ?>
+    <p class="dp-formulas" data-dp-formulas>🧪 <?php if ($fmls): ?>Fórmula<?= count($fmls) > 1 ? 's' : '' ?>: <?php foreach ($fmls as $fm): ?><a href="<?= url('/formulas/' . (int) $fm['id']) ?>"><?= e($fm['codigo']) ?> v<?= (int) $fm['versao'] ?></a> (<?= e(\App\Services\FormulaService::SITUACOES[$fm['situacao']][0] ?? $fm['situacao']) ?>) <?php endforeach; ?>
+      <?php else: ?>Monte a fórmula na área de Fórmulas: quando aprovada, ela vira a ficha técnica deste produto. <?php endif; ?>
+      <?php if (\App\Core\Auth::pode('formulas.editar')): ?><a class="botao contorno pequeno" href="<?= url('/formulas/nova') ?>?projeto=<?= (int) $p['id'] ?>" data-criar-formula>Criar fórmula</a><?php endif; ?></p>
+  <?php endif; ?>
 
   <?php if ($ch === 'codigo'): ?>
     <form method="post" action="<?= $acao('codigo') ?>" class="pd-form dp-inline"><?= csrf_campo() ?>

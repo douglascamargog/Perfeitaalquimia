@@ -35,6 +35,6 @@ class OneController extends Controller
             $this->json(['ok' => true]);
             return;
         }
-        $this->json(['ok' => true] + \App\Services\OnePergunta::perguntar((string) ($_POST['pergunta'] ?? ''), (string) ($_POST['especialista'] ?? '')));
+        $this->json(['ok' => true] + \App\Services\OnePergunta::perguntar((string) ($_POST['pergunta'] ?? ''), (string) ($_POST['especialista'] ?? ''), (string) ($_POST['tela'] ?? '')));
     }
 }

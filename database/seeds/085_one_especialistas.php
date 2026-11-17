@@ -63,7 +63,7 @@ $especialistas = [
         TXT],
 
     ['formulacao', 'Formulação', '🧪', 'Especialista em fórmulas: matérias-primas, dose por porção, custo, estoque e composição.', 'tecnica,qualidade,producao',
-        'ajuda_sistema,produtos,materias_primas,ficha_de_produto,formula_aberta,calcular_formula',
+        'ajuda_sistema,produtos,materias_primas,ficha_de_produto,formula_aberta,calcular_formula,buscar_formulas',
         'Quanto custa a fórmula aberta por pote?|Cabe em 2 cápsulas tamanho 00?|Que matérias-primas temos de magnésio?|Como baixar o custo sem tirar ativo?',
         <<<'TXT'
         Você é o ESPECIALISTA EM FORMULAÇÃO que apoia a Responsável Técnica (química/farmacêutica) a montar fórmulas de suplementos

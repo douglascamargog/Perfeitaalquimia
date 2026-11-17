@@ -245,7 +245,7 @@ async function perguntar(texto) {
   const botaoEnviar = formPergunta.querySelector('button');
   botaoEnviar.disabled = true;
   try {
-    const corpo = new FormData(); corpo.append('pergunta', texto); corpo.append('especialista', especialista); corpo.append('_csrf', CSRF);
+    const corpo = new FormData(); corpo.append('pergunta', texto); corpo.append('especialista', especialista); corpo.append('tela', location.pathname); corpo.append('_csrf', CSRF);
     const r = await fetch(`${BASE}/one/perguntar`, { method: 'POST', body: corpo, headers: { Accept: 'application/json', 'X-CSRF-Token': CSRF } });
     const d = await r.json();
     pensando.remove();
