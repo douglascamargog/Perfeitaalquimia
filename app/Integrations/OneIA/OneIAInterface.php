@@ -16,5 +16,5 @@ interface OneIAInterface
      * Devolve ['texto' => resposta (markdown simples: **negrito**, [texto](/caminho), listas com "- "),
      *          'consultas' => [nomes das consultas feitas], 'tokens_entrada', 'tokens_saida', 'custo' (US$), 'situacao' => ok|erro|recusada]
      */
-    public function responder(string $pergunta, array $historico): array;
+    public function responder(string $pergunta, array $historico, ?array $especialista = null): array;
 }

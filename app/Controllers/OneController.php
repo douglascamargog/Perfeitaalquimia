@@ -31,10 +31,10 @@ class OneController extends Controller
     public function perguntar(): void
     {
         if (!empty($_POST['esquecer'])) {
-            \App\Services\OnePergunta::esquecer();
+            \App\Services\OnePergunta::esquecer((string) ($_POST['especialista'] ?? ''));
             $this->json(['ok' => true]);
             return;
         }
-        $this->json(['ok' => true] + \App\Services\OnePergunta::perguntar((string) ($_POST['pergunta'] ?? '')));
+        $this->json(['ok' => true] + \App\Services\OnePergunta::perguntar((string) ($_POST['pergunta'] ?? ''), (string) ($_POST['especialista'] ?? '')));
     }
 }

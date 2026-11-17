@@ -197,6 +197,34 @@ function formatar(texto) {
 
 const formPergunta = document.querySelector('[data-one-pergunte]');
 const conversa = document.querySelector('[data-one-conversa]');
+
+// Especialistas do One (V15.0): cada um com a sua conversa e os seus exemplos de pergunta
+const barraEsp = document.querySelector('[data-one-especialistas]');
+let especialista = '';
+try { especialista = sessionStorage.getItem('one-especialista') || ''; } catch { /* navegação privada */ }
+function escolherEspecialista(slug, limpar = true) {
+  const botoes = [...document.querySelectorAll('[data-one-especialista]')];
+  const alvo = botoes.find((b) => b.dataset.oneEspecialista === slug) || botoes.find((b) => b.dataset.oneEspecialista === barraEsp?.dataset.padrao) || botoes[0];
+  if (!alvo) return;
+  especialista = alvo.dataset.oneEspecialista;
+  try { sessionStorage.setItem('one-especialista', especialista); } catch { /* ok */ }
+  botoes.forEach((b) => b.setAttribute('aria-selected', String(b === alvo)));
+  if (!limpar || !conversa) return;
+  conversa.querySelectorAll('.one-msg').forEach((m) => m.remove());
+  const vazio = document.querySelector('[data-one-sugestoes]');
+  vazio?.removeAttribute('hidden');
+  const intro = document.querySelector('[data-one-esp-intro]');
+  if (intro) intro.textContent = especialista === 'geral' ? 'Pergunte do seu jeito, como falaria com um colega. Por exemplo:' : `${alvo.dataset.nome}: ${alvo.dataset.descricao} Por exemplo:`;
+  const exemplos = document.querySelector('[data-one-exemplos]');
+  if (exemplos) {
+    exemplos.replaceChildren(...JSON.parse(alvo.dataset.sugestoes || '[]').map((t) => el('button', { type: 'button', 'data-one-exemplo': '' }, t)));
+  }
+}
+if (barraEsp) escolherEspecialista(especialista, true);
+document.addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-one-especialista]');
+  if (b && b.dataset.oneEspecialista !== especialista) escolherEspecialista(b.dataset.oneEspecialista);
+});
 function bolha(quem, html) {
   const b = el('div', { class: 'one-msg ' + quem });
   if (quem.startsWith('one')) b.append(el('img', { src: img('piscando'), alt: '', width: '28', height: '31' }));
@@ -217,7 +245,7 @@ async function perguntar(texto) {
   const botaoEnviar = formPergunta.querySelector('button');
   botaoEnviar.disabled = true;
   try {
-    const corpo = new FormData(); corpo.append('pergunta', texto); corpo.append('_csrf', CSRF);
+    const corpo = new FormData(); corpo.append('pergunta', texto); corpo.append('especialista', especialista); corpo.append('_csrf', CSRF);
     const r = await fetch(`${BASE}/one/perguntar`, { method: 'POST', body: corpo, headers: { Accept: 'application/json', 'X-CSRF-Token': CSRF } });
     const d = await r.json();
     pensando.remove();
@@ -242,7 +270,7 @@ document.addEventListener('click', (ev) => {
   if (ev.target.closest('[data-one-limpar]') && conversa) {
     conversa.querySelectorAll('.one-msg').forEach((m) => m.remove());
     document.querySelector('[data-one-sugestoes]')?.removeAttribute('hidden');
-    const corpo = new FormData(); corpo.append('esquecer', '1'); corpo.append('_csrf', CSRF);
+    const corpo = new FormData(); corpo.append('esquecer', '1'); corpo.append('especialista', especialista); corpo.append('_csrf', CSRF);
     fetch(`${BASE}/one/perguntar`, { method: 'POST', body: corpo, headers: { 'X-CSRF-Token': CSRF } }).catch(() => {});
   }
 });

@@ -248,4 +248,36 @@ class AdministracaoController extends Controller
             . ($r['nao_achadas'] ? ", {$r['nao_achadas']} sem endereço preciso (continuam aproximadas na cidade)" : '') . '.' . ($r['erro'] ? ' ' . $r['erro'] : ''));
         redirecionar('/administracao#google-maps');
     }
+
+    // ------------------------------------------------------------------ Especialistas do One (V15.0)
+
+    public function especialistas(): void
+    {
+        $this->tela('administracao/especialistas', ['titulo' => 'Especialistas do One',
+            'lista' => \App\Core\Banco::todos('SELECT * FROM one_especialistas ORDER BY ordem, nome'),
+            'funcoes' => \App\Core\Banco::todos('SELECT slug, nome FROM funcoes WHERE ativa = 1 ORDER BY nome'),
+            'uso' => \App\Services\OneEspecialistas::usoDoMes(), 'comIa' => \App\Services\OnePergunta::comIa()]);
+    }
+
+    public function salvarEspecialista(string $id): void
+    {
+        $e = \App\Core\Banco::um('SELECT * FROM one_especialistas WHERE id = ?', [(int) $id]);
+        if (!$e) {
+            redirecionar('/administracao/especialistas');
+        }
+        $funcoes = array_values(array_intersect((array) ($_POST['funcoes'] ?? []), array_column(\App\Core\Banco::todos('SELECT slug FROM funcoes'), 'slug')));
+        $dados = [
+            'nome' => mb_substr(trim((string) ($_POST['nome'] ?? '')) ?: $e['nome'], 0, 60),
+            'descricao' => mb_substr(trim((string) ($_POST['descricao'] ?? '')), 0, 200),
+            'instrucoes' => mb_substr(trim((string) ($_POST['instrucoes'] ?? '')), 0, 8000),
+            'sugestoes' => mb_substr(implode('|', array_filter(array_map('trim', preg_split('/\R/', (string) ($_POST['sugestoes'] ?? ''))))), 0, 600),
+            'funcoes' => implode(',', $funcoes),
+            'ativo' => $e['slug'] === 'geral' ? 1 : (int) !empty($_POST['ativo']),
+            'editado_em' => date('Y-m-d H:i:s'),
+        ];
+        \App\Core\Banco::atualizar('one_especialistas', (int) $id, $dados);
+        \App\Core\Auditoria::registrar('configuracao', (int) $id, 'one_especialista', ['instrucoes' => $e['instrucoes'], 'ativo' => $e['ativo']], ['slug' => $e['slug']] + array_diff_key($dados, ['editado_em' => 1]));
+        \App\Core\Sessao::aviso('sucesso', 'Especialista "' . $dados['nome'] . '" salvo.');
+        redirecionar('/administracao/especialistas#esp-' . $e['slug']);
+    }
 }

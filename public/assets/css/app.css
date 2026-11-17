@@ -570,6 +570,12 @@ a.eq-pessoa { color: inherit; text-decoration: none; }
 .one-abas button[aria-selected="true"] { background: var(--card); color: var(--primaria-escura); box-shadow: 0 1px 4px rgba(2, 40, 40, .1); }
 .one-painel-corpo { flex: 1; overflow-y: auto; }
 .one-chat { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.one-especialistas { display: flex; gap: 6px; overflow-x: auto; padding: 8px 12px 6px; border-bottom: 1px solid var(--borda); scrollbar-width: thin; flex: none; }
+.one-especialistas button { flex: none; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--borda); background: var(--card); color: var(--texto); border-radius: 99px;
+  padding: 5px 11px; font: inherit; font-size: .76rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.one-especialistas button:hover { border-color: var(--primaria); }
+.one-especialistas button[aria-selected="true"] { background: var(--fundo-forte); color: var(--lima); border-color: var(--fundo-forte); }
+.one-chat-vazio [data-one-exemplos] { display: grid; gap: 6px; width: 100%; }
 .one-chat[hidden] { display: none; }
 .one-conversa { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
 .one-chat-vazio { margin: auto 0; display: grid; justify-items: center; gap: 8px; text-align: center; color: var(--texto-suave); font-size: .86rem; }

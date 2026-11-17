@@ -37,7 +37,7 @@ class OneIAClaude implements OneIAInterface
         return 'claude';
     }
 
-    public function responder(string $pergunta, array $historico): array
+    public function responder(string $pergunta, array $historico, ?array $especialista = null): array
     {
         $uso = ['tokens_entrada' => 0, 'tokens_saida' => 0, 'custo' => 0.0, 'consultas' => []];
         $autoload = RAIZ . '/vendor/autoload.php';
@@ -53,14 +53,15 @@ class OneIAClaude implements OneIAInterface
             $mensagens[] = ['role' => $h['papel'] === 'pessoa' ? 'user' : 'assistant', 'content' => (string) $h['texto']];
         }
         $mensagens[] = ['role' => 'user', 'content' => $pergunta];
-        $ferramentas = OneFerramentas::definicoes();
+        $liberadas = \App\Services\OneEspecialistas::consultas($especialista);
+        $ferramentas = OneFerramentas::definicoes($liberadas);
 
         try {
             for ($rodada = 0; $rodada <= self::MAX_RODADAS; $rodada++) {
                 $resposta = $cliente->beta->messages->create(
                     model: $this->modelo,
                     maxTokens: 4000,
-                    system: $this->instrucoes(),
+                    system: $this->instrucoes($especialista),
                     messages: $mensagens,
                     tools: $ferramentas,
                     outputConfig: ['effort' => 'low'],
@@ -104,7 +105,7 @@ class OneIAClaude implements OneIAInterface
                     $entrada = is_array($bloco->input) ? $bloco->input : (array) json_decode(json_encode($bloco->input), true);
                     $uso['consultas'][] = $bloco->name;
                     try {
-                        $dados = OneFerramentas::executar((string) $bloco->name, $entrada);
+                        $dados = OneFerramentas::executar((string) $bloco->name, $entrada, $liberadas);
                         $resultados[] = ['type' => 'tool_result', 'toolUseID' => $bloco->id, 'content' => json_encode($dados, JSON_UNESCAPED_UNICODE)];
                     } catch (\Throwable $e) {
                         error_log('OneIAClaude consulta ' . $bloco->name . ': ' . $e->getMessage());
@@ -164,7 +165,7 @@ class OneIAClaude implements OneIAInterface
         }
     }
 
-    private function instrucoes(): string
+    private function instrucoes(?array $especialista = null): string
     {
         $empresa = config('empresa_nome', 'Perfeita Alquimia');
         $pessoa = \App\Services\EquipeService::comoChamar(\App\Core\Auth::usuario());
@@ -179,7 +180,8 @@ class OneIAClaude implements OneIAInterface
         Para dúvidas de "como faço" no sistema, use ajuda_sistema. $clientes
         Valores em reais no formato R$ 1.234,56 e datas dd/mm/aaaa. Não mostre ids técnicos.
         Você não altera nada no sistema: só consulta e orienta. Se pedirem para fazer algo (enviar pedido, mudar cadastro), explique onde fazer.
-        Assuntos fora do trabalho da empresa: responda com gentileza que você só ajuda com o sistema e as vendas.
-        TXT;
+        Assuntos fora do trabalho da empresa: responda com gentileza que você só ajuda com o sistema e o trabalho da empresa.
+        TXT . ($especialista && $especialista['slug'] !== 'geral' ? "\n\nAGORA VOCÊ ATUA COMO: " . $especialista['icone'] . ' One ' . $especialista['nome']
+            . " (especialista do setor). Pode responder com mais detalhe quando o assunto pedir (até umas 12 frases ou uma lista).\n" . trim((string) $especialista['instrucoes']) : '');
     }
 }

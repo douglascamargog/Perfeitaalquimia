@@ -178,13 +178,25 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
   </div>
   <div class="one-painel-corpo" data-one-corpo data-one-aba-painel="dicas"><p class="one-carregando"><img src="<?= asset('img/one/one-correndo-padrao.webp') ?>" alt="" width="40">Um instante, estou olhando seus dados…</p></div>
   <div class="one-chat" data-one-aba-painel="perguntar" hidden>
+    <?php $especialistas = \App\Services\OneEspecialistas::paraPessoa(); $espPadrao = \App\Services\OneEspecialistas::padrao(); ?>
+    <?php if (count($especialistas) > 1): ?>
+      <div class="one-especialistas" role="tablist" aria-label="Especialistas do One" data-one-especialistas data-padrao="<?= e($espPadrao) ?>">
+        <?php foreach ($especialistas as $esp): ?>
+          <button type="button" role="tab" data-one-especialista="<?= e($esp['slug']) ?>" aria-selected="<?= $esp['slug'] === $espPadrao ? 'true' : 'false' ?>"
+            title="<?= e($esp['descricao']) ?>" data-sugestoes="<?= e(json_encode(array_values(array_filter(explode('|', (string) $esp['sugestoes']))), JSON_UNESCAPED_UNICODE)) ?>"
+            data-nome="<?= e($esp['nome']) ?>" data-descricao="<?= e($esp['descricao']) ?>"><span aria-hidden="true"><?= e($esp['icone']) ?></span><?= e($esp['nome']) ?></button>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
     <div class="one-conversa" data-one-conversa aria-live="polite">
       <div class="one-chat-vazio" data-one-sugestoes>
         <img src="<?= asset('img/one/one-ola-padrao.webp') ?>" alt="" width="54" height="60">
-        <p>Pergunte do seu jeito, como falaria com um colega. Por exemplo:</p>
-        <button type="button" data-one-exemplo>Como faço um orçamento?</button>
-        <button type="button" data-one-exemplo>Quanto falta para a minha meta?</button>
-        <button type="button" data-one-exemplo>Quais campanhas estão no ar?</button>
+        <p data-one-esp-intro>Pergunte do seu jeito, como falaria com um colega. Por exemplo:</p>
+        <div data-one-exemplos>
+          <button type="button" data-one-exemplo>Como faço um orçamento?</button>
+          <button type="button" data-one-exemplo>Quanto falta para a minha meta?</button>
+          <button type="button" data-one-exemplo>Quais campanhas estão no ar?</button>
+        </div>
       </div>
     </div>
     <form class="one-pergunte" data-one-pergunte>

@@ -21,6 +21,8 @@ return [
     ['POST', '/administracao/tray/conectar',    'AdministracaoController@conectarTray',    'config.gerenciar'],
     ['POST', '/administracao/tray/testar',      'AdministracaoController@testarTray',      'config.gerenciar'],
     ['GET',  '/tray/retorno',                   'AdministracaoController@retornoTray',     'publico'],
+    ['GET',  '/administracao/especialistas',    'AdministracaoController@especialistas',   'config.gerenciar'],
+    ['POST', '/administracao/especialistas/{id}', 'AdministracaoController@salvarEspecialista', 'config.gerenciar'],
     ['POST', '/administracao/google-maps',      'AdministracaoController@googleMaps',      'config.gerenciar'],
     ['POST', '/administracao/google-maps/testar', 'AdministracaoController@testarGoogleMaps', 'config.gerenciar'],
     ['POST', '/administracao/google-maps/localizar', 'AdministracaoController@localizarLojas', 'config.gerenciar'], // engrenagem do topo: só as telas que a pessoa pode abrir

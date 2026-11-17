@@ -33,8 +33,10 @@ class OnePergunta
     }
 
     /** Responde e devolve ['texto', 'ia' => bool] */
-    public static function perguntar(string $pergunta): array
+    public static function perguntar(string $pergunta, string $especialista = ''): array
     {
+        $esp = OneEspecialistas::escolher($especialista ?: OneEspecialistas::padrao());
+        $chaveConversa = 'one_conversa_' . ($esp['slug'] ?? 'geral');
         $pergunta = trim(mb_substr($pergunta, 0, 500));
         if ($pergunta === '') {
             return ['texto' => 'Pode perguntar! Ex.: "como faço um orçamento?" ou "quanto falta para a minha meta?"', 'ia' => false];
@@ -49,27 +51,32 @@ class OnePergunta
                 $ia = new OneIALocal(); // passou do limite da hora: responde sem IA
             }
         }
-        $historico = (array) Sessao::get('one_conversa', []);
+        $historico = (array) Sessao::get($chaveConversa, []);
         try {
-            $r = $ia->responder($pergunta, $historico);
+            $r = $ia->responder($pergunta, $historico, $esp);
         } catch (\Throwable $e) {
             error_log('OnePergunta: ' . $e->getMessage());
             $r = ['texto' => 'Ops, algo deu errado aqui. Tente de novo.', 'consultas' => [], 'tokens_entrada' => 0, 'tokens_saida' => 0, 'custo' => 0, 'situacao' => 'erro'];
         }
-        Banco::inserir('one_perguntas', ['usuario_id' => $id, 'provedor' => $ia->nome(),
+        Banco::inserir('one_perguntas', ['usuario_id' => $id, 'provedor' => $ia->nome(), 'especialista' => $esp['slug'] ?? null,
             'consultas' => mb_substr(implode(',', array_unique($r['consultas'] ?? [])), 0, 255) ?: null,
             'tokens_entrada' => (int) ($r['tokens_entrada'] ?? 0), 'tokens_saida' => (int) ($r['tokens_saida'] ?? 0),
             'custo_estimado' => (float) ($r['custo'] ?? 0), 'situacao' => $r['situacao'] ?? 'ok']);
         // conversa: só nesta sessão do navegador (some ao sair do sistema)
         $historico[] = ['papel' => 'pessoa', 'texto' => $pergunta];
         $historico[] = ['papel' => 'one', 'texto' => mb_substr((string) $r['texto'], 0, 2000)];
-        Sessao::set('one_conversa', array_slice($historico, -self::TROCAS * 2));
-        return ['texto' => (string) $r['texto'], 'ia' => $ia->nome() === 'claude'];
+        Sessao::set($chaveConversa, array_slice($historico, -self::TROCAS * 2));
+        return ['texto' => (string) $r['texto'], 'ia' => $ia->nome() === 'claude', 'especialista' => $esp['slug'] ?? 'geral'];
     }
 
-    public static function esquecer(): void
+    public static function esquecer(string $especialista = ''): void
     {
         Sessao::remover('one_conversa');
+        foreach (OneEspecialistas::ativos() as $e) {
+            if ($especialista === '' || $especialista === $e['slug']) {
+                Sessao::remover('one_conversa_' . $e['slug']);
+            }
+        }
     }
 
     /** Uso do mês (para o admin): perguntas, pessoas, custo estimado em US$ */

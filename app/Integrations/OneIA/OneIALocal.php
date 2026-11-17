@@ -15,7 +15,7 @@ class OneIALocal implements OneIAInterface
         return 'local';
     }
 
-    public function responder(string $pergunta, array $historico): array
+    public function responder(string $pergunta, array $historico, ?array $especialista = null): array
     {
         $p = mb_strtolower($pergunta);
         $consultas = [];
