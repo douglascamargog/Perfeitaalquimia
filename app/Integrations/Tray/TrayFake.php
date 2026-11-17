@@ -167,13 +167,13 @@ class TrayFake implements EcommerceInterface
         $nomes = ['Ana P.', 'Bruno S.', 'Carla M.', 'Diego R.', 'Elisa T.', 'Fábio L.', 'Gabi N.', 'Heitor C.', 'Iara B.', 'João V.'];
         $cidades = [['Porto Alegre', 'RS'], ['São Paulo', 'SP'], ['Curitiba', 'PR'], ['Recife', 'PE'], ['Belo Horizonte', 'MG'], ['Canoas', 'RS'],
             ['Florianópolis', 'SC'], ['Goiânia', 'GO'], ['Salvador', 'BA'], ['Campinas', 'SP']];
-        $hoje = date('Y-m-d');
+        // Os pedidos aconteceram nas últimas horas (a qualquer hora do dia que se abra a demonstração);
+        // a base é a hora cheia, então o mesmo pedido mantém o código durante a hora
+        $base = (int) (floor(time() / 3600) * 3600);
+        $hoje = date('YmdH', $base);
         $lista = [];
-        foreach ([7 * 60 + 10, 7 * 60 + 45, 8 * 60 + 20, 8 * 60 + 55, 9 * 60 + 30, 10 * 60 + 5, 10 * 60 + 40, 11 * 60 + 25, 12 * 60 + 10, 13 * 60 + 40] as $i => $minuto) {
-            $criado = strtotime($hoje) + $minuto * 60;
-            if ($criado > time()) {
-                continue; // ainda não aconteceu hoje
-            }
+        foreach ([390, 355, 320, 285, 250, 215, 180, 125, 70, 25] as $i => $minutosAtras) {
+            $criado = $base - $minutosAtras * 60;
             $s = crc32($hoje . '-' . $i);
             $itens = [];
             foreach ([0, 1] as $k) {
@@ -185,9 +185,9 @@ class TrayFake implements EcommerceInterface
             }
             $temNota = $criado < time() - 40 * 60;
             $lista[] = [
-                'codigo' => 'TRAY-' . date('ymd') . '-' . ($i + 1), 'numero_marketplace' => strtoupper(substr($canais[$i], 0, 2)) . '-' . (2000000000 + $s % 999999999),
+                'codigo' => 'TRAY-' . date('ymdH', $base) . '-' . ($i + 1), 'numero_marketplace' => strtoupper(substr($canais[$i], 0, 2)) . '-' . (2000000000 + $s % 999999999),
                 'canal' => $canais[$i], 'criado_em' => date('Y-m-d H:i:s', $criado), 'cancelado' => false,
-                'nf' => $temNota ? (string) (90000 + (int) date('z') * 20 + $i) : null, 'nf_em' => $temNota ? date('Y-m-d H:i:s', $criado + 35 * 60) : null,
+                'nf' => $temNota ? (string) (100000 + intdiv($base, 3600) % 50000 * 10 + $i) : null, 'nf_em' => $temNota ? date('Y-m-d H:i:s', $criado + 35 * 60) : null,
                 'comprador' => $nomes[$i], 'cidade' => $cidades[$i][0], 'uf' => $cidades[$i][1],
                 'total' => round(array_sum(array_map(fn($it) => $it['quantidade'] * $it['preco'], $itens)), 2), 'itens' => $itens,
             ];

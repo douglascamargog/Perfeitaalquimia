@@ -73,7 +73,8 @@ function diasTrabalho(ate) {
   kpis = await p.locator('.kpis-meu-mes').innerText();
   ok(kpis.includes(String(qtdAntes + 1)), `modo manual: quantidade de vendas no mês: ${qtdAntes + 1}`);
   const [soma, qtd] = sql("select concat(sum(valor),'|',count(*)) from vendas_registradas v join usuarios u on u.id=v.usuario_id where u.email='televendas1@demo.local' and v.data like concat(date_format(curdate(),'%Y-%m'),'%')").split('|');
-  ok(kpis.includes(brl(Number(soma) / Number(qtd))), `modo manual: ticket médio = ${brl(Number(soma) / Number(qtd))}`);
+  const tk = Number(soma) / Number(qtd); // meio centavo (ex.: 4.192,595) pode arredondar para cima ou para baixo
+  ok([Math.floor(tk * 100) / 100, Math.ceil(tk * 100) / 100].some((v) => kpis.includes(brl(v))), `modo manual: ticket médio = ${brl(tk)}`);
   ok(kpis.includes('participação') || kpis.toLowerCase().includes('participação'), 'mostra a participação na equipe');
   await p.screenshot({ path: DIR + '/meu-mes-vendedor.png', fullPage: true });
 
