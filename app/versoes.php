@@ -17,6 +17,17 @@
  */
 return [
     [
+        'versao' => '14.1', 'data' => '2026-11-17', 'titulo' => 'E-commerce igual à Tray e mapa novo',
+        'melhoria' => [
+            'Vendas por estado com o mapa de verdade do Brasil: cada estado pintado conforme as vendas, com o ranking ao lado. Clique no estado para filtrar.',
+            'Pedido de venda direta pelo painel da Tray agora aparece como "Particular (painel/API)", o mesmo nome da Tray.',
+            'Pedidos do Mercado Livre feitos pela integração da Tray mostram o número, o tipo de envio e a situação do frete no Mercado Livre.',
+            '"Pedir ao Marketing" ficou mais simples: saíram os assuntos de pergunta de cliente e cadastro de produto nos marketplaces.',
+        ],
+        'correcao' => ['As vendas do E-commerce agora batem com a "Performance da loja" da Tray: pedido "A enviar" só conta como venda depois que a Tray confirma o pagamento.'],
+        'admin' => 'Na 1ª leitura depois da atualização, o One relê só o cabeçalho de todos os pedidos da Tray (confirmação de pagamento), sem ler de novo os pedidos completos. Os assuntos tirados do "Pedir ao Marketing" ficaram inativos em Configurações › Listas (dá para reativar).',
+    ],
+    [
         'versao' => '14.0', 'data' => '2026-11-17', 'titulo' => 'E-commerce completo: loja própria e marketplaces',
         'novo' => [
             'Painel do E-commerce novo: vendas da loja própria e dos marketplaces (Mercado Livre, Shopee, Amazon, Magalu), com filtros de período, canal, estado e situação.',

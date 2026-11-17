@@ -34,10 +34,6 @@ $maxCidade = max(1, (float) ($p['cidades'][0]['faturamento'] ?? 1));
 $ufMax = max(1, (float) ($p['ufs'][0]['faturamento'] ?? 1));
 $ufFat = array_column($p['ufs'], null, 'uf');
 $totalUf = array_sum(array_column($p['ufs'], 'faturamento')) ?: 1;
-// Mapa do Brasil em quadradinhos: UF => [coluna, linha]
-$mapa = ['RR' => [3, 1], 'AP' => [5, 1], 'AM' => [2, 2], 'PA' => [4, 2], 'MA' => [5, 2], 'CE' => [6, 2], 'RN' => [7, 2], 'AC' => [1, 3], 'RO' => [2, 3],
-    'MT' => [3, 3], 'TO' => [4, 3], 'PI' => [5, 3], 'PB' => [7, 3], 'GO' => [4, 4], 'DF' => [5, 4], 'BA' => [6, 4], 'PE' => [7, 4], 'MS' => [3, 5],
-    'MG' => [5, 5], 'ES' => [6, 5], 'AL' => [7, 5], 'SP' => [4, 6], 'RJ' => [5, 6], 'SE' => [7, 6], 'PR' => [4, 7], 'SC' => [4, 8], 'RS' => [4, 9]];
 $pagNomes = ['pix' => 'Pix', 'cartao' => 'Cartão', 'boleto' => 'Boleto', 'outro' => 'Pago no marketplace / outro'];
 $fu = $p['funil'];
 $etapas = [['Pedidos feitos', $fu['todos'], 'cinza'], ['Aguardando pagamento', $fu['aguardando'], 'amarelo'], ['Pagos', $fu['pagos'], 'verde'],
@@ -71,7 +67,7 @@ $periodoNome = $f['periodo'] === 'livre' ? data_br($f['de']) . ' a ' . data_br($
   </select>
   <select name="uf" aria-label="Estado">
     <option value="">Todo o Brasil</option>
-    <?php foreach (array_keys($mapa) as $uf): ?><option <?= $f['uf'] === $uf ? 'selected' : '' ?>><?= $uf ?></option><?php endforeach; ?>
+    <?php foreach (['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'] as $uf): ?><option <?= $f['uf'] === $uf ? 'selected' : '' ?>><?= $uf ?></option><?php endforeach; ?>
   </select>
   <select name="situacao" aria-label="Situação">
     <option value="">Todas as situações</option>
@@ -247,17 +243,35 @@ $periodoNome = $f['periodo'] === 'livre' ? data_br($f['de']) . ' a ' . data_br($
   </section>
 
   <!-- Geografia -->
-  <section class="b-card span-6" data-eco-mapa>
+  <section class="b-card span-7" data-eco-mapa>
     <header class="b-topo"><h2>Vendas por estado</h2><span class="b-chip"><?= count($p['ufs']) ?> estado(s)</span></header>
-    <div class="eco-mapa">
-      <?php foreach ($mapa as $uf => [$col, $lin]): $fat = (float) ($ufFat[$uf]['faturamento'] ?? 0); ?>
-        <a class="eco-uf <?= $fat ? '' : 'sem' ?> <?= $f['uf'] === $uf ? 'ativo' : '' ?>" style="grid-column: <?= $col ?>; grid-row: <?= $lin ?>; --forca: <?= $fat ? max(12, round($fat / $ufMax * 100)) : 0 ?>%"
-           href="<?= url('/marketing/ecommerce') ?>?<?= e($qs(['uf' => $f['uf'] === $uf ? null : $uf])) ?>"
-           title="<?= $uf ?>: <?= $fat ? dinheiro($fat) . ' · ' . $n($ufFat[$uf]['pedidos']) . ' pedido(s) · ' . $pct($fat / $totalUf * 100) : 'sem vendas' ?>"><?= $uf ?></a>
-      <?php endforeach; ?>
+    <?php $brasil = require RAIZ . '/app/dados/brasil_estados.php'; $topUfs = array_slice($p['ufs'], 0, 6); ?>
+    <div class="eco-mapa-area">
+      <svg class="eco-mapa" viewBox="<?= e($brasil['viewBox']) ?>" role="img" aria-label="Mapa do Brasil com o faturamento por estado">
+        <?php foreach ($brasil['estados'] as $uf => [$nomeUf, $caminho]): $fat = (float) ($ufFat[$uf]['faturamento'] ?? 0); ?>
+          <a href="<?= url('/marketing/ecommerce') ?>?<?= e($qs(['uf' => $f['uf'] === $uf ? null : $uf])) ?>" data-uf="<?= $uf ?>">
+            <path class="eco-uf <?= $fat ? '' : 'sem' ?> <?= $f['uf'] === $uf ? 'ativo' : '' ?>" d="<?= e($caminho) ?>"
+              style="--forca: <?= $fat ? max(14, round($fat / $ufMax * 100)) : 0 ?>%">
+              <title><?= e($nomeUf) ?>: <?= $fat ? dinheiro($fat) . ' · ' . $n($ufFat[$uf]['pedidos']) . ' pedido(s) · ' . $pct($fat / $totalUf * 100) . ' do total' : 'sem vendas no período' ?></title>
+            </path>
+          </a>
+        <?php endforeach; ?>
+      </svg>
+      <div>
+        <?php if (!$topUfs): ?><p class="b-vazio">Sem vendas no período.</p><?php endif; ?>
+        <ol class="eco-ranking-uf">
+          <?php foreach ($topUfs as $u): ?>
+            <li><a href="<?= url('/marketing/ecommerce') ?>?<?= e($qs(['uf' => $u['uf']])) ?>"><b><?= e($u['uf']) ?></b><span><?= e($brasil['estados'][$u['uf']][0] ?? $u['uf']) ?></span>
+              <strong><?= dinheiro((float) $u['faturamento']) ?></strong></a>
+              <i style="width: <?= round($u['faturamento'] / $ufMax * 100) ?>%"></i><small><?= $n($u['pedidos']) ?> pedido(s) · <?= $pct($u['faturamento'] / $totalUf * 100) ?></small></li>
+          <?php endforeach; ?>
+        </ol>
+        <p class="eco-legenda"><span>menos</span><i></i><span>mais vendas</span></p>
+      </div>
     </div>
+    <small class="eco-credito">Mapa: @svg-maps/brazil (CC BY 4.0)</small>
   </section>
-  <section class="b-card span-6">
+  <section class="b-card span-5">
     <header class="b-topo"><h2>Cidades que mais compram</h2></header>
     <?php if (!$p['cidades']): ?><p class="b-vazio">Sem cidades no período (aparecem depois que o pedido completo é lido).</p><?php endif; ?>
     <ul class="eco-barras">

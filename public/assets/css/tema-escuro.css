@@ -128,6 +128,7 @@ html.escuro .eco-calor i, html.escuro .eco-calor i * { color: var(--secundaria-t
 html.escuro .eco-calor i[data-forte], html.escuro .eco-calor i[data-forte] * { color: var(--secundaria-texto); }
 html.escuro .eco-foto { background: color-mix(in srgb, #fff 18%, var(--card)); }
 html.escuro .eco-barras li i, html.escuro .eco-barras li i * { color: var(--secundaria-texto); }
+html.escuro .eco-legenda i { background: linear-gradient(90deg, color-mix(in srgb, var(--primaria) 14%, var(--secundaria-clara, color-mix(in srgb, #e9f7ee 18%, var(--card)))), var(--primaria)); }
 html.escuro .eco-sit.sit-aguardando { background: color-mix(in srgb, #fef3c7 18%, var(--card)); color: color-mix(in srgb, #92400e 45%, #ffffff); }
 html.escuro .eco-sit.sit-enviado { background: color-mix(in srgb, #dbeafe 18%, var(--card)); color: color-mix(in srgb, #1e40af 45%, #ffffff); }
 html.escuro .eco-sit.sit-entregue { background: color-mix(in srgb, #e0e7ff 18%, var(--card)); color: color-mix(in srgb, #3730a3 45%, #ffffff); }

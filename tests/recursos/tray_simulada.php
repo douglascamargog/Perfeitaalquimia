@@ -63,6 +63,10 @@ if (str_starts_with($caminho, '/web_api/orders')) {
             'payment_method' => 'Cartão - Vindi', 'payment_method_type' => 'credit_card', 'shipment' => 'Sedex', 'has_invoice' => '0', 'modified' => $dia(1) . ' 12:15:00',
             'Customer' => $cliente('61', 'Ana Paula', 'Curitiba', 'PR'), 'ProductsSold' => [$item('CAD8', 'Cadeira BBB Boucle (Ref. CABBB-8)<br /><strong>Cor</strong> Terracota', 1, '69.90')]],
     ];
+    // Como o #2029 do print: "A ENVIAR", mas a Tray ainda não confirmou o pagamento (has_payment = 0) → não é venda
+    $pedidos['2033'] = ['status' => 'A ENVIAR', 'date' => $dia(1), 'hour' => '16:10:00', 'point_sale' => 'LOJA VIRTUAL', 'total' => '45.00', 'partial_total' => '45.00',
+        'shipment_value' => '0.00', 'payment_method' => 'Mercado Pago', 'payment_method_type' => 'other', 'shipment' => 'PAC', 'has_invoice' => '0', 'has_payment' => '0',
+        'modified' => $dia(1) . ' 16:11:00', 'Customer' => $cliente('71', 'Pessoa Sem Pagamento', 'Maringá', 'PR'), 'ProductsSold' => [$item('CAMISA', 'Camisa Teste', 1, '45.00')]];
     for ($i = 0; $i < 12; $i++) { // pedidos comuns da loja (para testar o limite por rodada)
         $pedidos[(string) (3000 + $i)] = ['status' => 'FINALIZADO', 'date' => $dia(5 + $i), 'hour' => '10:00:00', 'point_sale' => 'LOJA VIRTUAL', 'total' => '100.00', 'partial_total' => '100.00',
             'shipment_value' => '0.00', 'payment_method' => 'Pix', 'payment_method_type' => 'pix', 'shipment' => 'PAC', 'has_invoice' => '1', 'modified' => $dia(4 + $i) . ' 10:00:00', 'delivered' => '1',

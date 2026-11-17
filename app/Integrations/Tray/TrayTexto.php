@@ -21,13 +21,13 @@ class TrayTexto
         'americanas'    => ['Americanas', 'vermelho', ['AMERICANAS', 'B2W', 'SUBMARINO']],
         'shein'         => ['Shein', 'cinza', ['SHEIN']],
         'tiktok'        => ['TikTok Shop', 'cinza', ['TIKTOK']],
-        'manual'        => ['Digitado no painel', 'cinza', ['PARTICULAR', 'MANUAL']],
+        'manual'        => ['Particular (painel/API)', 'cinza', ['PARTICULAR', 'MANUAL']],
         'outro'         => ['Outros', 'cinza', []],
     ];
 
     /** Situações (já traduzidas): chave => [nome, cor] */
     public const SITUACOES = [
-        'aguardando' => ['Aguardando pagamento', 'amarelo'],
+        'aguardando' => ['Aguardando pagamento', 'amarelo'],   // inclui "A ENVIAR" sem pagamento confirmado
         'pago'       => ['Pago / a enviar', 'verde'],
         'enviado'    => ['Enviado', 'azul'],
         'entregue'   => ['Entregue', 'verde'],
@@ -107,6 +107,25 @@ class TrayTexto
         };
     }
 
+    /**
+     * Ajusta pela confirmação de pagamento da Tray (has_payment), como na "Performance da loja":
+     * "A ENVIAR" sem pagamento confirmado ainda não é venda; "Pendente" com pagamento confirmado já é.
+     */
+    public static function comPagamento(string $tipo, mixed $temPagamento): string
+    {
+        if ($temPagamento === null || $temPagamento === '') {
+            return $tipo; // a loja não informou: vale o status
+        }
+        $pago = (string) $temPagamento === '1';
+        if (!$pago && $tipo === 'pago') {
+            return 'aguardando';
+        }
+        if ($pago && $tipo === 'aguardando') {
+            return 'pago';
+        }
+        return $tipo;
+    }
+
     /** Forma de pagamento → pix | cartao | boleto | outro */
     public static function pagamentoTipo(string $tipoTray, string $forma = ''): ?string
     {
@@ -150,7 +169,11 @@ class TrayTexto
     {
         $mkt = $o['MarketplaceOrder'][0]['MarketplaceOrder'] ?? ($o['MarketplaceOrder'][0] ?? []);
         if (!$mkt && !empty($o['MlOrder'])) {
-            $mkt = ['marketplace_name' => 'Mercado Livre'] + ($o['MlOrder'][0]['MlOrder'] ?? []);
+            // Venda do Mercado Livre pela integração própria da Tray: campos com outros nomes
+            $ml = $o['MlOrder'][0]['MlOrder'] ?? ($o['MlOrder'][0] ?? []);
+            $mkt = ['marketplace_name' => 'Mercado Livre', 'marketplace_order_id' => (string) ($ml['pedido_id'] ?? ''),
+                'marketplace_shipping_type' => (string) (($ml['logistic_type'] ?? '') ?: ($ml['mercado_envio'] ?? '')),
+                'marketplace_internal_status' => (string) ($ml['status_frete_ml'] ?? '')];
         }
         $status = (string) ($o['OrderStatus']['status'] ?? $o['status'] ?? '');
         [$canal, $canalNome] = self::canal((string) ($mkt['marketplace_name'] ?? ''), (string) ($o['point_sale'] ?? ''), (string) ($o['partner_id'] ?? ''));
@@ -162,7 +185,7 @@ class TrayTexto
             'data_hora' => "$data $hora",
             'modificado_em' => self::data($o['modified'] ?? null),
             'status' => mb_substr($status, 0, 80),
-            'status_tipo' => self::statusTipo($status, (string) ($o['OrderStatus']['type'] ?? ($statusDaLoja[$status] ?? ''))),
+            'status_tipo' => self::comPagamento(self::statusTipo($status, (string) ($o['OrderStatus']['type'] ?? ($statusDaLoja[$status] ?? ''))), $o['has_payment'] ?? null),
             'status_cor' => preg_match('/^#[0-9a-f]{3,8}$/i', (string) ($o['OrderStatus']['background'] ?? '')) ? $o['OrderStatus']['background'] : null,
             'canal' => $canal, 'canal_nome' => $canalNome ? mb_substr($canalNome, 0, 80) : null,
             'marketplace_pedido' => mb_substr((string) ($mkt['marketplace_order_id'] ?? ''), 0, 60) ?: (str_starts_with((string) ($o['external_code'] ?? ''), 'TRAY') ? null : (mb_substr((string) ($o['external_code'] ?? ''), 0, 60) ?: null)),

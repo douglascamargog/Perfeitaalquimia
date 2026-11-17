@@ -48,14 +48,17 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
   ok(sql(`select count(*) from notificacoes where tipo='mkt_tarefa' and usuario_id=${social} and link='/marketing/tarefas/${t1}'`) === '1', 'Social Media avisada no sino');
   ok(sql(`select count(*) from notificacoes where tipo='mkt_tarefa' and usuario_id=${ecom} and link='/marketing/tarefas/${t1}'`) === '0', 'E-commerce não recebe o pedido de arte');
   ok(await v.p.locator(`tr[data-pedido="${t1}"]`).count() === 1, 'aparece em "Meus pedidos"');
-  // Cadastro de produto → E-commerce
+  // Assuntos do e-commerce saíram do "Pedir ao Marketing" (V14.1): pedido com eles não é aceito
   await post(v, '/marketing/tarefas', { pedido: '1', tipo_id: tipo('Cadastrar produto'), titulo: 'Cadastrar o Ozen X na Shopee' });
+  ok(sql("select count(*) from mkt_tarefas where titulo='Cadastrar o Ozen X na Shopee'") === '0', 'assunto de e-commerce (inativo) não cria pedido');
+  // Tarefa do E-commerce para o resto do teste (o Gestor de Marketing passa um "Outro assunto" para o setor)
+  await post(v, '/marketing/tarefas', { pedido: '1', tipo_id: tipo('Outro'), titulo: 'Cadastrar o Ozen X na Shopee' });
   const t2 = sql("select id from mkt_tarefas where titulo='Cadastrar o Ozen X na Shopee'");
-  ok(sql(`select funcao_slug from mkt_tarefas where id=${t2}`) === 'ecommerce', 'cadastro de produto vai para E-commerce e Marketplaces');
+  sql(`update mkt_tarefas set funcao_slug='ecommerce' where id=${t2}`);
   // Assuntos que saíram da lista (V11.6)
   await v.p.goto(BASE + '/marketing/pedir');
   const assuntos = (await v.p.locator('select[name=tipo_id] option').allInnerTexts()).join(' | ');
-  ok(!/Rótulo ou embalagem|oferta relâmpago|Envio FULL/.test(assuntos) && assuntos.includes('Arte ou post'), 'sem "Rótulo ou embalagem", "Campanha de desconto" e "Envio FULL" na lista de assuntos');
+  ok(!/Rótulo ou embalagem|oferta relâmpago|Envio FULL|marketplace ou site|Cadastrar produto/.test(assuntos) && assuntos.includes('Arte ou post'), 'sem "Rótulo ou embalagem", "Campanha de desconto", "Envio FULL" e os dois assuntos de e-commerce na lista');
   ok((await post(v, '/marketing/tarefas', { pedido: '1', tipo_id: tipo('Arte'), titulo: 'Ontem', prazo: '2000-01-01' })).includes('já passou'), 'prazo no passado não passa');
 
   // ---------- Anexo protegido ----------
@@ -100,7 +103,7 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
   // encaminhar
   await post(g, `/marketing/tarefas/${t2}/encaminhar`, { funcao_slug: 'ecommerce', responsavel_id: ecom, prazo: '2099-01-10' });
   ok(sql(`select concat(responsavel_id,'/',prazo) from mkt_tarefas where id=${t2}`) === `${ecom}/2099-01-10`, 'encaminhar define quem faz e o prazo');
-  ok(sql(`select count(*) from notificacoes where usuario_id=${ecom} and link='/marketing/tarefas/${t2}' and tipo='mkt_tarefa'`) === '2', 'quem recebe a tarefa é avisado');
+  ok(sql(`select count(*) from notificacoes where usuario_id=${ecom} and link='/marketing/tarefas/${t2}' and tipo='mkt_tarefa'`) === '1', 'quem recebe a tarefa é avisado');
   // vendedora não mexe
   ok((await post(v, `/marketing/tarefas/${t2}/mudar`, { acao: 'concluir' })).includes('não pode') && sit(t2) === 'a_fazer', 'vendedora não conclui tarefa do Marketing');
   await post(v, `/marketing/tarefas/${t2}/mudar`, { acao: 'cancelar' });

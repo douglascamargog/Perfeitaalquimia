@@ -63,14 +63,23 @@
 .eco-pizza { height: 180px; }
 .eco-tabela-mini { margin-top: 8px; font-size: .8rem; }
 
-/* Mapa do Brasil (quadradinhos) */
-.eco-mapa { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(9, 34px); gap: 4px; max-width: 360px; margin: 14px auto 0; }
-.eco-uf { display: grid; place-items: center; border-radius: 8px; font-size: .72rem; font-weight: 800; text-decoration: none;
-  background: color-mix(in srgb, var(--primaria) var(--forca), var(--primaria-clara)); color: var(--verde-escuro); }
-.eco-uf[style*="--forca: 6"], .eco-uf[style*="--forca: 7"], .eco-uf[style*="--forca: 8"], .eco-uf[style*="--forca: 9"], .eco-uf[style*="--forca: 100"] { color: #fff; }
-.eco-uf.sem { background: var(--fundo); color: var(--texto-suave); font-weight: 600; }
-.eco-uf.ativo { outline: 3px solid var(--lima-escuro); }
-.eco-uf:hover { outline: 2px solid var(--verde-escuro); }
+/* Mapa do Brasil (contorno real dos estados) */
+.eco-mapa-area { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: center; margin-top: 12px; }
+.eco-mapa { width: 100%; height: auto; max-height: 420px; display: block; }
+.eco-mapa .eco-uf { fill: color-mix(in srgb, var(--primaria) var(--forca), var(--secundaria-clara, #e9f7ee)); stroke: var(--card); stroke-width: 1.2; transition: fill .15s, opacity .15s; cursor: pointer; }
+.eco-mapa .eco-uf.sem { fill: color-mix(in srgb, var(--borda) 70%, var(--card)); }
+.eco-mapa a:hover .eco-uf { opacity: .8; stroke: var(--verde-escuro); stroke-width: 2; }
+.eco-mapa .eco-uf.ativo { stroke: var(--lima-escuro, #8fbf1a); stroke-width: 3; }
+.eco-ranking-uf { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.eco-ranking-uf li { display: grid; gap: 3px; font-size: .84rem; }
+.eco-ranking-uf a { display: grid; grid-template-columns: 30px 1fr auto; gap: 6px; align-items: center; color: var(--texto); text-decoration: none; }
+.eco-ranking-uf b { font-size: .72rem; background: var(--fundo-forte); color: var(--lima); border-radius: 6px; text-align: center; padding: 1px 0; }
+.eco-ranking-uf i { height: 6px; border-radius: 99px; background: var(--primaria); }
+.eco-ranking-uf small { color: var(--texto-suave); font-size: .72rem; }
+.eco-legenda { display: flex; align-items: center; gap: 6px; font-size: .7rem; color: var(--texto-suave); margin: 12px 0 0; }
+.eco-legenda i { flex: 1; height: 8px; border-radius: 99px; background: linear-gradient(90deg, color-mix(in srgb, var(--primaria) 14%, var(--secundaria-clara, #e9f7ee)), var(--primaria)); }
+.eco-credito { display: block; text-align: right; font-size: .62rem; color: var(--texto-suave); margin-top: 6px; }
+@media (max-width: 680px) { .eco-mapa-area { grid-template-columns: 1fr; } }
 
 /* Tabela e detalhe */
 .eco-pedidos td { vertical-align: top; }
@@ -91,7 +100,6 @@
 @media (max-width: 760px) {
   .eco-calor { grid-template-columns: 26px repeat(24, minmax(0, 1fr)); gap: 1px; font-size: .5rem; }
   .eco-periodos { border-radius: 16px; }
-  .eco-mapa { grid-template-rows: repeat(9, 28px); }
 }
 @media print {
   .eco-filtros, .eco-periodos { display: none !important; }

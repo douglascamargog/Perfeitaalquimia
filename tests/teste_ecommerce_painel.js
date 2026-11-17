@@ -48,12 +48,12 @@ const entrar = async (b, email, opcoes = {}) => {
     // 1. Primeira leitura: 16 pedidos, só 10 completos nesta rodada
     await a.goto(BASE + '/marketing/ecommerce?periodo=90d');
     await Promise.all([a.waitForNavigation(), a.click('[data-eco-atualizar]')]);
-    ok((await a.locator('.aviso').first().innerText()).includes('16 pedido(s) novo(s)'), '"Atualizar agora" copia os 16 pedidos da loja');
-    ok(sql("select count(*) from ecommerce_pedidos where origem='tray' and detalhado=1") === '10' && sql("select count(*) from ecommerce_pedidos where detalhado=0") === '6',
-      'limite por rodada: 10 pedidos completos agora, 6 ficam para a próxima');
-    ok(await a.locator('[data-eco-importando]').isVisible() && (await a.locator('[data-eco-importando]').innerText()).includes('10 de 16'), 'a tela mostra "Importando o histórico: 10 de 16"');
+    ok((await a.locator('.aviso').first().innerText()).includes('17 pedido(s) novo(s)'), '"Atualizar agora" copia os 17 pedidos da loja');
+    ok(sql("select count(*) from ecommerce_pedidos where origem='tray' and detalhado=1") === '10' && sql("select count(*) from ecommerce_pedidos where detalhado=0") === '7',
+      'limite por rodada: 10 pedidos completos agora, 7 ficam para a próxima');
+    ok(await a.locator('[data-eco-importando]').isVisible() && (await a.locator('[data-eco-importando]').innerText()).includes('10 de 17'), 'a tela mostra "Importando o histórico: 10 de 17"');
     await Promise.all([a.waitForNavigation(), a.click('[data-eco-atualizar]')]);
-    ok(sql("select count(*) from ecommerce_pedidos where detalhado=0") === '0' && sql('select count(*) from ecommerce_pedidos') === '16', 'segunda rodada completa o histórico, sem duplicar');
+    ok(sql("select count(*) from ecommerce_pedidos where detalhado=0") === '0' && sql('select count(*) from ecommerce_pedidos') === '17', 'segunda rodada completa o histórico, sem duplicar');
     const leiturasAntes = Object.values(estado().contagem || {}).reduce((s, n) => s + n, 0);
     await Promise.all([a.waitForNavigation(), a.click('[data-eco-atualizar]')]);
     const leiturasDepois = Object.values(estado().contagem || {}).reduce((s, n) => s + n, 0);
@@ -63,6 +63,7 @@ const entrar = async (b, email, opcoes = {}) => {
     ok(sql("select concat(canal,'|',status_tipo) from ecommerce_pedidos where tray_id='2029'") === 'mercado_livre|pago'
       && sql("select concat(canal,'|',status_tipo) from ecommerce_pedidos where tray_id='2023'") === 'manual|aguardando'
       && sql("select status_tipo from ecommerce_pedidos where tray_id='2019'") === 'aguardando', 'canal e situação: Mercado Livre pago, "Pendente" e "Aguardando Vindi" = aguardando pagamento');
+    ok(sql("select status_tipo from ecommerce_pedidos where tray_id='2033'") === 'aguardando', '"A ENVIAR" sem pagamento confirmado na Tray (has_payment = 0) ainda não é venda, como na Performance da loja');
     ok(sql("select concat(nome,'|',variacao) from ecommerce_pedido_itens i join ecommerce_pedidos p on p.id=i.pedido_id where p.tray_id='1281'") === 'Roupa Cirurgica Gato Confort Verde (teste Tray)|Tamanho 02',
       'nome do produto sem HTML e sem "(Disponibilidade...)", com a variação separada');
     ok(sql("select count(*) from ecommerce_pedido_itens where nome like '%<%'") === '0', 'nenhum nome com HTML');
@@ -74,7 +75,7 @@ const entrar = async (b, email, opcoes = {}) => {
     ok(Math.abs(fat - (899 + 21.85 + 1200)) < 0.01, 'faturamento conta só pago/enviado/entregue (sem os aguardando pagamento)');
     ok((await a.locator('[data-eco-faturamento]').innerText()).includes('2.120,85'), 'o painel mostra R$ 2.120,85 de faturamento');
     const canais = await a.locator('[data-eco-canais]').innerText();
-    ok(/loja própria/i.test(canais) && /mercado livre/i.test(canais) && /digitado no painel/i.test(canais), 'vendas por canal: loja própria, Mercado Livre e digitado no painel');
+    ok(/loja própria/i.test(canais) && /mercado livre/i.test(canais) && /particular/i.test(canais), 'vendas por canal: loja própria, Mercado Livre e particular (painel/API)');
     ok(await a.locator('#grafico-diario').isVisible() && (await a.locator('#eco-calor i').count()) === 168, 'gráfico por dia e canal + mapa de calor (7 dias × 24 horas)');
     ok((await a.locator('[data-eco-produtos]').innerText()).includes('Roupa Cirurgica Gato Confort Verde') && !(await a.content()).includes('&lt;strong'), 'mais vendidos com nome limpo');
     ok((await a.locator('[data-eco-mapa] .eco-uf:not(.sem)').count()) === 2, 'mapa do Brasil marca os estados com venda');

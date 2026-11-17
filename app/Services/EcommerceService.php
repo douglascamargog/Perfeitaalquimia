@@ -146,7 +146,10 @@ class EcommerceService
                 unset($dados['tray_id']);
                 if (!$completo) {
                     unset($dados['data_hora']); // a listagem não traz a hora: mantém a do pedido completo
-                    $dados['detalhado'] = 0;
+                    // Releitura forçada (modificado_em apagado numa atualização do One): só o cabeçalho muda
+                    if ($e['modificado_em'] !== null || !$e['detalhado']) {
+                        $dados['detalhado'] = 0;
+                    }
                 }
                 Banco::atualizar('ecommerce_pedidos', (int) $e['id'], $dados);
                 $atualizados++;
