@@ -50,3 +50,4 @@ continuam com o mesmo número de registros.
 | `ajustes` | Código do produto, busca rápida, ficha do funcionário, aniversariantes, Início do admin, backup |
 | `notificacoes` | Contador do menu, sino, aviso flutuante, "novidade" nos clientes, um aviso por hora, privacidade |
 | `revisao` | Abre todas as telas de todos os perfis no computador e no celular (erros, avisos e rolagem lateral) |
+| `zerar` | Administração › Zerar dados: só o Admin, senha + ZERAR, backup antes, apaga o dia a dia e mantém usuários, produtos, catálogo, configurações e treinamento; toda tabela classificada |

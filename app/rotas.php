@@ -445,6 +445,8 @@ return [
     ['GET',  '/sistema/atualizacao',                  'AtualizacaoController@index',   'sistema.atualizar'],
     ['POST', '/sistema/atualizacao/aplicar',          'AtualizacaoController@aplicar', 'sistema.atualizar'],
     ['POST', '/sistema/atualizacao/backup',           'AtualizacaoController@backup',  'sistema.atualizar'],
+    ['GET',  '/sistema/zerar',                        'ZerarDadosController@index',    'sistema.zerar'], // só o Admin ('*')
+    ['POST', '/sistema/zerar',                        'ZerarDadosController@zerar',    'sistema.zerar'],
 
     ['GET',  '/integracao',             'IntegracaoController@index',       'integracao.gerenciar'],
     ['POST', '/integracao/testar',      'IntegracaoController@testar',      'integracao.gerenciar'],

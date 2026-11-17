@@ -17,6 +17,14 @@
  */
 return [
     [
+        'versao' => '15.1', 'data' => '2026-11-17', 'titulo' => 'One pronto para os dados reais',
+        'melhoria' => [
+            'O One está sendo preparado para receber os dados reais da empresa: clientes, pedidos, compras, produção e títulos vão passar a vir do Nota10.',
+            'Seu login, sua senha, seu perfil e o seu progresso no treinamento continuam como estão. Produtos e catálogo também.',
+        ],
+        'admin' => 'Administração › Zerar dados (só o perfil Admin): apaga os dados do dia a dia (clientes, linha do tempo, tarefas, pedidos, orçamentos, metas, cobrança, matérias-primas, fichas técnicas, ordens de produção, fórmulas, projetos, compras, marketing, terceirização, prospecção, avisos e os anexos desses dados) e mantém usuários, produtos e catálogo (com preços e estoque), configurações e chaves, listas, Academia, treinamento e o progresso de cada pessoa, mensagens prontas, e-commerce da Tray e a auditoria. Pede a sua senha e a palavra ZERAR e faz antes um backup completo em storage/backups (one-antes-de-zerar-....sql.gz, não é apagado pela limpeza dos backups diários). Para voltar: phpMyAdmin › Importar esse arquivo. Recomendado: avisar a equipe e fazer fora do horário.',
+    ],
+    [
         'versao' => '15.0', 'data' => '2026-11-17', 'titulo' => 'Especialistas do One e área de Fórmulas',
         'novo' => [
             'Especialistas do One: no chat do One (aba Perguntar) há um assistente para cada setor — Vendas, Prospecção, Marketing, Formulação, Cobrança e Terceirização. O chat abre no especialista do seu setor.',
