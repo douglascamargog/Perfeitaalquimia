@@ -39,6 +39,8 @@ class MeuMesController extends Controller
             'equipe'   => $equipe,
             'participaEquipe' => $participaEquipe,
             'tarefas'  => $tarefas,
+            // Pedidos tirados em visitas de outras carteiras (Planejador de visitas): a venda é da dona; aqui só para acompanhar
+            'tirados'  => $aba === 'vendas' ? \App\Services\RoteiroService::pedidosTirados((int) Auth::id(), $mes) : null,
             'podeEquipe' => Auth::pode('metas.gerenciar'),
             'participacao' => $equipe && $equipe['vendido'] > 0 ? $eu['vendido'] / $equipe['vendido'] * 100 : null,
             // Pedidos faturados no sistema (catálogo, sistema, app) em que a pessoa é a vendedora

@@ -17,6 +17,7 @@ return [
             ['Recompra', null, 'recompra.ver', ''],
             ['Prospecção', 'prospeccao.ver', 'prospeccao.usar', 'Ver: a fila e a base de CNPJs · Editar: enviar empresas para o funil'],
             ['App do externo', null, 'app.usar', ''],
+            ['Planejador de visitas', 'roteiros.gerenciar', 'roteiros.usar', 'Quem é da função Externo já usa. Ver: os roteiros de todos · Editar: montar os próprios roteiros'],
             ['Pedidos', 'pedidos.ver_todos', 'pedidos.criar', 'Ver: todos os pedidos · Editar: criar pedidos (vê os próprios)'],
             ['Aprovação de pedidos', null, 'pedidos.aprovar', ''],
             ['Equipe de vendas', null, 'equipe.ver', 'Meta da equipe, números das frentes e ranking'],
@@ -26,6 +27,7 @@ return [
         ],
         'Gestão' => [
             ['Painel de vendas', null, 'painel.ver', ''],
+            ['Análise de clientes', null, 'clientes.analise', 'Todos os clientes da empresa com filtros (UF, cidade, vendedor...), média mensal e ticket'],
             ['Metas', 'metas.ver', 'metas.gerenciar', ''],
             ['Acompanhamento (ligações e gravações)', null, 'acompanhamento.ver', 'A gestora do setor vê a equipe dela.'],
             ['Carteiras (configuração)', null, 'carteiras.gerenciar', 'Passar carteiras, mover e importar clientes. A gestora do setor usa nas carteiras do setor dela.'],

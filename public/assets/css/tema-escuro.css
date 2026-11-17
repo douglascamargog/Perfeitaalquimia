@@ -234,6 +234,10 @@ html.escuro .msg-cartao p { color: color-mix(in srgb, #3d4a40 45%, #ffffff); }
 html.escuro .msg-balao, html.escuro .msg-balao * { color: var(--secundaria-texto); }
 html.escuro .b-alerta-suave { background: color-mix(in srgb, #fff4ec 18%, var(--card)) !important; }
 html.escuro .b-alerta-suave .b-valor { color: color-mix(in srgb, #c2410c 45%, #ffffff); }
+/* roteiros.css */
+html.escuro .rt-marcador { border: 2px solid color-mix(in srgb, #fff 35%, var(--card)); }
+html.escuro .rt-marcador.sugerida, html.escuro .rt-marcador.sugerida * { color: var(--secundaria-texto); }
+html.escuro .rt-marcador.cidade { background: color-mix(in srgb, #fff 18%, var(--card)); }
 /* treinamento.css */
 html.escuro .tr-caso summary span { color: color-mix(in srgb, #7c3aed 45%, #ffffff); }
 }

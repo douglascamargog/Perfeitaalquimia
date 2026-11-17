@@ -130,7 +130,8 @@ class Cliente
     public static function podeVer(array $cliente): bool
     {
         return Auth::pode('carteira.ver_todas') || (int) $cliente['responsavel_id'] === Auth::id()
-            || in_array((int) ($cliente['funcao_id'] ?? 0), \App\Services\Setores::gerenciados(), true); // gestor(a) do setor
+            || in_array((int) ($cliente['funcao_id'] ?? 0), \App\Services\Setores::gerenciados(), true) // gestor(a) do setor
+            || \App\Services\RoteiroService::clienteNoRoteiro((int) $cliente['id'], Auth::id()); // externo: loja do roteiro de visitas dele
     }
 
     /** Números da visão geral (respeitando filtros e escopo) */

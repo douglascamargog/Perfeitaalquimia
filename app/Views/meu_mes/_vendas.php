@@ -1,4 +1,4 @@
-<?php /** Minhas vendas. Variáveis: $mes, $eu, $ou. Modo Omie: pedidos faturados (nada para digitar); modo manual: a pessoa registra. */
+<?php /** Minhas vendas. Variáveis: $mes, $eu, $ou, $tirados (pedidos em visitas de outras carteiras). Modo Omie: pedidos faturados (nada para digitar); modo manual: a pessoa registra. */
 $omie = \App\Services\MetaService::vendasDoOmie(); ?>
 <div class="grade-meu-mes">
   <?php if ($omie): ?>
@@ -32,3 +32,28 @@ $omie = \App\Services\MetaService::vendasDoOmie(); ?>
     </table>
   </div>
 </section>
+
+<?php if (!empty($tirados['pedidos'])): ?>
+  <section class="card" data-vendas-visitas style="margin-top:16px">
+    <h2>Vendas em visitas de outras carteiras</h2>
+    <p class="suave pequeno">Pedidos que você fechou em visitas do <a href="<?= url('/roteiros') ?>">Planejador de visitas</a> em lojas de outras carteiras.
+      A venda é da dona da carteira e conta para a meta dela; aqui é só para você acompanhar o que conseguiu vender.</p>
+    <dl class="ficha-dados">
+      <div><dt>Pedidos</dt><dd><?= count($tirados['pedidos']) ?></dd></div>
+      <div><dt>Total vendido</dt><dd data-total-visitas><?= dinheiro($tirados['total']) ?></dd></div>
+      <div><dt>Já faturado</dt><dd><?= dinheiro($tirados['faturado']) ?></dd></div>
+    </dl>
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead><tr><th>Data</th><th>Loja</th><th>Carteira de</th><th style="text-align:right">Valor</th><th></th></tr></thead>
+        <tbody>
+        <?php foreach ($tirados['pedidos'] as $p): ?>
+          <tr><td><?= data_br($p['criado_em']) ?></td><td><?= e($p['cliente']) ?> <small class="suave"><?= e($p['cidade']) ?>/<?= e($p['uf']) ?></small></td><td><?= e($p['dona'] ?? '—') ?></td>
+            <td style="text-align:right"><strong><?= dinheiro($p['total']) ?></strong><br><small class="suave"><?= e(\App\Services\PedidoService::SITUACOES[$p['situacao']][0] ?? $p['situacao']) ?></small></td>
+            <td style="text-align:right"><a class="botao contorno pequeno" href="<?= url('/pedidos/' . (int) $p['id']) ?>">Ver pedido</a></td></tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<?php endif; ?>

@@ -102,6 +102,24 @@ class LocalizacaoService
         return null;
     }
 
+    /**
+     * Centro de uma CIDADE (Planejador de visitas): ['lat', 'lng'] ou null. Aceita o ponto aproximado do Google
+     * (o centro da cidade), desde que seja a mesma cidade.
+     */
+    public static function localizarCidade(string $cidade, string $uf): ?array
+    {
+        if (self::chave() === '') {
+            return null;
+        }
+        $dados = self::consultar(['address' => trim($cidade) . ' - ' . strtoupper($uf) . ', Brasil', 'components' => 'country:BR|administrative_area:' . strtoupper($uf)]);
+        foreach ($dados['results'] ?? [] as $res) {
+            if (self::mesmaCidade($res, $cidade)) {
+                return ['lat' => round((float) $res['geometry']['location']['lat'], 6), 'lng' => round((float) $res['geometry']['location']['lng'], 6)];
+            }
+        }
+        return null;
+    }
+
     /** O resultado do Google é da mesma cidade do cadastro? (sem acento, sem maiúscula) */
     private static function mesmaCidade(array $res, string $cidade): bool
     {

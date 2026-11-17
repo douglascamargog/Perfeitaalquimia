@@ -7,7 +7,7 @@ use App\Core\Banco;
 /**
  * Zerar os dados do One (Administração › Zerar dados) — para recomeçar com os dados reais (ex.: importação do Nota10).
  *
- * APAGA tudo o que a equipe criou no dia a dia: clientes, pedidos, cobrança, produção, fórmulas, projetos, compras,
+ * APAGA tudo o que a equipe criou no dia a dia: clientes, roteiros de visita, pedidos, cobrança, produção, fórmulas, projetos, compras,
  * marketing, prospecção e avisos.
  * MANTÉM o que faz o sistema funcionar: usuários e acessos, produtos e catálogo (com preços e estoque),
  * configurações e chaves, listas (funis, segmentos, etapas...), Academia, treinamento, mensagens prontas,
@@ -27,7 +27,7 @@ class ZerarDadosService
     /** O que é apagado, por grupo (o nome do grupo aparece na tela) */
     public const APAGAR = [
         'Carteira e clientes' => ['cliente_eventos', 'tarefas', 'cliente_anexos', 'cliente_acessos', 'buscas_contato', 'ligacoes',
-            'importacao_linhas', 'importacoes', 'carteiras', 'clientes'],
+            'importacao_linhas', 'importacoes', 'carteiras', 'roteiro_paradas', 'roteiros', 'clientes'],
         'Pedidos, orçamentos e metas' => ['pedido_historico', 'pedido_item_lotes', 'pedido_embalagens', 'pedido_itens', 'pedidos',
             'orcamento_historico', 'orcamento_itens', 'orcamentos', 'pedido_modelo_itens', 'pedido_modelos',
             'vendas_registradas', 'meu_mes', 'metas', 'metas_equipe', 'metas_equipe_lancamentos'],

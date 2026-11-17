@@ -34,6 +34,7 @@ $diasSemCompra = $c['ultima_compra_em'] ? (int) floor((time() - strtotime($c['ul
 
 <div class="cl-kpis">
   <div class="card cl-kpi"><span>Comprou em 12 meses</span><strong><?= dinheiro((float) $resumo['faturado']) ?></strong><small><?= (int) $resumo['pedidos'] ?> pedido(s) faturado(s)</small></div>
+  <div class="card cl-kpi" data-media-mensal><span>Média por mês</span><strong><?= (float) $resumo['faturado'] > 0 ? dinheiro((float) $resumo['faturado'] / 12) : '—' ?></strong><small>o que comprou em 12 meses ÷ 12</small></div>
   <div class="card cl-kpi"><span>Ticket médio</span><strong><?= $ticket ? dinheiro($ticket) : '—' ?></strong><small>por pedido nos últimos 12 meses</small></div>
   <div class="card cl-kpi <?= $diasSemCompra !== null && $diasSemCompra > 60 ? 'cl-alerta' : '' ?>"><span>Última compra</span><strong><?= $c['ultima_compra_em'] ? data_br($c['ultima_compra_em']) : '—' ?></strong>
     <small><?= $diasSemCompra !== null ? "há $diasSemCompra dia(s)" : 'ainda não comprou' ?><?= $primeiraCompra ? ' · cliente desde ' . data_br($primeiraCompra) : '' ?></small></div>

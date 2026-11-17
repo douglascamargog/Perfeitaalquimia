@@ -1,0 +1,60 @@
+/* =====================================================================
+   Planejador de visitas (roteiros do vendedor externo)
+   ===================================================================== */
+.rt-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.rt-cartao { display: grid; gap: 6px; margin: 0; color: inherit; text-decoration: none; transition: transform .15s; }
+.rt-cartao:hover { transform: translateY(-2px); }
+.rt-cartao header { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.rt-cartao p { margin: 0; }
+.rt-cidades { font-size: .86rem; font-weight: 600; color: var(--primaria-escura); }
+.rt-numeros { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .8rem; color: var(--texto-suave); }
+.rt-numeros b { color: var(--texto); }
+
+.rt-form-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.rt-form-grade .rt-largo { grid-column: 1 / -1; }
+.rt-cidades-campos { border: 0; padding: 0; margin: 16px 0 0; display: grid; gap: 8px; max-width: 520px; }
+.rt-cidades-campos legend { font-weight: 700; margin-bottom: 6px; }
+.rt-cidade-linha { display: flex; align-items: center; gap: 8px; }
+.rt-cidade-linha input { flex: 1; }
+.rt-num { width: 26px; height: 26px; border-radius: 50%; background: var(--primaria-clara); color: var(--primaria-escura); font-weight: 700; font-size: .8rem; display: grid; place-items: center; flex: none; }
+.rt-cidades-campos > button { justify-self: start; }
+
+.rt-mapa { height: 380px; padding: 0; overflow: hidden; margin-bottom: 16px; }
+.rt-marcador { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .35); display: grid; place-items: center;
+  font-size: .7rem; font-weight: 800; color: #fff; background: var(--primaria-escura); cursor: pointer; }
+.rt-marcador.visitado { background: #16a34a; }
+.rt-marcador.nao_atendeu { background: #ea580c; }
+.rt-marcador.sugerida { width: 14px; height: 14px; background: var(--lima); border-color: var(--primaria-escura); }
+.rt-marcador.outra { width: 10px; height: 10px; background: #94a3b8; }
+.rt-marcador.cidade { width: 14px; height: 14px; background: #fff; border: 3px solid var(--primaria-escura); }
+
+.rt-caminho-topo { display: grid; gap: 10px; margin-bottom: 10px; }
+.rt-filtros { display: flex; flex-wrap: wrap; gap: 8px; }
+.rt-filtros select { padding: 7px 10px; font-size: .84rem; }
+.rt-tabela td { vertical-align: top; }
+.rt-tabela tr.rt-ja { opacity: .6; }
+.rt-busca { margin-top: 16px; max-width: 520px; }
+.rt-busca ul { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 4px; }
+.rt-busca li { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 6px 8px; border: 1px solid var(--borda); border-radius: var(--raio-pequeno); font-size: .85rem; }
+
+.rt-barra { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.rt-dia { margin-bottom: 14px; }
+.rt-dia-topo { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rt-dia-topo h2 { margin: 0; font-size: 1.05rem; }
+.rt-paradas { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; counter-reset: parada; }
+.rt-parada { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 12px 10px 44px; border: 1px solid var(--borda); border-radius: var(--raio-pequeno); position: relative; counter-increment: parada; }
+.rt-parada::before { content: counter(parada); position: absolute; left: 10px; top: 10px; width: 24px; height: 24px; border-radius: 50%; background: var(--primaria-escura); color: #fff; font-size: .75rem; font-weight: 700; display: grid; place-items: center; }
+.rt-parada.rt-visitado::before { background: #16a34a; content: '✓'; }
+.rt-parada.rt-nao_atendeu::before { background: #ea580c; }
+.rt-parada-info { display: grid; gap: 3px; min-width: 220px; flex: 1; }
+.rt-parada-info small { display: block; }
+.rt-parada-acoes { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+.rt-mais summary { list-style: none; }
+.rt-mais summary::-webkit-details-marker { display: none; }
+.rt-mais[open] { flex-basis: 100%; }
+.rt-form-visita { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.rt-form-visita input[type=text] { flex: 1; min-width: 180px; }
+.rt-perigo { color: var(--perigo); border-color: var(--perigo); margin-top: 8px; }
+
+@media (max-width: 700px) { .rt-mapa { height: 280px; } .rt-parada { padding-left: 40px; } }
+@media print { .rt-mapa, .rt-parada-acoes, .rt-barra, .abas { display: none !important; } }

@@ -19,7 +19,9 @@ class AppSync
     private static function escopo(): array
     {
         $setor = \App\Services\Setores::sqlGerenciados(); // gestor(a) do setor leva a carteira do setor no app
-        return Auth::pode('carteira.ver_todas') ? ['1 = 1', []] : ['(c.responsavel_id = ?' . ($setor ? " OR $setor" : '') . ')', [Auth::id()]];
+        // + as lojas dos roteiros de visita ativos da pessoa (de outras carteiras), para vender offline na viagem
+        return Auth::pode('carteira.ver_todas') ? ['1 = 1', []]
+            : ['(c.responsavel_id = ?' . ($setor ? " OR $setor" : '') . ' OR ' . RoteiroService::sqlNoRoteiro() . ')', [Auth::id(), Auth::id()]];
     }
 
     public static function pacote(): array
@@ -153,7 +155,7 @@ class AppSync
         }
         [$w, $par] = self::escopo();
         $linhas = Banco::todos('SELECT p.uuid, p.id, p.situacao, p.numero_nf, p.motivo_recusa, p.total FROM pedidos p JOIN clientes c ON c.id = p.cliente_id
-            WHERE p.uuid IN (' . implode(',', array_fill(0, count($uuids), '?')) . ") AND (p.vendedor_id = ? OR $w)", [...array_slice($uuids, 0, 300), Auth::id(), ...$par]);
+            WHERE p.uuid IN (' . implode(',', array_fill(0, count($uuids), '?')) . ") AND (p.vendedor_id = ? OR p.tirado_por_id = ? OR $w)", [...array_slice($uuids, 0, 300), Auth::id(), Auth::id(), ...$par]);
         $saida = [];
         foreach ($linhas as $l) {
             $saida[$l['uuid']] = ['pedido_id' => (int) $l['id'], 'situacao' => $l['situacao'], 'numero_nf' => $l['numero_nf'], 'motivo' => $l['motivo_recusa'], 'total' => (float) $l['total']];

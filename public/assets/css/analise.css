@@ -1,0 +1,30 @@
+/* =====================================================================
+   Gestão › Análise de clientes (usa os filtros da Carteira e as tabelas da Início/Painel)
+   ===================================================================== */
+.an-filtro-rodape { display: flex; gap: 12px; align-items: center; margin-top: 10px; }
+.filtros-grade input[type=text] { padding: 8px 10px; font-size: .84rem; }
+
+.an-kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin: 14px 0 18px; }
+.an-kpi { margin: 0; display: grid; gap: 3px; }
+.an-kpi span { font-size: .78rem; font-weight: 600; color: var(--texto-suave); }
+.an-kpi strong { font-size: 1.3rem; color: var(--primaria-escura); }
+.an-kpi small { font-size: .76rem; color: var(--texto-suave); }
+.an-kpi.an-destaque { background: var(--primaria-escura); }
+.an-kpi.an-destaque span, .an-kpi.an-destaque small { color: rgba(255, 255, 255, .75); }
+.an-kpi.an-destaque strong { color: var(--lima); }
+
+.an-bloco { margin-bottom: 18px; }
+.an-topo { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.an-topo h2 { margin: 0; font-size: 1.05rem; }
+.an-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.an-chips a { padding: 5px 11px; border-radius: 999px; border: 1px solid var(--borda); font-size: .78rem; font-weight: 600; color: var(--texto-suave); text-decoration: none; }
+.an-chips a.ativo { background: var(--primaria-escura); border-color: var(--primaria-escura); color: #fff; }
+.an-tabela td a { color: inherit; }
+
+@media (max-width: 1000px) { .an-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .an-kpis > :first-child { grid-column: 1 / -1; } }
+@media print {
+  .an-kpis { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .an-kpi.an-destaque { background: none; }
+  .an-kpi.an-destaque span, .an-kpi.an-destaque small, .an-kpi.an-destaque strong { color: #000; }
+  .an-bloco { break-inside: auto; }
+}

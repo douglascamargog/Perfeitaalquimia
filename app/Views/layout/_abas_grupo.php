@@ -9,6 +9,7 @@ $grupos = [
     'resultados' => [
         '/painel'         => ['Painel de vendas', ['painel.ver']],
         '/equipe'         => ['Equipe de vendas', ['equipe.ver']],
+        '/analise'        => ['Análise de clientes', ['clientes.analise']],
         '/acompanhamento' => ['Acompanhamento', ['acompanhamento.ver', 'setor.gestao', 'cobranca.gerenciar']],
         '/metas'          => ['Metas', ['metas.ver', 'metas.gerenciar']],
     ],

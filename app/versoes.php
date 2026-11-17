@@ -17,6 +17,22 @@
  */
 return [
     [
+        'versao' => '15.2', 'data' => '2026-11-17', 'titulo' => 'Planejador de visitas e Análise de clientes',
+        'novo' => [
+            'Planejador de visitas (vendedor externo): monte o roteiro da viagem escolhendo as cidades do caminho, e o One mostra as lojas que ficam perto, de qualquer carteira.',
+            'O assistente já sugere as lojas mais importantes: recompra atrasada, sem compra há 60 ou 90 dias, quem mais compra por mês e leads ainda não abordados.',
+            'As visitas ficam na ordem do caminho e divididas pelos dias da viagem, com o botão "Rota no Google Maps" para navegar no celular.',
+            'Pedido fechado pelo externo numa loja de outra carteira vai para a dona da carteira e conta na meta dela. O externo vê o que vendeu assim no Meu mês › Minhas vendas.',
+            'A vendedora recebe um aviso no sino quando uma loja dela entra num roteiro de visitas e quando o externo fecha pedido nela.',
+            'Análise de clientes (Gestão): todos os clientes da empresa numa tela, com filtros por UF, cidade, região, segmento, vendedor(a), carteira e situação de compra; média mensal, ticket médio, agrupamentos, impressão e CSV.',
+        ],
+        'melhoria' => [
+            'Ficha da loja: card novo "Média por mês" (o que comprou nos últimos 12 meses dividido por 12).',
+            'As lojas do roteiro vão para o app do externo, para vender sem internet durante a viagem.',
+        ],
+        'admin' => 'Planejador de visitas: quem é da função Externo já usa; a permissão "roteiros.gerenciar" (Gestor e Diretoria) vê os roteiros de todos (Administração › Acessos › Planejador de visitas). Padrões em Configurações › App do externo (distância da rota e visitas por dia). Cidades que ainda não têm lojas no One são localizadas pelo Google Maps (mesma chave da Carteira). Análise de clientes: permissão "clientes.analise" (Gestor e Diretoria). Banco: tabelas roteiros e roteiro_paradas e a coluna pedidos.tirado_por_id (quem fechou o pedido em visita de outra carteira).',
+    ],
+    [
         'versao' => '15.1', 'data' => '2026-11-17', 'titulo' => 'One pronto para os dados reais',
         'melhoria' => [
             'O One está sendo preparado para receber os dados reais da empresa: clientes, pedidos, compras, produção e títulos vão passar a vir do Nota10.',

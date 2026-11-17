@@ -39,7 +39,7 @@ class Pedido
             return ['1 = 1', []];
         }
         $setor = \App\Services\Setores::sqlGerenciados(); // gestor(a) do setor vê os pedidos do setor
-        return ['(p.vendedor_id = ? OR c.responsavel_id = ?' . ($setor ? " OR $setor" : '') . ')', [Auth::id(), Auth::id()]];
+        return ['(p.vendedor_id = ? OR c.responsavel_id = ? OR p.tirado_por_id = ?' . ($setor ? " OR $setor" : '') . ')', [Auth::id(), Auth::id(), Auth::id()]];
     }
 
     private static function montarWhere(array $f): array
@@ -95,7 +95,7 @@ class Pedido
     /** A equipe pode ver este pedido? */
     public static function podeVer(array $p): bool
     {
-        return Auth::pode('pedidos.ver_todos') || Auth::pode('pedidos.aprovar') || (int) $p['vendedor_id'] === Auth::id() || (int) $p['responsavel_id'] === Auth::id()
+        return Auth::pode('pedidos.ver_todos') || Auth::pode('pedidos.aprovar') || (int) $p['vendedor_id'] === Auth::id() || (int) $p['responsavel_id'] === Auth::id() || (int) ($p['tirado_por_id'] ?? 0) === Auth::id()
             || (($p['expedicao'] ?? null) !== null && (Auth::pode('deposito.ver') || Auth::pode('deposito.operar'))); // pedido na fila do depósito
     }
 

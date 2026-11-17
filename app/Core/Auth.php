@@ -117,6 +117,11 @@ class Auth
             // Compras da empresa: lançar compras/NF e cuidar dos itens (fornecedores, documentos): Financeiro (compras.lancar) e a Qualidade
             return self::pode('compras.lancar') || self::pode('compras.solicitar');
         }
+        if ($permissao === 'roteiros.usar') {
+            // Planejador de visitas: quem é da função Externo (ou tem a permissão; quem vê os de todos também monta)
+            return in_array('*', $permissoes, true) || in_array('roteiros.usar', $permissoes, true)
+                || in_array('roteiros.gerenciar', $permissoes, true) || self::temFuncao('externo');
+        }
         if ($permissao === 'compras.solicitar') {
             // Orçamentos e compras: quem é da função configurada (padrão: Qualidade) ou tem compras.gerenciar
             return in_array('*', $permissoes, true) || in_array('compras.gerenciar', $permissoes, true)

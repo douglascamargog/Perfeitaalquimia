@@ -4,7 +4,7 @@
 .cl-topo p { margin: 0 0 8px; color: var(--texto-suave); }
 .cl-topo .sobretitulo a { color: inherit; text-decoration: none; }
 .cl-topo .acoes { display: flex; gap: 10px; flex-wrap: wrap; }
-.cl-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+.cl-kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
 .cl-kpi { margin: 0; display: grid; gap: 3px; }
 .cl-kpi span { font-size: .78rem; font-weight: 600; color: var(--texto-suave); }
 .cl-kpi strong { font-size: 1.3rem; color: var(--primaria-escura); }
@@ -25,7 +25,7 @@
 .cl-tarefas small { color: var(--texto-suave); }
 .cl-linha-tempo { max-height: 640px; overflow: auto; }
 .ficha-topo-botoes { display: flex; gap: 8px; align-items: flex-start; }
-@media (max-width: 1150px) { .cl-grade { grid-template-columns: 1fr; } .cl-ficha { position: static; max-height: none; } .cl-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1150px) { .cl-grade { grid-template-columns: 1fr; } .cl-ficha { position: static; max-height: none; } .cl-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cl-kpis > :first-child { grid-column: 1 / -1; } }
 @media print { .cl-ficha, .cl-topo .acoes { display: none; } .cl-grade { grid-template-columns: 1fr; } }
 .cl-principal td.direita { white-space: nowrap; }
 .cl-principal td { vertical-align: middle; }

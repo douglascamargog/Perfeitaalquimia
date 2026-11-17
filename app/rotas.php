@@ -445,6 +445,22 @@ return [
     ['GET',  '/sistema/atualizacao',                  'AtualizacaoController@index',   'sistema.atualizar'],
     ['POST', '/sistema/atualizacao/aplicar',          'AtualizacaoController@aplicar', 'sistema.atualizar'],
     ['POST', '/sistema/atualizacao/backup',           'AtualizacaoController@backup',  'sistema.atualizar'],
+    // Planejador de visitas (roteiros do externo): quem é da função Externo ou tem roteiros.usar / roteiros.gerenciar
+    ['GET',  '/roteiros',                             'RoteiroController@index',      'roteiros.usar|roteiros.gerenciar'],
+    ['GET',  '/roteiros/novo',                        'RoteiroController@novo',       'roteiros.usar'],
+    ['POST', '/roteiros',                             'RoteiroController@criar',      'roteiros.usar'],
+    ['GET',  '/roteiros/buscar-lojas',                'RoteiroController@buscarLojas', 'roteiros.usar'],
+    ['GET',  '/roteiros/{id}',                        'RoteiroController@ver',        'logado'], // a dona da loja também abre (só vê as lojas dela)
+    ['GET',  '/roteiros/{id}/editar',                 'RoteiroController@editar',     'roteiros.usar'],
+    ['POST', '/roteiros/{id}/editar',                 'RoteiroController@salvar',     'roteiros.usar'],
+    ['POST', '/roteiros/{id}/adicionar',              'RoteiroController@adicionar',  'roteiros.usar'],
+    ['POST', '/roteiros/{id}/organizar',              'RoteiroController@organizar',  'roteiros.usar'],
+    ['POST', '/roteiros/{id}/situacao',               'RoteiroController@situacao',   'roteiros.usar'],
+    ['POST', '/roteiros/{id}/paradas/{parada}/visita', 'RoteiroController@visita',    'roteiros.usar'],
+    ['POST', '/roteiros/{id}/paradas/{parada}/dia',   'RoteiroController@dia',        'roteiros.usar'],
+    ['POST', '/roteiros/{id}/paradas/{parada}/remover', 'RoteiroController@remover',  'roteiros.usar'],
+    ['GET',  '/analise',                              'AnaliseClientesController@index',    'clientes.analise'],
+    ['GET',  '/analise/exportar.csv',                 'AnaliseClientesController@exportar', 'clientes.analise'],
     ['GET',  '/sistema/zerar',                        'ZerarDadosController@index',    'sistema.zerar'], // só o Admin ('*')
     ['POST', '/sistema/zerar',                        'ZerarDadosController@zerar',    'sistema.zerar'],
 

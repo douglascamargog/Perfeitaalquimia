@@ -220,6 +220,11 @@ class PedidoService
         }
 
         $vendedor = (int) ($d['vendedor_id'] ?? 0) ?: (int) ($d['usuario_id'] ?? 0) ?: (int) $cliente['responsavel_id'] ?: null;
+        // Externo em visita do roteiro numa loja de outra carteira: a venda é da dona da loja, ele fica como "tirado por"
+        $tiradoPor = null;
+        if (in_array($d['origem'] ?? '', ['sistema', 'app'], true) && ($regra = RoteiroService::vendedorDoPedido($cliente, (int) ($d['usuario_id'] ?? 0) ?: null))) {
+            [$vendedor, $tiradoPor] = $regra;
+        }
         $origem = in_array($d['origem'] ?? '', ['catalogo', 'sistema', 'app', 'orcamento'], true) ? $d['origem'] : 'sistema';
 
         // Desconto da vendedora (só em pedido montado pela equipe): por produto e no pedido inteiro
@@ -261,9 +266,9 @@ class PedidoService
         $desconto = round($descontoCampanha + $descontoPedido + ($condicao ? $base * (float) $condicao['desconto_pct'] / 100 : 0.0), 2);
         $brindes = implode(' · ', array_column($camp['brindes'], 'texto'));
 
-        $id = Banco::transacao(function () use ($cliente, $carrinho, $forma, $condicao, $desconto, $vendedor, $origem, $uuid, $d, $descontoPedidoPct, $descontoVendedor, $acimaLimite, $pctVendedor, $limite, $camp, $campPct, $descontoCampanha, $brindes) {
+        $id = Banco::transacao(function () use ($cliente, $carrinho, $forma, $condicao, $desconto, $vendedor, $tiradoPor, $origem, $uuid, $d, $descontoPedidoPct, $descontoVendedor, $acimaLimite, $pctVendedor, $limite, $camp, $campPct, $descontoCampanha, $brindes) {
             $id = Banco::inserir('pedidos', [
-                'uuid' => $uuid, 'cliente_id' => $cliente['id'], 'vendedor_id' => $vendedor, 'origem' => $origem,
+                'uuid' => $uuid, 'cliente_id' => $cliente['id'], 'vendedor_id' => $vendedor, 'tirado_por_id' => $tiradoPor, 'origem' => $origem,
                 'tabela_preco_id' => $carrinho['tabela']['id'], 'forma_pagamento_id' => $forma['id'], 'condicao_id' => $condicao['id'] ?? null,
                 'subtotal' => $carrinho['subtotal'], 'desconto' => $desconto, 'total' => round($carrinho['subtotal'] - $desconto, 2),
                 'desconto_pedido_pct' => $descontoPedidoPct, 'desconto_vendedor' => $descontoVendedor, 'desconto_acima_limite' => $acimaLimite ? 1 : 0,
@@ -295,6 +300,9 @@ class PedidoService
             return $id;
         });
         self::enviarAoErp($id);
+        if ($tiradoPor) {
+            RoteiroService::pedidoTirado((int) $id, $cliente, $tiradoPor, round($carrinho['subtotal'] - $desconto, 2));
+        }
         NotificacaoService::pedidoCriado((int) $id, $d['usuario_id'] ?? null); // sino do Financeiro (e do vendedor, se veio do catálogo)
         if ($acimaLimite) { // gestores avisados: desconto acima do limite
             NotificacaoService::avisar(NotificacaoService::destinatarios('pedidos.ver_todos', 'comercial', 'aprovacao'), 'pedido_desconto',

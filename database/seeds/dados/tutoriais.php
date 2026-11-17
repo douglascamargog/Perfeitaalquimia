@@ -30,6 +30,22 @@ return [
         ['', 'Registre cada contato (ligação, WhatsApp, visita). Tudo vai para a linha do tempo, com seu nome e a data.'],
         ['', 'Agende o próximo contato: ele aparece na sua Agenda no dia certo.'],
         ['', '"O que mais compra" e "Repetir último pedido" ajudam a montar a oferta. Daqui também dá para fazer pedido ou orçamento.'],
+        ['[data-media-mensal]', '"Média por mês" é o que a loja comprou nos últimos 12 meses dividido por 12, mesmo que tenha feito poucos pedidos.'],
+    ]],
+    ['/analise', 'Análise de clientes', [
+        [$cab, 'Aqui estão TODOS os clientes da empresa, de todas as carteiras, com o que cada um comprou no período.'],
+        [$filtros, 'Filtre por UF, cidade, região, segmento, vendedor(a), carteira, etapa ou situação de compra. Dá para filtrar também pela faixa de média mensal.'],
+        ['[data-analise-resumo]', 'Os números do filtro: quantas lojas, faturamento, média mensal por cliente (o que comprou ÷ meses do período) e ticket médio por pedido.'],
+        ['[data-analise-grupos]', 'Troque o agrupamento (UF, cidade, vendedor...) para comparar. Clique numa linha para abrir só aquele grupo.'],
+        ['[data-analise-lista]', 'A lista das lojas, com a média mensal de cada uma. Ordene por média, ticket, pedidos ou última compra.'],
+        [$acoes, 'Imprima ou exporte em CSV para abrir no Excel.'],
+    ]],
+    ['/roteiros', 'Planejador de visitas', [
+        [$cab, 'Monte o roteiro da sua viagem: escolha as cidades do caminho e o One mostra as lojas que ficam perto, de qualquer carteira.'],
+        ['', 'Em "Lojas no caminho" as sugeridas já vêm marcadas: recompra atrasada, sem compra há 60/90 dias, quem mais compra por mês e leads ainda não abordados.'],
+        ['', 'As paradas ficam na ordem do caminho e divididas pelos dias. O botão "Rota no Google Maps" abre a navegação no celular.'],
+        ['', 'Pedido fechado numa loja de outra carteira vai para a dona dela (conta na meta dela). Você vê o que vendeu assim no Meu mês › Minhas vendas.'],
+        ['', 'A dona da loja recebe um aviso no sino quando a loja dela entra no seu roteiro e quando você fecha pedido.'],
     ]],
     ['/carteira', 'Carteira', [
         [$cab, 'A Carteira tem todos os seus clientes: cada um tem um responsável.'],
