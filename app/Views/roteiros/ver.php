@@ -113,8 +113,8 @@ $linkAba = fn(string $aba, array $mais = []) => url('/roteiros/' . (int) $r['id'
           <li class="rt-parada rt-<?= e($p['situacao']) ?>" id="parada-<?= (int) $p['id'] ?>" data-parada="<?= (int) $p['id'] ?>">
             <div class="rt-parada-info">
               <strong><a href="<?= url('/carteira/clientes/' . (int) $p['cliente_id']) ?>"><?= e($p['nome']) ?></a></strong>
-              <span class="selo <?= $cor ?>"><?= $rotulo ?></span><?= $outra ? ' <span class="selo" title="A venda vai para a dona da carteira">carteira de ' . e($p['vendedor'] ?? '—') . '</span>' : '' ?>
-              <small class="suave"><?= e(trim(($p['endereco'] ?? '') . ($p['bairro'] ? ' · ' . $p['bairro'] : ''))) ?> · <?= e($p['cidade']) ?>/<?= e($p['uf']) ?>
+              <span class="rt-selos"><span class="selo <?= $cor ?>"><?= $rotulo ?></span><?= $outra ? '<span class="selo" title="A venda vai para a dona da carteira">carteira de ' . e($p['vendedor'] ?? '—') . '</span>' : '' ?></span>
+              <small class="suave"><?= e(implode(' · ', array_filter([trim((string) $p['endereco']), trim((string) $p['bairro']), $p['cidade'] . '/' . $p['uf']]))) ?>
                 <?= $p['ultima_compra_em'] ? ' · última compra ' . data_br($p['ultima_compra_em']) : ' · ainda não comprou' ?></small>
               <?php if ($p['pedido_id']): ?><small>🛒 <a href="<?= url('/pedidos/' . (int) $p['pedido_id']) ?>">Pedido #<?= (int) $p['pedido_id'] ?></a> · <?= dinheiro($p['pedido_total']) ?></small><?php endif; ?>
               <?php if ($p['observacao']): ?><small>📝 <?= e($p['observacao']) ?></small><?php endif; ?>

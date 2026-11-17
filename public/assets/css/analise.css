@@ -28,3 +28,4 @@
   .an-kpi.an-destaque span, .an-kpi.an-destaque small, .an-kpi.an-destaque strong { color: #000; }
   .an-bloco { break-inside: auto; }
 }
+.an-tabela td.direita, .rt-tabela td.direita { white-space: nowrap; }

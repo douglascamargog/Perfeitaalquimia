@@ -30,7 +30,7 @@
 
 .rt-caminho-topo { display: grid; gap: 10px; margin-bottom: 10px; }
 .rt-filtros { display: flex; flex-wrap: wrap; gap: 8px; }
-.rt-filtros select { padding: 7px 10px; font-size: .84rem; }
+.rt-filtros select { padding: 7px 10px; font-size: .84rem; width: auto; flex: 0 1 auto; }
 .rt-tabela td { vertical-align: top; }
 .rt-tabela tr.rt-ja { opacity: .6; }
 .rt-busca { margin-top: 16px; max-width: 520px; }
@@ -46,7 +46,8 @@
 .rt-parada::before { content: counter(parada); position: absolute; left: 10px; top: 10px; width: 24px; height: 24px; border-radius: 50%; background: var(--primaria-escura); color: #fff; font-size: .75rem; font-weight: 700; display: grid; place-items: center; }
 .rt-parada.rt-visitado::before { background: #16a34a; content: '✓'; }
 .rt-parada.rt-nao_atendeu::before { background: #ea580c; }
-.rt-parada-info { display: grid; gap: 3px; min-width: 220px; flex: 1; }
+.rt-parada-info { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 220px; flex: 1; }
+.rt-selos { display: flex; flex-wrap: wrap; gap: 4px; }
 .rt-parada-info small { display: block; }
 .rt-parada-acoes { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
 .rt-mais summary { list-style: none; }
