@@ -137,20 +137,17 @@ Até ligar, o painel **Marketing › E-commerce** mostra números simulados. Par
    e a **consumer secret**. Se a agência que cuida da loja já tem um aplicativo Tray, ela pode fornecer essas chaves.
 2. **Autorizar na loja.** No painel da loja Tray › **Meus Aplicativos** › o aplicativo › **Acessar**: aparece o **code**.
    O **endereço da API** é o endereço da loja + `/web_api` (ex.: `https://www.sualoja.com.br/web_api`).
-3. No cPanel › `one/config/config.php`, preencha o bloco `'tray'` (num sistema já instalado, copie o bloco de `config.example.php`):
+3. No One, como admin: **⚙️ Administração › Tray**: cole o endereço da API (`https://sualoja.../web_api`), o code de instalação,
+   o consumer key e o consumer secret; escolha **"Da loja Tray (reais)"** e clique em **Guardar** e depois em **Testar conexão**.
+4. **Marketing › E-commerce › Atualizar agora.** A primeira leitura busca 12 meses de pedidos aos poucos (300 pedidos completos
+   por rodada, por causa do limite da Tray de 10 mil consultas por dia). Os pedidos simulados são apagados nessa hora.
+5. Cron **a cada 15 minutos** (cPanel › Cron Jobs). Ele atualiza o painel do E-commerce **e** manda os pedidos pagos com nota para o Depósito:
    ```
-   'tray' => ['api' => 'https://www.sualoja.com.br/web_api', 'consumer_key' => '...', 'consumer_secret' => '...', 'code' => '...'],
-   ```
-4. No One, como admin: **Configurações › E-commerce (Tray) › Origem dos números** = `tray`.
-5. **Marketing › E-commerce › Testar conexão.** Deu certo? Clique em **Atualizar agora**. A primeira leitura busca 13 meses
-   de pedidos e pode levar alguns minutos (a Tray limita 180 consultas por minuto). Os números simulados são apagados nessa hora.
-6. Cron de hora em hora (cPanel › Cron Jobs):
-   ```
-   0 * * * * php /home/doug9130/public_html/one/cron/ecommerce.php
+   */15 * * * * php /home/doug9130/public_html/one/cron/pedidos_ecommerce.php
    ```
 
-O One só lê números (pedidos, valores, produtos). Não grava nada na loja e não guarda nome, e-mail ou endereço de comprador.
-Pedidos cancelados não entram no faturamento.
+O One só lê os pedidos. Não grava nada na loja e não guarda nome, CPF, e-mail, telefone ou endereço de comprador (só cidade e estado).
+Pedidos aguardando pagamento e cancelados não entram no faturamento.
 
 ## 10. Trazer o trabalho da Carteira atual
 
