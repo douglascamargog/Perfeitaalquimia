@@ -1,0 +1,101 @@
+/* E-commerce (V14.0): filtros, canais, funil, mapa de calor, mapa do Brasil, tabelas */
+
+/* Selo de canal */
+.eco-canal { display: inline-block; font-size: .72rem; font-weight: 700; padding: 2px 9px; border-radius: 99px; white-space: nowrap; background: #eceff1; color: #455a64; }
+.canal-loja { --canal: #1f7a46; --canal-fundo: #e3f4e8; }
+.canal-mercado_livre { --canal: #2d3277; --canal-fundo: #fff59d; }
+.canal-shopee { --canal: #c2410c; --canal-fundo: #ffe4d5; }
+.canal-amazon { --canal: #232f3e; --canal-fundo: #ffe8b8; }
+.canal-magalu { --canal: #0b5cc8; --canal-fundo: #dbeafe; }
+.canal-americanas { --canal: #b91c1c; --canal-fundo: #fee2e2; }
+.canal-shein, .canal-tiktok, .canal-manual, .canal-outro { --canal: #455a64; --canal-fundo: #eceff1; }
+.eco-canal[class*="canal-"] { background: var(--canal-fundo); color: var(--canal); }
+
+/* Filtros */
+.eco-filtros { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 8px; }
+.eco-filtros select, .eco-filtros input[type="search"] { max-width: 220px; }
+.eco-periodos { display: flex; flex-wrap: wrap; gap: 4px; background: var(--card); border: 1px solid var(--borda); border-radius: 99px; padding: 4px; }
+.eco-periodos a { padding: 6px 12px; border-radius: 99px; font-size: .8rem; font-weight: 700; color: var(--texto-suave); text-decoration: none; white-space: nowrap; }
+.eco-periodos a:hover { background: var(--primaria-clara); color: var(--verde-escuro); }
+.eco-periodos a.ativo { background: var(--fundo-forte); color: var(--lima); }
+.eco-datas { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; color: var(--texto-suave); }
+.eco-datas input { width: auto; }
+.eco-periodo-txt { font-size: .8rem; color: var(--texto-suave); margin: 0 0 12px; }
+.eco-alerta { margin: 0 0 10px; }
+.eco-importando { margin-bottom: 10px; }
+.eco-ruim { color: var(--perigo) !important; }
+
+/* Canais */
+.eco-canais { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-top: 12px; }
+.eco-canal-card { position: relative; overflow: hidden; display: grid; gap: 2px; padding: 14px 14px 16px; border-radius: 18px; text-decoration: none; color: var(--texto);
+  background: color-mix(in srgb, var(--canal-fundo) 55%, var(--card)); border: 1px solid color-mix(in srgb, var(--canal) 18%, transparent); }
+.eco-canal-card:hover { transform: translateY(-2px); box-shadow: var(--sombra); }
+.eco-canal-nome { font-size: .78rem; font-weight: 800; color: var(--canal); text-transform: uppercase; letter-spacing: .04em; }
+.eco-canal-card strong { font-size: 1.35rem; letter-spacing: -.03em; color: var(--verde-escuro); }
+.eco-canal-card small { font-size: .74rem; color: var(--texto-suave); }
+.eco-barra { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--canal); border-radius: 0 4px 0 0; }
+
+/* Funil */
+.eco-funil { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.eco-funil li { position: relative; display: flex; justify-content: space-between; padding: 7px 10px; border-radius: 10px; background: var(--primaria-clara); overflow: hidden; font-size: .84rem; }
+.eco-funil li span, .eco-funil li b { position: relative; z-index: 1; }
+.eco-funil i { position: absolute; inset: 0 auto 0 0; opacity: .35; border-radius: 10px; }
+.cor-cinza { background: #90a4ae; } .cor-amarelo { background: #facc15; } .cor-verde { background: #22c55e; } .cor-azul { background: #3b82f6; } .cor-vermelho { background: #ef4444; }
+
+/* Mapa de calor */
+.eco-calor { display: grid; grid-template-columns: 34px repeat(24, minmax(0, 1fr)); gap: 2px; margin-top: 12px; font-size: .64rem; color: var(--texto-suave); }
+.eco-calor span { text-align: center; }
+.eco-calor b { font-weight: 700; text-align: right; padding-right: 4px; align-self: center; }
+.eco-calor i { aspect-ratio: 1.3; border-radius: 4px; background: color-mix(in srgb, var(--secundaria) var(--forca, 0%), var(--primaria-clara)); }
+.eco-calor i[data-forte] { background: color-mix(in srgb, var(--primaria) var(--forca, 0%), var(--secundaria)); }
+
+/* Produtos e barras */
+.eco-produtos li { grid-template-columns: auto auto 1fr auto; }
+.eco-foto { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: #fff; border: 1px solid var(--borda); flex: none; }
+.eco-foto.vazia { display: inline-block; background: var(--primaria-clara); }
+.eco-produtos small .eco-canal { font-size: .64rem; padding: 0 6px; }
+.eco-barras { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+.eco-barras li { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; font-size: .84rem; }
+.eco-barras li i { grid-column: 1 / -1; height: 6px; border-radius: 99px; background: var(--secundaria); }
+.eco-barras li small { grid-column: 1 / -1; color: var(--texto-suave); font-size: .72rem; }
+.eco-sub { font-size: .9rem; margin: 16px 0 2px; }
+.eco-parados { margin: 6px 0 0; padding-left: 18px; font-size: .82rem; display: grid; gap: 4px; }
+.eco-pizza { height: 180px; }
+.eco-tabela-mini { margin-top: 8px; font-size: .8rem; }
+
+/* Mapa do Brasil (quadradinhos) */
+.eco-mapa { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(9, 34px); gap: 4px; max-width: 360px; margin: 14px auto 0; }
+.eco-uf { display: grid; place-items: center; border-radius: 8px; font-size: .72rem; font-weight: 800; text-decoration: none;
+  background: color-mix(in srgb, var(--primaria) var(--forca), var(--primaria-clara)); color: var(--verde-escuro); }
+.eco-uf[style*="--forca: 6"], .eco-uf[style*="--forca: 7"], .eco-uf[style*="--forca: 8"], .eco-uf[style*="--forca: 9"], .eco-uf[style*="--forca: 100"] { color: #fff; }
+.eco-uf.sem { background: var(--fundo); color: var(--texto-suave); font-weight: 600; }
+.eco-uf.ativo { outline: 3px solid var(--lima-escuro); }
+.eco-uf:hover { outline: 2px solid var(--verde-escuro); }
+
+/* Tabela e detalhe */
+.eco-pedidos td { vertical-align: top; }
+.eco-itens-resumo { min-width: 220px; max-width: 320px; font-size: .8rem; }
+.eco-pedidos { min-width: 1080px; }
+.eco-pedidos .eco-canal { white-space: nowrap; }
+.nao-quebra { white-space: nowrap; }
+.eco-sit.sit-aguardando { background: #fef3c7; color: #92400e; }
+.eco-sit.sit-pago { background: var(--sucesso-fundo); color: var(--sucesso); }
+.eco-sit.sit-enviado { background: #dbeafe; color: #1e40af; }
+.eco-sit.sit-entregue { background: #e0e7ff; color: #3730a3; }
+.eco-sit.sit-cancelado { background: var(--perigo-fundo); color: var(--perigo); }
+.eco-valores { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; margin: 12px 0 0; font-size: .86rem; }
+.eco-valores dt { color: var(--texto-suave); }
+.eco-valores dd { margin: 0; text-align: right; font-weight: 600; }
+.eco-valores .forte { font-size: 1.05rem; color: var(--verde-escuro); font-weight: 800; border-top: 1px solid var(--borda); padding-top: 6px; }
+
+@media (max-width: 760px) {
+  .eco-calor { grid-template-columns: 26px repeat(24, minmax(0, 1fr)); gap: 1px; font-size: .5rem; }
+  .eco-periodos { border-radius: 16px; }
+  .eco-mapa { grid-template-rows: repeat(9, 28px); }
+}
+@media print {
+  .eco-filtros, .eco-periodos { display: none !important; }
+  .eco-canal-card { break-inside: avoid; }
+}
+.eco-pedidos td.direita { white-space: nowrap; }
+.eco-pedidos.compacta { min-width: 640px; }

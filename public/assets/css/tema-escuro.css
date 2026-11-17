@@ -122,6 +122,15 @@ html.escuro .dp-balao.concluida > button small { color: color-mix(in srgb, #4d6b
 html.escuro .dp-balao.andamento > div, html.escuro .dp-balao.andamento > button { background: linear-gradient(150deg, color-mix(in srgb, rgba(202, 255, 77, .95) 18%, var(--card)), rgba(150, 230, 90, .88)); color: color-mix(in srgb, #08180f 45%, #ffffff); border: 1px solid color-mix(in srgb, #e9ffb0 35%, var(--card)); }
 html.escuro .dp-conquista { background: linear-gradient(135deg, color-mix(in srgb, #eaffc2 18%, var(--card)), var(--lima)); }
 html.escuro .dp-gaveta .dp-atual { background: linear-gradient(180deg, color-mix(in srgb, #ffffff 18%, var(--card)), color-mix(in srgb, #f2f8f4 18%, var(--card))); border-left: 1px solid color-mix(in srgb, rgba(202, 255, 77, .6) 35%, var(--card)); }
+/* ecommerce.css */
+html.escuro .eco-canal { background: color-mix(in srgb, #eceff1 18%, var(--card)); color: color-mix(in srgb, #455a64 45%, #ffffff); }
+html.escuro .eco-calor i, html.escuro .eco-calor i * { color: var(--secundaria-texto); }
+html.escuro .eco-calor i[data-forte], html.escuro .eco-calor i[data-forte] * { color: var(--secundaria-texto); }
+html.escuro .eco-foto { background: color-mix(in srgb, #fff 18%, var(--card)); }
+html.escuro .eco-barras li i, html.escuro .eco-barras li i * { color: var(--secundaria-texto); }
+html.escuro .eco-sit.sit-aguardando { background: color-mix(in srgb, #fef3c7 18%, var(--card)); color: color-mix(in srgb, #92400e 45%, #ffffff); }
+html.escuro .eco-sit.sit-enviado { background: color-mix(in srgb, #dbeafe 18%, var(--card)); color: color-mix(in srgb, #1e40af 45%, #ffffff); }
+html.escuro .eco-sit.sit-entregue { background: color-mix(in srgb, #e0e7ff 18%, var(--card)); color: color-mix(in srgb, #3730a3 45%, #ffffff); }
 /* graficos.css */
 html.escuro .s2, html.escuro .grafico-legenda i.s2, html.escuro .grafico-pilha .s2 { background: color-mix(in srgb, #b9cfc5 18%, var(--card)); }
 html.escuro .legenda-evolucao i.real { background: var(--secundaria, color-mix(in srgb, #caff4d 18%, var(--card))); }

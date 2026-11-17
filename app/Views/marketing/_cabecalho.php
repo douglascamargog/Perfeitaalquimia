@@ -1,7 +1,8 @@
 <?php
 /**
  * Cabeçalho comum do Marketing: título, navegação de mês e abas.
- * Variáveis: $aba ('inicio'|'mural'|'feed'|'planejamento'|'ecommerce'), $mes (AAAA-MM), $titulo, $subtitulo, $acoes (HTML opcional)
+ * Variáveis: $aba ('inicio'|'mural'|'feed'|'planejamento'|'ecommerce'), $mes (AAAA-MM), $titulo, $subtitulo, $acoes (HTML opcional),
+ *            $semMes (true = sem a navegação de mês; o E-commerce tem filtros próprios)
  */
 use App\Core\Auth;
 
@@ -33,10 +34,12 @@ $caminho = $links[$aba][1] ?? '/marketing';
       <a href="<?= url($link) ?>?mes=<?= e($mes) ?>" class="<?= $chave === $aba ? 'ativa' : '' ?>"><?= e($nome) ?></a>
     <?php endforeach; ?>
   </nav>
+  <?php if (empty($semMes)): ?>
   <div class="mk-mes">
     <a class="botao-icone" href="<?= url($caminho) ?>?mes=<?= $anterior ?>" aria-label="Mês anterior">‹</a>
     <strong><?= e($nomeMes) ?></strong>
     <a class="botao-icone" href="<?= url($caminho) ?>?mes=<?= $proximo ?>" aria-label="Próximo mês">›</a>
     <?php if ($mes !== date('Y-m')): ?><a class="b-chip" href="<?= url($caminho) ?>">Hoje</a><?php endif; ?>
   </div>
+  <?php endif; ?>
 </div>

@@ -104,21 +104,73 @@ class MarketingController extends Controller
 
     public function ecommerce(): void
     {
-        $mes = $this->mes();
-        if (!Banco::valor('SELECT 1 FROM ecommerce_resumo_diario LIMIT 1') && Integracoes::ecommerce()->nome() === 'fake') {
-            EcommerceService::sincronizar(); // demonstração: gera o histórico na hora (a loja real é lida pelo cron ou "Atualizar agora")
-        }
-        try {
-            $pedidos = Integracoes::ecommerce()->pedidosRecentes(8);
-        } catch (\Throwable $erro) {
-            error_log((string) $erro);
-            $pedidos = [];
-        }
+        $this->garantirDados();
+        $f = EcommerceService::filtros($_GET);
         $this->tela('marketing/ecommerce', [
-            'titulo' => 'E-commerce', 'painel' => EcommerceService::painel($mes), 'pedidos' => $pedidos,
-            'estilos' => ['carteira.css', 'inicio.css', 'marketing.css'],
+            'titulo' => 'E-commerce', 'painel' => EcommerceService::painel($f),
+            'estilos' => ['carteira.css', 'inicio.css', 'marketing.css', 'ecommerce.css'],
             'scripts' => ['https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js', 'ecommerce.js'],
         ]);
+    }
+
+    /** Lista completa dos pedidos da loja (com filtros e busca) */
+    public function ecommercePedidos(): void
+    {
+        $this->garantirDados();
+        $f = EcommerceService::filtros($_GET);
+        $extra = ['sem_nf' => !empty($_GET['sem_nf']), 'atrasado' => !empty($_GET['atrasado'])];
+        $this->tela('marketing/ecommerce_pedidos', [
+            'titulo' => 'Pedidos do e-commerce', 'f' => $f, 'extra' => $extra,
+            'lista' => EcommerceService::pedidos($f, max(1, (int) ($_GET['pagina'] ?? 1)), 50, $extra),
+            'estilos' => ['carteira.css', 'inicio.css', 'marketing.css', 'ecommerce.css'],
+        ]);
+    }
+
+    /** Um pedido da loja */
+    public function ecommercePedido(string $id): void
+    {
+        $p = ctype_digit($id) ? EcommerceService::pedido((int) $id) : null;
+        if (!$p) {
+            http_response_code(404);
+            $this->tela('erros/erro', ['titulo' => 'Pedido não encontrado', 'codigo' => 404, 'mensagem' => 'Pedido não encontrado.']);
+            return;
+        }
+        $this->tela('marketing/ecommerce_pedido', ['titulo' => 'Pedido ' . $p['tray_id'], 'p' => $p,
+            'estilos' => ['carteira.css', 'inicio.css', 'marketing.css', 'ecommerce.css']]);
+    }
+
+    /** Planilha dos pedidos (CSV, sem dados pessoais) */
+    public function ecommerceCsv(): void
+    {
+        $f = EcommerceService::filtros($_GET);
+        $linhas = EcommerceService::exportar($f, ['sem_nf' => !empty($_GET['sem_nf']), 'atrasado' => !empty($_GET['atrasado'])]);
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="pedidos-ecommerce-' . $f['de'] . '-a-' . $f['ate'] . '.csv"');
+        $saida = fopen('php://output', 'w');
+        fwrite($saida, "\xEF\xBB\xBF"); // Excel abre com acentos
+        fputcsv($saida, ['Pedido', 'Data', 'Hora', 'Canal', 'Pedido no marketplace', 'Situação', 'Status na loja', 'Itens', 'Produtos', 'Subtotal', 'Desconto', 'Cupom',
+            'Frete', 'Total', 'Pagamento', 'Envio', 'Prazo de entrega', 'Enviado em', 'Nota fiscal', 'Cidade', 'UF'], ';');
+        $num = fn($v) => number_format((float) $v, 2, ',', '');
+        foreach ($linhas as $l) {
+            fputcsv($saida, [$l['tray_id'], date('d/m/Y', strtotime($l['data_hora'])), $l['detalhado'] ? date('H:i', strtotime($l['data_hora'])) : '',
+                \App\Integrations\Tray\TrayTexto::nomeCanal($l['canal'], $l['canal_nome']), $l['marketplace_pedido'],
+                \App\Integrations\Tray\TrayTexto::SITUACOES[$l['status_tipo']][0] ?? $l['status_tipo'], $l['status'], $l['itens_qtd'], $l['resumo_itens'],
+                $num($l['subtotal']), $num($l['desconto']), $l['cupom'], $num($l['frete']), $num($l['total']), $l['pagamento'], $l['envio'],
+                $l['prazo_entrega'] ? date('d/m/Y', strtotime($l['prazo_entrega'])) : '', $l['enviado_em'] ? date('d/m/Y', strtotime($l['enviado_em'])) : '',
+                $l['nf_numero'] ?: ($l['tem_nf'] ? 'emitida' : ''), $l['cidade'], $l['uf']], ';');
+        }
+        fclose($saida);
+        exit;
+    }
+
+    /** Demonstração: gera os pedidos simulados na primeira visita */
+    private function garantirDados(): void
+    {
+        try {
+            EcommerceService::garantirDemonstracao();
+        } catch (\Throwable $erro) {
+            error_log((string) $erro);
+        }
     }
 
     /** Admin: confere se as chaves da Tray funcionam */
@@ -134,11 +186,16 @@ class MarketingController extends Controller
         @set_time_limit(600); // a primeira leitura da loja real pode demorar (180 requisições/min na Tray)
         try {
             $r = EcommerceService::sincronizar();
-            Sessao::aviso('sucesso', "Números atualizados ({$r['dias']} dia(s)).");
+            if ($r['ocupado']) {
+                Sessao::aviso('aviso', 'A loja já está sendo atualizada agora. Em alguns minutos os números aparecem.');
+            } else {
+                Sessao::aviso('sucesso', "Loja atualizada: {$r['novos']} pedido(s) novo(s), {$r['atualizados']} alterado(s)"
+                    . ($r['faltam'] ? " · ainda faltam {$r['faltam']} pedido(s) do histórico (o One continua sozinho a cada rodada)" : '') . '.');
+            }
         } catch (\Throwable $erro) {
             error_log((string) $erro);
-            Sessao::aviso('erro', 'Não foi possível falar com a loja agora. Tente de novo em alguns minutos.');
+            Sessao::aviso('erro', 'Não foi possível falar com a loja agora: ' . $erro->getMessage());
         }
-        redirecionar('/marketing/ecommerce');
+        redirecionar('/marketing/ecommerce' . (!empty($_POST['voltar']) && preg_match('#^\?[\w=&%.-]*$#', (string) $_POST['voltar']) ? $_POST['voltar'] : ''));
     }
 }
