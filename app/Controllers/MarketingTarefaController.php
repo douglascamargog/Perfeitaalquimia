@@ -119,6 +119,15 @@ class MarketingTarefaController extends Controller
         redirecionar($this->campo('voltar') === 'inicio' ? '/marketing/inicio' : '/marketing/tarefas/' . (int) $t['id']);
     }
 
+    /** Editar o pedido/tarefa (V15.7): quem pediu, enquanto está "A fazer"; o Marketing, até concluir */
+    public function editar(string $id): void
+    {
+        $t = $this->tarefaOuErro($id);
+        $erro = T::editar($t, $_POST, (int) Auth::id());
+        Sessao::aviso($erro ? 'erro' : 'sucesso', $erro ?? 'Pedido atualizado.');
+        redirecionar('/marketing/tarefas/' . (int) $t['id']);
+    }
+
     public function comentar(string $id): void
     {
         $t = $this->tarefaOuErro($id);

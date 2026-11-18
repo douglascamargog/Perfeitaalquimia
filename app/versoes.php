@@ -17,6 +17,16 @@
  */
 return [
     [
+        'versao' => '15.8', 'data' => '2026-11-18', 'titulo' => 'Corrigir pedido, pedido ao Marketing, comunicado e ordem de produção',
+        'novo' => [
+            'Pedido aguardando aprovação: botão "Corrigir pedido". A tela abre com os itens; ao enviar, o pedido novo substitui o antigo (que fica cancelado) e vai para a aprovação.',
+            'Pedir ao Marketing: quem pediu pode editar título, descrição, prazo e urgência enquanto o pedido está "A fazer".',
+            'Comunicados: dá para corrigir o título e o texto de um comunicado já enviado.',
+            'Produção: ordem planejada pode ser editada (quantidade, datas, lote, validade e observações).',
+        ],
+        'admin' => 'Corrigir pedido cancela o antigo pelo mesmo caminho do "Cancelar pedido" e registra a substituição no histórico dos dois. Ordem de produção aprovada pela Responsável Técnica volta a pedir aprovação se a quantidade mudar. Comunicado corrigido não avisa de novo quem já leu. Tudo fica na auditoria.',
+    ],
+    [
         'versao' => '15.7', 'data' => '2026-11-18', 'titulo' => 'Corrigir, editar e excluir',
         'novo' => [
             'Linha do tempo: errou ao registrar um contato ou anotação? Clique em "Corrigir" para mudar o texto ou apagar o registro (até 24 horas depois).',

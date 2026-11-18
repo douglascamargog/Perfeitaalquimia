@@ -137,6 +137,7 @@ return [
     ['GET',  '/marketing/tarefas/{id}/anexo',      'MarketingTarefaController@anexo',  'logado'],
     ['POST', '/marketing/tarefas/{id}/mudar',      'MarketingTarefaController@mudar',  'logado'],
     ['POST', '/marketing/tarefas/{id}/comentar',   'MarketingTarefaController@comentar', 'logado'],
+    ['POST', '/marketing/tarefas/{id}/editar',     'MarketingTarefaController@editar',   'logado'], // quem pediu ou o Marketing (regra no serviço)
     ['POST', '/marketing/tarefas/{id}/encaminhar', 'MarketingTarefaController@encaminhar', 'marketing.editar'],
     ['GET',  '/marketing',                         'MarketingController@mural',        'marketing.ver'],
     ['GET',  '/marketing/feed',                    'MarketingController@feed',         'marketing.ver'],
@@ -363,6 +364,7 @@ return [
     ['GET',  '/producao/ordens/{id}/imprimir',   'OrdemProducaoController@imprimir',     'producao.gerenciar|producao.ver'],
     ['POST', '/producao/ordens/{id}/concluir',   'OrdemProducaoController@concluir',     'producao.gerenciar'],
     ['POST', '/producao/ordens/{id}/cancelar',   'OrdemProducaoController@cancelar',     'producao.gerenciar'],
+    ['POST', '/producao/ordens/{id}/editar',     'OrdemProducaoController@editar',       'producao.gerenciar'],
     ['POST', '/producao/ordens/{id}/lotes',      'OrdemProducaoController@lotes',        'producao.gerenciar'],
     ['POST', '/producao/ordens/{id}/aprovar',    'OrdemProducaoController@aprovar',      'produtos.tecnico'],
 
@@ -394,6 +396,7 @@ return [
     ['POST', '/comunicados',                    'ComunicadoController@emitir',           'comunicados.emitir'],
     ['POST', '/comunicados/{id}/ler',           'ComunicadoController@ler',              'logado'],
     ['POST', '/comunicados/{id}/encerrar',      'ComunicadoController@encerrar',         'comunicados.emitir'],
+    ['POST', '/comunicados/{id}/corrigir',      'ComunicadoController@corrigir',         'comunicados.emitir'],
     ['GET',  '/equipe',                         'EquipeController@index',                'equipe.ver'],
     // Terceirização (marca própria do cliente)
     ['GET',  '/terceirizacao',                  'TerceirizacaoController@clientes',      'terceirizacao.ver|terceirizacao.editar'],

@@ -203,6 +203,30 @@ class MarketingTarefaService
     }
 
     /**
+     * Editar título, descrição, prazo e urgência (V15.7): quem pediu, enquanto está "A fazer"; o Marketing, até concluir.
+     * Devolve o erro (ou null). Fica no histórico da tarefa e na auditoria.
+     */
+    public static function editar(array $t, array $d, int $usuarioId): ?string
+    {
+        $marketing = self::podeMexer();
+        $dono = (int) $t['solicitante_id'] === $usuarioId;
+        if (!in_array($t['situacao'], $marketing ? ['a_fazer', 'fazendo'] : ['a_fazer'], true) || !($marketing || $dono)) {
+            return 'Esta tarefa não pode mais ser editada' . ($dono ? ' (o Marketing já começou: mande um comentário).' : '.');
+        }
+        $titulo = mb_substr(trim((string) ($d['titulo'] ?? '')), 0, 160);
+        if ($titulo === '') {
+            return 'Dê um título.';
+        }
+        $prazo = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($d['prazo'] ?? '')) ? $d['prazo'] : null;
+        $novos = ['titulo' => $titulo, 'descricao' => mb_substr(trim((string) ($d['descricao'] ?? '')), 0, 5000) ?: null, 'prazo' => $prazo,
+            'urgente' => !empty($d['urgente']) ? 1 : 0, 'atualizado_em' => date('Y-m-d H:i:s')];
+        Banco::atualizar('mkt_tarefas', (int) $t['id'], $novos);
+        Banco::inserir('mkt_tarefa_historico', ['tarefa_id' => $t['id'], 'usuario_id' => $usuarioId, 'texto' => 'Editou o pedido (título, descrição ou prazo).']);
+        Auditoria::registrar('mkt_tarefa', (int) $t['id'], 'editar', array_intersect_key($t, $novos), $novos);
+        return null;
+    }
+
+    /**
      * Muda a situação. $acao: comecar | aprovacao | aprovar | devolver | concluir | cancelar | reabrir
      * Devolve o erro (ou null).
      */

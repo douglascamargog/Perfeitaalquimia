@@ -94,6 +94,21 @@ $icones = asset('img/icones.svg');
           <button class="botao contorno" type="submit">Cancelar ordem</button>
         </form>
       </div>
+      <details class="card" data-editar-ordem style="margin-top:12px">
+        <summary><strong>✏️ Editar a ordem</strong> <small class="suave">quantidade, datas, lote e observações</small></summary>
+        <form method="post" action="<?= url('/producao/ordens/' . (int) $o['id'] . '/editar') ?>" style="margin-top:10px"><?= csrf_campo() ?>
+          <div class="grade-campos">
+            <div class="campo"><label>Quantidade<input type="number" name="quantidade" min="1" value="<?= (int) $o['quantidade'] ?>" required></label></div>
+            <div class="campo"><label>Entrada na produção<input type="date" name="entrada_producao" value="<?= e((string) $o['entrada_producao']) ?>"></label></div>
+            <div class="campo"><label>Previsto para<input type="date" name="previsto_para" value="<?= e((string) $o['previsto_para']) ?>"></label></div>
+            <div class="campo"><label>Lote<input type="text" name="lote" maxlength="40" value="<?= e((string) $o['lote']) ?>"></label></div>
+            <div class="campo"><label>Validade<input type="date" name="validade" value="<?= e((string) $o['validade']) ?>"></label></div>
+          </div>
+          <div class="campo"><label>Observações<textarea name="observacoes" rows="2"><?= e((string) $o['observacoes']) ?></textarea></label></div>
+          <?php if ($o['aprovada_em']): ?><p class="pequeno suave">Mudar a quantidade tira a aprovação da Responsável Técnica: ela confere de novo.</p><?php endif; ?>
+          <button class="botao pequeno" type="submit">Salvar</button>
+        </form>
+      </details>
     <?php endif; ?>
   </section>
 <?php elseif ($o['situacao'] === 'concluida'): ?>

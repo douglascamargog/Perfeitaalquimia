@@ -35,6 +35,21 @@ $imagem = $t['anexo'] && str_starts_with((string) $t['anexo_mime'], 'image/');
   </div>
 </div>
 
+<?php if (($pode || $dono) && in_array($t['situacao'], $pode ? ['a_fazer', 'fazendo'] : ['a_fazer'], true)): ?>
+  <details class="card" data-editar-tarefa-mkt style="margin-bottom:14px">
+    <summary><strong>✏️ Editar <?= $dono && !$pode ? 'o meu pedido' : 'a tarefa' ?></strong> <small class="suave">título, descrição, prazo e urgência</small></summary>
+    <form method="post" action="<?= $acao ?>/editar" style="margin-top:10px"><?= csrf_campo() ?>
+      <div class="grade-campos">
+        <div class="campo"><label>Título<input type="text" name="titulo" value="<?= e($t['titulo']) ?>" maxlength="160" required></label></div>
+        <div class="campo"><label>Prazo<input type="date" name="prazo" value="<?= e((string) $t['prazo']) ?>"></label></div>
+      </div>
+      <div class="campo"><label>Descrição<textarea name="descricao" rows="4" maxlength="5000"><?= e((string) $t['descricao']) ?></textarea></label></div>
+      <label class="pequeno"><input type="checkbox" name="urgente" value="1" <?= $t['urgente'] ? 'checked' : '' ?>> Urgente</label>
+      <div class="acoes-form"><button class="botao pequeno" type="submit">Salvar</button></div>
+    </form>
+  </details>
+<?php endif; ?>
+
 <?php if ($podeAprovar && $t['situacao'] === 'aprovacao'): ?>
 <section class="card mt-decidir" id="decidir" data-decidir>
   <h2>Sua aprovação</h2>

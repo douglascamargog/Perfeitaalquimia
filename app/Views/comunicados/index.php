@@ -43,6 +43,14 @@ $situacao = ['no ar' => 'verde', 'agendado' => 'laranja', 'vencido' => 'cinza', 
               <small data-leitura><?= (int) $c['leram'] ?> de <?= (int) $c['total'] ?> leram</small>
               <?php if ($c['faltam']): ?><details><summary class="pequeno">quem falta</summary><small><?= e(implode(', ', $c['faltam'])) ?></small></details><?php endif; ?></div></td>
             <td><?php if (in_array($c['situacao'], ['no ar', 'agendado'], true)): ?>
+              <details data-corrigir-comunicado="<?= (int) $c['id'] ?>"><summary class="botao contorno pequeno">Corrigir</summary>
+                <form method="post" action="<?= url('/comunicados/' . (int) $c['id'] . '/corrigir') ?>" style="display:grid;gap:6px;margin-top:6px;min-width:260px"><?= csrf_campo() ?>
+                  <input type="text" name="titulo" value="<?= e($c['titulo']) ?>" maxlength="140" required aria-label="Título">
+                  <textarea name="texto" rows="4" maxlength="5000" required aria-label="Texto"><?= e((string) $c['texto']) ?></textarea>
+                  <button class="botao pequeno" type="submit">Salvar correção</button>
+                  <small class="suave">Quem já leu não recebe aviso de novo.</small>
+                </form>
+              </details>
               <form method="post" action="<?= url('/comunicados/' . (int) $c['id'] . '/encerrar') ?>" onsubmit="return confirm('Tirar este comunicado do topo da tela de todos?')"><?= csrf_campo() ?><button class="botao contorno pequeno" type="submit">Encerrar</button></form>
             <?php endif; ?></td>
           </tr>

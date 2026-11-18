@@ -11,6 +11,9 @@ $origens = ['catalogo' => 'Catálogo (cliente)', 'sistema' => 'Sistema (equipe)'
   <div class="acoes">
     <a class="botao contorno" href="<?= url('/pedidos') ?>">← Pedidos</a>
     <button class="botao contorno" type="button" onclick="window.print()">Imprimir</button>
+    <?php if ($p['situacao'] === 'aguardando_aprovacao' && Auth::pode('pedidos.criar')): ?>
+      <a class="botao contorno" href="<?= url('/pedidos/novo') ?>?cliente=<?= (int) $p['cliente_id'] ?>&corrigir=<?= (int) $p['id'] ?>" data-corrigir-pedido>Corrigir pedido</a>
+    <?php endif; ?>
     <?php if ($p['situacao'] === 'aguardando_aprovacao' && (Auth::pode('pedidos.criar') || Auth::pode('pedidos.ver_todos'))): ?>
       <form method="post" action="<?= url('/pedidos/' . (int) $p['id'] . '/cancelar') ?>" data-confirmar="Cancelar este pedido?"><?= csrf_campo() ?><button class="botao contorno" type="submit">Cancelar pedido</button></form>
     <?php endif; ?>

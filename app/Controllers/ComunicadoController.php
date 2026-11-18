@@ -41,6 +41,17 @@ class ComunicadoController extends Controller
             'faixa' => \App\Core\Visao::renderizar('comunicados/_faixa', ['comunicados' => $restantes])]);
     }
 
+    public function corrigir(string $id): void
+    {
+        try {
+            C::corrigir((int) $id, (string) ($_POST['titulo'] ?? ''), (string) ($_POST['texto'] ?? ''), Auth::id());
+            Sessao::aviso('sucesso', 'Comunicado corrigido.');
+        } catch (\RuntimeException $e) {
+            Sessao::aviso('erro', $e->getMessage());
+        }
+        redirecionar('/comunicados');
+    }
+
     public function encerrar(string $id): void
     {
         C::encerrar((int) $id, Auth::id());

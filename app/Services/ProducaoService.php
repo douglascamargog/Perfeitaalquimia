@@ -731,6 +731,31 @@ class ProducaoService
         });
     }
 
+    /**
+     * Editar uma ordem PLANEJADA (V15.7): quantidade, datas, lote e observações.
+     * Mudou a quantidade de uma ordem aprovada? A aprovação da Responsável Técnica volta a ser pedida.
+     */
+    public static function editarOrdem(int $id, array $d, ?int $usuarioId): void
+    {
+        $op = Banco::um('SELECT * FROM ordens_producao WHERE id = ?', [$id]);
+        if (!$op || $op['situacao'] !== 'planejada') {
+            throw new RuntimeException('Só dá para editar uma ordem planejada.');
+        }
+        $qtd = (int) ($d['quantidade'] ?? 0);
+        if ($qtd < 1 || $qtd > 1000000) {
+            throw new RuntimeException('Informe quantas unidades vão ser fabricadas.');
+        }
+        $data = fn($v) => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $v) ? $v : null;
+        $novos = ['quantidade' => $qtd, 'entrada_producao' => $data($d['entrada_producao'] ?? null), 'previsto_para' => $data($d['previsto_para'] ?? null),
+            'lote' => mb_substr(trim((string) ($d['lote'] ?? '')), 0, 40) ?: null, 'validade' => $data($d['validade'] ?? null),
+            'observacoes' => trim((string) ($d['observacoes'] ?? '')) ?: null];
+        if ($qtd !== (int) $op['quantidade'] && $op['aprovada_em']) {
+            $novos += ['aprovada_em' => null, 'aprovada_por' => null];
+        }
+        Banco::atualizar('ordens_producao', $id, $novos);
+        Auditoria::registrar('ordem_producao', $id, 'editar', array_intersect_key($op, $novos), $novos);
+    }
+
     public static function cancelarOrdem(int $id, string $motivo, ?int $usuarioId): void
     {
         $op = Banco::um('SELECT * FROM ordens_producao WHERE id = ?', [$id]);

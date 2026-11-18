@@ -156,6 +156,18 @@ class OrdemProducaoController extends Controller
         redirecionar("/producao/ordens/$id");
     }
 
+    /** Editar uma ordem planejada (V15.7) */
+    public function editar(string $id): void
+    {
+        try {
+            ProducaoService::editarOrdem((int) $id, $_POST, Auth::id());
+            Sessao::aviso('sucesso', 'Ordem atualizada.');
+        } catch (RuntimeException $e) {
+            Sessao::aviso('erro', $e->getMessage());
+        }
+        redirecionar("/producao/ordens/$id");
+    }
+
     private static function produtosComFicha(): array
     {
         return Banco::todos('SELECT p.id, p.nome, p.embalagem FROM produtos p WHERE p.ativo = 1 AND EXISTS (SELECT 1 FROM ficha_tecnica f WHERE f.produto_id = p.id) ORDER BY p.nome');

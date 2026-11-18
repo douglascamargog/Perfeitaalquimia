@@ -36,6 +36,9 @@ foreach ($campanhas as $cp) {
   <?php if ($orcamento): ?><input type="hidden" name="orcamento_id" value="<?= (int) $orcamento['id'] ?>"><?php endif; ?>
   <?php if ($orcamento): ?><p class="aviso ped-aviso-orc">Você está mexendo no <a href="<?= url('/orcamentos/' . (int) $orcamento['id']) ?>">orçamento #<?= (int) $orcamento['id'] ?></a>:
     <strong>Atualizar orçamento</strong> mantém o mesmo link do cliente; <strong>Enviar pedido</strong> transforma ele em pedido agora.</p><?php endif; ?>
+  <?php if (!empty($corrigir)): ?><input type="hidden" name="corrigir_id" value="<?= (int) $corrigir['id'] ?>">
+    <p class="aviso ped-aviso-orc" data-corrigindo>Você está corrigindo o <a href="<?= url('/pedidos/' . (int) $corrigir['id']) ?>">pedido #<?= (int) $corrigir['id'] ?></a>:
+      ajuste os itens e clique em <strong>Enviar pedido</strong>. O pedido novo substitui o antigo, que fica cancelado (o Financeiro aprova o novo).</p><?php endif; ?>
   <section class="card ped-modelos" data-modelos='<?= e(json_encode($jsonModelos)) ?>'>
     <div class="ped-modelos-usar">
       <label for="usar-modelo"><strong>Usar um modelo</strong> <small>soma as quantidades do modelo ao que já está escolhido</small></label>

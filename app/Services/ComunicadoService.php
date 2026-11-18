@@ -111,6 +111,22 @@ class ComunicadoService
         Banco::executar('INSERT IGNORE INTO comunicado_leituras (comunicado_id, usuario_id) VALUES (?, ?)', [$id, $usuarioId]);
     }
 
+    /** Corrigir título e texto de um comunicado no ar ou agendado (V15.7). Quem já leu não é avisado de novo. */
+    public static function corrigir(int $id, string $titulo, string $texto, ?int $usuarioId): void
+    {
+        $c = Banco::um('SELECT id, titulo, texto FROM comunicados WHERE id = ? AND encerrado_em IS NULL', [$id]);
+        $titulo = trim($titulo);
+        $texto = trim($texto);
+        if (!$c) {
+            throw new RuntimeException('Comunicado não encontrado (ou já encerrado).');
+        }
+        if ($titulo === '' || mb_strlen($titulo) > 140 || $texto === '' || mb_strlen($texto) > 5000) {
+            throw new RuntimeException('Escreva o título (até 140 letras) e o texto (até 5.000 letras).');
+        }
+        Banco::executar('UPDATE comunicados SET titulo = ?, texto = ? WHERE id = ?', [$titulo, $texto, $id]);
+        Auditoria::registrar('comunicado', $id, 'corrigir', ['titulo' => $c['titulo'], 'texto' => $c['texto']], ['titulo' => $titulo, 'texto' => $texto]);
+    }
+
     public static function encerrar(int $id, ?int $usuarioId): void
     {
         Banco::executar('UPDATE comunicados SET encerrado_em = NOW() WHERE id = ? AND encerrado_em IS NULL', [$id]);
