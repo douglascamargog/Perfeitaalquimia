@@ -32,6 +32,7 @@ const entrar = async (b, email) => {
   const b = await chromium.launch(); const paginas = [];
   try {
     const a = await entrar(b, 'admin@demo.local'); paginas.push(a);
+    sql("update configuracoes set valor='google' where chave='mapas.provedor'"); // este teste é do Google (a Geoapify tem teste próprio)
     await a.goto(BASE + '/administracao#google-maps');
     ok(await a.locator('[data-google-maps]').isVisible() && (await a.locator('[data-geo-resumo]').innerText()).startsWith('0 de'), 'Administração mostra o Google Maps: nenhuma loja no ponto exato ainda');
     const guardar = async (chave) => { await a.fill('[data-google-chave]', chave); await Promise.all([a.waitForNavigation(), a.click('[data-google-maps] button:has-text("Guardar")')]); return a.locator('.aviso').first().innerText(); };

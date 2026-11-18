@@ -123,24 +123,44 @@ $icones = asset('img/icones.svg');
       <button class="botao contorno pequeno" type="submit" data-testar-tray>Testar conexão</button>
       <span class="pequeno suave">gera o Access Token e lê o último pedido da loja</span></form>
   </section>
-  <?php $gChave = \App\Services\LocalizacaoService::chave(); $geo = \App\Services\LocalizacaoService::resumo(); ?>
-  <section class="card adm-one" id="google-maps" data-google-maps style="margin-top:16px">
-    <h2 style="margin:0 0 6px;font-size:1rem">🗺️ Google Maps <small class="suave">localização exata das lojas no mapa da Carteira</small></h2>
-    <p class="pequeno" style="margin:0">Com a chave, o One transforma o endereço de cada loja em um ponto exato no mapa (aos poucos, de hora em hora).
-      Só vai para o Google o endereço comercial da loja. A chave é criada no Google Cloud (Credenciais › Criar chave de API) com a <strong>Geocoding API</strong> ativada.</p>
+  <?php $prov = \App\Services\LocalizacaoService::provedor(); $gChave = \App\Services\LocalizacaoService::chaveGoogle(); $aChave = (string) config('integracoes.geoapify.chave', '');
+        $chaveAtiva = \App\Services\LocalizacaoService::chave(); $geo = \App\Services\LocalizacaoService::resumo(); ?>
+  <section class="card adm-one" id="google-maps" data-google-maps data-mapas style="margin-top:16px">
+    <h2 style="margin:0 0 6px;font-size:1rem">🗺️ Mapas <small class="suave">ponto exato das lojas e rotas do Planejador de visitas</small></h2>
+    <p class="pequeno" style="margin:0">Com a chave, o One transforma o endereço de cada loja em um ponto no mapa (aos poucos, de hora em hora) e calcula as rotas pelas estradas
+      no Planejador de visitas. Só vai para o serviço o endereço comercial da loja. O botão "Rota no Google Maps" do celular não usa chave nem tem custo.</p>
+    <form method="post" action="<?= url('/administracao/mapas/provedor') ?>" style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:10px 0" data-mapas-provedor><?= csrf_campo() ?>
+      <strong class="pequeno">Serviço em uso:</strong>
+      <label class="pequeno"><input type="radio" name="provedor" value="geoapify" <?= $prov === 'geoapify' ? 'checked' : '' ?> onchange="this.form.submit()"> Geoapify <small class="suave">(grátis até 3.000 créditos por dia, sem pré-pagamento)</small></label>
+      <label class="pequeno"><input type="radio" name="provedor" value="google" <?= $prov === 'google' ? 'checked' : '' ?> onchange="this.form.submit()"> Google Maps <small class="suave">(pago, mais preciso no número da casa)</small></label>
+      <noscript><button class="botao contorno pequeno" type="submit">Trocar</button></noscript>
+    </form>
     <p class="pequeno" data-geo-resumo style="margin:8px 0"><strong><?= $geo['exatos'] ?></strong> de <?= $geo['total'] ?> loja(s) com endereço já estão no ponto exato
       (<?= $geo['manuais'] ?> ajustada(s) à mão) · <?= $geo['pendentes'] ?> esperando · <?= $geo['nao_achados'] ?> sem endereço preciso.</p>
-    <form method="post" action="<?= url('/administracao/google-maps') ?>" class="adm-chave" autocomplete="off"><?= csrf_campo() ?>
-      <div class="adm-chave-linha">
-        <label style="flex:1;min-width:240px">Chave da API do Google Maps <small class="suave"><?= $gChave ? '(cadastrada: …' . e(mb_substr($gChave, -4)) . '; para trocar, cole a nova)' : '(nenhuma cadastrada)' ?></small>
-          <input type="password" name="chave" placeholder="AIza..." autocomplete="new-password" spellcheck="false" data-google-chave></label>
-        <button class="botao pequeno" type="submit">Guardar</button>
-        <?php if ($gChave): ?><button class="botao contorno pequeno" type="submit" name="remover" value="1" data-confirmar="Remover a chave do Google Maps?">Remover</button><?php endif; ?>
-      </div>
-    </form>
+    <?php if ($prov === 'geoapify'): ?>
+      <p class="pequeno suave" style="margin:0 0 6px">Crie a conta grátis em geoapify.com › My Projects › crie um projeto › copie a <strong>API Key</strong> e cole aqui. Os mapas mostram "Powered by Geoapify", como pede o plano grátis.</p>
+      <form method="post" action="<?= url('/administracao/geoapify') ?>" class="adm-chave" autocomplete="off" data-form-geoapify><?= csrf_campo() ?>
+        <div class="adm-chave-linha">
+          <label style="flex:1;min-width:240px">Chave da Geoapify <small class="suave"><?= $aChave ? '(cadastrada: …' . e(mb_substr($aChave, -4)) . '; para trocar, cole a nova)' : '(nenhuma cadastrada)' ?></small>
+            <input type="password" name="chave" placeholder="cole a API Key" autocomplete="new-password" spellcheck="false" data-geoapify-chave></label>
+          <button class="botao pequeno" type="submit">Guardar</button>
+          <?php if ($aChave): ?><button class="botao contorno pequeno" type="submit" name="remover" value="1" data-confirmar="Remover a chave da Geoapify?">Remover</button><?php endif; ?>
+        </div>
+      </form>
+    <?php else: ?>
+      <p class="pequeno suave" style="margin:0 0 6px">A chave do Google é criada no Google Cloud (Credenciais › Criar chave de API) com a <strong>Geocoding API</strong> ativada. O Google pede cadastro de pagamento.</p>
+      <form method="post" action="<?= url('/administracao/google-maps') ?>" class="adm-chave" autocomplete="off"><?= csrf_campo() ?>
+        <div class="adm-chave-linha">
+          <label style="flex:1;min-width:240px">Chave da API do Google Maps <small class="suave"><?= $gChave ? '(cadastrada: …' . e(mb_substr($gChave, -4)) . '; para trocar, cole a nova)' : '(nenhuma cadastrada)' ?></small>
+            <input type="password" name="chave" placeholder="AIza..." autocomplete="new-password" spellcheck="false" data-google-chave></label>
+          <button class="botao pequeno" type="submit">Guardar</button>
+          <?php if ($gChave): ?><button class="botao contorno pequeno" type="submit" name="remover" value="1" data-confirmar="Remover a chave do Google Maps?">Remover</button><?php endif; ?>
+        </div>
+      </form>
+    <?php endif; ?>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
       <form method="post" action="<?= url('/administracao/google-maps/testar') ?>"><?= csrf_campo() ?><button class="botao contorno pequeno" type="submit" data-google-testar>Testar</button></form>
-      <form method="post" action="<?= url('/administracao/google-maps/localizar') ?>"><?= csrf_campo() ?><button class="botao contorno pequeno" type="submit" data-google-localizar <?= $gChave ? '' : 'disabled' ?>>Localizar agora</button></form>
+      <form method="post" action="<?= url('/administracao/google-maps/localizar') ?>"><?= csrf_campo() ?><button class="botao contorno pequeno" type="submit" data-google-localizar <?= $chaveAtiva ? '' : 'disabled' ?>>Localizar agora</button></form>
       <span class="pequeno suave" style="align-self:center">Cron de hora em hora: <code>cron/geocodificar.php</code></span>
     </div>
   </section>

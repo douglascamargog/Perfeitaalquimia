@@ -154,7 +154,7 @@ class RoteiroService
         }
         if ($semLugar) {
             throw new RuntimeException('Não encontrei no mapa: ' . implode(', ', $semLugar) . '. Confira o nome (com a UF, ex.: Ijuí/RS)'
-                . (LocalizacaoService::chave() === '' ? ' — para cidades que ainda não têm lojas no One, o administrador precisa cadastrar a chave do Google Maps.' : '.'));
+                . (LocalizacaoService::chave() === '' ? ' — para cidades que ainda não têm lojas no One, o administrador precisa cadastrar a chave do serviço de mapas (⚙️ Administração › Mapas).' : '.'));
         }
         if (!$cidades) {
             throw new RuntimeException('Escolha pelo menos uma cidade do caminho.');
@@ -170,10 +170,12 @@ class RoteiroService
             // dias fora das novas datas voltam para "sem dia"
             Banco::executar("UPDATE roteiro_paradas SET dia = NULL WHERE roteiro_id = ? AND situacao = 'pendente' AND (dia < ? OR dia > ?)", [$id, $inicio, $fim]);
             Auditoria::registrar('roteiro', $id, 'editar', null, $dados);
+            self::calcularTrajeto(self::buscar($id));
             return $id;
         }
         $id = Banco::inserir('roteiros', $dados + ['usuario_id' => $usuarioId]);
         Auditoria::registrar('roteiro', $id, 'criar', null, $dados);
+        self::calcularTrajeto(self::buscar($id));
         return $id;
     }
 
@@ -333,7 +335,9 @@ class RoteiroService
     /** Rota em km (projeção plana, ótima para distâncias de um estado): pontos, segmentos e km acumulados */
     private static function rota(array $r): array
     {
-        $pontos = array_values(array_filter($r['cidades'], fn($c) => $c['lat'] !== null));
+        // Trajeto real pelas estradas (Geoapify), quando calculado; senão, as cidades ligadas em linha reta
+        $trajeto = array_map(fn($p) => ['lat' => (float) $p[0], 'lng' => (float) $p[1]], (array) json_decode((string) ($r['trajeto_json'] ?? ''), true));
+        $pontos = count($trajeto) >= 2 ? $trajeto : array_values(array_filter($r['cidades'], fn($c) => $c['lat'] !== null));
         if (!$pontos) {
             return ['pontos' => []];
         }
@@ -466,6 +470,88 @@ class RoteiroService
             $ordem[$dia] = ($ordem[$dia] ?? 0) + 1;
             Banco::executar('UPDATE roteiro_paradas SET dia = ?, ordem = ? WHERE id = ?', [$dia, $ordem[$dia], $p['id']]);
         }
+        self::otimizarDias($r);
+    }
+
+    /** O serviço de rotas está disponível? (Geoapify com chave) */
+    public static function rotasReais(): bool
+    {
+        return LocalizacaoService::provedor() === 'geoapify' && LocalizacaoService::chave() !== '';
+    }
+
+    /**
+     * Trajeto pelas estradas entre as cidades do roteiro (uma consulta à Geoapify). Guarda os pontos, km e tempo.
+     * Sem chave ou com erro, o roteiro continua em linha reta e o motivo aparece na tela.
+     */
+    public static function calcularTrajeto(array $r): void
+    {
+        $cidades = array_values(array_filter($r['cidades'] ?? self::cidades($r), fn($c) => $c['lat'] !== null));
+        $limpar = ['trajeto_json' => null, 'km_total' => null, 'minutos_total' => null];
+        if (!self::rotasReais()) {
+            Banco::atualizar('roteiros', (int) $r['id'], $limpar + ['rota_aviso' => LocalizacaoService::provedor() === 'geoapify'
+                ? 'Distâncias em linha reta: cadastre a chave da Geoapify em Administração › Mapas para usar as estradas.' : null]);
+            return;
+        }
+        if (count($cidades) < 2) {
+            Banco::atualizar('roteiros', (int) $r['id'], $limpar + ['rota_aviso' => null]);
+            return;
+        }
+        try {
+            $rota = \App\Integrations\Mapas\GeoapifyClient::daConfig()->rota($cidades);
+            $pontos = $rota['trajeto'];
+            $passo = max(1, (int) ceil(count($pontos) / 600)); // até ~600 pontos: leve para guardar e para o mapa
+            $simples = [];
+            foreach ($pontos as $i => $pt) {
+                if ($i % $passo === 0 || $i === count($pontos) - 1) {
+                    $simples[] = [round($pt[0], 5), round($pt[1], 5)];
+                }
+            }
+            Banco::atualizar('roteiros', (int) $r['id'], ['trajeto_json' => json_encode($simples), 'km_total' => $rota['km'], 'minutos_total' => $rota['minutos'], 'rota_aviso' => null]);
+        } catch (\RuntimeException $e) {
+            error_log('Roteiro ' . $r['id'] . ': trajeto não calculado (' . $e->getMessage() . ')');
+            Banco::atualizar('roteiros', (int) $r['id'], $limpar + ['rota_aviso' => 'Distâncias em linha reta: ' . mb_substr($e->getMessage(), 0, 200)]);
+        }
+    }
+
+    /**
+     * Melhor ordem das visitas de cada dia (Geoapify Route Planner: uma consulta por dia), com km e tempo do dia.
+     * O dia começa onde o anterior terminou (o primeiro, na cidade de saída). Visitas já feitas ficam no começo, como estão.
+     */
+    private static function otimizarDias(array $r): void
+    {
+        if (!self::rotasReais()) {
+            return;
+        }
+        $r['cidades'] = $r['cidades'] ?? self::cidades($r);
+        $inicio = array_values(array_filter($r['cidades'], fn($c) => $c['lat'] !== null))[0] ?? null;
+        $resumo = [];
+        foreach (self::dias($r) as $dia) {
+            $lista = Banco::todos("SELECT p.id, p.situacao, p.ordem, COALESCE(c.lat, ci.lat) AS lat, COALESCE(c.lng, ci.lng) AS lng
+                FROM roteiro_paradas p JOIN clientes c ON c.id = p.cliente_id LEFT JOIN cidades ci ON ci.id = c.cidade_id
+                WHERE p.roteiro_id = ? AND p.dia = ? ORDER BY p.situacao = 'pendente', p.ordem, p.id", [$r['id'], $dia]);
+            $feitas = array_values(array_filter($lista, fn($p) => $p['situacao'] !== 'pendente' || $p['lat'] === null));
+            $pendentes = array_values(array_filter($lista, fn($p) => $p['situacao'] === 'pendente' && $p['lat'] !== null));
+            if (!$pendentes || !$inicio) {
+                continue;
+            }
+            $saida = $feitas && end($feitas)['lat'] !== null ? end($feitas) : $inicio;
+            try {
+                $plano = \App\Integrations\Mapas\GeoapifyClient::daConfig()->ordenar(['lat' => (float) $saida['lat'], 'lng' => (float) $saida['lng']],
+                    array_map(fn($p) => ['lat' => (float) $p['lat'], 'lng' => (float) $p['lng']], $pendentes));
+            } catch (\RuntimeException $e) {
+                error_log('Roteiro ' . $r['id'] . ': ordem do dia ' . $dia . ' não calculada (' . $e->getMessage() . ')');
+                Banco::executar('UPDATE roteiros SET rota_aviso = ? WHERE id = ?', ['Melhor ordem das visitas não calculada: ' . mb_substr($e->getMessage(), 0, 180), $r['id']]);
+                return;
+            }
+            $n = count($feitas);
+            foreach ($plano['ordem'] as $i) {
+                Banco::executar('UPDATE roteiro_paradas SET ordem = ? WHERE id = ?', [++$n, $pendentes[$i]['id']]);
+            }
+            $resumo[$dia] = ['km' => $plano['km'], 'minutos' => $plano['minutos']];
+            $ultima = $pendentes[end($plano['ordem'])];
+            $inicio = ['lat' => $ultima['lat'], 'lng' => $ultima['lng']]; // o próximo dia sai daqui
+        }
+        Banco::executar('UPDATE roteiros SET dias_json = ? WHERE id = ?', [$resumo ? json_encode($resumo) : null, $r['id']]);
     }
 
     public static function mudarDia(array $r, int $paradaId, string $dia): void

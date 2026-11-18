@@ -21,13 +21,16 @@ $mapa = [
     'caminho' => $caminho ? array_values(array_map(fn($l) => ['id' => (int) $l['id'], 'nome' => $l['nome'], 'lat' => (float) $l['lat'], 'lng' => (float) $l['lng'],
         'sugerida' => $l['sugerida'], 'no_roteiro' => (bool) $l['no_roteiro']], array_slice($caminho['lojas'], 0, 800))) : [],
 ];
+$horas = fn(?int $min) => $min === null ? '' : ($min >= 60 ? intdiv($min, 60) . 'h' . str_pad((string) ($min % 60), 2, '0', STR_PAD_LEFT) : $min . ' min');
+$porDiaKm = (array) json_decode((string) ($r['dias_json'] ?? ''), true);
+$mapa['trajeto'] = array_map(fn($p) => [(float) $p[1], (float) $p[0]], (array) json_decode((string) ($r['trajeto_json'] ?? ''), true)); // [lng, lat] para o mapa
 $linkAba = fn(string $aba, array $mais = []) => url('/roteiros/' . (int) $r['id']) . '?' . e(http_build_query(['aba' => $aba] + $mais));
 ?>
 <a class="voltar-link" href="<?= url('/roteiros') ?>">← Planejador de visitas</a>
 <div class="cabecalho-secao">
   <div><div class="sobretitulo">ROTEIRO · <?= e(mb_strtoupper($r['usuario_nome'])) ?></div><h1><?= e($r['nome']) ?></h1>
     <p><?= data_br($r['data_inicio']) ?><?= $r['data_fim'] !== $r['data_inicio'] ? ' a ' . data_br($r['data_fim']) : '' ?> ·
-      <strong><?= e(implode(' → ', array_column($r['cidades'], 'nome'))) ?></strong> · lojas até <?= (int) $r['raio_km'] ?> km do caminho · <?= (int) $r['visitas_dia'] ?> visitas por dia
+      <strong><?= e(implode(' → ', array_column($r['cidades'], 'nome'))) ?></strong><?= $r['km_total'] !== null ? ' · <span data-km-total>' . number_format((float) $r['km_total'], 0, ',', '.') . ' km pelas estradas (' . $horas((int) $r['minutos_total']) . ' dirigindo)</span>' : '' ?> · lojas até <?= (int) $r['raio_km'] ?> km do caminho · <?= (int) $r['visitas_dia'] ?> visitas por dia
       <?= $r['situacao'] !== 'planejado' ? ' · <span class="selo">' . ($r['situacao'] === 'concluido' ? 'Concluído' : 'Cancelado') . '</span>' : '' ?></p>
     <?php if ($r['observacoes']): ?><p class="suave pequeno"><?= nl2br(e($r['observacoes'])) ?></p><?php endif; ?>
   </div>
@@ -47,6 +50,7 @@ $linkAba = fn(string $aba, array $mais = []) => url('/roteiros/' . (int) $r['id'
   <div class="aviso">Você está vendo só as lojas da <strong>sua carteira</strong> que estão neste roteiro de visitas. Pedidos fechados na visita são seus.</div>
 <?php endif; ?>
 
+<?php if ($r['rota_aviso'] && !$soLeitura): ?><p class="pequeno suave" data-rota-aviso>ℹ️ <?= e($r['rota_aviso']) ?></p><?php endif; ?>
 <div id="rt-mapa" class="rt-mapa card" data-mapa-roteiro="<?= e(json_encode($mapa, JSON_UNESCAPED_UNICODE)) ?>" aria-label="Mapa do roteiro"></div>
 
 <?php if (!$soLeitura): ?>
@@ -106,7 +110,7 @@ $linkAba = fn(string $aba, array $mais = []) => url('/roteiros/' . (int) $r['id'
   <?php endif; ?>
   <?php foreach (array_merge($dias, ['']) as $dia): if (empty($porDia[$dia])) { continue; } $lista = $porDia[$dia]; ?>
     <section class="card rt-dia" data-dia="<?= e($dia) ?>">
-      <header class="rt-dia-topo"><h2><?= $dia ? e(ucfirst($nomeDia($dia))) : 'Sem dia' ?> <small class="suave"><?= count($lista) ?> loja(s)</small></h2>
+      <header class="rt-dia-topo"><h2><?= $dia ? e(ucfirst($nomeDia($dia))) : 'Sem dia' ?> <small class="suave"><?= count($lista) ?> loja(s)<?= isset($porDiaKm[$dia]) ? ' · <span data-km-dia>' . number_format((float) $porDiaKm[$dia]['km'], 0, ',', '.') . ' km · ' . $horas((int) $porDiaKm[$dia]['minutos']) . ' com as visitas</span>' : '' ?></small></h2>
         <?php if ($dia && !$soLeitura): foreach (R::linksGoogleMaps($lista) as $l): ?><a class="pequeno" href="<?= e($l) ?>" target="_blank" rel="noopener">🧭 Rota do dia</a><?php endforeach; endif; ?></header>
       <ol class="rt-paradas">
         <?php foreach ($lista as $p): [$rotulo, $cor] = $sit[$p['situacao']] ?? [$p['situacao'], '']; $outra = (int) $p['responsavel_id'] !== (int) $r['usuario_id']; ?>
@@ -145,3 +149,4 @@ $linkAba = fn(string $aba, array $mais = []) => url('/roteiros/' . (int) $r['id'
     </section>
   <?php endforeach; ?>
 <?php endif; ?>
+<?php if ($r['trajeto_json'] || $porDiaKm): ?><p class="pequeno suave" style="text-align:right">Rotas: <a href="https://www.geoapify.com/" target="_blank" rel="noopener">Powered by Geoapify</a> · © OpenStreetMap</p><?php endif; ?>

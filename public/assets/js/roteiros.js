@@ -44,9 +44,13 @@ if (el) {
       new maplibregl.Marker({ element: m }).setLngLat([p.lng, p.lat]).setPopup(new maplibregl.Popup({ offset: 12 }).setText(popup)).addTo(mapa);
     };
     mapa.on('load', () => {
-      if ((dados.rota || []).length > 1) {
-        mapa.addSource('rota', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: dados.rota.map((c) => [c.lng, c.lat]) } } });
-        mapa.addLayer({ id: 'rota', type: 'line', source: 'rota', paint: { 'line-color': '#0b5d4b', 'line-width': 4, 'line-opacity': .55, 'line-dasharray': [2, 1.5] } });
+      // Trajeto pelas estradas (Geoapify) em linha cheia; sem ele, as cidades ligadas em linha reta (tracejada)
+      const real = (dados.trajeto || []).length > 1;
+      const linha = real ? dados.trajeto : (dados.rota || []).map((c) => [c.lng, c.lat]);
+      if (linha.length > 1) {
+        mapa.addSource('rota', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: linha } } });
+        mapa.addLayer({ id: 'rota', type: 'line', source: 'rota', paint: real ? { 'line-color': '#0b5d4b', 'line-width': 4, 'line-opacity': .7 }
+          : { 'line-color': '#0b5d4b', 'line-width': 4, 'line-opacity': .55, 'line-dasharray': [2, 1.5] } });
       }
     });
     (dados.caminho || []).filter((l) => !l.no_roteiro).forEach((l) => marcador(l.sugerida ? 'sugerida' : 'outra', '', l, l.nome + (l.sugerida ? ' · sugerida' : '')));

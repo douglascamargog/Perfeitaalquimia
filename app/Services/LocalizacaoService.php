@@ -5,8 +5,9 @@ use App\Core\Banco;
 use App\Core\Config;
 
 /**
- * Localização exata das lojas da Carteira (V14.2): endereço → coordenada pelo Google Maps (Geocoding API).
- *  - A chave fica em config/segredos.php (⚙️ Administração › Google Maps), nunca no código.
+ * Localização exata das lojas da Carteira (V14.2): endereço → coordenada.
+ *  - Serviço (V15.5): Geoapify (padrão, plano grátis sem pré-pagamento) ou Google Maps — "mapas.provedor" em ⚙️ Administração › Mapas.
+ *  - As chaves ficam em config/segredos.php, nunca no código.
  *  - rodada(): o cron/geocodificar.php localiza aos poucos as lojas sem coordenada ou com endereço mudado.
  *  - Só grava quando o Google acha o endereço na MESMA cidade e com precisão de rua ou melhor;
  *    senão o ponto continua aproximado pela cidade (como antes).
@@ -18,7 +19,24 @@ class LocalizacaoService
     /** Precisão do Google → nossa */
     private const PRECISAO = ['ROOFTOP' => 'telhado', 'RANGE_INTERPOLATED' => 'rua', 'GEOMETRIC_CENTER' => 'rua'];
 
+    /** Serviço de mapas em uso: 'geoapify' (padrão) ou 'google' */
+    public static function provedor(): string
+    {
+        return Config::get('mapas.provedor', 'geoapify') === 'google' ? 'google' : 'geoapify';
+    }
+
+    public static function nomeProvedor(): string
+    {
+        return self::provedor() === 'google' ? 'Google Maps' : 'Geoapify';
+    }
+
+    /** Chave do serviço em uso ('' = sem chave: o mapa fica com os pontos aproximados pela cidade) */
     public static function chave(): string
+    {
+        return self::provedor() === 'google' ? self::chaveGoogle() : (string) config('integracoes.geoapify.chave', '');
+    }
+
+    public static function chaveGoogle(): string
     {
         return (string) config('integracoes.google.maps_chave', '');
     }
@@ -60,7 +78,7 @@ class LocalizacaoService
     {
         $r = ['achadas' => 0, 'nao_achadas' => 0, 'erro' => null];
         if (self::chave() === '') {
-            $r['erro'] = 'Falta a chave do Google Maps (⚙️ Administração › Google Maps).';
+            $r['erro'] = 'Falta a chave do ' . self::nomeProvedor() . ' (⚙️ Administração › Mapas).';
             return $r;
         }
         foreach (self::pendentes($limite) as $c) {
@@ -80,7 +98,7 @@ class LocalizacaoService
                     [$c['hash'], $c['id']]);
                 $r['nao_achadas']++;
             }
-            usleep(60_000); // bem abaixo do limite do Google (50 por segundo)
+            usleep(self::provedor() === 'google' ? 60_000 : 250_000); // abaixo do limite (Google 50/s; Geoapify grátis 5/s)
         }
         return $r;
     }
@@ -88,6 +106,9 @@ class LocalizacaoService
     /** Um endereço → ['lat', 'lng', 'precisao'] ou null (não achou na cidade com precisão de rua) */
     public static function localizar(array $c): ?array
     {
+        if (self::provedor() === 'geoapify') {
+            return self::localizarGeoapify($c);
+        }
         $endereco = implode(', ', array_filter([trim((string) $c['endereco']), trim((string) ($c['bairro'] ?? '')),
             trim((string) $c['cidade']) . ' - ' . strtoupper(trim((string) $c['uf'])), preg_replace('/\D/', '', (string) ($c['cep'] ?? '')), 'Brasil']));
         $dados = self::consultar(['address' => $endereco, 'components' => 'country:BR' . ($c['uf'] ? '|administrative_area:' . strtoupper($c['uf']) : '')]);
@@ -111,6 +132,10 @@ class LocalizacaoService
         if (self::chave() === '') {
             return null;
         }
+        if (self::provedor() === 'geoapify') {
+            $p = \App\Integrations\Mapas\GeoapifyClient::daConfig()->cidade(trim($cidade), strtoupper($uf));
+            return $p ? ['lat' => round($p['lat'], 6), 'lng' => round($p['lng'], 6)] : null;
+        }
         $dados = self::consultar(['address' => trim($cidade) . ' - ' . strtoupper($uf) . ', Brasil', 'components' => 'country:BR|administrative_area:' . strtoupper($uf)]);
         foreach ($dados['results'] ?? [] as $res) {
             if (self::mesmaCidade($res, $cidade)) {
@@ -118,6 +143,31 @@ class LocalizacaoService
             }
         }
         return null;
+    }
+
+    /**
+     * Geoapify: aceita só prédio/estabelecimento ("telhado") ou rua ("rua"), na MESMA cidade do cadastro.
+     * Cidade, CEP ou bairro sozinhos não servem: a loja continua aproximada pela cidade.
+     */
+    private static function localizarGeoapify(array $c): ?array
+    {
+        $cep = preg_replace('/\D/', '', (string) ($c['cep'] ?? ''));
+        $texto = implode(', ', array_filter([trim((string) $c['endereco']), trim((string) ($c['bairro'] ?? '')),
+            trim((string) $c['cidade']) . ' - ' . strtoupper(trim((string) $c['uf'])), strlen($cep) === 8 ? substr($cep, 0, 5) . '-' . substr($cep, 5) : '', 'Brasil']));
+        $alvo = self::semAcento((string) $c['cidade']);
+        foreach (\App\Integrations\Mapas\GeoapifyClient::daConfig()->localizar($texto, (string) $c['uf']) as $r) {
+            $precisao = ['building' => 'telhado', 'amenity' => 'telhado', 'street' => 'rua'][$r['tipo']] ?? null;
+            $mesmaCidade = in_array($alvo, array_map([self::class, 'semAcento'], $r['cidades']), true);
+            if ($precisao && $mesmaCidade && ($r['uf'] === '' || $r['uf'] === strtoupper((string) $c['uf']))) {
+                return ['lat' => round($r['lat'], 6), 'lng' => round($r['lng'], 6), 'precisao' => $precisao];
+            }
+        }
+        return null;
+    }
+
+    private static function semAcento(string $t): string
+    {
+        return strtolower(trim(preg_replace('/[^a-z0-9 ]/i', '', iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $t) ?: $t)));
     }
 
     /** O resultado do Google é da mesma cidade do cadastro? (sem acento, sem maiúscula) */
@@ -159,6 +209,9 @@ class LocalizacaoService
     /** Teste da chave com um endereço conhecido */
     public static function testar(): array
     {
+        if (self::provedor() === 'geoapify') {
+            return \App\Integrations\Mapas\GeoapifyClient::daConfig()->testar();
+        }
         if (self::chave() === '') {
             return [false, 'Falta a chave do Google Maps.'];
         }

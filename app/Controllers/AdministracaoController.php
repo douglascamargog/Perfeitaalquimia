@@ -232,10 +232,40 @@ class AdministracaoController extends Controller
         redirecionar('/administracao#google-maps');
     }
 
+    /** Geoapify (mapas sem pré-pagamento): guardar ou remover a chave */
+    public function geoapify(): void
+    {
+        $chave = trim((string) ($_POST['chave'] ?? ''));
+        if (!empty($_POST['remover'])) {
+            $erro = \App\Services\ChaveIA::gravar(['integracoes', 'geoapify', 'chave'], '');
+            $msg = 'Chave da Geoapify removida. Os pontos que já foram localizados continuam no mapa.';
+        } elseif (!preg_match('/^[A-Za-z0-9]{20,64}$/', $chave)) {
+            $erro = 'A chave da Geoapify não parece certa: são só letras e números, sem espaços (geoapify.com › My Projects › API Keys).';
+        } else {
+            $erro = \App\Services\ChaveIA::gravar(['integracoes', 'geoapify', 'chave'], $chave);
+            $msg = 'Chave da Geoapify guardada. Clique em "Testar" e depois em "Localizar agora".';
+        }
+        if (!$erro) {
+            \App\Core\Auditoria::registrar('configuracao', null, 'geoapify', null, ['chave_trocada' => empty($_POST['remover']), 'removida' => !empty($_POST['remover'])]);
+        }
+        \App\Core\Sessao::aviso($erro ? 'erro' : 'sucesso', $erro ?? $msg);
+        redirecionar('/administracao#google-maps');
+    }
+
+    /** Qual serviço de mapas o One usa (localizar lojas e rotas): Geoapify ou Google */
+    public function mapasProvedor(): void
+    {
+        $novo = ($_POST['provedor'] ?? '') === 'google' ? 'google' : 'geoapify';
+        \App\Core\Config::definir('mapas.provedor', $novo);
+        \App\Core\Auditoria::registrar('configuracao', null, 'mapas_provedor', null, ['provedor' => $novo]);
+        \App\Core\Sessao::aviso('sucesso', 'Mapas: agora o One usa ' . ($novo === 'google' ? 'o Google Maps' : 'a Geoapify') . '.');
+        redirecionar('/administracao#google-maps');
+    }
+
     public function testarGoogleMaps(): void
     {
         [$ok, $mensagem] = \App\Services\LocalizacaoService::testar();
-        \App\Core\Sessao::aviso($ok ? 'sucesso' : 'erro', 'Google Maps: ' . $mensagem);
+        \App\Core\Sessao::aviso($ok ? 'sucesso' : 'erro', \App\Services\LocalizacaoService::nomeProvedor() . ': ' . $mensagem);
         redirecionar('/administracao#google-maps');
     }
 

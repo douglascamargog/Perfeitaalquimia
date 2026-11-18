@@ -17,6 +17,16 @@
  */
 return [
     [
+        'versao' => '15.5', 'data' => '2026-11-18', 'titulo' => 'Mapas sem pré-pagamento e rotas pelas estradas',
+        'novo' => [
+            'Planejador de visitas: com o serviço de mapas ligado, as lojas "no caminho" são medidas pela estrada de verdade (não mais em linha reta entre as cidades).',
+            'Cada dia da viagem mostra os km e o tempo, e as visitas ficam na melhor ordem para rodar menos.',
+            'O trajeto aparece desenhado pelas estradas no mapa do roteiro.',
+        ],
+        'melhoria' => ['As lojas continuam sendo colocadas no ponto certo do mapa da Carteira, agora pela Geoapify (sem custo).'],
+        'admin' => 'Administração › Mapas: escolha o serviço (Geoapify, grátis até 3.000 créditos por dia sem pré-pagamento, ou Google Maps) e cole a chave (geoapify.com › My Projects › API Key). Depois: Testar e Localizar agora. Uma consulta por roteiro para o trajeto e uma por dia para a melhor ordem. Sem a chave, o planejador continua em linha reta (aparece um aviso). Quem já tinha a chave do Google continua no Google até trocar. O fundo do mapa continua o OpenFreeMap (grátis e sem limite), para não gastar os créditos da Geoapify.',
+    ],
+    [
         'versao' => '15.4', 'data' => '2026-11-18', 'titulo' => 'Rotas pelo endereço da loja',
         'correcao' => [
             'Planejador de visitas: "Rota no Google Maps" e "Rota do dia" agora levam ao endereço de cada loja (rua, número, bairro, cidade e CEP), e não mais a um ponto aproximado no mapa.',

@@ -1,7 +1,7 @@
 <?php
 /**
- * Tarefa agendada: localiza no mapa (Google Maps) as lojas da Carteira sem localização exata ou com endereço mudado.
- * Vai aos poucos (Configurações › Carteira: "Lojas localizadas por rodada"). Sem chave do Google, não faz nada.
+ * Tarefa agendada: localiza no mapa (Geoapify ou Google Maps, conforme ⚙️ Administração › Mapas) as lojas da Carteira sem localização exata ou com endereço mudado.
+ * Vai aos poucos (Configurações › Carteira: "Lojas localizadas por rodada"). Sem a chave do serviço escolhido, não faz nada.
  *
  * Configure no cPanel (Cron Jobs) para rodar de hora em hora
  * (campo minuto: 0; os demais campos com asterisco):

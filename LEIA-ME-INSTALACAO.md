@@ -149,17 +149,22 @@ Até ligar, o painel **Marketing › E-commerce** mostra números simulados. Par
 O One só lê os pedidos. Não grava nada na loja e não guarda nome, CPF, e-mail, telefone ou endereço de comprador (só cidade e estado).
 Pedidos aguardando pagamento e cancelados não entram no faturamento.
 
-## Mapa da Carteira com o endereço exato (Google Maps)
+## Mapa da Carteira com o endereço exato e rotas do Planejador de visitas (Geoapify ou Google)
 
-1. No **Google Cloud** (console.cloud.google.com): crie um projeto, ative a **Geocoding API** e crie uma **chave de API**
-   (Credenciais › Criar credenciais › Chave de API). Restrinja a chave à Geocoding API. A cobrança precisa estar ativa;
-   o Google dá uma cota grátis por mês, suficiente para localizar as lojas aos poucos.
-2. No One, como admin: **⚙️ Administração › Google Maps**: cole a chave, **Guardar**, **Testar** e **Localizar agora**.
+O padrão é a **Geoapify** (grátis até 3.000 créditos por dia, sem pré-pagamento nem cartão). O Google Maps continua como opção.
+
+1. Crie a conta grátis em **geoapify.com** › My Projects › crie um projeto › copie a **API Key**.
+2. No One, como admin: **⚙️ Administração › Mapas**: deixe marcado **Geoapify**, cole a chave, **Guardar**, **Testar** e **Localizar agora**.
 3. Cron de hora em hora (cPanel › Cron Jobs), para localizar o resto e os endereços que mudarem:
    ```
    0 * * * * php /home/doug9130/public_html/one/cron/geocodificar.php
    ```
-Loja que o Google não achar com precisão fica aproximada na cidade; dá para acertar em **📍 Ajustar no mapa**, na ficha da loja.
+   Com a cota grátis, umas 2.500 lojas por dia são localizadas; o resto continua no dia seguinte, sozinho.
+4. Com a chave, o **Planejador de visitas** passa a usar as estradas: trajeto real, km e tempo, e a melhor ordem das visitas de cada dia.
+   Sem a chave ele continua funcionando, em linha reta.
+
+Loja que o serviço não achar com precisão (prédio ou rua na mesma cidade) fica aproximada na cidade; dá para acertar em **📍 Ajustar no mapa**, na ficha da loja.
+Para usar o Google: marque **Google Maps** na mesma tela e cole a chave do Google Cloud (Geocoding API ativada; o Google exige cobrança ativa).
 
 ## 10. Trazer o trabalho da Carteira atual
 

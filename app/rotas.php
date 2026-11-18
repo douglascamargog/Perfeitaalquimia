@@ -24,6 +24,8 @@ return [
     ['GET',  '/administracao/especialistas',    'AdministracaoController@especialistas',   'config.gerenciar'],
     ['POST', '/administracao/especialistas/{id}', 'AdministracaoController@salvarEspecialista', 'config.gerenciar'],
     ['POST', '/administracao/google-maps',      'AdministracaoController@googleMaps',      'config.gerenciar'],
+    ['POST', '/administracao/geoapify',         'AdministracaoController@geoapify',        'config.gerenciar'],
+    ['POST', '/administracao/mapas/provedor',   'AdministracaoController@mapasProvedor',   'config.gerenciar'],
     ['POST', '/administracao/google-maps/testar', 'AdministracaoController@testarGoogleMaps', 'config.gerenciar'],
     ['POST', '/administracao/google-maps/localizar', 'AdministracaoController@localizarLojas', 'config.gerenciar'], // engrenagem do topo: só as telas que a pessoa pode abrir
     ['GET',  '/minha-senha',   'AuthController@formSenha',  'logado'],

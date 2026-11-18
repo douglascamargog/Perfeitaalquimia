@@ -52,4 +52,5 @@ continuam com o mesmo número de registros.
 | `revisao` | Abre todas as telas de todos os perfis no computador e no celular (erros, avisos e rolagem lateral) |
 | `roteiros` | Média mensal na ficha, Análise de clientes (filtros, agrupar, CSV), Planejador de visitas (lojas no caminho, dias, aviso à dona, pedido vai para a dona e aparece no Meu mês do externo) |
 | `simulador` | Dados de teste: movimento simulado (com a última compra das lojas atualizada), base de clientes de teste variada e apagar tudo |
+| `geoapify` | Mapas pela Geoapify (simulada): Administração › Mapas, chave, Testar, Localizar agora, trajeto pelas estradas, km/tempo e melhor ordem de cada dia no Planejador |
 | `zerar` | Administração › Zerar dados: só o Admin, senha + ZERAR, backup antes, apaga o dia a dia e mantém usuários, produtos, catálogo, configurações e treinamento; toda tabela classificada |
