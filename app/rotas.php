@@ -205,6 +205,10 @@ return [
     ['POST', '/produtos/catalogo/codigos/confirmar', 'CatalogoAdminController@confirmarCodigos', 'catalogo.editar'],
     ['POST', '/produtos/catalogo/{id}',              'CatalogoAdminController@salvar',    'catalogo.editar'],
     // Produtos (tudo sobre o produto, para a equipe)
+    ['GET',  '/produtos/nota10',                     'ProdutoNota10Controller@index',     'catalogo.editar'],
+    ['POST', '/produtos/nota10/ligar',               'ProdutoNota10Controller@juntar',    'catalogo.editar'],
+    ['POST', '/produtos/nota10/ligar-por-codigo',    'ProdutoNota10Controller@juntarPorCodigo', 'catalogo.editar'],
+    ['POST', '/produtos/nota10/desfazer/{id}',       'ProdutoNota10Controller@desfazer',  'catalogo.editar'],
     ['GET',  '/produtos',                            'ProdutoController@index',           'produtos.ver|catalogo.editar|produtos.tecnico'],
     ['GET',  '/produtos/documentos/{id}',            'ProdutoController@baixar',          'produtos.ver|catalogo.editar|produtos.tecnico|desenvolvimento.ver|desenvolvimento.gerenciar'],
     ['POST', '/produtos/documentos/{id}/arquivar',   'ProdutoController@arquivarDocumento', 'produtos.tecnico'],

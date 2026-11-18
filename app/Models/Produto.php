@@ -56,9 +56,9 @@ class Produto
     {
         $tabelas = Banco::todos('SELECT id, nome FROM tabelas_preco WHERE ativa = 1 ORDER BY id');
         $par = [];
-        $w = '1 = 1';
+        $w = "p.slug NOT LIKE 'n10-%'"; // os que vieram só do Nota10 ficam em Produtos › Ligar produtos do Nota10
         if ($busca !== '') {
-            $w = '(p.nome LIKE ? OR p.codigo LIKE ?)';
+            $w .= ' AND (p.nome LIKE ? OR p.codigo LIKE ?)';
             array_push($par, "%$busca%", "$busca%");
         }
         $produtos = Banco::todos("SELECT p.id, p.slug, p.codigo, p.nome, p.embalagem, p.chamada, p.ordem, p.ativo, p.visivel_catalogo, c.nome AS categoria, m.arquivo AS imagem,

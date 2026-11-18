@@ -380,7 +380,10 @@ class Importador
                 'custo' => (float) ($p['custo'] ?? 0) ?: null, 'grupo_erp' => $nomeGrupo ? mb_substr((string) $nomeGrupo, 0, 60) : null,
                 'cadastrado_erp_em' => self::dataPhp($p['datacadastro'] ?? null)];
             $id = Banco::valor('SELECT id FROM produtos WHERE nota10_codigo = ? OR (codigo = ? AND nota10_codigo IS NULL) ORDER BY nota10_codigo IS NULL LIMIT 1', [$codigo, $codigo]);
-            if ($id) {
+            if ($id && ($juntado = (int) Banco::valor('SELECT juntado_a_id FROM produtos WHERE id = ?', [$id]))) {
+                $id = $juntado; // duplicado já ligado ao produto do One (Produtos › Ligar produtos do Nota10): usa o do One
+                self::somar($rel, 'produtos_ligados');
+            } elseif ($id) {
                 Banco::atualizar('produtos', (int) $id, $extras);
                 self::somar($rel, 'produtos_ligados');
             } else { // só existe no Nota10: entra inativo e fora do catálogo (para o histórico ficar completo)
@@ -408,7 +411,7 @@ class Importador
                     continue;
                 }
                 $n = Banco::executar('INSERT INTO produto_precos (produto_id, tabela_preco_id, preco)
-                    SELECT pr.id, ?, x.ValorPreco FROM n10_precos x JOIN produtos pr ON pr.nota10_codigo = TRIM(x.CodigoProduto)
+                    SELECT COALESCE(pr.juntado_a_id, pr.id), ?, x.ValorPreco FROM n10_precos x JOIN produtos pr ON pr.nota10_codigo = TRIM(x.CodigoProduto)
                     WHERE x.Id_Tabela = ? AND x.ValorPreco > 0 AND x.id = (SELECT MAX(y.id) FROM n10_precos y WHERE y.Id_Tabela = x.Id_Tabela AND y.CodigoProduto = x.CodigoProduto)
                     ON DUPLICATE KEY UPDATE preco = VALUES(preco)', [$destino, $tab]);
                 self::somar($rel, 'precos', $n);
@@ -819,7 +822,7 @@ class Importador
         $fora = "(p.entrega_uf IS NOT NULL AND p.entrega_uf <> $uf)";
         $n = Banco::executar("INSERT INTO pedido_itens (pedido_id, produto_id, codigo, nome, quantidade, quantidade_nota10, preco_unitario, total, preco_tabela,
                 desconto_valor, custo_unitario, lote, validade, fabricacao, ncm, cfop, bonificado, valor_bonificado, nota10_guid)
-            SELECT p.id, pr.id, LEFT(i.CodigoProduto, 40),
+            SELECT p.id, COALESCE(pr.juntado_a_id, pr.id), LEFT(i.CodigoProduto, 40),
                 LEFT(COALESCE(NULLIF(TRIM(i.DescricaoProduto), ''), pr.nome, CONCAT('Produto ', i.CodigoProduto)), 200),
                 ROUND(COALESCE(i.Quantidade, 0)), i.Quantidade, COALESCE(i.ValorUnitario, 0),
                 CASE WHEN g.guid IS NULL THEN COALESCE(i.ValorTotalItem, 0) ELSE 0 END, i.ValorUnitario,

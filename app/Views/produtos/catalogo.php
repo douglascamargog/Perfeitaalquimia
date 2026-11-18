@@ -16,6 +16,11 @@ $icones = asset('img/icones.svg');
     Eles não aparecem para o cliente no catálogo. Clique em "Atualizar preços do ERP".</div>
 <?php endif; ?>
 
+<?php if (!empty($nota10Pendentes) && $podeEditar): ?>
+  <div class="aviso" role="status" data-aviso-nota10><strong><?= (int) $nota10Pendentes ?> produto(s) vieram só do Nota10</strong> e ainda não estão ligados a um produto do One.
+    Preencha aqui o código de cada produto do One (o mesmo do Nota10) e depois <a href="<?= url('/produtos/nota10') ?>">ligue os produtos do Nota10</a>.</div>
+<?php endif; ?>
+
 <?php if ($previa): ?>
   <section class="card" id="importar" data-previa-codigos>
     <h2>Conferir a importação de códigos</h2>

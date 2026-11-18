@@ -222,7 +222,9 @@ $opcoes = function (array $lista, $atual, string $vazio = 'Escolha…') {
 <section class="card n10-bloco" id="importar" data-n10-importar data-url="<?= url('/sistema/nota10/' . (int) $imp['id'] . '/importar-parte') ?>" data-andamento="<?= $emAndamento ? '1' : '0' ?>">
   <h2>4 · Importar para o One</h2>
   <?php if ($imp['importado_em']): ?>
-    <div class="aviso sucesso" data-n10-importado>Importação concluída em <?= data_br($imp['importado_em'], true) ?>. Os dados do Nota10 continuam guardados no One (tabelas n10_) para consulta.</div>
+    <div class="aviso sucesso" data-n10-importado>Importação concluída em <?= data_br($imp['importado_em'], true) ?>. Os dados do Nota10 continuam guardados no One (tabelas n10_) para consulta.
+      <?php if ($n10Soltos = (int) \App\Core\Banco::valor("SELECT COUNT(*) FROM produtos WHERE slug LIKE 'n10-%' AND juntado_a_id IS NULL")): ?>
+        <br><?= $n10Soltos ?> produto(s) vieram só do Nota10: <a href="<?= url('/produtos/nota10') ?>">ligue cada um ao produto do One</a>.<?php endif; ?></div>
     <form method="post" action="<?= url('/sistema/nota10/' . (int) $imp['id'] . '/importar') ?>" class="n10-form" data-n10-reimportar><?= csrf_campo() ?>
       <span class="pequeno">Importar de novo este backup (não duplica: completa o que faltou, como os casos de cobrança):</span>
       <input type="text" name="confirmar" placeholder="digite IMPORTAR" autocomplete="off" required aria-label="Digite IMPORTAR">

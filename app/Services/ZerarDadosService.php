@@ -50,7 +50,7 @@ class ZerarDadosService
         // usuários e acessos
         'usuarios', 'usuario_funcoes', 'usuario_permissoes', 'usuario_perfil', 'perfis', 'perfil_permissoes', 'funcoes', 'tentativas_login',
         // produtos e catálogo
-        'produtos', 'categorias', 'midias', 'produto_precos', 'produto_estoque', 'produto_tecnico', 'produto_documentos', 'produto_nutricional',
+        'produtos', 'produto_juncoes', 'categorias', 'midias', 'produto_precos', 'produto_estoque', 'produto_tecnico', 'produto_documentos', 'produto_nutricional',
         // configurações e listas
         'configuracoes', 'segmentos', 'origens', 'funil_etapas', 'regioes', 'regiao_ufs', 'tabelas_preco', 'formas_pagamento',
         'condicoes_pagamento', 'cidades', 'cobranca_etapas', 'mkt_post_etapas', 'mkt_tipos', 'dp_etapas', 'mensagens_prontas',

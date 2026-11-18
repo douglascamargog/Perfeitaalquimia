@@ -17,6 +17,17 @@
  */
 return [
     [
+        'versao' => '17.7', 'data' => '2026-11-18', 'titulo' => 'Ligar os produtos do Nota10 aos do One',
+        'novo' => [
+            'Produtos › Ligar produtos do Nota10: os produtos que vieram do Nota10 e não foram reconhecidos podem ser ligados ao produto certo do One. As vendas antigas passam para o produto do One (relatórios, análise de clientes e histórico ficam completos) e pode desfazer.',
+        ],
+        'melhoria' => [
+            'Catálogo: já dá para dar ao produto do One o mesmo código que ele tinha no Nota10 (antes o One dizia que o código já era de outro produto).',
+            'O One sugere a ligação pelo mesmo código, pelo código de barras ou pelo nome; os que têm o mesmo código podem ser ligados todos de uma vez.',
+        ],
+        'admin' => 'Os produtos criados pela importação (inativos, endereço começando com "n10-") saíram da lista do Catálogo e ficam em Produtos › Ligar produtos do Nota10. Ao ligar: itens de pedido e orçamento, produção, lotes e documentos passam para o produto do One; preços, estoque, parte técnica, nutricional e ficha só completam o que o produto do One não tem; o duplicado fica inativo apontando para o do One (migration 062) e as próximas importações já usam o produto do One. Cada ligação fica na Auditoria e pode ser desfeita.',
+    ],
+    [
         'versao' => '17.6', 'data' => '2026-11-18', 'titulo' => 'Pergunte ao One avisa quando está sem IA',
         'melhoria' => [
             'Pergunte ao One: quando estiver respondendo sem IA (só com as aulas), ele avisa no começo da resposta e diz o motivo, em vez de parecer que "não entendeu" a pergunta.',

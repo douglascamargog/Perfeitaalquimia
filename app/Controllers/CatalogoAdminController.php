@@ -19,6 +19,7 @@ class CatalogoAdminController extends Controller
         $this->tela('produtos/catalogo', ['titulo' => 'Catálogo', 'busca' => $busca] + Produto::administracao($busca) + [
             'semPreco' => (int) Banco::valor('SELECT COUNT(*) FROM produtos p WHERE p.ativo = 1 AND NOT EXISTS (SELECT 1 FROM produto_precos pp WHERE pp.produto_id = p.id)'),
             'semCodigo' => (int) Banco::valor("SELECT COUNT(*) FROM produtos WHERE ativo = 1 AND (codigo IS NULL OR codigo = '')"),
+            'nota10Pendentes' => (int) Banco::valor("SELECT COUNT(*) FROM produtos WHERE slug LIKE 'n10-%' AND juntado_a_id IS NULL"),
             'previa' => Sessao::get('codigos_previa'),
             'estilos' => ['carteira.css', 'pedidos.css']]);
     }
@@ -55,7 +56,7 @@ class CatalogoAdminController extends Controller
         }
         // Liga cada linha a um produto pelo nome (sem acento, maiúsculas/minúsculas tanto faz)
         $porNome = [];
-        foreach (Banco::todos('SELECT id, nome, codigo FROM produtos') as $p) {
+        foreach (Banco::todos("SELECT id, nome, codigo FROM produtos WHERE slug NOT LIKE 'n10-%'") as $p) { // só os do One (os do Nota10 se ligam em Produtos › Ligar)
             $porNome[\App\Services\Normalizar::semAcento(mb_strtolower(trim($p['nome'])))] = $p;
         }
         $previa = ['ok' => [], 'sem_produto' => [], 'invalidos' => []];
@@ -106,6 +107,10 @@ class CatalogoAdminController extends Controller
             if ($this->campo('codigo') !== '' && !$codigo) {
                 Sessao::aviso('erro', 'Código inválido: use letras, números e . - / _ (até 40 caracteres).');
                 redirecionar($volta);
+            }
+            // o código está num produto que veio só do Nota10 (inativo): ele libera o código e continua reconhecido pelo código do Nota10
+            if ($codigo && Banco::valor("SELECT 1 FROM produtos WHERE codigo = ? AND id <> ? AND slug LIKE 'n10-%' AND ativo = 0", [$codigo, (int) $id])) {
+                Banco::executar("UPDATE produtos SET codigo = NULL WHERE codigo = ? AND id <> ? AND slug LIKE 'n10-%' AND ativo = 0", [$codigo, (int) $id]);
             }
             if ($codigo && Banco::valor('SELECT nome FROM produtos WHERE codigo = ? AND id <> ?', [$codigo, (int) $id])) {
                 Sessao::aviso('erro', "O código $codigo já é de outro produto: " . Banco::valor('SELECT nome FROM produtos WHERE codigo = ?', [$codigo]) . '.');
