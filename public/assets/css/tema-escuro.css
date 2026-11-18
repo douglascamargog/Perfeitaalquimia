@@ -23,6 +23,10 @@ html.escuro .linguagem .use { background: color-mix(in srgb, #e5f6ea 18%, var(--
 html.escuro .ac-meta .ac-barra i, html.escuro .ac-meta .ac-barra i * { color: var(--secundaria-texto); }
 /* agenda.css */
 html.escuro .ag-atrasadas { border: 1px solid color-mix(in srgb, #f3c1c1 35%, var(--card)); }
+/* analise.css */
+html.escuro .an-kpi.an-verde, html.escuro .an-kpi.an-verde * { color: var(--secundaria-texto); }
+html.escuro .an-kpi.an-lima { background: color-mix(in srgb, #f7e38f 18%, var(--card)); }
+html.escuro .an-kpi.an-lima span, html.escuro .an-kpi.an-lima small, html.escuro .an-kpi.an-lima strong { color: color-mix(in srgb, #10201d 45%, #ffffff); }
 /* app.css */
 html.escuro a.modulo .modulo-icone, html.escuro a.modulo .modulo-icone * { color: var(--secundaria-texto); }
 html.escuro .one-painel { border: 1px solid color-mix(in srgb, #d6e6e3 35%, var(--card)); }

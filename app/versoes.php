@@ -17,6 +17,22 @@
  */
 return [
     [
+        'versao' => '16.1', 'data' => '2026-11-18', 'titulo' => 'Análise de clientes com gráficos, e para todos os vendedores',
+        'novo' => [
+            'Análise de clientes agora abre para todos os vendedores, no menu Vendas. Cada pessoa vê a própria carteira; a gestão continua vendo todas.',
+            'Gráficos: faturamento mês a mês (com clientes que compraram e clientes novos), frequência de compra, situação da carteira pela última compra e quem mais compra.',
+            'Cartões novos: clientes ativos, recorrência (quem comprou em 2 meses ou mais) e quantos compraram em todos os meses. Clique no cartão amarelo para ver quais são.',
+            'Filtro "Frequência": comprou todos os meses, em 2 meses ou mais, uma vez só, ou nenhuma.',
+            'Marque os meses (ex.: out, nov e dez) e veja só as lojas que compraram em todos eles.',
+            'Na lista, cada loja tem uma faixa com os meses do período: quadradinho verde é mês com compra. Dá para ordenar por "meses com compra".',
+        ],
+        'melhoria' => [
+            'Os períodos agora são meses inteiros (ex.: 12 meses = do mesmo mês do ano passado até hoje), para comparar mês a mês sem cortar no meio.',
+            'Recorrência por UF, cidade ou segmento na tabela agrupada.',
+        ],
+        'admin' => 'A permissão clientes.analise passou a valer também para o perfil Vendedor (Administração › Acessos, grupo Comercial). Quem não tem "ver todas as carteiras" vê só os clientes da própria carteira (ou do setor que gerencia), sem os filtros de vendedor e carteira. "Todos os meses" conta os meses completos do período (o mês atual não entra). Pedidos do e-commerce não entram.',
+    ],
+    [
         'versao' => '16.0', 'data' => '2026-11-18', 'titulo' => 'Marketing: cada tarefa tem a sua pessoa',
         'novo' => [
             'Marketing: acabou o "quem pegar primeiro". Cada função tem a sua pessoa (Social Media, E-commerce e Marketplaces, Gestor de Marketing), e o pedido vai direto para ela.',

@@ -33,11 +33,12 @@ return [
         ['[data-media-mensal]', '"Média por mês" é o que a loja comprou nos últimos 12 meses dividido por 12, mesmo que tenha feito poucos pedidos.'],
     ]],
     ['/analise', 'Análise de clientes', [
-        [$cab, 'Aqui estão TODOS os clientes da empresa, de todas as carteiras, com o que cada um comprou no período.'],
-        [$filtros, 'Filtre por UF, cidade, região, segmento, vendedor(a), carteira, etapa ou situação de compra. Dá para filtrar também pela faixa de média mensal.'],
-        ['[data-analise-resumo]', 'Os números do filtro: quantas lojas, faturamento, média mensal por cliente (o que comprou ÷ meses do período) e ticket médio por pedido.'],
-        ['[data-analise-grupos]', 'Troque o agrupamento (UF, cidade, vendedor...) para comparar. Clique numa linha para abrir só aquele grupo.'],
-        ['[data-analise-lista]', 'A lista das lojas, com a média mensal de cada uma. Ordene por média, ticket, pedidos ou última compra.'],
+        [$cab, 'Os gráficos dos seus clientes: quem compra, quantas vezes e quanto. Gestão vê todas as carteiras; cada vendedor(a) vê a própria.'],
+        [$filtros, 'Filtre por UF, cidade, segmento, etapa, frequência (comprou todos os meses, 2 meses ou mais, uma vez só, nenhuma) e marque os meses: aparecem só as lojas que compraram em TODOS os meses marcados.'],
+        ['[data-analise-resumo]', 'Clientes ativos (compraram nos últimos dias da regra de inatividade), recorrência (compraram em 2 meses ou mais) e quantos compraram em todos os meses completos. Clique no cartão amarelo para ver quais são.'],
+        ['[data-graficos]', 'Mês a mês, frequência de compra, situação da carteira pela última compra e quem mais compra. Passe o dedo ou o mouse nos gráficos para ver os números.'],
+        ['[data-analise-grupos]', 'Troque o agrupamento (UF, cidade, segmento...) para comparar. Clique numa linha para abrir só aquele grupo.'],
+        ['[data-analise-lista]', 'A lista das lojas: cada quadradinho verde é um mês em que a loja comprou. Ordene por média, meses com compra, ticket ou última compra.'],
         [$acoes, 'Imprima ou exporte em CSV para abrir no Excel.'],
     ]],
     ['/roteiros', 'Planejador de visitas', [

@@ -4,7 +4,7 @@
 .an-filtro-rodape { display: flex; gap: 12px; align-items: center; margin-top: 10px; }
 .filtros-grade input[type=text] { padding: 8px 10px; font-size: .84rem; }
 
-.an-kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin: 14px 0 18px; }
+.an-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 14px 0 18px; }
 .an-kpi { margin: 0; display: grid; gap: 3px; }
 .an-kpi span { font-size: .78rem; font-weight: 600; color: var(--texto-suave); }
 .an-kpi strong { font-size: 1.3rem; color: var(--primaria-escura); }
@@ -21,11 +21,47 @@
 .an-chips a.ativo { background: var(--primaria-escura); border-color: var(--primaria-escura); color: #fff; }
 .an-tabela td a { color: inherit; }
 
-@media (max-width: 1000px) { .an-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .an-kpis > :first-child { grid-column: 1 / -1; } }
+@media (max-width: 1000px) { .an-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media print {
-  .an-kpis { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .an-kpis { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .an-kpi.an-verde, .an-kpi.an-lima { background: none; }
+  .an-graficos { grid-template-columns: 1fr 1fr; gap: 8px; } .an-canvas { height: 200px; }
   .an-kpi.an-destaque { background: none; }
   .an-kpi.an-destaque span, .an-kpi.an-destaque small, .an-kpi.an-destaque strong { color: #000; }
   .an-bloco { break-inside: auto; }
 }
 .an-tabela td.direita, .rt-tabela td.direita { white-space: nowrap; }
+
+/* Indicadores coloridos */
+.an-kpi.an-verde { background: var(--secundaria); }
+.an-kpi.an-verde span, .an-kpi.an-verde small, .an-kpi.an-verde strong { color: var(--secundaria-texto); }
+.an-kpi.an-lima { background: #f7e38f; text-decoration: none; }
+.an-kpi.an-lima span, .an-kpi.an-lima small, .an-kpi.an-lima strong { color: #10201d; }
+a.an-kpi:hover { filter: brightness(.96); }
+
+/* Gráficos */
+.an-graficos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+.an-grafico { margin: 0; min-width: 0; }
+.an-grafico.an-largo { grid-column: 1 / -1; }
+.an-canvas { position: relative; height: 260px; }
+
+/* Filtro por meses (chips com caixa) */
+.an-meses { border: 0; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.an-meses legend { margin-bottom: 6px; width: 100%; }
+.an-mes-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.an-mes-chip span { display: inline-block; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--borda); font-size: .76rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+.an-mes-chip input:checked + span { background: var(--primaria-escura); border-color: var(--primaria-escura); color: var(--lima); }
+.an-mes-chip input:focus-visible + span { outline: 2px solid var(--primaria); outline-offset: 2px; }
+
+/* Faixa de meses de cada loja: quadradinho cheio = comprou naquele mês */
+.an-meses-loja { display: flex; gap: 3px; align-items: center; }
+.an-meses-loja i { width: 11px; height: 18px; border-radius: 3px; background: var(--borda); opacity: .55; }
+.an-meses-loja i.sim { background: var(--primaria); opacity: 1; }
+.an-meses-loja b { margin-left: 6px; font-size: .74rem; color: var(--texto-suave); white-space: nowrap; }
+@media print { .an-meses-loja i { border: 1px solid #999; } .an-meses-loja i.sim { background: #333; } }
+
+/* Barrinha de recorrência na tabela por grupo */
+.an-barrinha { display: inline-block; width: 46px; height: 6px; border-radius: 3px; margin-right: 6px; vertical-align: middle;
+  background: linear-gradient(90deg, var(--primaria) var(--p), var(--borda) var(--p)); }
+@media (max-width: 1000px) { .an-graficos { grid-template-columns: 1fr; } .an-canvas { height: 230px; } }
+@media (max-width: 600px) { .an-meses-loja i { width: 7px; } }

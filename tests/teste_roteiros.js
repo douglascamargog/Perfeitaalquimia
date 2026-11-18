@@ -76,7 +76,9 @@ const id = (email) => sql(`select id from usuarios where email='${email}'`);
     const textoCsv = await csv.text();
     ok(csv.status() === 200 && textoCsv.includes('Média mensal (÷ 12)') && textoCsv.includes('339,55'), 'análise: exporta CSV com a média mensal');
     const tv = await entrar('televendas1@demo.local');
-    ok((await tv.goto(BASE + '/analise')).status() === 403, 'vendedora não abre a Análise de clientes (só gestão)');
+    const rAn = await tv.goto(BASE + '/analise?uf=RS');
+    const listaTv = await tv.locator('[data-analise-lista]').innerText();
+    ok(rAn.status() === 200 && listaTv.includes('Farmácia Rota Um') && !listaTv.includes('Naturais Rota Três'), 'vendedora abre a Análise de clientes só com a própria carteira');
 
     // ---------------- 3. Planejador: quem usa
     ok((await tv.goto(BASE + '/roteiros/novo')).status() === 403, 'televendas não monta roteiro (só a função Externo)');

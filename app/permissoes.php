@@ -27,7 +27,7 @@ return [
     'cobranca.enviar'         => ['Enviar um cliente da carteira para a Cobrança', ['gestor', 'vendedor', 'financeiro']],
     'contatos.buscar_ia'      => ['Buscar contatos novos do cliente na internet (IA)', ['gestor', 'vendedor', 'financeiro']],
     'painel.ver'              => ['Ver painel de vendas', ['gestor', 'financeiro']],
-    'clientes.analise'        => ['Gestão › Análise de clientes: todos os clientes, com filtros, média mensal e ticket', ['gestor', 'diretoria']],
+    'clientes.analise'        => ['Comercial › Análise de clientes: gráficos, recorrência e média mensal (vendedor vê só a própria carteira)', ['gestor', 'diretoria', 'vendedor']],
     'roteiros.usar'           => ['Planejador de visitas: montar os próprios roteiros (a função Externo já usa)', []],
     'roteiros.gerenciar'      => ['Planejador de visitas: ver os roteiros de todos', ['gestor', 'diretoria']],
     'recompra.ver'            => ['Ver a fila de recompra (clientes que passaram do prazo)', ['gestor', 'vendedor']],
