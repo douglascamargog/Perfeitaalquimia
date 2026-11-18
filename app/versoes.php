@@ -17,6 +17,18 @@
  */
 return [
     [
+        'versao' => '17.4', 'data' => '2026-11-18', 'titulo' => 'Cobrança ligada aos títulos da ficha do cliente',
+        'novo' => [
+            'Cobrança: ao abrir a tela, os títulos em aberto e vencidos que estão na ficha do cliente já entram sozinhos num caso (um por cliente), sem precisar ler nada à parte.',
+            'Ficha do cliente: título que está sendo cobrado mostra o selo "na Cobrança", com link direto para o caso.',
+        ],
+        'melhoria' => [
+            'Deu baixa no título na Cobrança? Ele fica pago também na ficha do cliente. E título pago na ficha (vindo do ERP ou do Nota10) recebe baixa sozinho na Cobrança; sem nada em aberto, o caso encerra.',
+            'A Cobrança e a ficha do cliente mostram sempre os mesmos títulos e os mesmos valores.',
+        ],
+        'admin' => 'Os títulos a receber passam a ter uma fonte só: a ficha do cliente (titulos_receber). "Ler títulos vencidos do ERP" e o cron da cobrança agora gravam os títulos do ERP na ficha (sem duplicar, pelo código do ERP) e a Cobrança é montada a partir dela, respeitando "Dias de atraso para entrar na cobrança". Casos antigos são ligados aos títulos da ficha automaticamente na atualização (migration 061).',
+    ],
+    [
         'versao' => '17.3', 'data' => '2026-11-18', 'titulo' => 'Cobrança com os títulos do Nota10',
         'novo' => [
             'Cobrança: os títulos vencidos que vieram do Nota10 viram casos na tela de Cobrança, um por cliente, com os títulos de cada um ("Vindo do Nota10").',

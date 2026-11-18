@@ -68,7 +68,8 @@ $vencidos = array_filter($abertos, fn($t) => $t['vencimento'] && $t['vencimento'
           <td><?= $t['vencimento'] ? data_br($t['vencimento']) : '—' ?></td>
           <td><?= $t['pago_em'] ? data_br($t['pago_em']) . ($dias > 0 ? ' <small class="cl-vencido">(' . $dias . ' dia(s) depois)</small>' : '') : '—' ?></td>
           <td class="pequeno"><?= e($t['forma_pagamento'] ?? '') ?></td>
-          <td><span class="selo <?= $atrasado ? 'vermelho' : ($t['situacao'] === 'pago' ? 'verde' : ($t['situacao'] === 'cancelado' ? '' : 'laranja')) ?>"><?= $atrasado ? 'vencido' : e($t['situacao']) ?></span></td>
+          <td><span class="selo <?= $atrasado ? 'vermelho' : ($t['situacao'] === 'pago' ? 'verde' : ($t['situacao'] === 'cancelado' ? '' : 'laranja')) ?>"><?= $atrasado ? 'vencido' : e($t['situacao']) ?></span>
+            <?php if (!empty($t['cobranca_id'])): ?> <a class="selo vermelho" href="<?= url('/cobranca?abrir=' . (int) $t['cobranca_id']) ?>" data-titulo-na-cobranca>na Cobrança</a><?php endif; ?></td>
           <td class="direita"><strong><?= e(dinheiro((float) $t['valor'])) ?></strong></td></tr>
       <?php endforeach; ?>
       </tbody>

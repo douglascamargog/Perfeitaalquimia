@@ -103,7 +103,8 @@ class ClienteController extends Controller
             'linhaDoTempo' => ClienteEvento::doCliente($cid, 200),
             // V16.2: o que vem do ERP (Nota10/Omie): pessoas da loja, títulos, rede (matriz e filiais)
             'contatos' => \App\Core\Banco::todos('SELECT * FROM cliente_contatos WHERE cliente_id = ? ORDER BY nome', [$cid]),
-            'titulos' => \App\Core\Banco::todos("SELECT * FROM titulos_receber WHERE cliente_id = ? ORDER BY situacao = 'aberto' DESC, vencimento DESC LIMIT 30", [$cid]),
+            'titulos' => \App\Core\Banco::todos("SELECT t.*, (SELECT ct.cobranca_id FROM cobranca_titulos ct WHERE ct.titulo_id = t.id AND ct.pago_em IS NULL LIMIT 1) AS cobranca_id
+                FROM titulos_receber t WHERE t.cliente_id = ? ORDER BY t.situacao = 'aberto' DESC, t.vencimento DESC LIMIT 30", [$cid]),
             'matriz' => $cliente['matriz_id'] ? \App\Core\Banco::um('SELECT id, nome_fantasia, razao_social, cidade, uf FROM clientes WHERE id = ? AND excluido_em IS NULL', [$cliente['matriz_id']]) : null,
             'filiais' => \App\Core\Banco::todos('SELECT id, nome_fantasia, razao_social, cidade, uf FROM clientes WHERE matriz_id = ? AND excluido_em IS NULL ORDER BY nome_fantasia', [$cid]),
             // a ficha (mesma da gaveta), sem o cabeçalho

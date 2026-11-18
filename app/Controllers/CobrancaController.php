@@ -26,6 +26,7 @@ class CobrancaController extends Controller
 
     public function funil(): void
     {
+        CobrancaService::sincronizarTitulos(Auth::id()); // os títulos vencidos da ficha dos clientes entram sozinhos (e os pagos saem)
         CobrancaService::verificarPromessas(); // promessa vencida volta para tentativa
         $filtros = Cobranca::filtrosDaUrl();
         $this->tela('cobranca/funil', [
@@ -37,6 +38,7 @@ class CobrancaController extends Controller
 
     public function lista(): void
     {
+        CobrancaService::sincronizarTitulos(Auth::id());
         $filtros = Cobranca::filtrosDaUrl();
         $this->tela('cobranca/lista', [
             'titulo' => 'Cobrança', 'filtros' => $filtros, 'opcoes' => $this->opcoes(), 'resumo' => Cobranca::resumo(),

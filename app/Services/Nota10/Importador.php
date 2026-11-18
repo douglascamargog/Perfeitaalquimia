@@ -864,36 +864,16 @@ class Importador
 
     // ------------------------------------------------------------------ 8b. cobrança
 
-    /**
-     * Títulos vencidos (há mais dias que a tolerância da Cobrança) viram casos na tela de Cobrança, um por cliente,
-     * do mesmo jeito que "Ler títulos vencidos do ERP". Cada título leva o código "n10:<chaveguid>": rodar de novo não duplica,
-     * e o título que foi pago (ou cancelado) no Nota10 recebe baixa no caso.
-     */
+    /** Títulos vencidos viram casos na Cobrança (um por cliente) e os pagos recebem baixa: CobrancaService::sincronizarTitulos() */
     private static function etapaCobranca(int $cursor, array &$rel): ?int
     {
-        if ($cursor === 0) { // baixa do que foi pago ou cancelado no Nota10 desde a última importação
-            foreach (self::linhas("SELECT ct.id FROM cobranca_titulos ct JOIN titulos_receber t ON ct.omie_codigo = CONCAT('n10:', t.nota10_guid)
-                    WHERE ct.pago_em IS NULL AND t.situacao IN ('pago', 'cancelado')") as $b) {
-                \App\Services\CobrancaService::baixarTitulo((int) $b['id'], null);
-                self::somar($rel, 'cobranca_titulos_baixados');
-            }
-        }
-        $dias = max(0, (int) Config::get('cobranca.dias_atraso_entrada', 5));
-        $limite = date('Y-m-d', strtotime("-$dias days"));
-        $clientes = array_column(self::linhas("SELECT DISTINCT cliente_id FROM titulos_receber WHERE origem = 'nota10' AND situacao = 'aberto'
-            AND vencimento <= ? AND cliente_id > ? ORDER BY cliente_id LIMIT 200", [$limite, $cursor]), 'cliente_id');
-        foreach ($clientes as $cid) {
-            $titulos = self::linhas("SELECT t.documento, t.parcela, t.valor, t.vencimento, CONCAT('n10:', t.nota10_guid) AS omie_codigo FROM titulos_receber t
-                WHERE t.cliente_id = ? AND t.origem = 'nota10' AND t.situacao = 'aberto' AND t.vencimento <= ?
-                  AND NOT EXISTS (SELECT 1 FROM cobranca_titulos ct WHERE ct.omie_codigo = CONCAT('n10:', t.nota10_guid)) ORDER BY t.vencimento", [$cid, $limite]);
-            if ($titulos) {
-                $novo = !\App\Services\CobrancaService::casoAberto((int) $cid);
-                \App\Services\CobrancaService::abrir((int) $cid, $titulos, 'nota10', null, 'Títulos vencidos trazidos do Nota10');
-                self::somar($rel, $novo ? 'cobranca_casos' : 'cobranca_casos_com_titulo_novo');
-                self::somar($rel, 'cobranca_titulos', count($titulos));
-            }
-        }
-        return count($clientes) === 200 ? (int) end($clientes) : null;
+        // a mesma rotina da tela de Cobrança: os títulos da ficha (titulos_receber) abrem/completam os casos e os pagos recebem baixa
+        $r = \App\Services\CobrancaService::sincronizarTitulos(null, $cursor, 200);
+        self::somar($rel, 'cobranca_casos', $r['casos']);
+        self::somar($rel, 'cobranca_casos_com_titulo_novo', $r['casos_com_titulo_novo']);
+        self::somar($rel, 'cobranca_titulos', $r['titulos']);
+        self::somar($rel, 'cobranca_titulos_baixados', $r['baixas']);
+        return $r['mais'] ? $r['ultimo'] : null;
     }
 
     // ------------------------------------------------------------------ 9. linha do tempo

@@ -18,6 +18,8 @@ use App\Models\Listas;
  * - Tentativas sem sucesso somam; ao chegar em cobranca.tentativas_para_sem_contato o caso vai
  *   para a etapa do tipo "sem_contato" (hora de buscar contatos novos).
  * - Etapas de encerramento (pago, acordo, juridico, perda) fecham o caso.
+ * - (V17.4) Os títulos vêm da ficha do cliente (titulos_receber, que o Nota10 e o ERP alimentam): sincronizarTitulos()
+ *   abre/completa os casos com os vencidos e dá baixa nos pagos. A baixa feita aqui volta para o título da ficha.
  * - Tudo vira evento na linha do tempo do cliente e registro na auditoria.
  */
 class CobrancaService
@@ -121,13 +123,14 @@ class CobrancaService
 
             $acrescentados = 0;
             foreach ($titulos as $t) {
-                if (!empty($t['omie_codigo']) && Banco::valor('SELECT 1 FROM cobranca_titulos WHERE omie_codigo = ?', [$t['omie_codigo']])) {
-                    continue; // já importado
+                if ((!empty($t['omie_codigo']) && Banco::valor('SELECT 1 FROM cobranca_titulos WHERE omie_codigo = ?', [$t['omie_codigo']]))
+                    || (!empty($t['titulo_id']) && Banco::valor('SELECT 1 FROM cobranca_titulos WHERE titulo_id = ?', [$t['titulo_id']]))) {
+                    continue; // já está na cobrança
                 }
                 Banco::inserir('cobranca_titulos', [
                     'cobranca_id' => $id, 'documento' => mb_substr((string) ($t['documento'] ?? ''), 0, 40) ?: null,
                     'parcela' => mb_substr((string) ($t['parcela'] ?? ''), 0, 10) ?: null, 'valor' => round((float) $t['valor'], 2),
-                    'vencimento' => $t['vencimento'], 'omie_codigo' => $t['omie_codigo'] ?? null,
+                    'vencimento' => $t['vencimento'], 'omie_codigo' => $t['omie_codigo'] ?? null, 'titulo_id' => $t['titulo_id'] ?? null,
                 ]);
                 $acrescentados++;
             }
@@ -137,7 +140,7 @@ class CobrancaService
             if ($novo) {
                 $c = Banco::um('SELECT valor_total FROM cobrancas WHERE id = ?', [$id]);
                 ClienteEvento::registrar($clienteId, 'cobranca', 'Enviado para a Cobrança · ' . dinheiro((float) $c['valor_total'])
-                    . ($observacao !== '' ? " — $observacao" : ''), $usuarioId, ['erp' => 'ERP', 'nota10' => 'Nota10'][$origem] ?? null, ['cobranca_id' => $id]);
+                    . ($observacao !== '' ? " — $observacao" : ''), $usuarioId, ['erp' => 'ERP', 'nota10' => 'Nota10', 'titulos' => 'Títulos'][$origem] ?? null, ['cobranca_id' => $id]);
             } elseif ($acrescentados) {
                 ClienteEvento::registrar($clienteId, 'cobranca', "$acrescentados título(s) novo(s) na cobrança", $usuarioId, null, ['cobranca_id' => $id]);
             }
@@ -280,13 +283,17 @@ class CobrancaService
     }
 
     /** Marca um título como pago; se não sobrar nada em aberto, encerra o caso como pago */
-    public static function baixarTitulo(int $tituloId, ?int $usuarioId): void
+    public static function baixarTitulo(int $tituloId, ?int $usuarioId, bool $refletirNaFicha = true): void
     {
         $titulo = Banco::um('SELECT * FROM cobranca_titulos WHERE id = ? AND pago_em IS NULL', [$tituloId]);
         if (!$titulo) {
             return;
         }
         Banco::executar('UPDATE cobranca_titulos SET pago_em = CURDATE() WHERE id = ?', [$tituloId]);
+        if ($refletirNaFicha && $titulo['titulo_id']) { // a baixa feita na Cobrança vale também para o título da ficha do cliente
+            Banco::executar("UPDATE titulos_receber SET situacao = 'pago', pago_em = CURDATE(), valor_pago = COALESCE(valor_pago, valor)
+                WHERE id = ? AND situacao = 'aberto'", [$titulo['titulo_id']]);
+        }
         $caso = Banco::um('SELECT * FROM cobrancas WHERE id = ?', [$titulo['cobranca_id']]);
         self::recalcular((int) $caso['id']);
         Auditoria::registrar('cobranca', (int) $caso['id'], 'titulo_pago', $titulo, ['pago_em' => date('Y-m-d')]);
@@ -316,39 +323,74 @@ class CobrancaService
      */
     public static function importarDoErp(?int $usuarioId): array
     {
+        // 1. os títulos do ERP vão para a ficha do cliente (titulos_receber)
+        $semCadastro = [];
+        foreach (Integracoes::erp()->listarTitulos() as $t) {
+            $clienteId = Banco::valor('SELECT id FROM clientes WHERE cnpj = ? AND excluido_em IS NULL ORDER BY id LIMIT 1', [$t['cnpj']]);
+            if (!$clienteId) {
+                $semCadastro[$t['cnpj']] = true;
+                continue;
+            }
+            Banco::executar("INSERT INTO titulos_receber (cliente_id, documento, parcela, vencimento, pago_em, valor, valor_pago, situacao, origem, omie_codigo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'omie', ?)
+                ON DUPLICATE KEY UPDATE pago_em = VALUES(pago_em), valor_pago = VALUES(valor_pago),
+                    situacao = IF(situacao = 'cancelado', situacao, VALUES(situacao)), vencimento = VALUES(vencimento), valor = VALUES(valor)",
+                [$clienteId, mb_substr((string) ($t['documento'] ?? ''), 0, 40) ?: null, mb_substr((string) ($t['parcela'] ?? ''), 0, 10) ?: null,
+                 $t['vencimento'], $t['pago_em'] ?? null, round((float) $t['valor'], 2), !empty($t['pago_em']) ? round((float) $t['valor'], 2) : null,
+                 !empty($t['pago_em']) ? 'pago' : 'aberto', mb_substr((string) $t['omie_codigo'], 0, 40)]);
+        }
+        // 2. a Cobrança se atualiza a partir da ficha
+        $r = self::sincronizarTitulos($usuarioId);
+        return ['casos' => $r['casos'] + $r['casos_com_titulo_novo'], 'pagos' => $r['baixas'], 'sem_cadastro' => count($semCadastro)];
+    }
+
+    /**
+     * A Cobrança se atualiza com os títulos da ficha dos clientes (titulos_receber, que o Nota10 e o ERP alimentam):
+     *  - título em aberto vencido há mais de "cobranca.dias_atraso_entrada" dias e que ainda não está na cobrança → entra no caso do cliente
+     *    (abre um caso novo, ou acrescenta ao caso aberto);
+     *  - título que foi pago ou cancelado → baixa no caso (o caso encerra quando zera).
+     * Roda ao abrir a tela da Cobrança, no cron diário e depois de importar o Nota10. $aPartirDe/$max: em partes (importação).
+     */
+    public static function sincronizarTitulos(?int $usuarioId = null, int $aPartirDe = 0, int $max = 0): array
+    {
+        $r = ['casos' => 0, 'casos_com_titulo_novo' => 0, 'titulos' => 0, 'baixas' => 0, 'ultimo' => $aPartirDe, 'mais' => false];
+        if ($aPartirDe === 0) {
+            // itens de cobrança antigos (do ERP ou do Nota10) ligados ao título da ficha
+            Banco::executar('UPDATE cobranca_titulos ct JOIN titulos_receber t ON t.omie_codigo = ct.omie_codigo SET ct.titulo_id = t.id
+                WHERE ct.titulo_id IS NULL AND ct.omie_codigo IS NOT NULL');
+            Banco::executar("UPDATE cobranca_titulos ct JOIN titulos_receber t ON ct.omie_codigo = CONCAT('n10:', t.nota10_guid) SET ct.titulo_id = t.id
+                WHERE ct.titulo_id IS NULL AND ct.omie_codigo LIKE 'n10:%'");
+            // pagos ou cancelados na ficha → baixa na cobrança
+            foreach (Banco::todos("SELECT ct.id FROM cobranca_titulos ct JOIN titulos_receber t ON t.id = ct.titulo_id
+                    WHERE ct.pago_em IS NULL AND t.situacao IN ('pago', 'cancelado')") as $b) {
+                self::baixarTitulo((int) $b['id'], $usuarioId, false);
+                $r['baixas']++;
+            }
+        }
         $dias = max(0, (int) Config::get('cobranca.dias_atraso_entrada', 5));
         $limite = date('Y-m-d', strtotime("-$dias days"));
-        $porCliente = [];
-        $pagos = 0;
-        foreach (Integracoes::erp()->listarTitulos() as $t) {
-            if (!empty($t['pago_em'])) {
-                $local = Banco::um('SELECT id FROM cobranca_titulos WHERE omie_codigo = ? AND pago_em IS NULL', [$t['omie_codigo']]);
-                if ($local) {
-                    self::baixarTitulo((int) $local["id"], $usuarioId);
-                    $pagos++;
-                }
+        $clientes = array_column(Banco::todos("SELECT DISTINCT t.cliente_id FROM titulos_receber t JOIN clientes c ON c.id = t.cliente_id AND c.excluido_em IS NULL
+            WHERE t.situacao = 'aberto' AND t.vencimento <= ? AND t.cliente_id > ?
+              AND NOT EXISTS (SELECT 1 FROM cobranca_titulos ct WHERE ct.titulo_id = t.id)
+            ORDER BY t.cliente_id" . ($max ? " LIMIT $max" : ''), [$limite, $aPartirDe]), 'cliente_id');
+        foreach ($clientes as $cid) {
+            $titulos = Banco::todos("SELECT t.id AS titulo_id, t.documento, t.parcela, t.valor, t.vencimento,
+                    COALESCE(t.omie_codigo, CASE WHEN t.nota10_guid IS NOT NULL THEN CONCAT('n10:', t.nota10_guid) END) AS omie_codigo, t.origem FROM titulos_receber t
+                WHERE t.cliente_id = ? AND t.situacao = 'aberto' AND t.vencimento <= ?
+                  AND NOT EXISTS (SELECT 1 FROM cobranca_titulos ct WHERE ct.titulo_id = t.id) ORDER BY t.vencimento", [$cid, $limite]);
+            if (!$titulos) {
                 continue;
             }
-            if ($t['vencimento'] > $limite) {
-                continue; // ainda dentro da tolerância
-            }
-            $porCliente[$t['cnpj']][] = $t;
+            $novo = !self::casoAberto((int) $cid);
+            $origens = array_unique(array_column($titulos, 'origem'));
+            $origem = $origens === ['nota10'] ? 'nota10' : ($origens === ['omie'] ? 'erp' : 'titulos');
+            self::abrir((int) $cid, $titulos, $origem, $usuarioId, $origem === 'nota10' ? 'Títulos vencidos trazidos do Nota10' : '');
+            $r[$novo ? 'casos' : 'casos_com_titulo_novo']++;
+            $r['titulos'] += count($titulos);
         }
-
-        $casos = $clientesSemCadastro = 0;
-        foreach ($porCliente as $cnpj => $titulos) {
-            $clienteId = Banco::valor('SELECT id FROM clientes WHERE cnpj = ? AND excluido_em IS NULL', [$cnpj]);
-            if (!$clienteId) {
-                $clientesSemCadastro++;
-                continue;
-            }
-            $novos = array_filter($titulos, fn($t) => !Banco::valor('SELECT 1 FROM cobranca_titulos WHERE omie_codigo = ?', [$t['omie_codigo']]));
-            if ($novos) {
-                self::abrir((int) $clienteId, array_values($novos), 'erp', $usuarioId);
-                $casos++;
-            }
-        }
-        return ['casos' => $casos, 'pagos' => $pagos, 'sem_cadastro' => $clientesSemCadastro];
+        $r['ultimo'] = $clientes ? (int) end($clientes) : $aPartirDe;
+        $r['mais'] = $max && count($clientes) === $max;
+        return $r;
     }
 
     /** Promessas vencidas e não pagas voltam para "Tentativa de contato" (rodado pelo cron e ao abrir a tela) */
