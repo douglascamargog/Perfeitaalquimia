@@ -49,3 +49,8 @@
   .orc-qtd { grid-column: 1 / -1; grid-template-columns: auto 1fr; justify-items: start; align-items: center; }
   .orc-qtd b { justify-self: end; }
 }
+
+/* V16.6 — bonificação oferecida no orçamento */
+.orc-bonificacao { border: 1px dashed var(--secundaria-escura); background: var(--secundaria-clara); }
+.orc-bonificacao ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.orc-bonificacao li { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }

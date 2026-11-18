@@ -69,6 +69,18 @@ class OrcamentoService
             LEFT JOIN midias m ON m.id = p.imagem_id WHERE i.orcamento_id = ? ORDER BY i.nome', [$id]);
     }
 
+    /** Só os itens vendidos (sem os bonificados) */
+    public static function itensVendidos(int $id): array
+    {
+        return array_values(array_filter(self::itens($id), fn($i) => !(int) $i['bonificado']));
+    }
+
+    /** Só os itens bonificados (o cliente vê no link, mas não muda) */
+    public static function itensBonificados(int $id): array
+    {
+        return array_values(array_filter(self::itens($id), fn($i) => (int) $i['bonificado']));
+    }
+
     public static function historico(int $id): array
     {
         return Banco::todos('SELECT h.*, u.nome AS usuario FROM orcamento_historico h LEFT JOIN usuarios u ON u.id = h.usuario_id
@@ -172,14 +184,27 @@ class OrcamentoService
         if (!$carrinho['itens']) {
             return [null, ['Escolha pelo menos um produto para o orçamento.']];
         }
+        // Bonificação oferecida (V16.6): calculada com o preço de tabela do cliente; motivo obrigatório
+        $bonificados = [];
+        if (array_filter(array_map('intval', (array) ($d['bonificados'] ?? [])))) {
+            foreach (PedidoService::calcular($cliente, (array) $d['bonificados'])['itens'] as $b) {
+                $preco = (float) ($b['preco_cheio'] ?? $b['preco']);
+                $bonificados[] = $b + ['preco_bon' => $preco, 'valor_bon' => round($b['quantidade'] * $preco, 2)];
+            }
+            if ($bonificados && !in_array(trim((string) ($d['bonificacao_motivo'] ?? '')), PedidoService::motivosBonificacao(), true)) {
+                return [null, ['Escolha o motivo da bonificação.']];
+            }
+        }
         $dias = max(1, (int) Config::get('orcamento.validade_dias', 15));
         $dados = [
             'tabela_preco_id' => $carrinho['tabela']['id'], 'subtotal' => $carrinho['subtotal'],
             'forma_pagamento_id' => (int) ($d['forma_pagamento_id'] ?? 0) ?: null, 'condicao_id' => (int) ($d['condicao_id'] ?? 0) ?: null,
             'observacoes' => mb_substr(trim((string) ($d['observacoes'] ?? '')), 0, 1000) ?: null,
             'validade' => date('Y-m-d', strtotime("+$dias days")),
+            'bonificado_valor' => round(array_sum(array_column($bonificados, 'valor_bon')), 2),
+            'bonificacao_motivo' => $bonificados ? mb_substr(trim((string) $d['bonificacao_motivo']), 0, 60) : null,
         ];
-        $id = Banco::transacao(function () use ($cliente, $carrinho, $dados, $usuarioId, $orcamento) {
+        $id = Banco::transacao(function () use ($cliente, $carrinho, $dados, $usuarioId, $orcamento, $bonificados) {
             if ($orcamento) {
                 $id = (int) $orcamento['id'];
                 Banco::atualizar('orcamentos', $id, $dados + ['atualizado_em' => date('Y-m-d H:i:s')]);
@@ -196,6 +221,14 @@ class OrcamentoService
                 Banco::inserir('orcamento_itens', ['orcamento_id' => $id, 'chave' => (string) ($i['chave'] ?? $i['id']), 'produto_id' => $i['id'],
                     'terceirizacao_produto_id' => $i['terceirizacao_produto_id'] ?? null, 'codigo' => $i['codigo'] ?? null, 'nome' => $i['nome'],
                     'quantidade' => $i['quantidade'], 'preco_unitario' => $i['preco'], 'total' => $i['total']]);
+            }
+            foreach ($bonificados as $b) { // vai na nota com o preço de tabela, a loja não paga
+                Banco::inserir('orcamento_itens', ['orcamento_id' => $id, 'chave' => (string) ($b['chave'] ?? $b['id']), 'produto_id' => $b['id'],
+                    'terceirizacao_produto_id' => $b['terceirizacao_produto_id'] ?? null, 'codigo' => $b['codigo'] ?? null, 'nome' => $b['nome'],
+                    'quantidade' => $b['quantidade'], 'preco_unitario' => $b['preco_bon'], 'total' => 0, 'bonificado' => 1, 'valor_bonificado' => $b['valor_bon']]);
+            }
+            if ($bonificados) {
+                $texto .= ' Bonificação (' . $dados['bonificacao_motivo'] . '): ' . dinheiro($dados['bonificado_valor']) . '.';
             }
             self::historico_($id, $texto, $usuarioId);
             ClienteEvento::registrar((int) $cliente['id'], 'orcamento', "Orçamento #$id · " . dinheiro($carrinho['subtotal']) . ($orcamento ? ' (alterado)' : ' (criado, para enviar ao cliente)'),
@@ -268,16 +301,19 @@ class OrcamentoService
         $cliente = Banco::um('SELECT * FROM clientes WHERE id = ?', [$o['cliente_id']]);
         $mensagem = mb_substr(trim($mensagem), 0, 1000);
         $obs = trim(implode("\n", array_filter([$o['observacoes'], $mensagem !== '' ? 'Mensagem do cliente: ' . $mensagem : ''])));
+        // A bonificação vem do que o vendedor ofereceu (o cliente não muda); o limite é conferido com as quantidades finais
+        $bonificados = array_column(self::itensBonificados((int) $o['id']), 'quantidade', 'chave');
         [$pedidoId, $erros] = PedidoService::criar($cliente, [
             'itens' => $quantidades, 'forma_pagamento_id' => $formaId, 'condicao_id' => $condicaoId, 'observacoes' => $obs,
             'origem' => 'orcamento', 'uuid' => $o['uuid'], 'vendedor_id' => $o['vendedor_id'], 'usuario_id' => null,
+            'bonificados' => $bonificados, 'bonificacao_motivo' => (string) ($o['bonificacao_motivo'] ?? ''),
         ]);
         if ($erros) {
             return [null, $erros];
         }
         // O que o cliente mudou em relação ao que foi oferecido
         $oferecido = [];
-        foreach (self::itens((int) $o['id']) as $i) {
+        foreach (self::itensVendidos((int) $o['id']) as $i) {
             $oferecido[$i['chave']] = $i;
         }
         $confirmado = array_filter(array_map('intval', $quantidades), fn($q) => $q > 0);

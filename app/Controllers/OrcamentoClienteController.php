@@ -47,13 +47,14 @@ class OrcamentoClienteController extends Controller
             OrcamentoService::marcarVisto($o); // a equipe abrindo para conferir não conta como "o cliente viu"
         }
         $cliente = Banco::um('SELECT * FROM clientes WHERE id = ?', [$o['cliente_id']]);
-        $oferecidos = OrcamentoService::itens((int) $o['id']);
+        $oferecidos = OrcamentoService::itensVendidos((int) $o['id']);
         $quantidades = (array) Sessao::antigo('qtd', []) ?: array_column($oferecidos, 'quantidade', 'chave');
         $chaves = array_column($oferecidos, 'chave');
         $todos = PedidoService::produtosDoCliente($cliente);
         $disponiveis = array_map('strval', array_column($todos, 'id'));
         $this->telaCliente('catalogo/orcamento', [
             'titulo' => 'Orçamento #' . $o['id'], 'o' => $o, 'token' => $token, 'quantidades' => $quantidades,
+            'bonificados' => OrcamentoService::itensBonificados((int) $o['id']),
             // O que foi oferecido (com o preço de hoje da tabela do cliente) e os outros produtos, para acrescentar
             'oferecidos' => array_values(array_filter($todos, fn($p) => in_array((string) $p['id'], $chaves, true))),
             'semPrecoAgora' => array_values(array_filter($oferecidos, fn($i) => !in_array((string) $i['chave'], $disponiveis, true))), // saiu do catálogo

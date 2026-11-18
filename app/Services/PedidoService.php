@@ -237,7 +237,8 @@ class PedidoService
         $bonificados = [];
         $bonValor = 0.0;
         $bonMotivo = null;
-        if (in_array($d['origem'] ?? '', ['sistema', 'app'], true) && array_filter(array_map('intval', (array) ($d['bonificados'] ?? [])))) {
+        // (no orçamento aprovado pelo cliente, a bonificação é a que o vendedor ofereceu: ele não muda)
+        if (in_array($d['origem'] ?? '', ['sistema', 'app', 'orcamento'], true) && array_filter(array_map('intval', (array) ($d['bonificados'] ?? [])))) {
             foreach (self::calcular($cliente, (array) $d['bonificados'])['itens'] as $b) {
                 $preco = (float) ($b['preco_cheio'] ?? $b['preco']); // preço da tabela do cliente (sem promoção)
                 $bonificados[] = $b + ['preco_tabela_bon' => $preco, 'valor_bon' => round($b['quantidade'] * $preco, 2)];

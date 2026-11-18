@@ -42,7 +42,8 @@ class OrcamentoController extends Controller
         }
         [$forma, $condicao] = array_map('intval', explode(':', $this->campo('pagamento') . ':0'));
         [$id, $erros] = OrcamentoService::salvar($cliente, (array) ($_POST['qtd'] ?? []),
-            ['forma_pagamento_id' => $forma, 'condicao_id' => $condicao, 'observacoes' => $this->campo('observacoes')], (int) Auth::id(), $orcamento);
+            ['forma_pagamento_id' => $forma, 'condicao_id' => $condicao, 'observacoes' => $this->campo('observacoes'),
+             'bonificados' => (array) ($_POST['bonif'] ?? []), 'bonificacao_motivo' => $this->campo('bonificacao_motivo')], (int) Auth::id(), $orcamento);
         if ($erros) {
             $this->voltarComErros('/pedidos/novo?cliente=' . (int) $cliente['id'] . ($orcamento ? '&orcamento=' . (int) $orcamento['id'] : ''), $erros);
         }

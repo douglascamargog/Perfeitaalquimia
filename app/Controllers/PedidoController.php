@@ -55,7 +55,11 @@ class PedidoController extends Controller
         $bonificados = (array) Sessao::antigo('bonif', []);
         if (!$quantidades && $orcamento) {
             foreach (OrcamentoService::itens((int) $orcamento['id']) as $i) {
-                $quantidades[$i['chave']] = $i['quantidade'];
+                if ((int) $i['bonificado']) {
+                    $bonificados[$i['chave']] = (int) $i['quantidade']; // bonificação oferecida volta na coluna "Bonif."
+                } else {
+                    $quantidades[$i['chave']] = $i['quantidade'];
+                }
             }
         }
         // Corrigir um pedido que ainda espera aprovação (V15.7): a tela vem com os itens dele; ao enviar, o novo substitui o antigo

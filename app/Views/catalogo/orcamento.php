@@ -1,7 +1,7 @@
 <?php
 /**
  * Link do orçamento (cliente, sem senha): conferir, mudar quantidades, acrescentar produtos, aprovar ou recusar.
- * Variáveis: $o, $token, $quantidades, $oferecidos, $outros, $semPrecoAgora, $minimo, $formas
+ * Variáveis: $o, $token, $quantidades, $oferecidos, $outros, $semPrecoAgora, $minimo, $formas, $bonificados (presente oferecido pelo vendedor)
  * Usa o pedido.js (soma, mínimo e condição de pagamento) — o servidor confere tudo de novo ao aprovar.
  */
 $base = url('/o/' . $token);
@@ -47,6 +47,18 @@ $linha = function (array $p) use ($quantidades): string {
         <h2>Seu orçamento</h2>
         <?php foreach ($oferecidos as $p): ?><?= $linha($p) ?><?php endforeach; ?>
       </section>
+
+      <?php if ($bonificados): ?>
+      <section class="card orc-lista orc-bonificacao" aria-label="Bonificação" data-orcamento-bonificacao>
+        <h2>🎁 Bonificação de presente</h2>
+        <p class="pequeno suave">Vai junto no seu pedido, sem custo para você.</p>
+        <ul>
+          <?php foreach ($bonificados as $b): ?>
+            <li><span><strong><?= (int) $b['quantidade'] ?>×</strong> <?= e($b['nome']) ?></span><span><s class="suave"><?= dinheiro((float) $b['valor_bonificado']) ?></s> <strong>R$ 0,00</strong></span></li>
+          <?php endforeach; ?>
+        </ul>
+      </section>
+      <?php endif; ?>
 
       <?php if ($outros): ?>
       <details class="card orc-lista orc-mais" data-area-filtro>

@@ -17,6 +17,18 @@
  */
 return [
     [
+        'versao' => '16.6', 'data' => '2026-11-18', 'titulo' => 'Bonificação também no orçamento',
+        'novo' => [
+            'Orçamento: a coluna "Bonif." também vale aqui. Ofereça unidades bonificadas, escolha o motivo e gere o link.',
+            'O cliente vê no link um bloco "🎁 Bonificação de presente", com o produto e R$ 0,00. Ele não pode mudar a bonificação.',
+            'Quando o cliente aprova, a bonificação vai para o pedido com as mesmas regras: mesma nota, CFOP de bonificação, a loja não paga.',
+        ],
+        'melhoria' => [
+            'Se o cliente diminuir as quantidades e a bonificação passar de 15% do que ele comprou, o pedido vai marcado para aprovação.',
+            'Editar um orçamento em aberto traz a bonificação de volta na coluna certa.',
+        ],
+    ],
+    [
         'versao' => '16.5', 'data' => '2026-11-18', 'titulo' => 'Bonificação também no app do externo',
         'novo' => [
             'App do externo: cada produto tem o campo "🎁 bonif." para as unidades bonificadas, igual ao pedido do sistema: mesma nota, CFOP de bonificação, a loja não paga.',

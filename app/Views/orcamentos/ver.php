@@ -16,8 +16,8 @@ $imagem = [
     'numero' => (int) $o['id'], 'cliente' => $o['cliente'], 'cidade' => $o['cidade'] . '/' . $o['uf'], 'vendedor' => (string) $o['vendedor'],
     'validade' => data_br($o['validade']), 'data' => data_br($o['criado_em']), 'empresa' => (string) Config::get('empresa.nome', 'Perfeita Alquimia'),
     'logo' => asset('img/logo.png'), 'total' => dinheiro((float) $o['subtotal']), 'pagamento' => $pagamento ? trim($pagamento['forma'] . ' ' . ($pagamento['condicao'] ?? '')) : '',
-    'itens' => array_map(fn($i) => ['codigo' => (string) $i['codigo'], 'nome' => $i['nome'], 'qtd' => (int) $i['quantidade'],
-        'preco' => dinheiro((float) $i['preco_unitario']), 'total' => dinheiro((float) $i['total'])], $itens),
+    'itens' => array_map(fn($i) => ['codigo' => (string) $i['codigo'], 'nome' => $i['nome'] . ((int) ($i['bonificado'] ?? 0) ? ' (bonificação: presente)' : ''), 'qtd' => (int) $i['quantidade'],
+        'preco' => dinheiro((float) $i['preco_unitario']), 'total' => (int) ($i['bonificado'] ?? 0) ? 'R$ 0,00' : dinheiro((float) $i['total'])], $itens),
 ];
 ?>
 <a class="voltar-link" href="<?= url('/orcamentos') ?>">← Orçamentos</a>
@@ -51,10 +51,10 @@ $imagem = [
         <tbody>
         <?php foreach ($itens as $i): $mudou = $i['quantidade_cliente'] !== null; ?>
           <tr>
-            <td><?= $i['codigo'] ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><strong><?= e($i['nome']) ?></strong></td>
+            <td><?= $i['codigo'] ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><strong><?= e($i['nome']) ?></strong><?= (int) ($i['bonificado'] ?? 0) ? ' <span class="selo selo-bonificado" data-orc-bonificado>bonificado</span>' : '' ?></td>
             <td class="direita"><?php if ($mudou): ?><span class="orc-riscado"><?= (int) $i['quantidade'] ?></span> <span class="orc-mudou" title="O cliente mudou"><?= (int) $i['quantidade_cliente'] ?></span><?php else: ?><?= (int) $i['quantidade'] ?><?php endif; ?></td>
             <td class="direita"><?= dinheiro((float) $i['preco_unitario']) ?></td>
-            <td class="direita"><?= dinheiro((float) $i['total']) ?></td>
+            <td class="direita"><?= (int) ($i['bonificado'] ?? 0) ? '<small class="suave">' . dinheiro((float) $i['valor_bonificado']) . ' · presente</small>' : dinheiro((float) $i['total']) ?></td>
           </tr>
         <?php endforeach; ?>
         </tbody>

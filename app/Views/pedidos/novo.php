@@ -116,7 +116,7 @@ foreach ($campanhas as $cp) {
       <p class="ped-desconto-resumo" data-bonificacao-resumo></p>
       <label>Motivo da bonificação<select name="bonificacao_motivo" data-bonificacao-motivo>
         <option value="">Escolha…</option><?php foreach ($motivosBonificacao as $m): ?><option <?= antigo('bonificacao_motivo') === $m ? 'selected' : '' ?>><?= e($m) ?></option><?php endforeach; ?></select></label>
-      <small class="suave">Vai na mesma nota da venda com CFOP de bonificação; a loja não paga e não conta no faturamento nem na meta. Só vale para pedido (o orçamento não leva).</small>
+      <small class="suave">Vai na mesma nota da venda com CFOP de bonificação; a loja não paga e não conta no faturamento nem na meta. No orçamento, o cliente vê a bonificação de presente e não pode mudar.</small>
     </div>
     <div class="cat-minimo falta" data-caixa-minimo><span data-texto-minimo></span><div class="cat-minimo-barra"><i data-barra-minimo style="width:0"></i></div></div>
     <h3>Entrega</h3>
