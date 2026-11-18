@@ -31,3 +31,8 @@ Thumbs.db
 /vendor/
 /public/media/equipe/
 /tests/saida/
+
+# Dependências do Node (Playwright, para os testes no computador)
+/node_modules/
+/package.json
+/package-lock.json
