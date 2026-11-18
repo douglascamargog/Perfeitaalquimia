@@ -17,6 +17,14 @@
  */
 return [
     [
+        'versao' => '15.4', 'data' => '2026-11-18', 'titulo' => 'Rotas pelo endereço da loja',
+        'correcao' => [
+            'Planejador de visitas: "Rota no Google Maps" e "Rota do dia" agora levam ao endereço de cada loja (rua, número, bairro, cidade e CEP), e não mais a um ponto aproximado no mapa.',
+            'Ficha da loja: o botão "Rota" também abre o Google Maps pelo endereço da loja.',
+        ],
+        'admin' => 'Loja sem endereço cadastrado continua indo pelo ponto do mapa (ou pela cidade). Vale conferir os endereços das lojas: é por eles que o Google Maps navega.',
+    ],
+    [
         'versao' => '15.3', 'data' => '2026-11-18', 'titulo' => 'Última compra sempre certa nos filtros',
         'correcao' => [
             'Carteira: o filtro "Sem compra há +30 dias" (e 60, 90...) mostrava lojas que tinham comprado há poucos dias. A "última compra" das lojas agora acompanha os pedidos faturados.',

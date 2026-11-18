@@ -117,6 +117,11 @@ const id = (email) => sql(`select id from usuarios where email='${email}'`);
     ok(ordemDias.indexOf(c) === 2, 'paradas na ordem do caminho (Bento Gonçalves, a última cidade, fica por último)');
     await e.goto(BASE + `/roteiros/${rid}`);
     ok(await e.locator('[data-google-maps]').count() > 0 && (await e.locator('[data-google-maps]').first().getAttribute('href')).startsWith('https://www.google.com/maps/dir/'), 'botão "Rota no Google Maps" com as paradas');
+    // A rota do Google vai pelo ENDEREÇO da loja (não pela coordenada, que pode ser aproximada)
+    sql(`update clientes set endereco='Rua Sinimbu, 1500', bairro='Centro', cep='95020002' where id=${c}`);
+    await e.goto(BASE + `/roteiros/${rid}`);
+    const rota = decodeURIComponent((await e.locator('[data-google-maps]').first().getAttribute('href')).replace(/\+/g, ' '));
+    ok(rota.includes('Rua Sinimbu, 1500, Centro, Bento Gonçalves - RS, 95020-002, Brasil') && !rota.includes('-29.17'), 'Google Maps: loja com endereço vai pelo endereço (rua, número, bairro, cidade, CEP)');
 
     // ---------------- 6. Acesso e pedido em loja de outra carteira
     ok((await e.goto(BASE + '/carteira/clientes/' + a)).status() === 200, 'com a loja no roteiro, o externo abre a ficha dela');

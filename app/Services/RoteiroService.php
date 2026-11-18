@@ -97,7 +97,7 @@ class RoteiroService
     {
         $soMinhas = !self::podeVer($r);
         $lista = Banco::todos("SELECT p.*, c.razao_social, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS nome, c.endereco, c.bairro, c.cidade, c.uf,
-                c.telefone, c.whatsapp, c.responsavel_id, c.ultima_compra_em, c.tipo,
+                c.cep, c.telefone, c.whatsapp, c.responsavel_id, c.ultima_compra_em, c.tipo,
                 COALESCE(c.lat, ci.lat) AS lat, COALESCE(c.lng, ci.lng) AS lng, c.lat IS NULL AS aproximada,
                 u.nome AS vendedor, pe.total AS pedido_total, pe.situacao AS pedido_situacao
             FROM roteiro_paradas p JOIN clientes c ON c.id = p.cliente_id LEFT JOIN cidades ci ON ci.id = c.cidade_id
@@ -503,17 +503,34 @@ class RoteiroService
     /** Link do Google Maps com a rota (até 10 paradas por link: origem + 8 paradas + destino) */
     public static function linksGoogleMaps(array $paradas): array
     {
-        $pontos = array_values(array_filter($paradas, fn($p) => $p['lat'] !== null && $p['situacao'] === 'pendente'));
+        $pontos = array_values(array_filter($paradas, fn($p) => $p['situacao'] === 'pendente' && self::destinoGoogle($p) !== ''));
         $links = [];
         foreach (array_chunk($pontos, 10) as $grupo) {
-            $coord = fn($p) => number_format((float) $p['lat'], 6, '.', '') . ',' . number_format((float) $p['lng'], 6, '.', '');
             $destino = array_pop($grupo);
             $links[] = 'https://www.google.com/maps/dir/?' . http_build_query(array_filter([
-                'api' => 1, 'destination' => $coord($destino), 'travelmode' => 'driving',
-                'waypoints' => $grupo ? implode('|', array_map($coord, $grupo)) : null,
+                'api' => 1, 'destination' => self::destinoGoogle($destino), 'travelmode' => 'driving',
+                'waypoints' => $grupo ? implode('|', array_map([self::class, 'destinoGoogle'], $grupo)) : null,
             ]));
         }
         return $links;
+    }
+
+    /**
+     * Para onde o Google Maps leva: o ENDEREÇO da loja (rua e número, bairro, cidade - UF, CEP), que o Google acha certinho.
+     * Loja sem endereço: o ponto do mapa (latitude, longitude); sem ponto, só a cidade.
+     */
+    public static function destinoGoogle(array $p): string
+    {
+        $endereco = trim((string) ($p['endereco'] ?? ''));
+        if ($endereco !== '') {
+            $cep = preg_replace('/\D/', '', (string) ($p['cep'] ?? ''));
+            return str_replace('|', ' ', implode(', ', array_filter([$endereco, trim((string) ($p['bairro'] ?? '')),
+                trim((string) $p['cidade']) . ' - ' . $p['uf'], strlen($cep) === 8 ? substr($cep, 0, 5) . '-' . substr($cep, 5) : '', 'Brasil'])));
+        }
+        if (($p['lat'] ?? null) !== null) {
+            return number_format((float) $p['lat'], 6, '.', '') . ',' . number_format((float) $p['lng'], 6, '.', '');
+        }
+        return trim((string) ($p['cidade'] ?? '')) !== '' ? $p['cidade'] . ' - ' . $p['uf'] . ', Brasil' : '';
     }
 
     // ------------------------------------------------------------------ pedidos tirados em visita
