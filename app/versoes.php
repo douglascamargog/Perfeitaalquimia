@@ -17,6 +17,13 @@
  */
 return [
     [
+        'versao' => '15.3', 'data' => '2026-11-18', 'titulo' => 'Última compra sempre certa nos filtros',
+        'correcao' => [
+            'Carteira: o filtro "Sem compra há +30 dias" (e 60, 90...) mostrava lojas que tinham comprado há poucos dias. A "última compra" das lojas agora acompanha os pedidos faturados.',
+        ],
+        'admin' => 'Na atualização, o One corrige sozinho a "última compra" das lojas pelo pedido faturado mais recente (só adianta a data, nunca volta). A causa era o movimento de Administração › Dados de teste, que criava pedidos sem atualizar a loja. Novo em Dados de teste: "Base de clientes de teste" (até 10.000 lojas variadas: a maioria no RS, várias etapas, prioridades, segmentos e vendedoras, ponto no mapa sem usar o Google e pedidos faturados de 12 meses). Sai com "Apagar dados simulados".',
+    ],
+    [
         'versao' => '15.2', 'data' => '2026-11-17', 'titulo' => 'Planejador de visitas e Análise de clientes',
         'novo' => [
             'Planejador de visitas (vendedor externo): monte o roteiro da viagem escolhendo as cidades do caminho, e o One mostra as lojas que ficam perto, de qualquer carteira.',

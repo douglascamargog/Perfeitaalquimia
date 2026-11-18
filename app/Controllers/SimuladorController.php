@@ -29,6 +29,21 @@ class SimuladorController extends Controller
         redirecionar('/sistema/dados-de-teste');
     }
 
+    /** Base de clientes de teste (ex.: 5.000 lojas variadas com histórico de compras) */
+    public function base(): void
+    {
+        try {
+            $c = S::gerarBase((int) ($_POST['quantidade'] ?? 5000), Auth::id());
+        } catch (\Throwable $e) {
+            error_log((string) $e);
+            Sessao::aviso('erro', 'Não foi possível gerar a base: ' . mb_substr($e->getMessage(), 0, 300) . ' (as lojas gravadas até o erro saem com "Apagar dados simulados").');
+            redirecionar('/sistema/dados-de-teste');
+        }
+        Sessao::aviso('sucesso', 'Base de teste criada: ' . number_format($c['clientes'], 0, ',', '.') . ' clientes, ' . number_format($c['leads'], 0, ',', '.') . ' leads e '
+            . number_format($c['pedidos'], 0, ',', '.') . ' pedidos faturados (12 meses).' . ($c['pedidos'] ? '' : ' Sem pedidos: cadastre produtos com preço para ter histórico de compras.'));
+        redirecionar('/sistema/dados-de-teste');
+    }
+
     public function apagar(): void
     {
         if (trim((string) ($_POST['confirmar'] ?? '')) !== 'APAGAR') {

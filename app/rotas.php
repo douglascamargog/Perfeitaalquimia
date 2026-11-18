@@ -441,6 +441,7 @@ return [
 
     ['GET',  '/sistema/dados-de-teste',               'SimuladorController@index',     'sistema.atualizar'],
     ['POST', '/sistema/dados-de-teste/gerar',         'SimuladorController@gerar',     'sistema.atualizar'],
+    ['POST', '/sistema/dados-de-teste/base',          'SimuladorController@base',      'sistema.atualizar'],
     ['POST', '/sistema/dados-de-teste/apagar',        'SimuladorController@apagar',    'sistema.atualizar'],
     ['GET',  '/sistema/atualizacao',                  'AtualizacaoController@index',   'sistema.atualizar'],
     ['POST', '/sistema/atualizacao/aplicar',          'AtualizacaoController@aplicar', 'sistema.atualizar'],

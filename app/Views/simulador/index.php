@@ -19,6 +19,16 @@ $total = array_sum($contagem);
     <form method="post" action="<?= url('/sistema/dados-de-teste/gerar') ?>" data-confirmar="Gerar movimento simulado dos últimos 60 dias?"><?= csrf_campo() ?>
       <button class="botao" type="submit">Gerar movimento simulado</button></form>
   </section>
+  <section class="card" data-base-teste>
+    <h2>Base de clientes de teste</h2>
+    <p>Cria muitas lojas variadas para testar filtros, Análise de clientes, mapa, recompra e o Planejador de visitas: a maioria no RS (e SC, PR e outros estados),
+      com segmento, etapa, prioridade, origem, vendedora, ponto no mapa e <strong>pedidos faturados dos últimos 12 meses</strong> (clientes ativos e parados).</p>
+    <form method="post" action="<?= url('/sistema/dados-de-teste/base') ?>" class="pd-form" data-confirmar="Criar a base de clientes de teste? Pode levar alguns minutos."><?= csrf_campo() ?>
+      <label>Quantas lojas<input type="number" name="quantidade" min="10" max="10000" step="10" value="5000"></label>
+      <button class="botao" type="submit">Gerar base de clientes</button>
+      <p class="pequeno suave">Saem junto com "Apagar dados simulados". Não usam o Google Maps nem o ERP.</p>
+    </form>
+  </section>
   <section class="card">
     <h2>Simulado no sistema agora</h2>
     <dl class="pd-dados" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">

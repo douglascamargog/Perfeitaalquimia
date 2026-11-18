@@ -51,6 +51,32 @@ const aviso = async (p) => (await p.locator('.aviso').allInnerTexts()).join(' | 
   ok(sql('select count(*) from cliente_eventos') === String(Number(reais.ev) + 1), 'o contato real feito depois continua');
   ok(sql("select count(*) from auditoria where entidade='simulador'") === '2', 'gerar e apagar ficam na auditoria');
 
+  // V15.3: a "última compra" acompanha os pedidos simulados (o filtro "sem compra há +30 dias" não mostra quem acabou de comprar)
+  await Promise.all([p.waitForNavigation(), p.click('button:has-text("Gerar movimento simulado")')]);
+  ok(sql(`select count(*) from clientes c where c.ultima_compra_em < (select max(date(faturado_em)) from pedidos p where p.cliente_id = c.id and p.situacao = 'faturado')`) === '0',
+    'movimento simulado atualiza a última compra das lojas (igual ao faturamento de verdade)');
+  await p.goto(BASE + '/carteira/lista?compra=sem30');
+  const recentes = sql("select group_concat(id) from clientes c where exists (select 1 from pedidos p where p.cliente_id = c.id and p.situacao = 'faturado' and p.faturado_em >= curdate() - interval 25 day)").split(',');
+  const naLista = await p.locator('[data-abrir-cliente]').evaluateAll((l) => l.map((x) => x.dataset.abrirCliente));
+  ok(!naLista.some((id) => recentes.includes(id)), 'filtro "sem compra há +30 dias" não mostra loja com compra nos últimos dias');
+
+  // Base de clientes de teste (V15.3): muitas lojas variadas, com histórico de compras
+  await p.goto(BASE + '/sistema/dados-de-teste');
+  await p.fill('[data-base-teste] input[name=quantidade]', '400');
+  await Promise.all([p.waitForNavigation({ timeout: 120000 }), p.click('[data-base-teste] button')]);
+  ok((await aviso(p)).includes('Base de teste criada'), 'gera a base de clientes de teste');
+  ok(Number(sql("select count(*) from clientes where simulado=1 and razao_social like '%Teste Ltda'")) === 400, 'criou as 400 lojas pedidas');
+  ok(Number(sql("select count(distinct uf) from clientes where simulado=1")) >= 4 && Number(sql("select count(*) from clientes where simulado=1 and uf='RS'")) > 200, 'lojas em vários estados, a maioria no RS');
+  ok(Number(sql("select count(distinct etapa_id) from clientes where simulado=1")) >= 5 && Number(sql("select count(distinct prioridade) from clientes where simulado=1")) >= 3
+    && Number(sql("select count(distinct segmento_id) from clientes where simulado=1")) >= 3, 'etapas, prioridades e segmentos variados (para testar os filtros)');
+  ok(sql("select count(*) from clientes where simulado=1 and razao_social like '%Teste Ltda' and (lat is null or geo_precisao <> 'telhado')") === '0', 'todas com ponto no mapa (sem gastar o Google)');
+  ok(Number(sql("select count(*) from pedidos p join clientes c on c.id = p.cliente_id where c.simulado=1 and p.situacao='faturado'")) > 400, 'histórico de pedidos faturados de 12 meses');
+  ok(sql(`select count(*) from clientes c where c.simulado=1 and c.ultima_compra_em < (select max(date(faturado_em)) from pedidos p where p.cliente_id = c.id and p.situacao = 'faturado')`) === '0', 'última compra bate com os pedidos');
+  await p.goto(BASE + '/sistema/dados-de-teste');
+  await p.fill('input[name=confirmar]', 'APAGAR');
+  await Promise.all([p.waitForNavigation(), p.click('button:has-text("Apagar dados simulados")')]);
+  ok(sql('select count(*) from clientes where simulado=1') === '0' && sql('select count(*) from pedidos where simulado=1') === '0' && sql('select count(*) from clientes') === reais.cli, 'apagar tira a base inteira e deixa o resto igual');
+
   const v = await (await b.newContext()).newPage();
   await entrar(v, 'gestor@demo.local');
   ok((await v.goto(BASE + '/sistema/dados-de-teste')).status() === 403, 'só a administração usa os dados de teste');
