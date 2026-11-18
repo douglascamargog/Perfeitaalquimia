@@ -141,6 +141,20 @@ document.querySelectorAll('form[data-filtros]').forEach((form) => {
   });
 });
 
+// Lista: ações com as lojas marcadas (V15.9) — contador e "marcar todas desta página"
+const loteForm = document.querySelector('[data-lote]');
+if (loteForm) {
+  const itens = () => [...document.querySelectorAll('[data-lote-item]')];
+  const contar = () => {
+    const n = itens().filter((c) => c.checked).length;
+    loteForm.querySelector('[data-lote-qtd]').textContent = `(${n})`;
+    loteForm.classList.toggle('ativo', n > 0);
+  };
+  document.querySelector('[data-lote-todas]')?.addEventListener('change', (ev) => { itens().forEach((c) => { c.checked = ev.target.checked; }); contar(); });
+  document.addEventListener('change', (ev) => { if (ev.target.matches('[data-lote-item]')) contar(); });
+  contar();
+}
+
 // Disponível para os outros scripts (mapa.js, funil.js) sem carregar este arquivo duas vezes
 /** Recarrega o que está aberto na gaveta (depois de salvar algo por outro script) */
 function recarregar() {

@@ -112,6 +112,7 @@ class AgendaController extends Controller
         $tarefa = $this->tarefaAberta($id);
         Banco::executar('DELETE FROM tarefas WHERE id = ?', [$tarefa['id']]);
         \App\Core\Auditoria::registrar('tarefa', (int) $tarefa['id'], 'excluir', ['titulo' => $tarefa['titulo'], 'vence_em' => $tarefa['vence_em'], 'cliente_id' => $tarefa['cliente_id']], null);
+        \App\Services\DesfazerService::guardar('tarefa_excluida', 'tarefa "' . $tarefa['titulo'] . '" voltou', ['linha' => $tarefa]);
         Sessao::aviso('sucesso', 'Tarefa excluída.');
         redirecionar($this->voltar('/agenda'));
     }
@@ -132,9 +133,8 @@ class AgendaController extends Controller
             redirecionar('/agenda');
         }
         Banco::executar('UPDATE tarefas SET concluida_em = NOW() WHERE id = ?', [$tarefa['id']]);
-        if ($tarefa['cliente_id']) {
-            ClienteEvento::registrar((int) $tarefa['cliente_id'], 'tarefa', 'Concluída: ' . $tarefa['titulo'], Auth::id());
-        }
+        $evento = $tarefa['cliente_id'] ? ClienteEvento::registrar((int) $tarefa['cliente_id'], 'tarefa', 'Concluída: ' . $tarefa['titulo'], Auth::id()) : null;
+        \App\Services\DesfazerService::guardar('tarefa_concluida', 'tarefa "' . $tarefa['titulo'] . '" voltou para a Agenda', ['id' => (int) $tarefa['id'], 'evento_id' => $evento]);
         Sessao::aviso('sucesso', 'Tarefa concluída.');
         // One comemora quando a pessoa zera a agenda de hoje (nada atrasado nem para hoje)
         if ((int) $tarefa['usuario_id'] === (int) Auth::id() && !Banco::valor('SELECT 1 FROM tarefas WHERE usuario_id = ? AND concluida_em IS NULL AND vence_em <= CURDATE() LIMIT 1', [Auth::id()])) {

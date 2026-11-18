@@ -17,6 +17,17 @@
  */
 return [
     [
+        'versao' => '15.9', 'data' => '2026-11-18', 'titulo' => 'Filtros lembrados, ações em lote e Desfazer',
+        'novo' => [
+            'Carteira › Lista: marque várias lojas (ou todas da página) e mude a etapa ou a prioridade de uma vez. A gestão também move as marcadas para outra carteira.',
+            '"↶ Desfazer": logo depois de concluir uma tarefa, excluir uma tarefa ou apagar um registro da linha do tempo, o aviso traz o botão para voltar atrás.',
+        ],
+        'melhoria' => [
+            'A Carteira lembra os seus últimos filtros: saiu para a Agenda ou para a ficha e voltou pelo menu? Os filtros continuam. "Limpar filtros" esquece.',
+        ],
+        'admin' => 'Os filtros ficam guardados até a pessoa sair do sistema. As ações em lote passam pela mesma regra de quando é feito uma a uma (só lojas que a pessoa vê; mover de carteira só para quem usa Gestão › Carteiras) e ficam na linha do tempo e na auditoria. O Desfazer vale por 30 segundos, só para a própria pessoa, e aparece uma vez (na tela logo depois da ação).',
+    ],
+    [
         'versao' => '15.8', 'data' => '2026-11-18', 'titulo' => 'Corrigir pedido, pedido ao Marketing, comunicado e ordem de produção',
         'novo' => [
             'Pedido aguardando aprovação: botão "Corrigir pedido". A tela abre com os itens; ao enviar, o pedido novo substitui o antigo (que fica cancelado) e vai para a aprovação.',

@@ -87,6 +87,8 @@ return [
     ['POST', '/carteira/clientes/{id}/etapa',   'ClienteController@etapa',       'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/eventos/{evento}/editar', 'EventoController@editar', 'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/eventos/{evento}/apagar', 'EventoController@apagar', 'carteira.ver_propria|carteira.ver_todas'],
+    ['POST', '/desfazer',                       'DesfazerController@desfazer',   'logado'],
+    ['POST', '/carteira/lote',                  'CarteiraLoteController@aplicar', 'carteira.ver_propria|carteira.ver_todas'], // ações com as lojas marcadas
     // Excluir, restaurar e juntar lojas repetidas (V15.7): Gestor e Admin
     ['POST', '/carteira/clientes/{id}/excluir', 'ClienteExclusaoController@excluir',   'carteira.excluir'],
     ['POST', '/carteira/clientes/{id}/juntar',  'ClienteExclusaoController@juntar',    'carteira.excluir'],

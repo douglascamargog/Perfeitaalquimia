@@ -157,8 +157,14 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
         <div class="aniv-faixa" role="status">🎉 <strong>Feliz aniversário, <?= e(\App\Services\EquipeService::comoChamar($usuario)) ?>!</strong> A equipe toda está torcendo por você hoje.
           <a href="<?= url('/') ?>#mural-aniversario">Ver os parabéns</a></div>
       <?php endif; ?>
+      <?php $desfazer = \App\Services\DesfazerService::paraMostrar(); ?>
       <?php foreach (Sessao::avisos() as $aviso): ?>
-        <div class="aviso <?= e($aviso['tipo']) ?>" role="status"><?= e($aviso['mensagem']) ?></div>
+        <div class="aviso <?= e($aviso['tipo']) ?>" role="status"><?= e($aviso['mensagem']) ?>
+          <?php if ($desfazer && $aviso['tipo'] === 'sucesso'): ?>
+            <form method="post" action="<?= url('/desfazer') ?>" style="display:inline;margin-left:10px" data-desfazer><?= csrf_campo() ?>
+              <input type="hidden" name="voltar" value="<?= e(substr((string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), strlen(url_base())) ?: '/') ?>">
+              <button class="botao contorno pequeno" type="submit">↶ Desfazer</button></form>
+          <?php endif; ?></div>
       <?php endforeach; ?>
       <?= $conteudo ?>
     </main>

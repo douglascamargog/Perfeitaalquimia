@@ -62,6 +62,7 @@ $algumFiltro = (bool) array_filter($filtros);
   </div>
   <div class="filtros-acoes">
     <button class="botao pequeno" type="submit">Filtrar</button>
-    <?php if ($algumFiltro): ?><a class="botao contorno pequeno" href="<?= url($acao) ?>">Limpar filtros</a><?php endif; ?>
+    <?php if ($algumFiltro): ?><a class="botao contorno pequeno" href="<?= url($acao) ?>?limpar=1" data-limpar-filtros>Limpar filtros</a>
+      <small class="suave" title="Ao voltar para a Carteira, estes filtros continuam até você limpar ou sair do sistema">🔖 filtros lembrados</small><?php endif; ?>
   </div>
 </form>

@@ -30,6 +30,8 @@ class EventoController extends Controller
     public function apagar(string $clienteId, string $eventoId): void
     {
         $ev = $this->evento($clienteId, $eventoId);
+        \App\Services\DesfazerService::guardar('evento_apagado', 'o registro voltou para a linha do tempo', ['linha' => $ev,
+            'anexos' => array_map('intval', array_column(Banco::todos('SELECT id FROM cliente_anexos WHERE evento_id = ?', [$ev['id']]), 'id'))]);
         Banco::transacao(function () use ($ev) {
             Banco::executar('UPDATE cliente_anexos SET evento_id = NULL WHERE evento_id = ?', [$ev['id']]); // o print continua na loja
             Banco::executar('DELETE FROM cliente_eventos WHERE id = ?', [$ev['id']]);

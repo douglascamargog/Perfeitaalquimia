@@ -314,6 +314,10 @@ details.ficha-secao[open] > summary::before { content: '▾ '; }
 .cx-previa button { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; border: 0; background: var(--perigo); color: #fff; cursor: pointer; line-height: 1; }
 .lt-anexos { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; }
 .lt-corrigir { grid-column: 1 / -1; }
+.cl-lote { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 10px 14px; margin-bottom: 10px; opacity: .7; }
+.cl-lote.ativo { opacity: 1; border: 1px solid var(--primaria); }
+.cl-lote-acao { display: inline-flex; gap: 6px; align-items: center; }
+.cl-lote-acao select { padding: 6px 8px; font-size: .82rem; }
 .lt-corrigir summary { cursor: pointer; color: var(--texto-suave); width: max-content; }
 .lt-corrigir form { display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-start; margin-top: 6px; }
 .lt-corrigir textarea { flex: 1; min-width: 200px; }

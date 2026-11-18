@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Core\Auditoria;
 use App\Core\Auth;
 use App\Core\Config;
+use App\Core\Sessao;
 use App\Models\Cliente;
 use App\Models\Listas;
 use App\Models\Tarefa;
@@ -25,8 +26,32 @@ class CarteiraController extends Controller
         return $f;
     }
 
+    /**
+     * Filtros lembrados (V15.9): a última filtragem da Carteira fica guardada até a pessoa sair do sistema.
+     * Voltar pelo menu (sem filtros na URL) reabre com ela; "Limpar filtros" (?limpar=1) esquece.
+     */
+    private static function lembrarFiltros(): void
+    {
+        $caminho = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '/carteira';
+        if (isset($_GET['limpar'])) {
+            Sessao::remover('filtros_carteira');
+            redirecionar(substr($caminho, strlen(url_base())) ?: '/carteira');
+        }
+        $chaves = array_merge(Cliente::FILTROS, ['ordem']);
+        if (array_intersect(array_keys($_GET), $chaves)) { // a pessoa filtrou agora: guarda o que tem valor
+            $guardar = array_filter(array_intersect_key($_GET, array_flip($chaves)), fn($v) => is_string($v) && $v !== '' && $v !== 'nome');
+            $guardar ? Sessao::set('filtros_carteira', $guardar) : Sessao::remover('filtros_carteira');
+            return;
+        }
+        $salvos = (array) Sessao::get('filtros_carteira', []);
+        if ($salvos && !array_diff(array_keys($_GET), ['pagina', 'abrir'])) {
+            redirecionar(substr($caminho, strlen(url_base())) . '?' . http_build_query($salvos + array_intersect_key($_GET, ['abrir' => 1])));
+        }
+    }
+
     private function base(string $aba, string $titulo): array
     {
+        self::lembrarFiltros();
         $filtros = self::filtros();
         return [
             'titulo'   => $titulo,

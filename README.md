@@ -1,4 +1,4 @@
-# One — sistema unificado da Perfeita Alquimia (Fase 0 · protótipo)
+# One — sistema unificado da Perfeita Alquimia (em produção)
 
 **One** é o nome do sistema e do mascote ajudante: um caldeirão de alquimista com um broto
 (arquivos em `public/assets/img/one/`, 6 expressões × 2 variações). O One aparece no login, no Início
@@ -6,10 +6,19 @@
 (`app/Services/OneAssistente.php`).
 
 
-Carteira e CRM, catálogo B2B com pedido, app do externo, painel de vendas, Academia e produção num só sistema,
-integrado ao Omie (no protótipo: **dados simulados**). Especificação completa em `CLAUDE.md`.
+Carteira e CRM, catálogo B2B com pedido, app do externo, Planejador de visitas, painel de vendas, Análise de clientes,
+Academia, produção e fórmulas num só sistema. **É o sistema definitivo da empresa**, na HostGator, com os dados reais.
+Integrações: Omie (ERP), Tray (loja virtual), Ligue Talk (telefonia), Geoapify ou Google (mapas) e Claude (IA do One).
+Os dados simulados (`OmieFake`, `TrayFake`, seeds `_demo`, Administração › Dados de teste) servem só para os testes
+e para instalações de teste. Regras do projeto em `CLAUDE.md`; o que mudou em cada versão em `app/versoes.php`.
 
-PHP 8 + MySQL/MariaDB, HTML/CSS/JS puro. Sem Composer e sem etapa de build.
+PHP 8 + MySQL/MariaDB, HTML/CSS/JS puro, sem etapa de build. Única dependência do Composer: o SDK da Anthropic (IA).
+
+## Atualizar o sistema em uso
+
+`bash ferramentas/gerar_pacote.sh --atualizacao` gera `pacote/ONE_V<versão>.zip`; o passo a passo está em
+`LEIA-ME-ATUALIZACAO.md` (backup → extrair; na primeira visita o One faz backup e aplica sozinho as mudanças do banco).
+Antes de publicar: `bash tests/rodar.sh` (num computador de teste, nunca no servidor).
 
 ## Rodar no seu computador
 
@@ -63,7 +72,7 @@ com o "Backup JSON" exportado pela V4.
 - **Cobrança** (menu Comercial; perfis Financeiro, Gestor e Admin): clientes com títulos em atraso, em um **funil próprio**
   (Título vencido → Tentativa de contato → Sem contato — buscar contatos → Em negociação → Promessa de pagamento → Pago / Acordo / Jurídico / Perda).
   As etapas ficam em Configurações › Listas › Funil de cobrança.
-- Os casos entram pelo botão **Ler títulos vencidos do ERP** (simulado no protótipo; Omie depois), pelo cron, ou pelo vendedor na ficha do
+- Os casos entram pelo botão **Ler títulos vencidos do ERP** (Omie; na instalação de teste, simulado), pelo cron, ou pelo vendedor na ficha do
   cliente (**Enviar para cobrança**). Vão para quem tem a função **Cobrança** (ou para o Financeiro).
 - Depois de X tentativas sem resposta (configurável) o caso vai para **Sem contato**. Promessa de pagamento cria uma tarefa para o dia;
   promessa vencida volta para tentativa. Todos os títulos pagos encerram o caso como Pago.
@@ -114,7 +123,7 @@ com o "Backup JSON" exportado pela V4.
     (conversão por origem), funil dos leads e as abordagens da equipe na semana. Vendedor vê só a carteira dele.
   - **Encontrar empresas**: base pública de CNPJs filtrada pelos CNAEs do nosso público (Configurações › Prospecção), por cidade,
     bairro, atividade e data de abertura, com a cobertura de cada cidade. Marque e envie para o funil (não duplica CNPJ).
-    No protótipo é uma **amostra simulada do RS**; a base real da Receita entra na mesma tabela numa fase posterior.
+    Hoje é uma **amostra do RS**; a base real da Receita entra na mesma tabela (pendência: lista de CNAEs e importação da base).
   - A antiga "campanha em destaque" virou parte da Prospecção. As 499 lojas da Carteira V4 estão na origem
     "Lista de prospecção — Grande Porto Alegre".
 - **Mensagens prontas** (`/mensagens`, Conteúdo): modelos de WhatsApp com variáveis (`{nome}`, `{link_vendedor}`, `{dias_sem_compra}`...).
@@ -202,17 +211,19 @@ O resto do sistema não muda. O esqueleto da API real está em `app/Integrations
 A tela **Administração › Integração Omie** mostra o que vem e vai para o ERP, testa a conexão e tem o botão
 "Sincronizar agora" (o mesmo que o cron `cron/sincronizar_erp.php` faz a cada 30 minutos).
 
-## Apresentação da Fase 0
+## Instalação de teste (demonstração)
 
-O roteiro da demonstração para a diretoria (ordem das telas, logins, falas, perguntas prováveis e decisões)
-foi publicado como página à parte. Logins de demonstração: veja a tabela acima (senha `Demo@2026`).
+A Fase 0 (protótipo para a diretoria) foi concluída e aprovada. Os logins de demonstração (tabela acima, senha `Demo@2026`)
+existem só numa instalação de teste (`modo_demo` ligado no `config.php`); no servidor da empresa o `modo_demo` fica desligado.
 
 ## Testes automáticos
 
 Mais de 400 verificações em `tests/` (Playwright): `bash tests/rodar.sh`. Veja `tests/LEIA-ME.md`.
 Rode antes de publicar qualquer mudança. Eles apagam e recriam o banco: use só no ambiente de teste.
 
-## Novidades depois da Fase 0
+## Histórico das primeiras versões (depois da Fase 0)
+
+As versões mais recentes, com o que mudou em cada uma, ficam em `app/versoes.php` (e na tela Novidades do sistema).
 
 - **Código do produto** em todo o sistema (catálogo, pedidos, app, Academia, Produção e busca). Cadastre em
   Conteúdo › Produtos ou importe de uma planilha (colunas Código e Produto). Na Fase 2 vem do Omie.
