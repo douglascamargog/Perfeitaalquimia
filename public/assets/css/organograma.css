@@ -1,88 +1,120 @@
-/* Organograma: interligações (SVG) e organização (áreas → funções → pessoas). Cores das áreas abaixo; o resto vem do tema (base.css). */
+/* Organograma (só o desenvolvedor do sistema): interligações (SVG colorido), o que falta ligar e a organização (áreas → funções → pessoas). */
 .org-abas { margin-bottom: 0; }
 .org-painel { display: grid; gap: 14px; padding-top: 16px; }
 .org-painel[hidden] { display: none; }
 
-/* cores das áreas (no tema escuro, tema-escuro.css troca as fixas) */
-.area-fora { --cor: #5b6f88; }
-.area-comercial { --cor: var(--primaria); }
-.area-financeiro { --cor: #b7791f; }
-.area-gestao { --cor: #6b52a8; }
-.area-operacao { --cor: var(--secundaria-escura); }
-.area-marketing { --cor: #b0487f; }
-.area-diretoria { --cor: var(--fundo-forte); }
+/* ---------- paleta: cada setor tem a sua cor (app/dados/interligacoes.php › 'cor'); no tema escuro, tema-escuro.css troca as fixas ---------- */
+.cor-azul { --cor: #2563eb; }
+.cor-ardosia { --cor: #546a85; }
+.cor-ciano { --cor: #0891b2; }
+.cor-indigo { --cor: #4f46e5; }
+.cor-violeta { --cor: #9333ea; }
+.cor-rosa { --cor: #db2777; }
+.cor-laranja { --cor: #ea7a0c; }
+.cor-verde { --cor: #059669; }
+.cor-oliva { --cor: #6b8e23; }
+.cor-ambar { --cor: #ca8a04; }
+.cor-vermelho { --cor: #dc2626; }
+.cor-roxo { --cor: #7c3aed; }
+.cor-petroleo { --cor: #0f766e; }
+.cor-marrom { --cor: #a16207; }
+.cor-lima { --cor: #65a30d; }
+/* áreas da organização */
+.area-comercial { --cor: #059669; }
+.area-marketing { --cor: #db2777; }
+.area-financeiro { --cor: #ca8a04; }
+.area-operacao { --cor: #0f766e; }
+.area-diretoria { --cor: #4f46e5; }
 .area-outras { --cor: var(--texto-suave); }
 
-/* ---------- resumo e filtros ---------- */
+/* ---------- resumo, filtros e legenda ---------- */
 .org-resumo { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
 .org-resumo-numeros { display: flex; flex-wrap: wrap; gap: 10px; }
-.org-num { display: inline-flex; align-items: baseline; gap: 6px; padding: 8px 14px; border-radius: 999px; background: var(--card); border: 1px solid var(--borda); font-size: .85rem; }
-.org-num strong { font-size: 1.25rem; font-variant-numeric: tabular-nums; }
-.org-num.ok strong { color: var(--sucesso); }
-.org-num.parcial strong { color: var(--aviso); }
-.org-num.ilha strong { color: #c4561c; }
+.org-num { display: inline-flex; align-items: baseline; gap: 6px; padding: 8px 16px; border-radius: 999px; font-size: .85rem; font-weight: 600; }
+.org-num strong { font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.org-num.ok { background: #dcfce7; color: #166534; }
+.org-num.parcial { background: #fef3c7; color: #92400e; }
+.org-num.ilha { background: #ffe4e6; color: #9f1239; }
 .org-filtros { display: flex; flex-wrap: wrap; gap: 6px; }
 .org-filtros .botao.ativo { background: var(--primaria); color: var(--primaria-texto); border-color: var(--primaria); }
-.org-dica { margin: 0; }
+.org-legenda { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; color: var(--texto-suave); }
+.org-legenda span { display: inline-flex; align-items: center; gap: 6px; }
+.leg-linha { display: inline-block; width: 30px; height: 0; border-top: 3px solid #059669; }
+.leg-linha.parcial { border-top: 3px dashed #d97706; }
+.leg-linha.ilha { border-top: 3px dashed #e11d48; }
 
-/* ---------- mapa + painel do setor ---------- */
-.org-mapa { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 14px; align-items: start; }
-@media (max-width: 1499px) { .org-mapa { grid-template-columns: minmax(0, 1fr); } .org-detalhe { position: static; max-height: none; } }
-.org-desenho { padding: 10px; overflow-x: auto; min-width: 0; }
+/* ---------- diagrama ---------- */
+.org-desenho { padding: 12px; overflow-x: auto; min-width: 0; }
 .org-svg { display: block; width: 100%; height: auto; }
-
-.org-coluna { font-size: 11px; font-weight: 700; letter-spacing: .12em; fill: var(--texto-suave); }
+.org-faixa-coluna { fill: color-mix(in srgb, var(--cor) 7%, var(--card)); stroke: color-mix(in srgb, var(--cor) 18%, transparent); }
+.org-coluna { font-size: 11.5px; font-weight: 800; letter-spacing: .14em; fill: var(--cor); }
 
 .org-lig .org-lig-largo { fill: none; stroke: transparent; stroke-width: 12; }
-.org-lig .org-lig-traco { fill: none; stroke-width: 1.8; transition: opacity .2s, stroke-width .2s; }
-.org-lig.ok .org-lig-traco { stroke: color-mix(in srgb, var(--primaria) 55%, transparent); }
-.org-lig.parcial .org-lig-traco { stroke: #c9971b; stroke-dasharray: 6 4; stroke-width: 2.2; }
-.org-lig.ilha .org-lig-traco { stroke: #e07a2f; stroke-dasharray: 6 4; stroke-width: 2.2; }
-.seta-ok { fill: color-mix(in srgb, var(--primaria) 70%, transparent); }
-.seta-parcial { fill: #c9971b; }
-.seta-ilha { fill: #e07a2f; }
-.org-lig:hover .org-lig-traco { stroke-width: 3.2; }
-.org-svg.com-foco .org-lig:not(.ativa) { opacity: .1; }
-.org-svg.com-foco .org-lig.ativa .org-lig-traco { stroke-width: 3; }
+.org-lig .org-lig-traco { fill: none; stroke: color-mix(in srgb, var(--cor) 72%, transparent); stroke-width: 2; transition: opacity .2s, stroke-width .2s; }
+.org-lig.parcial .org-lig-traco { stroke: #d97706; stroke-dasharray: 7 5; stroke-width: 2.8; }
+.org-lig.ilha .org-lig-traco { stroke: #e11d48; stroke-dasharray: 7 5; stroke-width: 2.8; }
+.seta { fill: var(--cor); }
+.seta-parcial { fill: #d97706; }
+.seta-ilha { fill: #e11d48; }
+.org-lig:hover .org-lig-traco { stroke-width: 3.6; }
+.org-svg.com-foco .org-lig:not(.ativa) { opacity: .08; }
+.org-svg.com-foco .org-lig.ativa .org-lig-traco { stroke-width: 3.4; stroke: var(--cor); }
+.org-svg.com-foco .org-lig.ativa.parcial .org-lig-traco { stroke: #d97706; }
+.org-svg.com-foco .org-lig.ativa.ilha .org-lig-traco { stroke: #e11d48; }
 .org-svg.so-falta .org-lig.ok { display: none; }
 
 .org-no { cursor: pointer; transition: opacity .2s; outline: none; }
-.org-no-fundo { fill: var(--card); stroke: var(--borda); stroke-width: 1.2; transition: stroke .2s, stroke-width .2s; }
-.org-no:hover .org-no-fundo, .org-no:focus-visible .org-no-fundo { stroke: var(--cor); stroke-width: 2; }
-.org-no.selecionado .org-no-fundo { stroke: var(--cor); stroke-width: 3; }
-.org-svg.com-foco .org-no:not(.vizinho) { opacity: .3; }
+.org-no-fundo { fill: color-mix(in srgb, var(--cor) 10%, var(--card)); stroke: color-mix(in srgb, var(--cor) 45%, transparent); stroke-width: 1.4; transition: stroke-width .2s; }
+.org-no:hover .org-no-fundo, .org-no:focus-visible .org-no-fundo { stroke: var(--cor); stroke-width: 2.4; }
+.org-no.selecionado .org-no-fundo { stroke: var(--cor); stroke-width: 3.4; fill: color-mix(in srgb, var(--cor) 18%, var(--card)); }
+.org-svg.com-foco .org-no:not(.vizinho) { opacity: .25; }
 .org-no-faixa { fill: var(--cor); }
-.org-no-icone-fundo { fill: color-mix(in srgb, var(--cor) 14%, var(--card)); }
-.org-no-icone { color: var(--cor); fill: none; stroke: currentColor; }
-.org-no-tipo { font-size: 9.5px; font-weight: 700; letter-spacing: .1em; fill: var(--cor); }
+.org-no-icone-fundo { fill: var(--cor); }
+.org-no-icone { color: #ffffff; fill: none; stroke: currentColor; }
+.org-no-tipo { font-size: 9.5px; font-weight: 800; letter-spacing: .1em; fill: var(--cor); }
 .org-no-nome { font-size: 13px; font-weight: 700; fill: var(--texto); }
 .org-no-num { font-size: 11.5px; fill: var(--texto-suave); }
 .org-no-valor { font-weight: 800; fill: var(--cor); font-size: 13px; }
-.org-no-alerta { fill: #e07a2f; }
+.org-no-alerta { fill: #e11d48; }
 .org-no-alerta-n { font-size: 11px; font-weight: 800; fill: #ffffff; }
 
-.org-detalhe { position: sticky; top: 12px; display: grid; gap: 10px; align-content: start; max-height: calc(100vh - 40px); overflow: auto; }
-.org-detalhe h2 { margin: 0; font-size: 1.1rem; }
-.org-detalhe-topo { border-left: 5px solid var(--cor); padding-left: 10px; }
-.org-no-tipo-html { font-size: .66rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--cor); }
-.org-indicador { margin: 0; padding: 8px 12px; border-radius: var(--raio-pequeno); background: var(--primaria-clara); font-size: .85rem; }
-.org-indicador strong { font-size: 1.1rem; color: var(--primaria-escura); }
-.org-sub { font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--texto-suave); margin: 6px 0 0; }
+/* ---------- quadro do setor (embaixo do diagrama) ---------- */
+.org-detalhe { display: grid; gap: 14px; border-top: 6px solid var(--cor); }
+.org-detalhe[hidden] { display: none; }
+.org-detalhe-cabeca { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: flex-start; }
+.org-detalhe-cabeca h2 { margin: 2px 0 4px; font-size: 1.25rem; color: var(--cor); }
+.org-detalhe-cabeca p { margin: 0; max-width: 70ch; }
+.org-no-tipo-html { font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--cor); }
+.org-detalhe-acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.org-indicador { padding: 6px 12px; border-radius: 999px; background: color-mix(in srgb, var(--cor) 12%, var(--card)); font-size: .85rem; }
+.org-indicador strong { font-size: 1.05rem; color: var(--cor); }
+.org-detalhe-colunas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.org-sub { font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--texto-suave); margin: 0 0 8px; }
 .org-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.org-lista li { padding: 8px 10px; border-radius: var(--raio-pequeno); background: var(--fundo); border-left: 3px solid color-mix(in srgb, var(--primaria) 45%, transparent); font-size: .86rem; }
-.org-lista li.parcial { border-left-color: #c9971b; }
-.org-lista li.ilha { border-left-color: #e07a2f; }
+.org-lista li { padding: 9px 11px; border-radius: var(--raio-pequeno); background: var(--fundo); border-left: 4px solid #059669; font-size: .86rem; }
+.org-lista li.parcial { border-left-color: #d97706; }
+.org-lista li.ilha { border-left-color: #e11d48; }
 .org-lista .org-chip { float: right; margin-left: 6px; }
-.org-chip { display: inline-block; font-size: .66rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
-.org-chip.ok { background: var(--sucesso-fundo); color: var(--sucesso); }
-.org-chip.parcial { background: var(--aviso-fundo); color: var(--aviso); }
-.org-chip.ilha { background: #fde6d6; color: #b4480f; }
-.org-detalhe-acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.org-chip { display: inline-block; font-size: .66rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.org-chip.ok { background: #dcfce7; color: #166534; }
+.org-chip.parcial { background: #fef3c7; color: #92400e; }
+.org-chip.ilha { background: #ffe4e6; color: #9f1239; }
+.org-etiqueta { display: inline-block; padding: 2px 10px; border-radius: 999px; font-weight: 700; font-size: .8rem;
+  background: color-mix(in srgb, var(--cor) 14%, var(--card)); color: var(--cor); border: 1px solid color-mix(in srgb, var(--cor) 35%, transparent); }
+.org-ponto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--cor); margin-right: 6px; vertical-align: middle; }
 .org-texto summary { cursor: pointer; font-weight: 700; }
 .org-texto .tabela-rolagem { margin-top: 10px; }
 
+/* ---------- o que falta ligar ---------- */
+.org-faltas { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.org-falta { background: var(--card); border: 1px solid var(--borda); border-left: 6px solid #e11d48; border-radius: var(--raio); padding: 14px 16px; display: grid; gap: 10px; align-content: start; box-shadow: var(--sombra); }
+.org-falta.parcial { border-left-color: #d97706; }
+.org-falta p { margin: 0; font-size: .9rem; }
+.org-falta-par { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.org-falta-seta { font-weight: 800; color: var(--texto-suave); }
+
 /* ---------- organização ---------- */
-.org-gestor-legenda { color: #c9971b; font-weight: 800; }
+.org-gestor-legenda { color: #ca8a04; font-weight: 800; }
 .org-arvore { display: grid; gap: 0; }
 .org-topo { display: flex; justify-content: center; position: relative; padding-bottom: 28px; }
 .org-topo .org-area { width: min(560px, 100%); }
@@ -120,3 +152,15 @@
   .org-abas, .org-filtros, .org-detalhe-acoes { display: none; }
   .org-painel[hidden] { display: grid; }
 }
+
+/* organização mais colorida: cabeçalho e funções na cor da área */
+.org-area { padding: 0 0 14px; overflow: hidden; border-top-width: 0; }
+.org-area > header { padding: 12px 14px; background: var(--cor); }
+.org-area > header h2, .area-diretoria > header h2 { color: #ffffff; }
+.org-area > header .org-area-total { color: rgba(255, 255, 255, .85); }
+.org-area > .org-funcao { margin: 0 12px; background: color-mix(in srgb, var(--cor) 8%, var(--card)); border: 1px solid color-mix(in srgb, var(--cor) 22%, transparent); }
+.org-funcao-topo strong { color: var(--cor); }
+.org-pessoa { border-color: color-mix(in srgb, var(--cor) 30%, var(--borda)); }
+.org-lider small { color: #a16207; }
+.org-topo::after, .org-ramo::before { border-left-width: 3px; border-left-color: color-mix(in srgb, var(--texto-suave) 45%, transparent); }
+.org-ramos { border-top-width: 3px; border-top-color: color-mix(in srgb, var(--texto-suave) 45%, transparent); }

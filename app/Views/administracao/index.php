@@ -15,6 +15,29 @@ $icones = asset('img/icones.svg');
     </a>
   <?php endforeach; ?>
 </div>
+<?php if (\App\Core\Auth::ehDesenvolvedor() || \App\Core\Auth::pode('usuarios.gerenciar')): $devs = \App\Services\Desenvolvedor::lista(); ?>
+  <section class="card" id="desenvolvedor" data-desenvolvedor style="margin-top:16px">
+    <h2 style="margin:0 0 6px;font-size:1rem">Desenvolvedor do sistema</h2>
+    <p class="pequeno" style="margin:0 0 8px">Quem mantém o One: só essa pessoa vê o Organograma, a Atualização, o Importar Nota10, o Zerar dados e os Dados de teste,
+      e pode trocar no topo da tela o jeito de ver o One ("Desenvolvedor", que vê tudo, ou como uma função, ex.: Gestor de Marketing). Nem o perfil Admin vê essas telas sem ser desenvolvedor.</p>
+    <?php if (!$devs): ?>
+      <form method="post" action="<?= url('/desenvolvedor/marcar') ?>"><?= csrf_campo() ?>
+        <button class="botao pequeno" type="submit" data-sou-desenvolvedor data-confirmar="Marcar você como o desenvolvedor do sistema? Depois, só um desenvolvedor pode marcar outra pessoa.">Eu sou o desenvolvedor do sistema</button>
+        <span class="pequeno suave">Ninguém marcado ainda: quem mantém o One clica aqui.</span></form>
+    <?php else: ?>
+      <div class="org-pessoas" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+        <?php foreach ($devs as $d): ?><span style="display:inline-flex;align-items:center;gap:6px"><?= \App\Services\EquipeService::avatar($d, 28) ?> <strong class="pequeno"><?= e($d['nome']) ?></strong>
+          <?php if (\App\Core\Auth::ehDesenvolvedor() && count($devs) > 1): ?><form method="post" action="<?= url('/desenvolvedor/marcar') ?>" style="display:inline"><?= csrf_campo() ?>
+            <input type="hidden" name="usuario" value="<?= (int) $d['id'] ?>"><button class="botao contorno pequeno" type="submit" name="acao" value="desmarcar">tirar</button></form><?php endif; ?></span><?php endforeach; ?>
+      </div>
+      <?php if (\App\Core\Auth::ehDesenvolvedor()): $outros = \App\Core\Banco::todos('SELECT id, nome FROM usuarios WHERE ativo = 1 AND desenvolvedor = 0 ORDER BY nome'); if ($outros): ?>
+        <form method="post" action="<?= url('/desenvolvedor/marcar') ?>" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><?= csrf_campo() ?>
+          <select name="usuario" aria-label="Pessoa"><?php foreach ($outros as $o): ?><option value="<?= (int) $o['id'] ?>"><?= e($o['nome']) ?></option><?php endforeach; ?></select>
+          <button class="botao contorno pequeno" type="submit" data-confirmar="Essa pessoa também vai ver as telas de desenvolvimento. Continuar?">Marcar também como desenvolvedor</button></form>
+      <?php endif; endif; ?>
+    <?php endif; ?>
+  </section>
+<?php endif; ?>
 <?php if (\App\Core\Auth::pode('config.gerenciar')): $u = \App\Services\OnePergunta::usoDoMes(); ?>
   <section class="card adm-one" data-uso-one style="margin-top:16px">
     <h2 style="margin:0 0 6px;font-size:1rem">Pergunte ao One <small class="suave"><?= \App\Services\OnePergunta::comIa() ? '✨ com IA (Claude)' : 'sem IA (aulas e dados do sistema)' ?></small></h2>

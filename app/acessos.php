@@ -61,7 +61,6 @@ return [
             ['Comunicados (emitir)', null, 'comunicados.emitir', 'Todos recebem; aqui é quem pode enviar'],
             ['Configurações e Listas', null, 'config.gerenciar', ''],
             ['Integração Omie', null, 'integracao.gerenciar', ''],
-            ['Atualização e backup', null, 'sistema.atualizar', ''],
             ['Auditoria', null, 'auditoria.ver', ''],
         ],
     ],

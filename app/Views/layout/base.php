@@ -137,6 +137,21 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
               <button type="button" class="sino-pc" data-ativar-avisos hidden>Avisar no computador</button></footer>
           </div>
         </div>
+        <?php if (Auth::ehDesenvolvedor()): $modo = $usuario['modo'] ?? null; ?>
+          <details class="dev-modo <?= $modo ? 'como-funcao' : '' ?>" data-dev-modo>
+            <summary title="Trocar o jeito de ver o One (só você vê este botão)"><?= $modo ? '👁 ' . e($modo['nome']) : '🛠 Desenvolvedor' ?></summary>
+            <form method="post" action="<?= url('/desenvolvedor/modo') ?>" class="dev-modo-painel"><?= csrf_campo() ?>
+              <input type="hidden" name="voltar" value="<?= e($caminhoAtual) ?>">
+              <strong>Ver o One como</strong>
+              <button type="submit" name="funcao" value="" class="<?= $modo ? '' : 'ativo' ?>" data-dev-opcao="desenvolvedor">🛠 Desenvolvedor <small>vê e faz tudo</small></button>
+              <?php $minha = null; foreach (\App\Services\Desenvolvedor::opcoes((int) $usuario['id']) as $op): ?>
+                <?php if ($minha !== null && $minha !== (bool) $op['minha']): ?><span class="dev-modo-sep">outras funções</span><?php endif; $minha = (bool) $op['minha']; ?>
+                <button type="submit" name="funcao" value="<?= (int) $op['id'] ?>" class="<?= ($modo['id'] ?? 0) == $op['id'] ? 'ativo' : '' ?>" data-dev-opcao="<?= e($op['slug']) ?>"><?= e($op['nome']) ?>
+                  <small><?= $op['perfil'] ? 'perfil ' . e($op['perfil']) : '' ?><?= $op['minha'] ? ' · sua função' : '' ?></small></button>
+              <?php endforeach; ?>
+            </form>
+          </details>
+        <?php endif; ?>
         <a class="usuario-perfil" href="<?= url('/meu-perfil') ?>" title="Meu perfil">
           <span class="usuario-nome">
             <strong title="<?= e($usuario['nome']) ?>"><?= e(\App\Services\EquipeService::comoChamar($usuario)) ?></strong>
@@ -153,6 +168,13 @@ $grupos = \App\Core\Menu::lateral($caminhoAtual, $pendencias);
     </header>
 
     <main class="conteudo">
+      <?php if (!empty($usuario['modo'])): ?>
+        <form class="dev-faixa" method="post" action="<?= url('/desenvolvedor/modo') ?>" role="status" data-dev-faixa><?= csrf_campo() ?>
+          <input type="hidden" name="voltar" value="<?= e($caminhoAtual) ?>">
+          <span>👁 Você está vendo o One como <strong><?= e($usuario['modo']['nome']) ?></strong> (perfil <?= e($usuario['modo']['perfil']) ?>): só essa função e o que esse perfil pode.</span>
+          <button type="submit" name="funcao" value="" class="botao contorno pequeno">Voltar ao modo desenvolvedor</button>
+        </form>
+      <?php endif; ?>
       <?php if ($meuAniversario): ?>
         <div class="aniv-faixa" role="status">🎉 <strong>Feliz aniversário, <?= e(\App\Services\EquipeService::comoChamar($usuario)) ?>!</strong> A equipe toda está torcendo por você hoje.
           <a href="<?= url('/') ?>#mural-aniversario">Ver os parabéns</a></div>

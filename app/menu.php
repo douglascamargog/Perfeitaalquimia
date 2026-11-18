@@ -9,12 +9,13 @@
  * - 'grupo': submenu onde o item fica. 'Vendas' = abas dos SETORES DE VENDA (Administração › Funções › "É um setor de venda"):
  *     'setor' => true      → aparece em TODOS os setores, filtrada pelo setor (Carteira, Meu mês, Agenda, Pedidos, Recompra);
  *     'so_setor' => 'slug' → aparece só no setor daquela função (ex.: App do externo no Externo).
+ * - 'so_desenvolvedor': tela de desenvolvimento do sistema: só aparece para o desenvolvedor (Administração › Desenvolvedor do sistema), sem cadeado para os outros.
  * - 'icone': nome de um ícone do arquivo public/assets/img/icones.svg
  */
 
 return array_values(array_filter([
     ['titulo' => 'Início',          'url' => '/',              'icone' => 'casa',      'grupo' => '',               'permissao' => 'logado',                                  'pronto' => true,  'descricao' => 'Resumo do dia'],
-    ['titulo' => 'Organograma',     'url' => '/organograma',   'icone' => 'alvo',      'grupo' => '',               'permissao' => 'logado',                                  'pronto' => true,  'descricao' => 'Como os setores se ligam e quem faz parte de cada área'],
+    ['titulo' => 'Organograma',     'url' => '/organograma',   'icone' => 'alvo',      'grupo' => '', 'so_desenvolvedor' => true, 'permissao' => 'sistema.desenvolvedor',                                  'pronto' => true,  'descricao' => 'Como os setores se ligam e quem faz parte de cada área'],
     ['oculto' => true, 'titulo' => 'Pessoas',         'url' => '/pessoas',       'icone' => 'pessoas',   'grupo' => '',               'permissao' => 'logado',                                  'pronto' => true,  'descricao' => 'Conheça os colegas: perfis, gostos e aniversários'],
     ['titulo' => 'Carteira',        'url' => '/carteira',      'icone' => 'pessoas',   'grupo' => 'Vendas', 'setor' => true,      'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Clientes, funil, mapa e linha do tempo'],
     ['titulo' => 'Meu mês',         'url' => '/meu-mes',       'icone' => 'grafico',   'grupo' => 'Vendas', 'setor' => true,      'permissao' => 'meu_mes.usar',                            'pronto' => true,  'descricao' => 'Minha meta, meta da equipe, vendas e tarefas'],
@@ -74,9 +75,9 @@ return array_values(array_filter([
     ['titulo' => 'Configurações',   'url' => '/configuracoes', 'tambem' => ['/configuracoes/listas'], 'icone' => 'engrenagem', 'grupo' => 'Administração', 'permissao' => 'config.gerenciar',                        'pronto' => true,  'descricao' => 'Regras comerciais editáveis'],
     ['oculto' => true, 'titulo' => 'Listas',          'url' => '/configuracoes/listas', 'icone' => 'etiqueta', 'grupo' => 'Administração', 'permissao' => 'config.gerenciar',                 'pronto' => true,  'descricao' => 'Etapas do funil, segmentos e origens'],
     ['titulo' => 'Integração Omie', 'url' => '/integracao',    'icone' => 'nuvem',     'grupo' => 'Administração',  'permissao' => 'integracao.gerenciar',                    'pronto' => true,  'descricao' => 'O que vem e vai para o ERP, conexão e sincronização'],
-    !config('modo_demo') ? null : ['titulo' => 'Dados de teste',  'url' => '/sistema/dados-de-teste', 'icone' => 'faisca', 'grupo' => 'Administração', 'permissao' => 'sistema.atualizar',            'pronto' => true,  'descricao' => 'Gerar e apagar movimento simulado para testar todos os setores'],
-    ['titulo' => 'Atualização',     'url' => '/sistema/atualizacao', 'icone' => 'nuvem', 'grupo' => 'Administração', 'permissao' => 'sistema.atualizar',                 'pronto' => true,  'descricao' => 'Versão instalada, backup do banco e aplicar versões novas'],
-    ['titulo' => 'Importar Nota10', 'url' => '/sistema/nota10', 'icone' => 'baixar', 'grupo' => 'Administração', 'permissao' => 'sistema.nota10', 'pronto' => true, 'descricao' => 'Trazer clientes, pedidos e o histórico do Nota10: enviar o backup, conferir e ligar os vendedores'],
-    ['titulo' => 'Zerar dados',     'url' => '/sistema/zerar', 'icone' => 'alerta', 'grupo' => 'Administração', 'permissao' => 'sistema.zerar',                     'pronto' => true,  'descricao' => 'Apagar os dados do dia a dia (com backup) para recomeçar com os dados reais'],
+    !config('modo_demo') ? null : ['titulo' => 'Dados de teste',  'url' => '/sistema/dados-de-teste', 'so_desenvolvedor' => true, 'icone' => 'faisca', 'grupo' => 'Administração', 'permissao' => 'sistema.atualizar',            'pronto' => true,  'descricao' => 'Gerar e apagar movimento simulado para testar todos os setores'],
+    ['titulo' => 'Atualização',     'url' => '/sistema/atualizacao', 'so_desenvolvedor' => true, 'icone' => 'nuvem', 'grupo' => 'Administração', 'permissao' => 'sistema.atualizar',                 'pronto' => true,  'descricao' => 'Versão instalada, backup do banco e aplicar versões novas'],
+    ['titulo' => 'Importar Nota10', 'url' => '/sistema/nota10', 'so_desenvolvedor' => true, 'icone' => 'baixar', 'grupo' => 'Administração', 'permissao' => 'sistema.nota10', 'pronto' => true, 'descricao' => 'Trazer clientes, pedidos e o histórico do Nota10: enviar o backup, conferir e ligar os vendedores'],
+    ['titulo' => 'Zerar dados',     'url' => '/sistema/zerar', 'so_desenvolvedor' => true, 'icone' => 'alerta', 'grupo' => 'Administração', 'permissao' => 'sistema.zerar',                     'pronto' => true,  'descricao' => 'Apagar os dados do dia a dia (com backup) para recomeçar com os dados reais'],
     ['titulo' => 'Auditoria',       'url' => '/auditoria',     'icone' => 'escudo',    'grupo' => 'Administração',  'permissao' => 'auditoria.ver',                           'pronto' => true,  'descricao' => 'Quem fez o quê, e quando'],
 ]));

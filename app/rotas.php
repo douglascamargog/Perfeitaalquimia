@@ -488,7 +488,9 @@ return [
     ['POST', '/roteiros/{id}/paradas/{parada}/visita', 'RoteiroController@visita',    'roteiros.usar'],
     ['POST', '/roteiros/{id}/paradas/{parada}/dia',   'RoteiroController@dia',        'roteiros.usar'],
     ['POST', '/roteiros/{id}/paradas/{parada}/remover', 'RoteiroController@remover',  'roteiros.usar'],
-    ['GET',  '/organograma',                         'OrganogramaController@index',        'logado'],   // interligações dos setores e organização da empresa
+    ['GET',  '/organograma',                         'OrganogramaController@index',        'sistema.desenvolvedor'],   // só o desenvolvedor do sistema
+    ['POST', '/desenvolvedor/modo',                  'DesenvolvedorController@modo',       'logado'],   // seletor "ver o One como" (o controller confere)
+    ['POST', '/desenvolvedor/marcar',                'DesenvolvedorController@marcar',     'logado'],
     ['GET',  '/analise',                              'AnaliseClientesController@index',    'clientes.analise'],
     ['GET',  '/analise/exportar.csv',                 'AnaliseClientesController@exportar', 'clientes.analise'],
     ['GET',  '/sistema/zerar',                        'ZerarDadosController@index',    'sistema.zerar'], // só o Admin ('*')

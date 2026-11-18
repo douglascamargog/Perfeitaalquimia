@@ -17,6 +17,13 @@
  */
 return [
     [
+        'versao' => '17.9', 'data' => '2026-11-18', 'titulo' => 'Menu mais limpo',
+        'melhoria' => [
+            'Menu lateral: ao abrir um submenu, os outros se fecham sozinhos. O menu não fica mais com tudo aberto.',
+        ],
+        'admin' => 'Novo: Desenvolvedor do sistema (Administração › Desenvolvedor do sistema). Quem mantém o One clica em "Eu sou o desenvolvedor do sistema" (só aparece enquanto ninguém está marcado; depois, só um desenvolvedor marca outra pessoa). A partir desta versão, Organograma, Atualização, Importar Nota10, Zerar dados e Dados de teste só aparecem para o desenvolvedor, nem o perfil Admin vê sem estar marcado. O desenvolvedor tem no topo o seletor "Ver o One como": Desenvolvedor (vê e faz tudo) ou uma função (ex.: Gestor de Marketing), que usa só aquela função e as permissões do perfil de quem trabalha nela, com uma faixa avisando o modo. Organograma: mais colorido (cada setor com a sua cor), o quadro do setor fica embaixo do diagrama e "O que falta ligar" virou uma aba própria. A linha "Atualização e backup" saiu da tela de Acessos (agora é do desenvolvedor). Migration 064.',
+    ],
+    [
         'versao' => '17.8', 'data' => '2026-11-18', 'titulo' => 'Organograma da empresa',
         'novo' => [
             'Organograma (no menu): mostra como os setores trocam informação no One. Clique num setor para ver de onde vêm as informações que ele usa e para quem ele passa as dele, e abra a tela do setor dali mesmo.',

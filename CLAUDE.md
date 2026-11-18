@@ -217,6 +217,11 @@ Portanto: código simples, legível, comentado em português, poucas dependênci
 - **Fórmulas** (Responsável Técnica): a fórmula **aprovada vira a ficha técnica** do produto.
 - **Treinamento** por setor + tutorial do One em cada tela; conteúdo em `database/seeds/dados/` (seed novo para recarregar).
 - **Modo escuro** com botão no topo; cores escuras geradas por `ferramentas/gerar_tema_escuro.py` (rodar ao mudar CSS).
+- **Desenvolvedor do sistema** (V17.9): marcado em ⚙️ Administração › Desenvolvedor do sistema (coluna `usuarios.desenvolvedor`, nunca pelo nome).
+  Só ele vê as telas de desenvolvimento (itens do menu com `so_desenvolvedor`: Organograma, Atualização, Importar Nota10, Zerar dados, Dados de teste;
+  permissão virtual `sistema.desenvolvedor`, que nem o Admin `*` tem sozinho) e tem o seletor "ver o One como" uma função no topo.
+- **Organograma — MANTER SEMPRE ATUALIZADO** (pedido do usuário): toda versão que crie, mude ou resolva uma troca de informação entre setores
+  atualiza `app/dados/interligacoes.php` (setores, ligações e a situação `ok`/`parcial`/`ilha`) no mesmo commit. Ilha resolvida → `ok`.
 
 ## 13.1 Pendências (não inventar — usar placeholder configurável)
 - Conferir o `OmieClient` com o Omie real e criar a tela de chaves do Omie (seção 7).

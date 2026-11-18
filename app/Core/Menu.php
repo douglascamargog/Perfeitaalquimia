@@ -97,6 +97,9 @@ class Menu
         $itens = [];
         $urlAtual = '/';
         foreach (require RAIZ . '/app/menu.php' as $item) {
+            if (!empty($item['so_desenvolvedor']) && !Auth::pode('sistema.desenvolvedor')) {
+                continue; // telas de desenvolvimento do sistema: nem aparecem para os outros
+            }
             $item['bloqueado'] = !\App\Controllers\InicioController::visivel($item);
             $item['leitura'] = !$item['bloqueado'] && !empty($item['editar']) && !Auth::pode($item['editar']);
             // Diretoria (só acompanha): tudo com o olho, menos onde ela aprova ou pede (e as telas de venda de quem também vende)

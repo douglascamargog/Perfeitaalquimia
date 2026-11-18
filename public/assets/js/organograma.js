@@ -8,7 +8,7 @@ const ESP_V = 20;           // espaço entre caixas
 const ESP_H = 96;          // espaço entre colunas
 const TOPO = 44;            // espaço para o nome da coluna
 const SITUACAO = { ok: 'integrado', parcial: 'pela metade', ilha: 'ilha' };
-const AREA = { 0: 'fora', 1: 'comercial', 2: 'financeiro', 3: 'operacao' };
+const COR_COLUNA = ['azul', 'verde', 'ambar', 'petroleo']; // faixa de fundo de cada coluna
 
 // ---------------------------------------------------------------- abas
 const abas = document.querySelectorAll('[data-org-aba]');
@@ -47,14 +47,18 @@ if (fonte && desenho) {
   const svg = el('svg', { viewBox: `0 0 ${larguraTotal} ${alturaTotal}`, class: 'org-svg', role: 'img', 'aria-label': 'Setores e as informações que passam entre eles' });
   svg.style.minWidth = Math.round(larguraTotal * 0.78) + 'px'; // no celular, o diagrama rola de lado dentro do quadro
   const defs = el('defs', {}, svg);
-  ['ok', 'parcial', 'ilha'].forEach((sit) => {
-    const m = el('marker', { id: 'seta-' + sit, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
-    el('path', { d: 'M0,0 L10,5 L0,10 z', class: 'seta-' + sit }, m);
+  // pontas das setas: uma por cor (integrado tem a cor de quem entrega) e as de pela metade/ilha
+  const pontas = new Set(['parcial', 'ilha', ...dados.setores.map((s) => 'cor-' + s.cor)]);
+  pontas.forEach((nome) => {
+    const m = el('marker', { id: 'seta-' + nome, class: nome, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
+    el('path', { d: 'M0,0 L10,5 L0,10 z', class: 'seta seta-' + nome }, m);
   });
 
-  // nomes das colunas
+  // faixas coloridas atrás de cada coluna, com o nome no topo
   dados.colunas.forEach((nome, i) => {
-    const t = el('text', { x: i * (LARG + ESP_H) + 10 + LARG / 2, y: 20, class: 'org-coluna', 'text-anchor': 'middle' }, svg);
+    const x = i * (LARG + ESP_H) + 10;
+    el('rect', { x: x - 10, y: 2, width: LARG + 20, height: alturaTotal - 4, rx: 18, class: `org-faixa-coluna cor-${COR_COLUNA[i] || 'ardosia'}` }, svg);
+    const t = el('text', { x: x + LARG / 2, y: 24, class: `org-coluna cor-${COR_COLUNA[i] || 'ardosia'}`, 'text-anchor': 'middle' }, svg);
     t.textContent = nome.toUpperCase();
   });
 
@@ -85,9 +89,9 @@ if (fonte && desenho) {
     const curva = la === lb ? 70 : Math.max(50, Math.abs(x2 - x1) / 2.2);
     const c1 = la === 'd' ? x1 + curva : x1 - curva;
     const c2 = lb === 'd' ? x2 + curva : x2 - curva;
-    const g = el('g', { class: `org-lig ${l[3]}`, 'data-de': l[0], 'data-para': l[1] }, camadaLinhas);
+    const g = el('g', { class: `org-lig ${l[3]} cor-${a.cor}`, 'data-de': l[0], 'data-para': l[1] }, camadaLinhas);
     el('path', { d: `M${x1},${y1} C${c1},${y1} ${c2},${y2} ${x2},${y2}`, class: 'org-lig-largo' }, g); // área de toque maior
-    el('path', { d: `M${x1},${y1} C${c1},${y1} ${c2},${y2} ${x2},${y2}`, class: 'org-lig-traco', 'marker-end': `url(#seta-${l[3]})` }, g);
+    el('path', { d: `M${x1},${y1} C${c1},${y1} ${c2},${y2} ${x2},${y2}`, class: 'org-lig-traco', 'marker-end': `url(#seta-${l[3] === 'ok' ? 'cor-' + a.cor : l[3]})` }, g);
     const titulo = el('title', {}, g);
     titulo.textContent = `${a.nome} → ${b.nome}: ${l[2]} (${SITUACAO[l[3]]})`;
     return g;
@@ -105,7 +109,7 @@ if (fonte && desenho) {
 
   const camadaCaixas = el('g', { class: 'org-caixas' }, svg);
   const caixas = dados.setores.map((s) => {
-    const g = el('g', { class: `org-no area-${AREA[s.coluna]}${s.coluna === 2 && s.id === 'gestao' ? ' area-gestao' : ''}`, transform: `translate(${s.x},${s.y})`,
+    const g = el('g', { class: `org-no cor-${s.cor}`, transform: `translate(${s.x},${s.y})`,
       tabindex: 0, role: 'button', 'aria-label': s.nome, 'data-setor': s.id }, camadaCaixas);
     el('rect', { width: LARG, height: ALT, rx: 14, class: 'org-no-fundo' }, g);
     el('rect', { width: 6, height: ALT - 24, x: 0, y: 12, rx: 3, class: 'org-no-faixa' }, g);
@@ -130,17 +134,17 @@ if (fonte && desenho) {
   desenho.appendChild(svg);
 
   // ---------------------------------------------------------------- seleção e detalhes
-  const detalheVazio = document.querySelector('[data-org-detalhe-vazio]');
+  const detalhe = document.querySelector('[data-org-detalhe]');
   const detalheSetor = document.querySelector('[data-org-detalhe-setor]');
   const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   let selecionado = null;
 
   function lista(titulo, itens, lado) {
-    if (!itens.length) return '';
-    return `<h3 class="org-sub">${titulo}</h3><ul class="org-lista">${itens.map((l) => {
+    const corpo = itens.length ? `<ul class="org-lista">${itens.map((l) => {
       const outro = setores[lado === 'de' ? l[0] : l[1]];
-      return `<li class="${l[3]}"><span class="org-chip ${l[3]}">${SITUACAO[l[3]]}</span><strong>${esc(outro.nome)}</strong><br><span class="pequeno">${esc(l[2])}</span></li>`;
-    }).join('')}</ul>`;
+      return `<li class="${l[3]}"><span class="org-chip ${l[3]}">${SITUACAO[l[3]]}</span><span class="org-etiqueta cor-${outro.cor}">${esc(outro.nome)}</span><br><span class="pequeno">${esc(l[2])}</span></li>`;
+    }).join('')}</ul>` : '<p class="pequeno suave">Nada por aqui.</p>';
+    return `<div class="org-detalhe-col"><h3 class="org-sub">${titulo} (${itens.length})</h3>${corpo}</div>`;
   }
 
   function selecionar(id) {
@@ -153,22 +157,22 @@ if (fonte && desenho) {
       if (liga) { vizinhos.add(g.dataset.de); vizinhos.add(g.dataset.para); }
     });
     caixas.forEach((g) => { g.classList.toggle('vizinho', !!selecionado && vizinhos.has(g.dataset.setor)); g.classList.toggle('selecionado', g.dataset.setor === selecionado); });
-    if (!selecionado) { detalheSetor.hidden = true; detalheVazio.hidden = false; return; }
+    if (!selecionado) { detalhe.hidden = true; return; }
     const s = setores[selecionado];
     const recebe = dados.ligacoes.filter((l) => l[1] === s.id);
     const entrega = dados.ligacoes.filter((l) => l[0] === s.id);
     detalheSetor.innerHTML = `
-      <div class="org-detalhe-topo area-${AREA[s.coluna]}${s.id === 'gestao' ? ' area-gestao' : ''}"><span class="org-no-tipo-html">${esc(s.tipo)}</span><h2>${esc(s.nome)}</h2></div>
-      <p class="pequeno">${esc(s.texto)}</p>
-      ${s.indicador ? `<p class="org-indicador"><strong>${esc(s.indicador.valor)}</strong> ${esc(s.indicador.rotulo)}</p>` : ''}
-      ${lista('Recebe de', recebe, 'de')}
-      ${lista('Entrega para', entrega, 'para')}
-      <div class="org-detalhe-acoes"><a class="botao pequeno" href="${esc(dados.base + s.url)}">Abrir ${esc(s.nome)}</a>
-        <button type="button" class="botao contorno pequeno" data-org-limpar>Ver todos</button></div>`;
-    detalheVazio.hidden = true;
-    detalheSetor.hidden = false;
-    if (window.innerWidth < 1500) detalheSetor.closest('[data-org-detalhe]').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); // painel embaixo do diagrama
+      <div class="org-detalhe-cabeca cor-${s.cor}">
+        <div><span class="org-no-tipo-html">${esc(s.tipo)}</span><h2>${esc(s.nome)}</h2><p class="pequeno">${esc(s.texto)}</p></div>
+        <div class="org-detalhe-acoes">${s.indicador ? `<span class="org-indicador"><strong>${esc(s.indicador.valor)}</strong> ${esc(s.indicador.rotulo)}</span>` : ''}
+          <a class="botao pequeno" href="${esc(dados.base + s.url)}">Abrir ${esc(s.nome)}</a>
+          <button type="button" class="botao contorno pequeno" data-org-limpar>Fechar</button></div>
+      </div>
+      <div class="org-detalhe-colunas">${lista('Recebe de', recebe, 'de')}${lista('Entrega para', entrega, 'para')}</div>`;
+    detalhe.hidden = false;
+    detalhe.className = `card org-detalhe cor-${s.cor}`;
     detalheSetor.querySelector('[data-org-limpar]').addEventListener('click', () => selecionar(selecionado));
+    detalhe.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   caixas.forEach((g) => {

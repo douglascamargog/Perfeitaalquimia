@@ -49,6 +49,7 @@ html.escuro .one-abas { background: color-mix(in srgb, #f1f8f6 18%, var(--card))
 html.escuro .one-msg.one .one-msg-corpo { background: color-mix(in srgb, #f1f8f6 18%, var(--card)); border: 1px solid color-mix(in srgb, #d6ebe6 35%, var(--card)); }
 html.escuro .one-pergunte { border-top: 1px solid color-mix(in srgb, #e3efec 35%, var(--card)); }
 html.escuro .tut-balao { background: var(--card, color-mix(in srgb, #fff 18%, var(--card))); }
+html.escuro .dev-faixa { background: color-mix(in srgb, #fbe3ef 18%, var(--card)); color: color-mix(in srgb, #7a1f4f 45%, #ffffff); border: 1px solid color-mix(in srgb, #f0b9d4 35%, var(--card)); }
 /* base.css */
 html.escuro .selo.lima, html.escuro .selo.lima * { color: var(--secundaria-texto); }
 html.escuro .selo.cinza { background: color-mix(in srgb, #eceff1 18%, var(--card)); }
@@ -200,7 +201,13 @@ html.escuro .n10-barra span, html.escuro .n10-barra span * { color: var(--secund
 /* nutricional.css */
 html.escuro .tn { color: color-mix(in srgb, #000 45%, #ffffff); }
 /* organograma.css */
-html.escuro .org-chip.ilha { background: color-mix(in srgb, #fde6d6 18%, var(--card)); color: color-mix(in srgb, #b4480f 45%, #ffffff); }
+html.escuro .org-num.ok { background: color-mix(in srgb, #dcfce7 18%, var(--card)); color: color-mix(in srgb, #166534 45%, #ffffff); }
+html.escuro .org-num.parcial { background: color-mix(in srgb, #fef3c7 18%, var(--card)); color: color-mix(in srgb, #92400e 45%, #ffffff); }
+html.escuro .org-num.ilha { background: color-mix(in srgb, #ffe4e6 18%, var(--card)); color: color-mix(in srgb, #9f1239 45%, #ffffff); }
+html.escuro .org-chip.ok { background: color-mix(in srgb, #dcfce7 18%, var(--card)); color: color-mix(in srgb, #166534 45%, #ffffff); }
+html.escuro .org-chip.parcial { background: color-mix(in srgb, #fef3c7 18%, var(--card)); color: color-mix(in srgb, #92400e 45%, #ffffff); }
+html.escuro .org-chip.ilha { background: color-mix(in srgb, #ffe4e6 18%, var(--card)); color: color-mix(in srgb, #9f1239 45%, #ffffff); }
+html.escuro .org-lider small { color: color-mix(in srgb, #a16207 45%, #ffffff); }
 /* painel.css */
 html.escuro .mk-var.desce { color: color-mix(in srgb, #dc2626 45%, #ffffff); }
 html.escuro .mk-ranking li:first-child .mk-posicao, html.escuro .mk-ranking li:first-child .mk-posicao * { color: var(--secundaria-texto); }

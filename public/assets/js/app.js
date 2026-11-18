@@ -7,20 +7,20 @@ import './manter-rolagem.js';
 const menu = document.querySelector('.menu-lateral');
 document.querySelector('.abrir-menu')?.addEventListener('click', () => menu?.classList.toggle('aberto'));
 
-// Grupos do menu (setores e áreas): abrem e fecham com um clique. O grupo da página atual abre sozinho;
-// os que a pessoa abriu ficam lembrados neste navegador.
+// Grupos do menu (setores e áreas): sanfona — abrir um grupo fecha os outros (V17.9, para o menu não ficar poluído).
+// O grupo da página atual abre sozinho; sem ele, abre o último que a pessoa abriu neste navegador.
 const lerAbertos = () => { try { return JSON.parse(localStorage.getItem('menu-abertos') || '[]'); } catch { return []; } };
 const gravarAbertos = (lista) => { try { localStorage.setItem('menu-abertos', JSON.stringify(lista)); } catch { /* sem armazenamento: tudo bem */ } };
-document.querySelectorAll('[data-menu-secao]').forEach((secao) => {
-  const botao = secao.querySelector('.menu-secao-botao');
-  const marcar = (aberta) => { secao.classList.toggle('aberta', aberta); botao.setAttribute('aria-expanded', String(aberta)); };
-  if (!secao.hasAttribute('data-atual') && lerAbertos().includes(secao.dataset.menuSecao)) marcar(true);
-  botao.addEventListener('click', () => {
+const secoesMenu = [...document.querySelectorAll('[data-menu-secao]')];
+const marcarSecao = (secao, aberta) => { secao.classList.toggle('aberta', aberta); secao.querySelector('.menu-secao-botao')?.setAttribute('aria-expanded', String(aberta)); };
+const secaoAtual = secoesMenu.find((s) => s.hasAttribute('data-atual'));
+const lembrada = secoesMenu.find((s) => s.dataset.menuSecao === lerAbertos().slice(-1)[0]);
+secoesMenu.forEach((s) => marcarSecao(s, s === (secaoAtual || lembrada)));
+secoesMenu.forEach((secao) => {
+  secao.querySelector('.menu-secao-botao')?.addEventListener('click', () => {
     const aberta = !secao.classList.contains('aberta');
-    marcar(aberta);
-    const lista = lerAbertos().filter((c) => c !== secao.dataset.menuSecao);
-    if (aberta) lista.push(secao.dataset.menuSecao);
-    gravarAbertos(lista);
+    secoesMenu.forEach((s) => marcarSecao(s, aberta && s === secao));
+    gravarAbertos(aberta ? [secao.dataset.menuSecao] : []);
   });
 });
 

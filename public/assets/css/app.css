@@ -663,3 +663,22 @@ html.escuro .tema-icone-lua { display: none; }
   html.escuro .v4-metrica.destaque, html.escuro .v4-metrica.destaque *, html.escuro .kpi.destaque, html.escuro .kpi.destaque *,
   html.escuro .meta-equipe-numeros .destaque, html.escuro .meta-equipe-numeros .destaque *, html.escuro .ficha-codigo strong { color: var(--secundaria-texto) !important; }
 }
+
+/* ---------- Desenvolvedor do sistema: seletor "ver o One como" e faixa do modo ---------- */
+.dev-modo { position: relative; }
+.dev-modo > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 7px 12px; border-radius: 999px;
+  background: #1f2937; color: #f8fafc; font-size: .76rem; font-weight: 700; white-space: nowrap; }
+.dev-modo > summary::-webkit-details-marker { display: none; }
+.dev-modo.como-funcao > summary { background: #b0487f; }
+.dev-modo-painel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: 290px; max-height: 70vh; overflow: auto; display: grid; gap: 4px;
+  padding: 10px; background: var(--card); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: 0 12px 40px rgba(0, 0, 0, .18); }
+.dev-modo-painel strong { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--texto-suave); padding: 2px 6px 6px; }
+.dev-modo-painel button { display: grid; text-align: left; gap: 1px; padding: 7px 10px; border: 1px solid transparent; border-radius: var(--raio-pequeno);
+  background: none; color: var(--texto); font: inherit; font-size: .84rem; font-weight: 600; cursor: pointer; }
+.dev-modo-painel button small { font-size: .7rem; font-weight: 500; color: var(--texto-suave); }
+.dev-modo-painel button:hover { background: var(--primaria-clara); }
+.dev-modo-painel button.ativo { border-color: var(--primaria); background: var(--primaria-clara); }
+.dev-modo-sep { font-size: .66rem; text-transform: uppercase; letter-spacing: .08em; color: var(--texto-suave); padding: 8px 6px 2px; border-top: 1px solid var(--borda); margin-top: 4px; }
+.dev-faixa { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 10px 14px;
+  border-radius: var(--raio-pequeno); background: #fbe3ef; color: #7a1f4f; border: 1px solid #f0b9d4; font-size: .86rem; }
+@media (max-width: 700px) { .dev-modo > summary { padding: 6px 9px; font-size: .7rem; } .dev-modo-painel { position: fixed; left: 12px; right: 12px; width: auto; top: 70px; } }

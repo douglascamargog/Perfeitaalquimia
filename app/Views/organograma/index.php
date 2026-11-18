@@ -17,6 +17,7 @@ $primeiroNome = fn(array $p) => EquipeService::comoChamar($p);
 
 <nav class="abas org-abas" aria-label="Visões do organograma" data-org-abas>
   <a href="#interligacoes" class="ativa" data-org-aba="interligacoes">Interligações dos setores</a>
+  <a href="#falta" data-org-aba="falta">O que falta ligar <span class="contador"><?= (int) ($r['parcial'] + $r['ilha']) ?></span></a>
   <a href="#organizacao" data-org-aba="organizacao">Organização da empresa <span class="contador"><?= (int) $organizacao['total'] ?></span></a>
 </nav>
 
@@ -33,27 +34,19 @@ $primeiroNome = fn(array $p) => EquipeService::comoChamar($p);
       <button type="button" class="botao contorno pequeno" data-org-filtro="falta" aria-pressed="false">Só o que falta ligar</button>
     </div>
   </div>
-  <p class="pequeno suave org-dica">Clique num setor para ver o que ele recebe e o que entrega. Linha cheia: integrado. Tracejada: pela metade (amarela) ou ilha, o dado existe mas não chega (laranja).</p>
-
-  <div class="org-mapa">
-    <div class="card org-desenho" data-org-desenho aria-label="Diagrama das interligações entre os setores">
-      <noscript><p>O diagrama precisa de JavaScript. Veja a lista abaixo.</p></noscript>
-    </div>
-    <aside class="card org-detalhe" data-org-detalhe aria-live="polite">
-      <div data-org-detalhe-vazio>
-        <h2>Escolha um setor</h2>
-        <p class="pequeno">O One liga <?= count($setores) ?> setores e sistemas. Clique num deles no diagrama para ver de onde vêm as informações que ele usa e para quem ele passa as dele.</p>
-        <h3 class="org-sub">O que ainda falta ligar</h3>
-        <ul class="org-lista">
-          <?php foreach ($interligacoes['ligacoes'] as [$de, $para, $texto, $sit]): if ($sit === 'ok') continue; ?>
-            <li class="<?= e($sit) ?>"><span class="org-chip <?= e($sit) ?>"><?= e($situacao[$sit]) ?></span>
-              <strong><?= e($setores[$de]['nome']) ?> → <?= e($setores[$para]['nome']) ?></strong><br><span class="pequeno"><?= e($texto) ?></span></li>
-          <?php endforeach; ?>
-        </ul>
-      </div>
-      <div data-org-detalhe-setor hidden></div>
-    </aside>
+  <div class="org-legenda pequeno">
+    <span><i class="leg-linha"></i> integrado (cor de quem entrega)</span>
+    <span><i class="leg-linha parcial"></i> pela metade</span>
+    <span><i class="leg-linha ilha"></i> ilha: o dado existe mas não chega</span>
+    <span>Clique num setor para ver o que ele recebe e entrega (o quadro aparece embaixo).</span>
   </div>
+
+  <div class="card org-desenho" data-org-desenho aria-label="Diagrama das interligações entre os setores">
+    <noscript><p>O diagrama precisa de JavaScript. Veja a lista abaixo.</p></noscript>
+  </div>
+  <section class="card org-detalhe" data-org-detalhe aria-live="polite" hidden>
+    <div data-org-detalhe-setor></div>
+  </section>
 
   <details class="card org-texto">
     <summary>Ver todas as ligações em lista</summary>
@@ -62,7 +55,7 @@ $primeiroNome = fn(array $p) => EquipeService::comoChamar($p);
         <thead><tr><th>De</th><th>Para</th><th>O que passa</th><th>Situação</th></tr></thead>
         <tbody>
         <?php foreach ($interligacoes['ligacoes'] as [$de, $para, $texto, $sit]): ?>
-          <tr><td><?= e($setores[$de]['nome']) ?></td><td><?= e($setores[$para]['nome']) ?></td><td><?= e($texto) ?></td>
+          <tr><td><span class="org-ponto cor-<?= e($setores[$de]['cor']) ?>"></span><?= e($setores[$de]['nome']) ?></td><td><span class="org-ponto cor-<?= e($setores[$para]['cor']) ?>"></span><?= e($setores[$para]['nome']) ?></td><td><?= e($texto) ?></td>
             <td><span class="org-chip <?= e($sit) ?>"><?= e($situacao[$sit]) ?></span></td></tr>
         <?php endforeach; ?>
         </tbody>
@@ -71,6 +64,24 @@ $primeiroNome = fn(array $p) => EquipeService::comoChamar($p);
   </details>
   <script type="application/json" id="org-dados"><?= json_encode(['colunas' => $interligacoes['colunas'], 'setores' => array_values($setores),
       'ligacoes' => $interligacoes['ligacoes'], 'icones' => asset('img/icones.svg'), 'base' => url('')], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+</section>
+
+<!-- ============================ O QUE FALTA LIGAR ============================ -->
+<section class="org-painel" id="falta" data-org-painel="falta">
+  <p class="pequeno suave">Onde a informação ainda não passa sozinha de um setor para o outro. Cada uma vira uma versão do One quando você pedir; quando ficar pronta, sai daqui e a linha do diagrama fica cheia.</p>
+  <div class="org-faltas">
+    <?php foreach ($interligacoes['ligacoes'] as [$de, $para, $texto, $sit]): if ($sit === 'ok') continue; ?>
+      <article class="org-falta <?= e($sit) ?>" data-org-falta>
+        <header><span class="org-chip <?= e($sit) ?>"><?= e($situacao[$sit]) ?></span></header>
+        <div class="org-falta-par">
+          <span class="org-etiqueta cor-<?= e($setores[$de]['cor']) ?>"><?= e($setores[$de]['nome']) ?></span>
+          <span class="org-falta-seta" aria-hidden="true">→</span>
+          <span class="org-etiqueta cor-<?= e($setores[$para]['cor']) ?>"><?= e($setores[$para]['nome']) ?></span>
+        </div>
+        <p><?= e($texto) ?></p>
+      </article>
+    <?php endforeach; ?>
+  </div>
 </section>
 
 <!-- ============================ ORGANIZAÇÃO ============================ -->

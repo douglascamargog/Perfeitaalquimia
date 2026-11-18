@@ -92,6 +92,21 @@ class Auth
         }
         $usuario['permissoes'] = Usuario::permissoes((int) $usuario['perfil_id'], (int) $usuario['id']);
         $usuario['funcoes'] = Usuario::funcoesDe((int) $usuario['id']);
+        $usuario['modo'] = null;
+        // Desenvolvedor do sistema "vendo o One como" uma função: só aquela função e as permissões do perfil de quem trabalha nela
+        if (!empty($usuario['desenvolvedor']) && !empty($usuario['ver_como_funcao_id'])) {
+            $f = \App\Core\Banco::um('SELECT id, slug, nome, area FROM funcoes WHERE id = ? AND ativa = 1', [(int) $usuario['ver_como_funcao_id']]);
+            $perfil = $f ? \App\Services\Desenvolvedor::perfilDaFuncao($f, (int) $usuario['id']) : null;
+            if ($f && $perfil) {
+                $gestor = (int) (array_column($usuario['funcoes'], 'gestor', 'id')[$f['id']] ?? 0);
+                $usuario['modo'] = $f + ['perfil' => $perfil['nome']];
+                $usuario['perfil_id'] = (int) $perfil['id'];
+                $usuario['perfil_slug'] = $perfil['slug'];
+                $usuario['perfil_nome'] = $perfil['nome'];
+                $usuario['permissoes'] = Usuario::permissoes((int) $perfil['id']); // sem as exceções de quem desenvolve
+                $usuario['funcoes'] = [['id' => $f['id'], 'slug' => $f['slug'], 'nome' => $f['nome'], 'gestor' => $gestor]];
+            }
+        }
         return self::$usuario = $usuario;
     }
 
@@ -109,6 +124,10 @@ class Auth
     public static function pode(string $permissao): bool
     {
         $permissoes = self::usuario()['permissoes'] ?? [];
+        if (in_array($permissao, ['sistema.desenvolvedor', 'sistema.atualizar', 'sistema.nota10', 'sistema.zerar'], true)) {
+            // Telas de desenvolvimento do sistema: só quem é desenvolvedor e está no modo desenvolvedor (nem o Admin '*' sozinho)
+            return self::ehDesenvolvedor() && empty(self::usuario()['modo']);
+        }
         if ($permissao === 'setor.gestao') {
             // Não é uma permissão da grade: vale para quem é "gestor(a) do setor" (Administração › Usuários › Funções)
             return \App\Services\Setores::gerenciados() !== [];
@@ -138,6 +157,12 @@ class Auth
     {
         $p = self::usuario()['permissoes'] ?? [];
         return !in_array('*', $p, true) && in_array('acompanhar.somente', $p, true);
+    }
+
+    /** A pessoa é desenvolvedora do sistema (mesmo vendo o One como uma função)? Ela é quem vê o seletor de modo. */
+    public static function ehDesenvolvedor(): bool
+    {
+        return !empty(self::usuario()['desenvolvedor']);
     }
 
     /** O usuário logado está vinculado a esta função? Ex.: Auth::temFuncao('prospeccao_reativacao') */
