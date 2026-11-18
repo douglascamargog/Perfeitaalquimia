@@ -48,7 +48,7 @@ $origens = ['catalogo' => 'Catálogo', 'sistema' => 'Sistema', 'app' => 'App ext
       <?php foreach ($r['itens'] as $p): [$rotulo, $cor] = PedidoService::SITUACOES[$p['situacao']] ?? [$p['situacao'], 'cinza']; ?>
         <tr>
           <td><a href="<?= url('/pedidos/' . (int) $p['id']) ?>"><strong>#<?= (int) $p['id'] ?></strong></a><?= \App\Services\NotificacaoService::marcaPedido((int) $p['id']) ?><small class="suave"><?= data_br($p['criado_em'], true) ?></small></td>
-          <td><?= e($p['nome_fantasia'] ?: $p['razao_social']) ?><small class="suave"><?= e($p['cidade']) ?>/<?= e($p['uf']) ?></small></td>
+          <td><a href="<?= url('/carteira/clientes/' . (int) $p['cliente_id']) ?>" data-link-loja><?= e($p['nome_fantasia'] ?: $p['razao_social']) ?></a><small class="suave"><?= e($p['cidade']) ?>/<?= e($p['uf']) ?></small></td>
           <td class="pequeno"><?= $origens[$p['origem']] ?? e($p['origem']) ?></td>
           <td class="pequeno"><?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null) ?></td>
           <td class="pequeno"><?= e($p['forma']) ?></td>

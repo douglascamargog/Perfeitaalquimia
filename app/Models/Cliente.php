@@ -130,8 +130,10 @@ class Cliente
     public static function podeVer(array $cliente): bool
     {
         return Auth::pode('carteira.ver_todas') || (int) $cliente['responsavel_id'] === Auth::id()
+            || Auth::pode('pedidos.aprovar') // Financeiro: vê a loja para decidir o crédito na aprovação
             || in_array((int) ($cliente['funcao_id'] ?? 0), \App\Services\Setores::gerenciados(), true) // gestor(a) do setor
-            || \App\Services\RoteiroService::clienteNoRoteiro((int) $cliente['id'], Auth::id()); // externo: loja do roteiro de visitas dele
+            || \App\Services\RoteiroService::clienteNoRoteiro((int) $cliente['id'], Auth::id()) // externo: loja do roteiro de visitas dele
+            || (Auth::pode('cobranca.ver') && Banco::valor('SELECT 1 FROM cobrancas WHERE cliente_id = ? LIMIT 1', [(int) $cliente['id']])); // Cobrança: lojas com caso
     }
 
     /** Números da visão geral (respeitando filtros e escopo) */

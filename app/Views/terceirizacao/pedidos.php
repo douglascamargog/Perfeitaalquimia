@@ -21,7 +21,7 @@ $rotulo = ['aguardando_aprovacao' => ['Aguardando aprovação', 'laranja'], 'apr
       <?php foreach ($pedidos as $p): [$nome, $cor] = $rotulo[$p['situacao']] ?? [$p['situacao'], 'cinza']; ?>
         <tr>
           <td><a href="<?= url('/pedidos/' . (int) $p['id']) ?>"><strong>#<?= (int) $p['id'] ?></strong></a><small class="suave"><?= data_br($p['criado_em']) ?></small></td>
-          <td><?= e($p['cliente']) ?></td>
+          <td><a href="<?= url('/carteira/clientes/' . (int) $p['cliente_id']) ?>" data-link-loja><?= e($p['cliente']) ?></a></td>
           <td class="pequeno"><?= e($p['carteira'] ?? '—') ?></td>
           <td class="pequeno"><?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null) ?></td>
           <td><span class="selo <?= $cor ?>"><?= e($nome) ?></span></td>

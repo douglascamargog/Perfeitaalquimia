@@ -4,7 +4,7 @@ $feitas = array_filter($tarefas, fn($t) => $t['concluida_em']);
 $linha = function (array $t): string {
     $classe = $t['concluida_em'] ? 'feita' : ($t['vence_em'] < date('Y-m-d') ? 'atrasada' : '');
     $html = '<li class="' . $classe . '"><div><strong>' . e($t['titulo']) . '</strong><small>' . data_br($t['vence_em']) . ($t['hora'] ? ' · ' . substr($t['hora'], 0, 5) : '')
-        . ($t['tipo'] === 'compromisso' ? ' · compromisso' : '') . ($t['prioridade'] === 'alta' ? ' · prioridade alta' : '') . ($t['razao_social'] ? ' · ' . e($t['razao_social']) : '') . '</small></div><div class="acoes-tarefa">';
+        . ($t['tipo'] === 'compromisso' ? ' · compromisso' : '') . ($t['prioridade'] === 'alta' ? ' · prioridade alta' : '') . ($t['razao_social'] ? ' · <a href="' . url('/carteira/clientes/' . (int) $t['cliente_id']) . '" data-link-loja>' . e($t['razao_social']) . '</a>' : '') . '</small></div><div class="acoes-tarefa">';
     $html .= '<form method="post" action="' . url('/meu-mes/tarefas/' . (int) $t['id'] . '/concluir') . '">' . csrf_campo() . '<button class="botao contorno pequeno" type="submit">' . ($t['concluida_em'] ? 'Reabrir' : 'Concluir') . '</button></form>';
     if (!$t['cliente_id']) {
         $html .= '<form method="post" action="' . url('/meu-mes/tarefas/' . (int) $t['id'] . '/excluir') . '" data-confirmar="Excluir?">' . csrf_campo() . '<button class="botao contorno pequeno" type="submit">Excluir</button></form>';

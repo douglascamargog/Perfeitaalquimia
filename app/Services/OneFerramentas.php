@@ -468,7 +468,7 @@ class OneFerramentas
             $w .= ' AND co.responsavel_id = ?';
             $par[] = Auth::id();
         }
-        $casos = Banco::todos("SELECT co.id, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS cliente, c.cidade, c.uf, co.valor_total, co.vencimento_mais_antigo,
+        $casos = Banco::todos("SELECT co.id, co.cliente_id, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS cliente, c.cidade, c.uf, co.valor_total, co.vencimento_mais_antigo,
                 co.promessa_em, co.promessa_valor, co.tentativas_sem_sucesso, co.ultimo_contato_em, e.nome AS etapa, c.ultima_compra_em
             FROM cobrancas co JOIN clientes c ON c.id = co.cliente_id LEFT JOIN cobranca_etapas e ON e.id = co.etapa_id
             WHERE $w ORDER BY (co.promessa_em IS NOT NULL AND co.promessa_em <= CURDATE()) DESC, co.valor_total DESC LIMIT 20", $par);
@@ -476,7 +476,8 @@ class OneFerramentas
             'valor' => dinheiro((float) $c['valor_total']), 'dias_de_atraso' => $c['vencimento_mais_antigo'] ? max(0, (int) ((strtotime('today') - strtotime($c['vencimento_mais_antigo'])) / 86400)) : null,
             'etapa' => $c['etapa'], 'promessa' => $c['promessa_em'] ? data_br($c['promessa_em']) . ($c['promessa_valor'] ? ' de ' . dinheiro((float) $c['promessa_valor']) : '') : null,
             'tentativas_sem_sucesso' => (int) $c['tentativas_sem_sucesso'], 'ultimo_contato' => $c['ultimo_contato_em'] ? data_br($c['ultimo_contato_em']) : null,
-            'ainda_compra' => $c['ultima_compra_em'] && strtotime($c['ultima_compra_em']) > strtotime('-90 days')], $casos), 'link' => '/cobranca'];
+            'ainda_compra' => $c['ultima_compra_em'] && strtotime($c['ultima_compra_em']) > strtotime('-90 days'),
+            'link' => '/carteira/clientes/' . (int) $c['cliente_id']], $casos), 'tela_da_cobranca' => '/cobranca'];
     }
 
     private static function mensagensCobranca(int $id): array

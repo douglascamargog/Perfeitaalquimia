@@ -32,6 +32,9 @@ $diasSemCompra = $c['ultima_compra_em'] ? (int) floor((time() - strtotime($c['ul
   </div>
 </div>
 
+<?php if (!Auth::pode('carteira.ver_propria') && !Auth::pode('carteira.ver_todas')): ?>
+  <div class="aviso" data-so-consulta>Você está consultando esta loja (pela Cobrança ou pela Aprovação). Para mudar o cadastro, fale com a vendedora responsável.</div>
+<?php endif; ?>
 <div class="cl-kpis">
   <div class="card cl-kpi"><span>Comprou em 12 meses</span><strong><?= dinheiro((float) $resumo['faturado']) ?></strong><small><?= (int) $resumo['pedidos'] ?> pedido(s) faturado(s)</small></div>
   <div class="card cl-kpi" data-media-mensal><span>Média por mês</span><strong><?= (float) $resumo['faturado'] > 0 ? dinheiro((float) $resumo['faturado'] / 12) : '—' ?></strong><small>o que comprou em 12 meses ÷ 12</small></div>

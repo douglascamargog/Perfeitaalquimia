@@ -71,7 +71,7 @@ return [
     ['GET',  '/carteira/exportar.csv',          'CarteiraController@exportar',   'carteira.importar'],
     ['GET',  '/carteira/clientes/novo',         'ClienteController@novo',        'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes',              'ClienteController@criar',       'carteira.ver_propria|carteira.ver_todas'],
-    ['GET',  '/carteira/clientes/{id}',         'ClienteController@pagina',      'carteira.ver_propria|carteira.ver_todas'],
+    ['GET',  '/carteira/clientes/{id}',         'ClienteController@pagina',      'carteira.ver_propria|carteira.ver_todas|cobranca.ver|pedidos.aprovar'], // Cobrança e Aprovação só VEEM (Cliente::podeVer decide)
     ['GET',  '/carteira/clientes/{id}/ficha',   'ClienteController@ficha',       'carteira.ver_propria|carteira.ver_todas'],
     ['GET',  '/carteira/clientes/{id}/editar',  'ClienteController@editar',      'carteira.ver_propria|carteira.ver_todas'],
     ['GET',  '/carteira/clientes/{id}/localizacao', 'ClienteController@localizacao', 'carteira.ver_propria|carteira.ver_todas'],

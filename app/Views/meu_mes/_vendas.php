@@ -48,7 +48,7 @@ $omie = \App\Services\MetaService::vendasDoOmie(); ?>
         <thead><tr><th>Data</th><th>Loja</th><th>Carteira de</th><th style="text-align:right">Valor</th><th></th></tr></thead>
         <tbody>
         <?php foreach ($tirados['pedidos'] as $p): ?>
-          <tr><td><?= data_br($p['criado_em']) ?></td><td><?= e($p['cliente']) ?> <small class="suave"><?= e($p['cidade']) ?>/<?= e($p['uf']) ?></small></td><td><?= e($p['dona'] ?? '—') ?></td>
+          <tr><td><?= data_br($p['criado_em']) ?></td><td><a href="<?= url('/carteira/clientes/' . (int) $p['cliente_id']) ?>" data-link-loja><?= e($p['cliente']) ?></a> <small class="suave"><?= e($p['cidade']) ?>/<?= e($p['uf']) ?></small></td><td><?= e($p['dona'] ?? '—') ?></td>
             <td style="text-align:right"><strong><?= dinheiro($p['total']) ?></strong><br><small class="suave"><?= e(\App\Services\PedidoService::SITUACOES[$p['situacao']][0] ?? $p['situacao']) ?></small></td>
             <td style="text-align:right"><a class="botao contorno pequeno" href="<?= url('/pedidos/' . (int) $p['id']) ?>">Ver pedido</a></td></tr>
         <?php endforeach; ?>

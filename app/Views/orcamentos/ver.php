@@ -24,7 +24,7 @@ $imagem = [
 <div class="cabecalho-secao">
   <div>
     <div class="sobretitulo">ORÇAMENTO #<?= (int) $o['id'] ?> · TABELA <?= e(mb_strtoupper((string) $o['tabela'])) ?></div>
-    <h1><?= e($o['cliente']) ?></h1>
+    <h1><a href="<?= url('/carteira/clientes/' . (int) $o['cliente_id']) ?>" data-link-loja style="color:inherit"><?= e($o['cliente']) ?></a></h1>
     <p><span class="selo <?= $sc ?>" data-situacao="<?= e($situacao) ?>"><?= e($sn) ?></span>
       <?= $o['cliente_alterou'] ? '<span class="selo laranja">cliente alterou</span>' : '' ?>
       <?= e($o['cidade']) ?>/<?= e($o['uf']) ?> · criado em <?= data_br($o['criado_em']) ?> por <?= pessoa($o['vendedor'] ?? null, $o['vendedor_foto'] ?? null, false, 18) ?> · válido até <strong><?= data_br($o['validade']) ?></strong>

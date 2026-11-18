@@ -25,8 +25,12 @@ $aberto = $c['situacao'] === 'aberta';
       <?php if (!$aberto): ?><span class="selo cinza">Encerrado em <?= data_br($c['encerrada_em']) ?></span><?php endif; ?>
     </div>
   </div>
-  <button class="botao-icone escuro" type="button" data-fechar-gaveta aria-label="Fechar"><svg class="icone"><use href="<?= $icones ?>#fechar"/></svg></button>
+  <div style="display:flex;gap:6px">
+    <a class="botao-icone escuro" href="<?= url('/carteira/clientes/' . (int) $c['cliente_id']) ?>" title="Abrir a página completa da loja" aria-label="Abrir a página completa da loja" data-abrir-pagina><svg class="icone"><use href="<?= $icones ?>#externo"/></svg></a>
+    <button class="botao-icone escuro" type="button" data-fechar-gaveta aria-label="Fechar"><svg class="icone"><use href="<?= $icones ?>#fechar"/></svg></button>
+  </div>
 </header>
+<a class="botao contorno pequeno" style="margin:0 0 10px" href="<?= url('/carteira/clientes/' . (int) $c['cliente_id']) ?>" data-pagina-loja><svg class="icone"><use href="<?= $icones ?>#externo"/></svg>Abrir página completa da loja</a>
 
 <div class="ficha-corpo">
   <div class="cob-valor-grande">

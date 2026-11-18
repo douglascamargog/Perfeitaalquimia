@@ -17,6 +17,17 @@
  */
 return [
     [
+        'versao' => '15.6', 'data' => '2026-11-18', 'titulo' => 'Conversa com o One que não se perde e lojas com link',
+        'melhoria' => [
+            'One: a conversa continua quando você troca de tela. Clicou num link da resposta? A tela abre e o One reabre na mesma conversa, para você continuar perguntando.',
+            'One: quando cita uma loja, um pedido ou um caso de cobrança, o nome vem com o link.',
+            'Cobrança: a gaveta do caso tem o botão "Abrir página completa da loja".',
+            'O nome da loja agora leva à página dela em Pedidos, no pedido aberto, na Aprovação, nos Orçamentos, na Terceirização e no Meu mês (vendas e tarefas).',
+            'Quem cuida da Cobrança e quem aprova pedidos consegue abrir a página da loja para consultar (sem editar o cadastro).',
+        ],
+        'admin' => 'A página da loja (só consulta) passou a abrir para quem tem cobranca.ver (lojas com caso de cobrança) e para quem tem pedidos.aprovar. Editar o cadastro continua só pela Carteira. A conversa do One fica no navegador da pessoa até fechar o navegador ou clicar em "nova conversa".',
+    ],
+    [
         'versao' => '15.5', 'data' => '2026-11-18', 'titulo' => 'Mapas sem pré-pagamento e rotas pelas estradas',
         'novo' => [
             'Planejador de visitas: com o serviço de mapas ligado, as lojas "no caminho" são medidas pela estrada de verdade (não mais em linha reta entre as cidades).',

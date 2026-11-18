@@ -652,7 +652,7 @@ class RoteiroService
     /** Pedidos que a pessoa tirou em visitas de outras carteiras, no mês (Meu mês) */
     public static function pedidosTirados(int $usuarioId, string $mes): array
     {
-        $lista = Banco::todos("SELECT p.id, p.total, p.situacao, p.criado_em, p.faturado_em, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS cliente,
+        $lista = Banco::todos("SELECT p.id, p.cliente_id, p.total, p.situacao, p.criado_em, p.faturado_em, COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social) AS cliente,
                 c.cidade, c.uf, u.nome AS dona
             FROM pedidos p JOIN clientes c ON c.id = p.cliente_id LEFT JOIN usuarios u ON u.id = p.vendedor_id
             WHERE p.tirado_por_id = ? AND p.criado_em >= ? AND p.criado_em < ? + INTERVAL 1 MONTH AND p.situacao NOT IN ('recusado', 'cancelado')

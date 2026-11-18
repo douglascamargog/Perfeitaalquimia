@@ -213,6 +213,7 @@ function escolherEspecialista(slug, limpar = true) {
   conversa.querySelectorAll('.one-msg').forEach((m) => m.remove());
   const vazio = document.querySelector('[data-one-sugestoes]');
   vazio?.removeAttribute('hidden');
+  restaurarConversa();
   const intro = document.querySelector('[data-one-esp-intro]');
   if (intro) intro.textContent = especialista === 'geral' ? 'Pergunte do seu jeito, como falaria com um colega. Por exemplo:' : `${alvo.dataset.nome}: ${alvo.dataset.descricao} Por exemplo:`;
   const exemplos = document.querySelector('[data-one-exemplos]');
@@ -220,7 +221,44 @@ function escolherEspecialista(slug, limpar = true) {
     exemplos.replaceChildren(...JSON.parse(alvo.dataset.sugestoes || '[]').map((t) => el('button', { type: 'button', 'data-one-exemplo': '' }, t)));
   }
 }
+// Conversa guardada durante a sessão (V15.6): trocar de tela ou clicar num link da resposta não apaga mais a conversa.
+// Fica no navegador (sessionStorage), uma por especialista; some ao fechar o navegador ou em "nova conversa".
+const chaveConversa = () => 'one-conversa:' + (especialista || 'geral');
+function lerConversa() {
+  try { return JSON.parse(sessionStorage.getItem(chaveConversa()) || '[]'); } catch { return []; }
+}
+function guardarFala(quem, texto) {
+  const lista = lerConversa();
+  lista.push({ quem, texto });
+  try { sessionStorage.setItem(chaveConversa(), JSON.stringify(lista.slice(-40))); } catch { /* sem armazenamento: a conversa vale só nesta tela */ }
+}
+function restaurarConversa() {
+  if (!conversa) return;
+  const lista = lerConversa();
+  if (!lista.length) return;
+  document.querySelector('[data-one-sugestoes]')?.setAttribute('hidden', '');
+  lista.forEach((f) => bolha(f.quem, formatar(f.texto)));
+}
 if (barraEsp) escolherEspecialista(especialista, true);
+else restaurarConversa();
+// Link clicado dentro da conversa: na tela nova, o painel do One reabre na conversa, no mesmo ponto
+conversa?.addEventListener('click', (ev) => {
+  const a = ev.target.closest('a[href]');
+  if (a && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey && a.target !== '_blank') {
+    try { sessionStorage.setItem('one-reabrir', '1'); } catch { /* ok */ }
+  }
+});
+let reabrir = null;
+try { reabrir = sessionStorage.getItem('one-reabrir'); sessionStorage.removeItem('one-reabrir'); } catch { /* ok */ }
+if (reabrir) {
+  const reabrirPainel = () => {
+    const botao = document.querySelector('[data-one-abrir]');
+    if (botao && document.getElementById('one-painel')?.hidden) botao.click();
+    abrirAba('perguntar');
+    if (conversa) conversa.scrollTop = conversa.scrollHeight;
+  };
+  if (document.readyState === 'complete') setTimeout(reabrirPainel, 0); else window.addEventListener('load', reabrirPainel, { once: true });
+}
 document.addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-one-especialista]');
   if (b && b.dataset.oneEspecialista !== especialista) escolherEspecialista(b.dataset.oneEspecialista);
@@ -240,6 +278,7 @@ async function perguntar(texto) {
   document.querySelector('[data-one-sugestoes]')?.setAttribute('hidden', '');
   abrirAba('perguntar');
   bolha('pessoa', formatar(texto));
+  guardarFala('pessoa', texto);
   const pensando = bolha('one pensando', '<p>Deixa eu ver…</p>');
   pensando.querySelector('img').src = img('pensando');
   const botaoEnviar = formPergunta.querySelector('button');
@@ -250,6 +289,7 @@ async function perguntar(texto) {
     const d = await r.json();
     pensando.remove();
     bolha('one', formatar(d.texto || 'Não entendi. Pode perguntar de outro jeito?'));
+    if (d.texto) guardarFala('one', d.texto);
   } catch {
     pensando.remove();
     bolha('one', '<p>Sem conexão agora. Tente de novo em instantes.</p>');
@@ -270,6 +310,7 @@ document.addEventListener('click', (ev) => {
   if (ev.target.closest('[data-one-limpar]') && conversa) {
     conversa.querySelectorAll('.one-msg').forEach((m) => m.remove());
     document.querySelector('[data-one-sugestoes]')?.removeAttribute('hidden');
+    try { sessionStorage.removeItem(chaveConversa()); } catch { /* ok */ }
     const corpo = new FormData(); corpo.append('esquecer', '1'); corpo.append('especialista', especialista); corpo.append('_csrf', CSRF);
     fetch(`${BASE}/one/perguntar`, { method: 'POST', body: corpo, headers: { 'X-CSRF-Token': CSRF } }).catch(() => {});
   }

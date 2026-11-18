@@ -11,7 +11,7 @@
     <article class="card ped-fila-item">
       <header>
         <div><a href="<?= url('/pedidos/' . (int) $p['id']) ?>"><strong>Pedido #<?= (int) $p['id'] ?></strong></a><?= \App\Services\NotificacaoService::marcaPedido((int) $p['id']) ?> · <?= data_br($p['criado_em'], true) ?>
-          <h2><?= e($p['nome_fantasia'] ?: $p['razao_social']) ?></h2>
+          <h2><a href="<?= url('/carteira/clientes/' . (int) $p['cliente_id']) ?>" data-link-loja><?= e($p['nome_fantasia'] ?: $p['razao_social']) ?></a></h2>
           <?php if (!empty($p['campanha_brindes']) || !empty($p['frete_gratis'])): ?><span class="selo azul" data-campanha-brinde><?= !empty($p['campanha_brindes']) ? '🎁 ' . e($p['campanha_brindes']) : '' ?><?= !empty($p['frete_gratis']) ? (!empty($p['campanha_brindes']) ? ' · ' : '') . 'frete grátis' : '' ?></span><?php endif; ?>
           <?php if (!empty($p['desconto_acima_limite'])): ?><span class="selo selo-desconto" data-desconto-acima>desconto acima do limite · <?= dinheiro((float) $p['desconto_vendedor']) ?></span><?php endif; ?>
           <small><?= e($p['cidade']) ?>/<?= e($p['uf']) ?> · vendedor: <?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null, false, 18) ?> · <?= e(['catalogo' => 'pelo catálogo', 'sistema' => 'pelo sistema', 'app' => 'pelo app'][$p['origem']] ?? '') ?></small></div>
