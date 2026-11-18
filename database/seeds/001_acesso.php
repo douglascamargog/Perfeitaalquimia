@@ -25,6 +25,9 @@ foreach ($perfis as $slug => [$nome, $descricao]) {
 Banco::inserir('perfil_permissoes', ['perfil_id' => $idPerfil['admin'], 'permissao' => '*']);
 foreach (require RAIZ . '/app/permissoes.php' as $permissao => [, $perfisComAcesso]) {
     foreach ($perfisComAcesso as $slugPerfil) {
+        if (!isset($idPerfil[$slugPerfil])) {
+            continue; // perfil criado por um seed mais novo (ex.: Diretoria, 054), que dá a permissão a ele
+        }
         Banco::inserir('perfil_permissoes', ['perfil_id' => $idPerfil[$slugPerfil], 'permissao' => $permissao]);
     }
 }

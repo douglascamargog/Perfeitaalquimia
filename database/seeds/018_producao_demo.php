@@ -171,7 +171,7 @@ foreach ($semCompraNoFim as $nome) {
 
 // Ordens planejadas para os próximos dias (uma de cada origem)
 $ids = array_keys($produtos);
-foreach ([[$ids[1], 3, 'manual'], [$ids[8], 5, 'manual']] as [$pid, $emDias, $origem]) {
+foreach (array_filter([[$ids[1] ?? null, 3, 'manual'], [$ids[8] ?? null, 5, 'manual']], fn($o) => $o[0]) as [$pid, $emDias, $origem]) { // sem o arquivo da Academia há poucos produtos
     P::criarOrdem(['produto_id' => $pid, 'quantidade' => $produtos[$pid]['lote'], 'previsto_para' => date('Y-m-d', strtotime("+$emDias weekdays")),
         'lote' => 'L' . date('ymd', strtotime("+$emDias weekdays")) . '-' . $pid, 'observacoes' => 'Programação da semana.'], $usuario, $origem);
 }
