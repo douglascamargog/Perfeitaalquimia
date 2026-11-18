@@ -92,6 +92,15 @@ class Importador
             'fim' => $etapa === 'fim', 'relatorio' => $rel];
     }
 
+    /**
+     * Linhas de uma consulta com as chaves SEMPRE em minúsculas: o nome da coluna vem com a grafia do backup
+     * (o real usa "numero", "tipooperacao"...; outro Nota10 pode usar "Numero", "TipoOperacao"). O SQL não diferencia; o PHP sim.
+     */
+    private static function linhas(string $sql, array $parametros = []): array
+    {
+        return array_map(fn($r) => array_change_key_case($r, CASE_LOWER), Banco::todos($sql, $parametros));
+    }
+
     private static function somar(array &$rel, string $chave, int|float $n = 1): void
     {
         $rel[$chave] = ($rel[$chave] ?? 0) + $n;
@@ -282,7 +291,7 @@ class Importador
         $perfil = (int) Banco::valor("SELECT id FROM perfis WHERE slug = 'vendedor'");
         $funcao = CarteiraService::funcaoId((string) Config::get('nota10.funcao_vendedor', 'televendas'));
         $criados = [];
-        foreach (Banco::todos("SELECT codigo FROM nota10_mapas WHERE tipo = 'vendedor' AND destino = 'novo' ORDER BY codigo + 0") as $m) {
+        foreach (self::linhas("SELECT codigo FROM nota10_mapas WHERE tipo = 'vendedor' AND destino = 'novo' ORDER BY codigo + 0") as $m) {
             $codigo = (string) $m['codigo'];
             $nome = Conferencia::nomeVendedor($codigo);
             $nome = mb_convert_case(mb_strtolower($nome), MB_CASE_TITLE);
@@ -313,23 +322,23 @@ class Importador
         if (!Conferencia::existe('produtos')) {
             return null;
         }
-        $grupos = array_column(Conferencia::existe('grupos') ? Banco::todos('SELECT Numero, Nome FROM n10_grupos') : [], 'Nome', 'Numero');
-        $estoque = Conferencia::existe('estoques') ? array_column(Banco::todos('SELECT CodigoProduto, SUM(Quantidade) AS q FROM n10_estoques GROUP BY CodigoProduto'), 'q', 'CodigoProduto') : [];
-        $linhas = Banco::todos('SELECT * FROM n10_produtos WHERE id > ? ORDER BY id LIMIT ' . self::LOTE, [$cursor]);
+        $grupos = array_column(Conferencia::existe('grupos') ? self::linhas('SELECT Numero AS numero, Nome AS nome FROM n10_grupos') : [], 'nome', 'numero');
+        $estoque = Conferencia::existe('estoques') ? array_column(self::linhas('SELECT CodigoProduto AS cod, SUM(Quantidade) AS q FROM n10_estoques GROUP BY CodigoProduto'), 'q', 'cod') : [];
+        $linhas = self::linhas('SELECT * FROM n10_produtos WHERE id > ? ORDER BY id LIMIT ' . self::LOTE, [$cursor]);
         foreach ($linhas as $p) {
-            $codigo = trim((string) $p['CodigoProduto']);
+            $codigo = trim((string) $p['codigoproduto']);
             if ($codigo === '') {
                 continue;
             }
-            $g = (string) (int) ($p['Grupo'] ?? 0);
+            $g = (string) (int) ($p['grupo'] ?? 0);
             $destino = self::mapas()['grupo'][$g] ?? ($g !== '0' && isset($grupos[$g]) ? Conferencia::palpiteGrupo((string) $grupos[$g]) : 'produto');
             $nomeGrupo = $grupos[$g] ?? null;
             if ($destino === 'materia_prima') {
-                $dados = ['codigo' => mb_substr($codigo, 0, 40), 'nome' => mb_substr((string) $p['Nome'] ?: "Item $codigo", 0, 160),
-                    'unidade' => mb_substr(strtolower((string) ($p['UnidadeVenda'] ?: 'un')), 0, 10), 'estoque' => (float) ($estoque[$codigo] ?? $p['Quant'] ?? 0),
-                    'estoque_minimo' => (float) ($p['Minimo'] ?? 0), 'custo_unitario' => (float) ($p['Custo'] ?? 0), 'ativo' => (int) ($p['Ativo'] ?? 1) ? 1 : 0,
+                $dados = ['codigo' => mb_substr($codigo, 0, 40), 'nome' => mb_substr((string) $p['nome'] ?: "Item $codigo", 0, 160),
+                    'unidade' => mb_substr(strtolower((string) ($p['unidadevenda'] ?: 'un')), 0, 10), 'estoque' => (float) ($estoque[$codigo] ?? $p['quant'] ?? 0),
+                    'estoque_minimo' => (float) ($p['minimo'] ?? 0), 'custo_unitario' => (float) ($p['custo'] ?? 0), 'ativo' => (int) ($p['ativo'] ?? 1) ? 1 : 0,
                     'tipo' => preg_match('/embalag/i', (string) $nomeGrupo) ? 'embalagem' : 'materia_prima', 'rotulo' => preg_match('/r[oó]tulo/iu', (string) $nomeGrupo) ? 1 : 0,
-                    'categoria' => $nomeGrupo ? mb_substr((string) $nomeGrupo, 0, 60) : null, 'fabricante' => mb_substr((string) ($p['Fabricante'] ?? ''), 0, 120) ?: null, 'nota10_codigo' => $codigo];
+                    'categoria' => $nomeGrupo ? mb_substr((string) $nomeGrupo, 0, 60) : null, 'fabricante' => mb_substr((string) ($p['fabricante'] ?? ''), 0, 120) ?: null, 'nota10_codigo' => $codigo];
                 $id = Banco::valor('SELECT id FROM materias_primas WHERE nota10_codigo = ? OR (codigo = ? AND nota10_codigo IS NULL) LIMIT 1', [$codigo, $codigo]);
                 $id ? Banco::atualizar('materias_primas', (int) $id, $dados) : Banco::inserir('materias_primas', $dados);
                 self::somar($rel, 'materias_primas');
@@ -339,23 +348,23 @@ class Importador
                 self::somar($rel, 'produtos_so_guardados');
                 continue;
             }
-            $extras = ['nota10_codigo' => $codigo, 'unidade' => mb_substr((string) ($p['UnidadeVenda'] ?? ''), 0, 6) ?: null, 'cest' => mb_substr((string) ($p['CEST'] ?? ''), 0, 10) ?: null,
-                'custo' => (float) ($p['Custo'] ?? 0) ?: null, 'grupo_erp' => $nomeGrupo ? mb_substr((string) $nomeGrupo, 0, 60) : null,
-                'cadastrado_erp_em' => self::dataPhp($p['dataCadastro'] ?? null)];
+            $extras = ['nota10_codigo' => $codigo, 'unidade' => mb_substr((string) ($p['unidadevenda'] ?? ''), 0, 6) ?: null, 'cest' => mb_substr((string) ($p['cest'] ?? ''), 0, 10) ?: null,
+                'custo' => (float) ($p['custo'] ?? 0) ?: null, 'grupo_erp' => $nomeGrupo ? mb_substr((string) $nomeGrupo, 0, 60) : null,
+                'cadastrado_erp_em' => self::dataPhp($p['datacadastro'] ?? null)];
             $id = Banco::valor('SELECT id FROM produtos WHERE nota10_codigo = ? OR (codigo = ? AND nota10_codigo IS NULL) ORDER BY nota10_codigo IS NULL LIMIT 1', [$codigo, $codigo]);
             if ($id) {
                 Banco::atualizar('produtos', (int) $id, $extras);
                 self::somar($rel, 'produtos_ligados');
             } else { // só existe no Nota10: entra inativo e fora do catálogo (para o histórico ficar completo)
                 $id = Banco::inserir('produtos', $extras + ['slug' => 'n10-' . preg_replace('/[^a-z0-9]+/', '-', strtolower($codigo)) . '-' . substr(md5($codigo), 0, 5),
-                    'codigo' => mb_substr($codigo, 0, 40), 'nome' => mb_substr((string) $p['Nome'] ?: "Produto $codigo", 0, 160), 'ficha_json' => '{}', 'ativo' => 0, 'visivel_catalogo' => 0]);
+                    'codigo' => mb_substr($codigo, 0, 40), 'nome' => mb_substr((string) $p['nome'] ?: "Produto $codigo", 0, 160), 'ficha_json' => '{}', 'ativo' => 0, 'visivel_catalogo' => 0]);
                 self::somar($rel, 'produtos_novos_inativos');
             }
             // parte técnica (só onde está vazia) e estoque
             Banco::executar('INSERT INTO produto_tecnico (produto_id, ean, ncm, peso_liquido, peso_bruto) VALUES (?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE ean = COALESCE(ean, VALUES(ean)), ncm = COALESCE(ncm, VALUES(ncm)), peso_liquido = COALESCE(peso_liquido, VALUES(peso_liquido)), peso_bruto = COALESCE(peso_bruto, VALUES(peso_bruto))',
-                [$id, mb_substr(self::digitos($p['CodigoBarras'] ?? ''), 0, 20) ?: null, mb_substr(self::digitos($p['NCM'] ?? ''), 0, 10) ?: null,
-                 (float) ($p['PesoLiquido'] ?? 0) ?: null, (float) ($p['PesoBruto'] ?? 0) ?: null]);
+                [$id, mb_substr(self::digitos($p['codigobarras'] ?? ''), 0, 20) ?: null, mb_substr(self::digitos($p['ncm'] ?? ''), 0, 10) ?: null,
+                 (float) ($p['pesoliquido'] ?? 0) ?: null, (float) ($p['pesobruto'] ?? 0) ?: null]);
             if (isset($estoque[$codigo])) {
                 Banco::executar('INSERT INTO produto_estoque (produto_id, quantidade) VALUES (?, ?) ON DUPLICATE KEY UPDATE quantidade = VALUES(quantidade)', [$id, (int) round((float) $estoque[$codigo])]);
             }
@@ -365,7 +374,7 @@ class Importador
         }
         // preços (a tabela do Nota10 vai para a tabela do One escolhida na ligação; "Base" → Lojista)
         if (Conferencia::existe('precos')) {
-            foreach (array_unique(array_column(Banco::todos('SELECT DISTINCT Id_Tabela FROM n10_precos'), 'Id_Tabela')) as $tab) {
+            foreach (array_unique(array_column(self::linhas('SELECT DISTINCT Id_Tabela AS tab FROM n10_precos'), 'tab')) as $tab) {
                 $destino = self::mapas()['tabela'][(string) $tab] ?? ((string) $tab === '1' ? (string) self::tabelaLojista() : null);
                 if (!$destino || !ctype_digit((string) $destino)) {
                     continue;
@@ -388,30 +397,30 @@ class Importador
             return null;
         }
         // cadastros internos: usados como carteira de muitos outros e sem compra própria (ex.: um vendedor antigo cadastrado como cliente)
-        self::$cache['internos'] ??= array_flip(array_map('intval', array_column(Banco::todos("SELECT c.Numero FROM n10_clientes c
+        self::$cache['internos'] ??= array_flip(array_map('intval', array_column(self::linhas("SELECT c.Numero AS numero FROM n10_clientes c
             WHERE (SELECT COUNT(*) FROM n10_clientes o WHERE o.Representante = c.Numero) >= 50
               AND NOT EXISTS (SELECT 1 FROM n10_notas n WHERE n.NumeroCliente = c.Numero AND n.TipoOperacao = 'V' AND COALESCE(n.TotalNota, 0) > 0)
-            UNION SELECT c.Numero FROM n10_clientes c WHERE UPPER(c.Nome) LIKE '%ENTRADA%' AND UPPER(c.Nome) LIKE '%PRODU%'"), 'Numero'))); // e o cadastro das entradas de produção
-        $linhas = Banco::todos('SELECT * FROM n10_clientes WHERE id > ? ORDER BY id LIMIT ' . self::LOTE, [$cursor]);
+            UNION SELECT c.Numero AS numero FROM n10_clientes c WHERE UPPER(c.Nome) LIKE '%ENTRADA%' AND UPPER(c.Nome) LIKE '%PRODU%'"), 'numero'))); // e o cadastro das entradas de produção
+        $linhas = self::linhas('SELECT * FROM n10_clientes WHERE id > ? ORDER BY id LIMIT ' . self::LOTE, [$cursor]);
         if (!$linhas) {
             self::fornecedoresPorMovimento($rel);
             return null;
         }
-        $numeros = array_map(fn($l) => (int) $l['Numero'], $linhas);
-        $feitos = array_column(Banco::todos('SELECT numero, cliente_id FROM n10_x_cliente WHERE numero IN (' . implode(',', $numeros) . ')'), 'cliente_id', 'numero');
-        $ultima = array_column(Banco::todos('SELECT numero, vendedor FROM n10_x_ultima_venda WHERE numero IN (' . implode(',', $numeros) . ')'), 'vendedor', 'numero');
-        $docs = array_filter(array_map(fn($l) => self::digitos($l['CPF_CNPJ'] ?? ''), $linhas), fn($d) => strlen($d) === 14 || strlen($d) === 11);
-        $porDoc = $docs ? array_column(Banco::todos('SELECT cnpj, MIN(id) AS id FROM clientes WHERE excluido_em IS NULL AND cnpj IN (' . implode(',', array_fill(0, count($docs), '?')) . ') GROUP BY cnpj', array_values($docs)), 'id', 'cnpj') : [];
+        $numeros = array_map(fn($l) => (int) $l['numero'], $linhas);
+        $feitos = array_column(self::linhas('SELECT numero, cliente_id FROM n10_x_cliente WHERE numero IN (' . implode(',', $numeros) . ')'), 'cliente_id', 'numero');
+        $ultima = array_column(self::linhas('SELECT numero, vendedor FROM n10_x_ultima_venda WHERE numero IN (' . implode(',', $numeros) . ')'), 'vendedor', 'numero');
+        $docs = array_filter(array_map(fn($l) => self::digitos($l['cpf_cnpj'] ?? ''), $linhas), fn($d) => strlen($d) === 14 || strlen($d) === 11);
+        $porDoc = $docs ? array_column(self::linhas('SELECT cnpj, MIN(id) AS id FROM clientes WHERE excluido_em IS NULL AND cnpj IN (' . implode(',', array_fill(0, count($docs), '?')) . ') GROUP BY cnpj', array_values($docs)), 'id', 'cnpj') : [];
         $prospeccao = CarteiraService::funcaoId((string) Config::get('carteira.funcao_reativacao', 'prospeccao_reativacao'));
         $ufs = Listas::ufs();
-        $cidades = self::$cache['cidades'] ??= array_column(Banco::todos('SELECT cod_ibge, id, uf FROM cidades WHERE cod_ibge IS NOT NULL'), null, 'cod_ibge');
+        $cidades = self::$cache['cidades'] ??= array_column(self::linhas('SELECT cod_ibge, id, uf FROM cidades WHERE cod_ibge IS NOT NULL'), null, 'cod_ibge');
         $novos = [];
         $fornecedores = [];
         $juntarLote = [];
         foreach ($linhas as $l) {
-            $numero = (int) $l['Numero'];
-            $tipo = self::tipoCadastro($l['TipoCliente'] ?? '', $numero);
-            $doc = self::digitos($l['CPF_CNPJ'] ?? '');
+            $numero = (int) $l['numero'];
+            $tipo = self::tipoCadastro($l['tipocliente'] ?? '', $numero);
+            $doc = self::digitos($l['cpf_cnpj'] ?? '');
             $doc = in_array(strlen($doc), [11, 14], true) ? $doc : null;
             if (in_array($tipo, ['fornecedor', 'transportadora', 'cliente_fornecedor', 'cliente_transportadora'], true)) {
                 $fornecedores[] = $l + ['_tipo' => str_contains($tipo, 'transportadora') ? 'transportadora' : 'fornecedor'];
@@ -436,62 +445,62 @@ class Importador
                 continue;
             }
             // UF: a digitada, ou a do código IBGE do município
-            $uf = strtoupper(trim((string) ($l['Estado'] ?? '')));
-            $cid = $cidades[(string) ($l['CodMunic'] ?? '')] ?? null;
+            $uf = strtoupper(trim((string) ($l['estado'] ?? '')));
+            $cid = $cidades[(string) ($l['codmunic'] ?? '')] ?? null;
             if (!in_array($uf, $ufs, true)) {
                 $uf = $cid['uf'] ?? null;
             }
-            $resp = self::vendedor($ultima[$numero] ?? 0) ?? self::vendedor($l['Representante'] ?? 0);
+            $resp = self::vendedor($ultima[$numero] ?? 0) ?? self::vendedor($l['representante'] ?? 0);
             $obs = trim(implode("\n", array_filter([
-                trim((string) ($l['Obs'] ?? '')) !== '' ? 'Obs. (Nota10): ' . trim((string) $l['Obs']) : '',
-                trim((string) ($l['Ocorrencias'] ?? '')) !== '' ? 'Ocorrências (Nota10): ' . trim((string) $l['Ocorrencias']) : '',
-                trim((string) ($l['Refer'] ?? '')) !== '' ? 'Referência (Nota10): ' . trim((string) $l['Refer']) : '',
+                trim((string) ($l['obs'] ?? '')) !== '' ? 'Obs. (Nota10): ' . trim((string) $l['obs']) : '',
+                trim((string) ($l['ocorrencias'] ?? '')) !== '' ? 'Ocorrências (Nota10): ' . trim((string) $l['ocorrencias']) : '',
+                trim((string) ($l['refer'] ?? '')) !== '' ? 'Referência (Nota10): ' . trim((string) $l['refer']) : '',
             ])));
-            $temEntrega = trim((string) ($l['entrega_Endereco'] ?? '')) !== '';
+            $temEntrega = trim((string) ($l['entrega_endereco'] ?? '')) !== '';
             $segmento = null;
-            foreach (['seg' => 'IdSegmento', 's1' => 'segmento1', 's2' => 'segmento2'] as $pref => $campo) {
+            foreach (['seg' => 'idsegmento', 's1' => 'segmento1', 's2' => 'segmento2'] as $pref => $campo) {
                 $v = (int) ($l[$campo] ?? 0);
                 if ($v && !$segmento && ctype_digit((string) (self::mapas()['segmento']["$pref:$v"] ?? ''))) {
                     $segmento = (int) self::mapas()['segmento']["$pref:$v"];
                 }
             }
-            $ativo = strtoupper((string) ($l['Ativo'] ?? 'S')) !== 'N';
+            $ativo = strtoupper((string) ($l['ativo'] ?? 'S')) !== 'N';
             $etapa = $tipo === 'validar' || (!$doc && $tipo !== 'lead') ? 'Validar cadastro' : (!$ativo ? 'Inativo' : (isset($ultima[$numero]) ? 'Cliente ativo' : 'Não abordado'));
             $email = trim(preg_split('/[;,\s]+/', (string) ($l['email'] ?? ''))[0] ?? '');
             $novos[] = [
                 'tipo' => $tipo === 'lead' && !isset($ultima[$numero]) ? 'lead' : 'cliente',
-                'razao_social' => mb_substr(trim((string) ($l['Razao'] ?: $l['Nome'])) ?: "Cadastro $numero", 0, 200),
-                'nome_fantasia' => mb_substr(trim((string) $l['Nome']), 0, 200) ?: null, 'cnpj' => $doc,
-                'endereco' => mb_substr(trim((string) ($l['Endereco'] ?? '')), 0, 255) ?: null, 'end_numero' => mb_substr((string) ($l['EndNum'] ?? ''), 0, 20) ?: null,
-                'end_complemento' => mb_substr((string) ($l['EndComp'] ?? ''), 0, 60) ?: null, 'bairro' => mb_substr((string) ($l['Bairro'] ?? ''), 0, 120) ?: null,
-                'cep' => strlen(self::digitos($l['CEP'] ?? '')) === 8 ? self::digitos($l['CEP']) : null,
-                'cidade' => mb_substr(trim((string) ($l['Cidade'] ?? '')), 0, 120) ?: 'Sem cidade', 'uf' => $uf, 'cidade_id' => $cid['id'] ?? null,
+                'razao_social' => mb_substr(trim((string) ($l['razao'] ?: $l['nome'])) ?: "Cadastro $numero", 0, 200),
+                'nome_fantasia' => mb_substr(trim((string) $l['nome']), 0, 200) ?: null, 'cnpj' => $doc,
+                'endereco' => mb_substr(trim((string) ($l['endereco'] ?? '')), 0, 255) ?: null, 'end_numero' => mb_substr((string) ($l['endnum'] ?? ''), 0, 20) ?: null,
+                'end_complemento' => mb_substr((string) ($l['endcomp'] ?? ''), 0, 60) ?: null, 'bairro' => mb_substr((string) ($l['bairro'] ?? ''), 0, 120) ?: null,
+                'cep' => strlen(self::digitos($l['cep'] ?? '')) === 8 ? self::digitos($l['cep']) : null,
+                'cidade' => mb_substr(trim((string) ($l['cidade'] ?? '')), 0, 120) ?: 'Sem cidade', 'uf' => $uf, 'cidade_id' => $cid['id'] ?? null,
                 'regiao_id' => $uf ? (self::$cache['regiao'][$uf] ??= Listas::regiaoDaUf($uf)) : null, 'segmento_id' => $segmento,
-                'segmento_original' => mb_substr(trim(implode(' ', array_filter(['s1=' . (int) ($l['segmento1'] ?? 0), 's2=' . (int) ($l['segmento2'] ?? 0), ($l['Grupo'] ?? '') !== '' ? 'grupo=' . $l['Grupo'] : '']))), 0, 120),
-                'telefone' => Normalizar::telefone((string) ($l['Telefones'] ?? '')), 'whatsapp' => Normalizar::telefone((string) ($l['Celular_1'] ?? '')),
-                'celular2' => mb_substr((string) ($l['Celular_2'] ?? ''), 0, 30) ?: null,
+                'segmento_original' => mb_substr(trim(implode(' ', array_filter(['s1=' . (int) ($l['segmento1'] ?? 0), 's2=' . (int) ($l['segmento2'] ?? 0), ($l['grupo'] ?? '') !== '' ? 'grupo=' . $l['grupo'] : '']))), 0, 120),
+                'telefone' => Normalizar::telefone((string) ($l['telefones'] ?? '')), 'whatsapp' => Normalizar::telefone((string) ($l['celular_1'] ?? '')),
+                'celular2' => mb_substr((string) ($l['celular_2'] ?? ''), 0, 30) ?: null,
                 'email' => filter_var($email, FILTER_VALIDATE_EMAIL) ? mb_substr($email, 0, 160) : null,
-                'email_nfe' => mb_substr((string) ($l['email_NFe'] ?? ''), 0, 250) ?: null, 'email_financeiro' => mb_substr((string) ($l['email_fin'] ?? ''), 0, 250) ?: null,
-                'site' => mb_substr((string) ($l['WebSite'] ?? ''), 0, 255) ?: null, 'contato_nome' => mb_substr((string) ($l['Contato'] ?? ''), 0, 60) ?: null,
-                'inscricao_estadual' => mb_substr((string) ($l['RG_IE'] ?? ''), 0, 20) ?: null, 'inscricao_municipal' => mb_substr((string) ($l['InscricaoMunicipal'] ?? ''), 0, 20) ?: null,
-                'contribuinte' => ['1' => 'contribuinte', '2' => 'isento', '9' => 'nao_contribuinte'][(string) ($l['TipoContribuinte'] ?? '')] ?? null,
-                'suframa' => mb_substr((string) ($l['SUFRAMA'] ?? ''), 0, 15) ?: null, 'data_fundacao' => self::dataPhp($l['DatNas'] ?? null),
-                'cliente_desde' => self::dataPhp($l['Entrada'] ?? null), 'limite_credito' => (float) ($l['LimiteCredito'] ?? 0) ?: null,
-                'desconto_padrao' => (float) ($l['Desconto'] ?? 0) ?: null, 'comissao_pct' => (float) ($l['ComissaoVendedor'] ?? 0) ?: null,
-                'situacao_erp' => mb_substr(trim(($ativo ? '' : 'Inativo ') . (string) ($l['Situacao'] ?? '')), 0, 30) ?: null,
-                'motivo_inativo' => mb_substr((string) ($l['MotivoStatus'] ?? ''), 0, 100) ?: null,
+                'email_nfe' => mb_substr((string) ($l['email_nfe'] ?? ''), 0, 250) ?: null, 'email_financeiro' => mb_substr((string) ($l['email_fin'] ?? ''), 0, 250) ?: null,
+                'site' => mb_substr((string) ($l['website'] ?? ''), 0, 255) ?: null, 'contato_nome' => mb_substr((string) ($l['contato'] ?? ''), 0, 60) ?: null,
+                'inscricao_estadual' => mb_substr((string) ($l['rg_ie'] ?? ''), 0, 20) ?: null, 'inscricao_municipal' => mb_substr((string) ($l['inscricaomunicipal'] ?? ''), 0, 20) ?: null,
+                'contribuinte' => ['1' => 'contribuinte', '2' => 'isento', '9' => 'nao_contribuinte'][(string) ($l['tipocontribuinte'] ?? '')] ?? null,
+                'suframa' => mb_substr((string) ($l['suframa'] ?? ''), 0, 15) ?: null, 'data_fundacao' => self::dataPhp($l['datnas'] ?? null),
+                'cliente_desde' => self::dataPhp($l['entrada'] ?? null), 'limite_credito' => (float) ($l['limitecredito'] ?? 0) ?: null,
+                'desconto_padrao' => (float) ($l['desconto'] ?? 0) ?: null, 'comissao_pct' => (float) ($l['comissaovendedor'] ?? 0) ?: null,
+                'situacao_erp' => mb_substr(trim(($ativo ? '' : 'Inativo ') . (string) ($l['situacao'] ?? '')), 0, 30) ?: null,
+                'motivo_inativo' => mb_substr((string) ($l['motivostatus'] ?? ''), 0, 100) ?: null,
                 'entrega_razao' => mb_substr((string) ($l['entrega_razao'] ?? ''), 0, 100) ?: null, 'entrega_cnpj' => self::digitos($l['entrega_cpf_cnpj'] ?? '') ?: null,
-                'entrega_endereco' => mb_substr((string) ($l['entrega_Endereco'] ?? ''), 0, 150) ?: null, 'entrega_numero' => mb_substr((string) ($l['entrega_EndNum'] ?? ''), 0, 20) ?: null,
-                'entrega_complemento' => mb_substr((string) ($l['entrega_EndComp'] ?? ''), 0, 60) ?: null, 'entrega_bairro' => mb_substr((string) ($l['entrega_Bairro'] ?? ''), 0, 60) ?: null,
-                'entrega_cidade' => mb_substr((string) ($l['entrega_Cidade'] ?? ''), 0, 80) ?: null,
-                'entrega_uf' => in_array(strtoupper((string) ($l['entrega_Estado'] ?? '')), $ufs, true) ? strtoupper((string) $l['entrega_Estado']) : null,
-                'entrega_cep' => strlen(self::digitos($l['entrega_CEP'] ?? '')) === 8 ? self::digitos($l['entrega_CEP']) : null,
+                'entrega_endereco' => mb_substr((string) ($l['entrega_endereco'] ?? ''), 0, 150) ?: null, 'entrega_numero' => mb_substr((string) ($l['entrega_endnum'] ?? ''), 0, 20) ?: null,
+                'entrega_complemento' => mb_substr((string) ($l['entrega_endcomp'] ?? ''), 0, 60) ?: null, 'entrega_bairro' => mb_substr((string) ($l['entrega_bairro'] ?? ''), 0, 60) ?: null,
+                'entrega_cidade' => mb_substr((string) ($l['entrega_cidade'] ?? ''), 0, 80) ?: null,
+                'entrega_uf' => in_array(strtoupper((string) ($l['entrega_estado'] ?? '')), $ufs, true) ? strtoupper((string) $l['entrega_estado']) : null,
+                'entrega_cep' => strlen(self::digitos($l['entrega_cep'] ?? '')) === 8 ? self::digitos($l['entrega_cep']) : null,
                 'entrega_revisar' => !$temEntrega ? EntregaService::trechoNaObservacao($obs) : null,
                 'observacoes' => $obs ?: null, 'responsavel_id' => $resp,
                 'funcao_id' => $resp ? (self::$cache['funcao'][$resp] ??= CarteiraService::funcaoPrincipal($resp)) : $prospeccao,
                 'etapa_id' => self::etapaId($etapa), 'prioridade' => 'Média',
-                'validacao' => $tipo === 'validar' ? mb_substr('Tipo no Nota10: ' . ($l['TipoCliente'] ?? ''), 0, 255) : (!$doc && $tipo !== 'lead' ? 'Sem CNPJ/CPF no Nota10' : null),
-                'nota10_numero' => $numero, 'nota10_guid' => mb_substr((string) ($l['Chave_GUID'] ?? ''), 0, 32) ?: null,
+                'validacao' => $tipo === 'validar' ? mb_substr('Tipo no Nota10: ' . ($l['tipocliente'] ?? ''), 0, 255) : (!$doc && $tipo !== 'lead' ? 'Sem CNPJ/CPF no Nota10' : null),
+                'nota10_numero' => $numero, 'nota10_guid' => mb_substr((string) ($l['chave_guid'] ?? ''), 0, 32) ?: null,
                 'nota10_dados' => json_encode(array_filter($l, fn($v) => $v !== null && $v !== '' && $v !== '0' && $v !== '0.00000'), JSON_UNESCAPED_UNICODE),
             ];
             if ($doc) {
@@ -539,18 +548,18 @@ class Importador
     {
         foreach ($linhas as $l) {
             $tipo = $l['_tipo'];
-            $numero = (int) $l['Numero'];
+            $numero = (int) $l['numero'];
             if (Banco::valor('SELECT 1 FROM fornecedores WHERE nota10_numero = ? AND tipo = ?', [$numero, $tipo])) {
                 continue;
             }
-            Banco::inserir('fornecedores', ['tipo' => $tipo, 'razao_social' => mb_substr(trim((string) ($l['Razao'] ?: $l['Nome'])) ?: "Cadastro $numero", 0, 200),
-                'nome_fantasia' => mb_substr((string) $l['Nome'], 0, 200) ?: null, 'cnpj' => mb_substr(self::digitos($l['CPF_CNPJ'] ?? ''), 0, 14) ?: null,
-                'inscricao_estadual' => mb_substr((string) ($l['RG_IE'] ?? ''), 0, 20) ?: null, 'endereco' => mb_substr((string) ($l['Endereco'] ?? ''), 0, 200) ?: null,
-                'bairro' => mb_substr((string) ($l['Bairro'] ?? ''), 0, 120) ?: null, 'cidade' => mb_substr((string) ($l['Cidade'] ?? ''), 0, 120) ?: null,
-                'uf' => mb_substr(strtoupper((string) ($l['Estado'] ?? '')), 0, 2) ?: null, 'cep' => strlen(self::digitos($l['CEP'] ?? '')) === 8 ? self::digitos($l['CEP']) : null,
-                'telefone' => mb_substr((string) ($l['Telefones'] ?? ''), 0, 40) ?: null, 'email' => mb_substr((string) ($l['email'] ?? ''), 0, 250) ?: null,
-                'contato' => mb_substr((string) ($l['Contato'] ?? ''), 0, 100) ?: null, 'observacoes' => trim((string) ($l['Obs'] ?? '')) ?: null,
-                'ativo' => strtoupper((string) ($l['Ativo'] ?? 'S')) !== 'N' ? 1 : 0, 'nota10_numero' => $numero,
+            Banco::inserir('fornecedores', ['tipo' => $tipo, 'razao_social' => mb_substr(trim((string) ($l['razao'] ?: $l['nome'])) ?: "Cadastro $numero", 0, 200),
+                'nome_fantasia' => mb_substr((string) $l['nome'], 0, 200) ?: null, 'cnpj' => mb_substr(self::digitos($l['cpf_cnpj'] ?? ''), 0, 14) ?: null,
+                'inscricao_estadual' => mb_substr((string) ($l['rg_ie'] ?? ''), 0, 20) ?: null, 'endereco' => mb_substr((string) ($l['endereco'] ?? ''), 0, 200) ?: null,
+                'bairro' => mb_substr((string) ($l['bairro'] ?? ''), 0, 120) ?: null, 'cidade' => mb_substr((string) ($l['cidade'] ?? ''), 0, 120) ?: null,
+                'uf' => mb_substr(strtoupper((string) ($l['estado'] ?? '')), 0, 2) ?: null, 'cep' => strlen(self::digitos($l['cep'] ?? '')) === 8 ? self::digitos($l['cep']) : null,
+                'telefone' => mb_substr((string) ($l['telefones'] ?? ''), 0, 40) ?: null, 'email' => mb_substr((string) ($l['email'] ?? ''), 0, 250) ?: null,
+                'contato' => mb_substr((string) ($l['contato'] ?? ''), 0, 100) ?: null, 'observacoes' => trim((string) ($l['obs'] ?? '')) ?: null,
+                'ativo' => strtoupper((string) ($l['ativo'] ?? 'S')) !== 'N' ? 1 : 0, 'nota10_numero' => $numero,
                 'cliente_id' => Banco::valor('SELECT cliente_id FROM n10_x_cliente WHERE numero = ?', [$numero]) ?: null,
                 'nota10_dados' => json_encode(array_filter($l, fn($v) => $v !== null && $v !== '' && $v !== '0'), JSON_UNESCAPED_UNICODE)]);
             self::somar($rel, $tipo === 'transportadora' ? 'transportadoras' : 'fornecedores');
@@ -560,7 +569,7 @@ class Importador
     /** Também é fornecedor quem aparece em Compras (C), Outras entradas (E) ou Devolução a fornecedor (F), mesmo cadastrado como cliente */
     private static function fornecedoresPorMovimento(array &$rel): void
     {
-        $linhas = Banco::todos("SELECT c.* FROM n10_clientes c WHERE c.Numero IN (SELECT DISTINCT n.NumeroCliente FROM n10_notas n
+        $linhas = self::linhas("SELECT c.* FROM n10_clientes c WHERE c.Numero IN (SELECT DISTINCT n.NumeroCliente FROM n10_notas n
                 WHERE n.TipoOperacao IN ('C', 'E', 'F') AND COALESCE(n.NumeroCliente, 0) > 0 AND COALESCE(n.NaturezaOperacao, '') NOT LIKE '%MANUAL%')
             AND NOT (UPPER(c.Nome) LIKE '%ENTRADA%' AND UPPER(c.Nome) LIKE '%PRODU%')
             AND NOT EXISTS (SELECT 1 FROM fornecedores f WHERE f.nota10_numero = c.Numero AND f.tipo = 'fornecedor')");
@@ -572,9 +581,9 @@ class Importador
     /** Situação do pedido pelas regras do Nota10 (regras-importacao.md 3.2); StatusPedido: 0 Cadastrado · 1 Processando · 2 Faturado · 3 Cancelado · 4 Em separação · 5 Despachado */
     public static function situacao(array $n): array
     {
-        $nf = strtoupper(trim((string) ($n['Status_NF'] ?? '')));
-        $st = trim((string) ($n['StatusPedido'] ?? ''));
-        $cancel = (int) ($n['PedidoCancelado'] ?? 0) === 1;
+        $nf = strtoupper(trim((string) ($n['status_nf'] ?? '')));
+        $st = trim((string) ($n['statuspedido'] ?? ''));
+        $cancel = (int) ($n['pedidocancelado'] ?? 0) === 1;
         if ($nf === 'C' || $st === '3' || ($cancel && $nf !== 'E')) {
             return ['cancelado', null];
         }
@@ -592,24 +601,24 @@ class Importador
         if (!Conferencia::existe('notas')) {
             return null;
         }
-        $linhas = Banco::todos('SELECT * FROM n10_notas WHERE id > ? ORDER BY id LIMIT ' . self::LOTE, [$cursor]);
+        $linhas = self::linhas('SELECT * FROM n10_notas WHERE id > ? ORDER BY id LIMIT ' . self::LOTE, [$cursor]);
         if (!$linhas) {
             return null;
         }
-        $guids = array_map(fn($l) => (string) $l['GUID_Nota'], $linhas);
+        $guids = array_map(fn($l) => (string) $l['guid_nota'], $linhas);
         $in = implode(',', array_fill(0, count($guids), '?'));
-        $feitos = array_flip(array_column(Banco::todos("SELECT nota10_guid FROM pedidos WHERE nota10_guid IN ($in)", $guids), 'nota10_guid'));
-        $gemeos = array_flip(array_column(Banco::todos("SELECT guid FROM n10_x_gemeo WHERE guid IN ($in)", $guids), 'guid'));
-        $comPar = array_flip(array_column(Banco::todos("SELECT guid_s FROM n10_x_par_saida WHERE guid_s IN ($in)", $guids), 'guid_s'));
-        $numeros = array_unique(array_merge(array_map(fn($l) => (int) $l['NumeroCliente'], $linhas), array_map(fn($l) => (int) $l['CodigoTransportadora'], $linhas), [0]));
-        $clientes = array_column(Banco::todos('SELECT numero, cliente_id FROM n10_x_cliente WHERE numero IN (' . implode(',', $numeros) . ')'), 'cliente_id', 'numero');
-        $nomes = array_column(Banco::todos('SELECT Numero, COALESCE(NULLIF(Nome, \'\'), Razao) AS nome FROM n10_clientes WHERE Numero IN ('
-            . implode(',', array_unique(array_merge($numeros, array_map(fn($l) => (int) $l['CodigoVendedor'], $linhas)))) . ')'), 'nome', 'Numero');
+        $feitos = array_flip(array_column(self::linhas("SELECT nota10_guid FROM pedidos WHERE nota10_guid IN ($in)", $guids), 'nota10_guid'));
+        $gemeos = array_flip(array_column(self::linhas("SELECT guid FROM n10_x_gemeo WHERE guid IN ($in)", $guids), 'guid'));
+        $comPar = array_flip(array_column(self::linhas("SELECT guid_s FROM n10_x_par_saida WHERE guid_s IN ($in)", $guids), 'guid_s'));
+        $numeros = array_unique(array_merge(array_map(fn($l) => (int) $l['numerocliente'], $linhas), array_map(fn($l) => (int) $l['codigotransportadora'], $linhas), [0]));
+        $clientes = array_column(self::linhas('SELECT numero, cliente_id FROM n10_x_cliente WHERE numero IN (' . implode(',', $numeros) . ')'), 'cliente_id', 'numero');
+        $nomes = array_column(self::linhas('SELECT Numero AS numero, COALESCE(NULLIF(Nome, \'\'), Razao) AS nome FROM n10_clientes WHERE Numero IN ('
+            . implode(',', array_unique(array_merge($numeros, array_map(fn($l) => (int) $l['codigovendedor'], $linhas)))) . ')'), 'nome', 'numero');
         $principal = self::principal();
         $novos = [];
         foreach ($linhas as $n) {
-            $guid = (string) $n['GUID_Nota'];
-            $t = strtoupper(trim((string) $n['TipoOperacao']));
+            $guid = (string) $n['guid_nota'];
+            $t = strtoupper(trim((string) $n['tipooperacao']));
             if (isset($feitos[$guid])) {
                 continue;
             }
@@ -621,7 +630,7 @@ class Importador
                 self::somar($rel, 'saidas_ligadas_a_pedido'); // é a NF de um pedido de venda (etapa "ligar")
                 continue;
             }
-            $natureza = mb_strtoupper((string) ($n['NaturezaOperacao'] ?? ''));
+            $natureza = mb_strtoupper((string) ($n['naturezaoperacao'] ?? ''));
             if (in_array($t, ['E', 'S'], true) && str_contains($natureza, 'ALTERACAO MANUAL')) {
                 self::somar($rel, 'ajustes_estoque_guardados');
                 continue;
@@ -630,14 +639,14 @@ class Importador
                 self::somar($rel, "notas_{$t}_guardadas"); // compras (etapa "compras"), entradas e devoluções a fornecedor ficam em n10_notas
                 continue;
             }
-            $cliente = $clientes[(int) $n['NumeroCliente']] ?? null;
+            $cliente = $clientes[(int) $n['numerocliente']] ?? null;
             if (!$cliente) {
                 self::somar($rel, 'notas_sem_cliente');
                 continue;
             }
             [$situacao, $detalhe] = self::situacao($n);
-            $operacao = Conferencia::tipoOperacao($n['CFOP'] ?? null, $n['finNFe'] ?? null);
-            $total = (float) ($n['TotalNota'] ?? 0);
+            $operacao = Conferencia::tipoOperacao($n['cfop'] ?? null, $n['finnfe'] ?? null);
+            $total = (float) ($n['totalnota'] ?? 0);
             $tipoOp = match ($t) {
                 'O' => 'orcamento',
                 'D' => 'devolucao',
@@ -651,34 +660,34 @@ class Importador
             if ($detalhe === 'alerta_cancelado_com_nf') {
                 self::somar($rel, 'alerta_cancelado_com_nf');
             }
-            $emitente = self::digitos($n['Emitente'] ?? '');
+            $emitente = self::digitos($n['emitente'] ?? '');
             $outra = $emitente !== '' && $emitente !== $principal;
             $situacaoOrigem = $outra ? $situacao : ($situacao === 'historico' || $situacao === 'faturado' && $detalhe === 'sem_nf' ? $detalhe : null);
             if ($outra && $situacao !== 'cancelado') {
                 $situacao = 'outra_empresa';
             }
-            $data = self::dataPhp($n['Data'] ?? null) ?? '2000-01-01';
-            $hora = preg_match('/^\d{2}:\d{2}(:\d{2})?$/', trim((string) ($n['Hora'] ?? ''))) ? trim((string) $n['Hora']) : '00:00:00';
-            $vend = (int) ($n['CodigoVendedor'] ?? 0);
-            $uf = strtoupper(trim((string) ($n['UF_Destino'] ?? '')));
+            $data = self::dataPhp($n['data'] ?? null) ?? '2000-01-01';
+            $hora = preg_match('/^\d{2}:\d{2}(:\d{2})?$/', trim((string) ($n['hora'] ?? ''))) ? trim((string) $n['hora']) : '00:00:00';
+            $vend = (int) ($n['codigovendedor'] ?? 0);
+            $uf = strtoupper(trim((string) ($n['uf_destino'] ?? '')));
             $novos[] = [
                 'uuid' => \App\Services\PedidoService::novoUuid(), 'cliente_id' => $cliente, 'vendedor_id' => self::vendedor($vend), 'origem' => 'nota10',
-                'tabela_preco_id' => self::tabelaLojista(), 'forma_pagamento_id' => self::formaId($n['FormaPgto'] ?? 0),
-                'subtotal' => (float) ($n['TotalMercadoria'] ?? 0) ?: $total, 'desconto' => (float) ($n['TotalDesconto'] ?? 0), 'total' => $total,
+                'tabela_preco_id' => self::tabelaLojista(), 'forma_pagamento_id' => self::formaId($n['formapgto'] ?? 0),
+                'subtotal' => (float) ($n['totalmercadoria'] ?? 0) ?: $total, 'desconto' => (float) ($n['totaldesconto'] ?? 0), 'total' => $total,
                 'situacao' => $situacao, 'situacao_origem' => $situacaoOrigem, 'tipo_venda' => $t === 'S' && $tipoOp === 'venda' ? 'nf_avulsa' : null,
-                'faturado_em' => in_array($situacao, ['faturado', 'outra_empresa'], true) ? ((self::dataPhp($n['data_NF'] ?? null) ?? $data) . ' 12:00:00') : null,
-                'numero_nf' => (int) ($n['Nota_S'] ?? 0) ? (string) $n['Nota_S'] : null, 'nf_serie' => mb_substr((string) ($n['Serie'] ?? ''), 0, 5) ?: null,
-                'nf_chave' => mb_substr(self::digitos($n['PrefNFE'] ?? ''), 0, 44) ?: null,
-                'nf_situacao' => ['E' => 'autorizada', 'C' => 'cancelada', 'D' => 'denegada', 'R' => 'recebida'][strtoupper((string) ($n['Status_NF'] ?? ''))] ?? null,
-                'emitido_em' => self::dataPhp($n['data_NF'] ?? null), 'saida_em' => self::dataPhp($n['dataSaida'] ?? null), 'entrega_em' => self::dataPhp($n['dataEntrega'] ?? null),
-                'cfop' => mb_substr(self::digitos($n['CFOP'] ?? ''), 0, 10) ?: null, 'natureza_operacao' => mb_substr((string) ($n['NaturezaOperacao'] ?? ''), 0, 80) ?: null,
-                'tipo_operacao' => $tipoOp, 'frete_valor' => (float) ($n['ValorFrete'] ?? 0) ?: null,
-                'valor_icms' => (float) ($n['ValorICMS'] ?? 0) ?: null, 'valor_st' => (float) ($n['Valor_ST'] ?? 0) ?: null, 'valor_ipi' => (float) ($n['ValorIPI'] ?? 0) ?: null,
-                'transportadora' => (int) ($n['CodigoTransportadora'] ?? 0) ? mb_substr((string) ($nomes[(int) $n['CodigoTransportadora']] ?? 'Transportadora ' . $n['CodigoTransportadora']), 0, 80) : null,
-                'volumes' => (int) ($n['Volumes'] ?? 0) ?: null, 'peso_kg' => (float) ($n['PesoBruto'] ?? 0) ?: null, 'rastreio' => mb_substr((string) ($n['CodigoRastreio'] ?? ''), 0, 60) ?: null,
-                'observacoes' => mb_substr(trim((string) ($n['Obs'] ?? '')), 0, 1000) ?: null, 'obs_interna' => trim((string) ($n['ObsInterna'] ?? '')) ?: null,
+                'faturado_em' => in_array($situacao, ['faturado', 'outra_empresa'], true) ? ((self::dataPhp($n['data_nf'] ?? null) ?? $data) . ' 12:00:00') : null,
+                'numero_nf' => (int) ($n['nota_s'] ?? 0) ? (string) $n['nota_s'] : null, 'nf_serie' => mb_substr((string) ($n['serie'] ?? ''), 0, 5) ?: null,
+                'nf_chave' => mb_substr(self::digitos($n['prefnfe'] ?? ''), 0, 44) ?: null,
+                'nf_situacao' => ['E' => 'autorizada', 'C' => 'cancelada', 'D' => 'denegada', 'R' => 'recebida'][strtoupper((string) ($n['status_nf'] ?? ''))] ?? null,
+                'emitido_em' => self::dataPhp($n['data_nf'] ?? null), 'saida_em' => self::dataPhp($n['datasaida'] ?? null), 'entrega_em' => self::dataPhp($n['dataentrega'] ?? null),
+                'cfop' => mb_substr(self::digitos($n['cfop'] ?? ''), 0, 10) ?: null, 'natureza_operacao' => mb_substr((string) ($n['naturezaoperacao'] ?? ''), 0, 80) ?: null,
+                'tipo_operacao' => $tipoOp, 'frete_valor' => (float) ($n['valorfrete'] ?? 0) ?: null,
+                'valor_icms' => (float) ($n['valoricms'] ?? 0) ?: null, 'valor_st' => (float) ($n['valor_st'] ?? 0) ?: null, 'valor_ipi' => (float) ($n['valoripi'] ?? 0) ?: null,
+                'transportadora' => (int) ($n['codigotransportadora'] ?? 0) ? mb_substr((string) ($nomes[(int) $n['codigotransportadora']] ?? 'Transportadora ' . $n['codigotransportadora']), 0, 80) : null,
+                'volumes' => (int) ($n['volumes'] ?? 0) ?: null, 'peso_kg' => (float) ($n['pesobruto'] ?? 0) ?: null, 'rastreio' => mb_substr((string) ($n['codigorastreio'] ?? ''), 0, 60) ?: null,
+                'observacoes' => mb_substr(trim((string) ($n['obs'] ?? '')), 0, 1000) ?: null, 'obs_interna' => trim((string) ($n['obsinterna'] ?? '')) ?: null,
                 'entrega_uf' => in_array($uf, Listas::ufs(), true) ? $uf : null, 'entrega_outro' => 0,
-                'emitente_cnpj' => $emitente ?: null, 'nota10_guid' => $guid, 'nota10_pedido' => mb_substr((string) ($n['Pedido'] ?? ''), 0, 20) ?: null, 'nota10_tipo' => $t ?: null,
+                'emitente_cnpj' => $emitente ?: null, 'nota10_guid' => $guid, 'nota10_pedido' => mb_substr((string) ($n['pedido'] ?? ''), 0, 20) ?: null, 'nota10_tipo' => $t ?: null,
                 'nota10_vendedor_codigo' => $vend ?: null, 'nota10_vendedor_nome' => $vend ? mb_substr(Conferencia::limparNomeVendedor((string) ($nomes[$vend] ?? '')), 0, 100) ?: null : null,
                 'criado_em' => "$data $hora", 'atualizado_em' => "$data $hora",
             ];
@@ -817,19 +826,19 @@ class Importador
         if (!Conferencia::existe('notas')) {
             return null;
         }
-        $compras = Banco::todos("SELECT n.*, c.Razao, c.Nome AS NomeCad, c.CPF_CNPJ FROM n10_notas n LEFT JOIN n10_clientes c ON c.Numero = n.NumeroCliente
+        $compras = self::linhas("SELECT n.*, c.Razao AS razao, c.Nome AS nomecad, c.CPF_CNPJ AS cpf_cnpj FROM n10_notas n LEFT JOIN n10_clientes c ON c.Numero = n.NumeroCliente
             WHERE n.TipoOperacao = 'C' AND n.id > ? AND NOT EXISTS (SELECT 1 FROM compras_lancadas x WHERE x.nota10_guid = n.GUID_Nota) ORDER BY n.id LIMIT " . self::LOTE, [$cursor]);
         foreach ($compras as $n) {
             $id = Banco::inserir('compras_lancadas', ['origem' => 'nota10', 'situacao' => 'lancado',
-                'numero_nf' => (int) ($n['Nota_E'] ?? 0) ? (string) $n['Nota_E'] : null, 'serie' => mb_substr((string) ($n['Serie'] ?? ''), 0, 5) ?: null,
-                'fornecedor' => mb_substr(trim((string) ($n['Razao'] ?: $n['NomeCad'])) ?: 'Fornecedor ' . $n['NumeroCliente'], 0, 160),
-                'cnpj' => mb_substr(self::digitos($n['CPF_CNPJ'] ?? ''), 0, 14) ?: null, 'emissao' => self::dataPhp($n['Data']) ?? date('Y-m-d'),
-                'valor_total' => (float) ($n['TotalNota'] ?? 0), 'observacoes' => mb_substr(trim((string) ($n['NaturezaOperacao'] ?? '') . ' ' . (string) ($n['Obs'] ?? '')), 0, 1000) ?: null,
-                'fornecedor_id' => Banco::valor("SELECT id FROM fornecedores WHERE nota10_numero = ? AND tipo = 'fornecedor'", [$n['NumeroCliente']]) ?: null,
-                'nota10_guid' => $n['GUID_Nota']]);
+                'numero_nf' => (int) ($n['nota_e'] ?? 0) ? (string) $n['nota_e'] : null, 'serie' => mb_substr((string) ($n['serie'] ?? ''), 0, 5) ?: null,
+                'fornecedor' => mb_substr(trim((string) ($n['razao'] ?: $n['nomecad'])) ?: 'Fornecedor ' . $n['numerocliente'], 0, 160),
+                'cnpj' => mb_substr(self::digitos($n['cpf_cnpj'] ?? ''), 0, 14) ?: null, 'emissao' => self::dataPhp($n['data']) ?? date('Y-m-d'),
+                'valor_total' => (float) ($n['totalnota'] ?? 0), 'observacoes' => mb_substr(trim((string) ($n['naturezaoperacao'] ?? '') . ' ' . (string) ($n['obs'] ?? '')), 0, 1000) ?: null,
+                'fornecedor_id' => Banco::valor("SELECT id FROM fornecedores WHERE nota10_numero = ? AND tipo = 'fornecedor'", [$n['numerocliente']]) ?: null,
+                'nota10_guid' => $n['guid_nota']]);
             Banco::executar('INSERT INTO compras_lancadas_itens (lancamento_id, materia_prima_id, descricao, quantidade, valor_unitario, total, lancado)
                 SELECT ?, mp.id, LEFT(COALESCE(NULLIF(i.DescricaoProduto, \'\'), mp.nome, CONCAT(\'Item \', i.CodigoProduto)), 200), COALESCE(i.Quantidade, 0), i.ValorUnitario, i.ValorTotalItem, 1
-                FROM n10_itensnota i LEFT JOIN materias_primas mp ON mp.nota10_codigo = TRIM(i.CodigoProduto) WHERE i.GUID_Nota = ?', [$id, $n['GUID_Nota']]);
+                FROM n10_itensnota i LEFT JOIN materias_primas mp ON mp.nota10_codigo = TRIM(i.CodigoProduto) WHERE i.GUID_Nota = ?', [$id, $n['guid_nota']]);
             self::somar($rel, 'compras');
         }
         return count($compras) === self::LOTE ? (int) end($compras)['id'] : null;
@@ -889,7 +898,7 @@ class Importador
             'entrega' => ['Endereços de entrega para revisar', $rel['entrega_para_revisar']],
         ];
         $rel['faturado_total'] = (float) Banco::valor("SELECT COALESCE(SUM(total), 0) FROM pedidos WHERE origem = 'nota10' AND situacao = 'faturado'");
-        $rel['faturado_por_ano'] = array_column(Banco::todos("SELECT YEAR(faturado_em) AS ano, ROUND(SUM(total), 2) AS v FROM pedidos WHERE origem = 'nota10' AND situacao = 'faturado' GROUP BY 1 ORDER BY 1"), 'v', 'ano');
+        $rel['faturado_por_ano'] = array_column(self::linhas("SELECT YEAR(faturado_em) AS ano, ROUND(SUM(total), 2) AS v FROM pedidos WHERE origem = 'nota10' AND situacao = 'faturado' GROUP BY 1 ORDER BY 1"), 'v', 'ano');
         return null;
     }
 }

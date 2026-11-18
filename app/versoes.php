@@ -17,6 +17,13 @@
  */
 return [
     [
+        'versao' => '17.1', 'data' => '2026-11-18', 'titulo' => 'Correção na importação do Nota10',
+        'correcao' => [
+            'Importação do Nota10: com o backup real, os clientes, pedidos e produtos não entravam (o backup grava os nomes das colunas em letras minúsculas). Corrigido antes da importação de verdade.',
+        ],
+        'admin' => 'Se a V17.0 chegou a rodar a importação com o backup real, rode de novo na V17.1 (Importar Nota10 › passo 4): ela não duplica e completa o que faltou. O cadastro tipo TR do Nota10 agora vira "cliente e transportadora". Revisão e resposta em docs/nota10/revisao-V17.0.md.',
+    ],
+    [
         'versao' => '17.0', 'data' => '2026-11-18', 'titulo' => 'O histórico do Nota10 dentro do One',
         'novo' => [
             'Os clientes, leads, pedidos, itens, títulos, follow-ups e compras do Nota10 podem ser trazidos para o One (a importação é feita pela administração).',

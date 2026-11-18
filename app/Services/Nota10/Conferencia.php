@@ -468,9 +468,9 @@ class Conferencia
             $t === 'P' => 'lead',
             in_array($t, ['C', 'CP', 'RC', 'PC'], true) => 'cliente',
             in_array($t, ['CF', 'FC'], true) => 'cliente_fornecedor',
-            in_array($t, ['TC', 'CT'], true) => 'cliente_transportadora',
+            in_array($t, ['TC', 'CT', 'TR'], true) => 'cliente_transportadora', // TR: no backup real, o único TR também vende
             $t === 'F' => 'fornecedor',
-            in_array($t, ['T', 'TF', 'TR', 'FT'], true) => 'transportadora',
+            in_array($t, ['T', 'TF', 'FT'], true) => 'transportadora',
             $t === 'R' => 'vendedor',
             default => 'validar', // tipo digitado errado no Nota10
         };
