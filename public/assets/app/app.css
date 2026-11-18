@@ -74,3 +74,15 @@ body.ap { background: var(--fundo); min-height: 100vh; padding-bottom: calc(70px
 .aviso-flutuante.erro { background: var(--perigo); color: #fff; }
 .cod-produto { display: inline-block; font-family: ui-monospace, Consolas, monospace; font-size: .78em; font-weight: 700; background: var(--primaria-clara); color: var(--primaria-escura); border-radius: 6px; padding: 1px 6px; margin-right: 2px; }
 .ap-marca { display: inline-block; font-size: .64rem; font-weight: 800; text-transform: uppercase; padding: 1px 6px; border-radius: 99px; background: var(--secundaria-clara); color: var(--primaria-escura); }
+
+/* V16.3/V16.4 — onde entregar e bonificação */
+.ap-entrega { display: block; margin-top: 4px; color: var(--aviso); font-weight: 600; }
+.ap-bonif { grid-column: 3; display: flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; color: var(--texto-suave); }
+.ap-bonif input { width: 100%; min-width: 0; height: 32px; text-align: center; padding: 0; font-weight: 700; }
+.ap-bonif.tem { color: var(--secundaria-escura); }
+.ap-bonif.tem input { border-color: var(--secundaria-escura); background: var(--secundaria-clara); }
+.ap-bonificacao { display: grid; gap: 6px; padding: 10px; border: 1px dashed var(--secundaria-escura); border-radius: 12px; }
+.ap-bonificacao.acima { border-color: var(--aviso); background: var(--aviso-fundo); }
+.ap-bonificacao small { color: var(--texto-suave); }
+.ap-bonificacao select { width: 100%; }
+.ap-bonif { white-space: nowrap; }

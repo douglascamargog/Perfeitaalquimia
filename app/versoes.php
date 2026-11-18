@@ -17,6 +17,19 @@
  */
 return [
     [
+        'versao' => '16.5', 'data' => '2026-11-18', 'titulo' => 'Bonificação também no app do externo',
+        'novo' => [
+            'App do externo: cada produto tem o campo "🎁 bonif." para as unidades bonificadas, igual ao pedido do sistema: mesma nota, CFOP de bonificação, a loja não paga.',
+            'O resumo do app mostra quanto foi bonificado e o % do vendido. Acima de 15%, ele avisa que o pedido vai para aprovação. O motivo é obrigatório.',
+            'Funciona sem internet, como o resto do pedido: a bonificação vai junto quando o pedido for enviado.',
+            'O topo do pedido no app mostra onde entregar quando a loja tem endereço de entrega.',
+        ],
+        'melhoria' => [
+            'A lista de pedidos do app mostra o valor bonificado de cada pedido.',
+        ],
+        'admin' => 'O app recebe a regra da bonificação (limite e motivos de Configurações › Pedidos) junto com os dados que baixa ao abrir com internet. Celular que ficou offline desde antes desta versão só mostra o campo de bonificação depois de abrir o app conectado uma vez.',
+    ],
+    [
         'versao' => '16.4', 'data' => '2026-11-18', 'titulo' => 'Produto bonificado no pedido',
         'novo' => [
             'Novo pedido: coluna "Bonif." em cada produto. As unidades bonificadas vão na mesma nota da venda, com o CFOP de bonificação, e a loja não paga por elas.',

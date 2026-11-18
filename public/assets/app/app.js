@@ -97,7 +97,13 @@ function totais() {
     if (preco !== null && q > 0) { subtotal += preco * q; qtd += q; }
   }
   const minimo = pacote.minimos?.[c.uf] || 0;
-  return { c, subtotal, qtd, minimo, falta: Math.max(0, minimo - subtotal) };
+  // Bonificação: vai na mesma nota, a loja não paga e não conta para o mínimo (o servidor confere tudo de novo)
+  let bonificado = 0, qtdBon = 0;
+  for (const [id, q] of Object.entries(rascunho.bonif || {})) {
+    const preco = precoDe(c, id);
+    if (preco !== null && q > 0) { bonificado += preco * q; qtdBon += q; }
+  }
+  return { c, subtotal, qtd, minimo, falta: Math.max(0, minimo - subtotal), bonificado, qtdBon };
 }
 
 function telaPedido() {
@@ -111,14 +117,16 @@ function telaPedido() {
       <button type="button" class="ap-voltar" data-ir="clientes">← Clientes</button>
       <h1>${esc(nomeCliente(c))}</h1>
       <small>${esc(c.cidade || '')}/${esc(c.uf || '')} · tabela ${esc(tabela)}${rascunho.corrigindo ? ' · <b>corrigindo pedido com erro</b>' : ''}</small>
+      ${c.entrega ? `<small class="ap-entrega">📦 Entregar em: ${esc(c.entrega)}</small>` : ''}
     </div>
     <div class="ap-busca"><input type="search" placeholder="Buscar produto ou código…" value="${esc(buscaProdutos)}" data-busca-produtos aria-label="Buscar produto"></div>
     <ul class="ap-produtos">
       ${produtos.map((p) => { const q = rascunho.itens[p.id] || 0; return `
-        <li class="${q ? 'escolhido' : ''}">
+        <li class="${q || rascunho.bonif?.[p.id] ? 'escolhido' : ''}">
           ${p.imagem ? `<img src="${esc(p.imagem)}" alt="" loading="lazy" width="52" height="52">` : '<span class="ap-sem-foto"></span>'}
           <div><strong>${p.codigo ? `<span class="cod-produto">${esc(p.codigo)}</span> ` : ''}${esc(p.nome)}</strong><small>${p.marca ? '<span class="ap-marca">marca do cliente</span> ' : ''}${esc(p.embalagem || '')}</small><b>${real(precoDe(c, p.id))}</b></div>
           <div class="ap-qtd" data-produto="${p.id}"><button type="button" data-menos aria-label="Menos">−</button><input type="number" inputmode="numeric" min="0" value="${q || ''}" placeholder="0" aria-label="Quantidade de ${esc(p.nome)}"><button type="button" data-mais aria-label="Mais">+</button></div>
+          ${pacote.bonificacao ? `<label class="ap-bonif ${rascunho.bonif?.[p.id] ? 'tem' : ''}">🎁 bonif.<input type="number" inputmode="numeric" min="0" value="${rascunho.bonif?.[p.id] || ''}" placeholder="0" data-bonif="${p.id}" aria-label="Bonificar unidades de ${esc(p.nome)}"></label>` : ''}
         </li>`; }).join('')}
     </ul>
     <div class="ap-barra" data-barra>${barraHtml({ subtotal, qtd, minimo, falta })}</div>
@@ -132,7 +140,7 @@ function barraHtml({ subtotal, qtd, minimo, falta }) {
     <button type="button" class="botao lima" data-ir-pagamento ${!qtd ? 'disabled' : ''}>Pagamento ↓</button>`;
 }
 
-function resumoHtml({ c, subtotal, qtd, minimo, falta }) {
+function resumoHtml({ c, subtotal, qtd, minimo, falta, bonificado = 0 }) {
   const opcoes = pacote.formas.map((f) => {
     const bloqueada = f.bloqueia_com_atraso && c.boleto_bloqueado;
     return `<fieldset class="ap-forma ${bloqueada ? 'bloqueada' : ''}"><legend>${esc(f.nome)}</legend>
@@ -147,10 +155,26 @@ function resumoHtml({ c, subtotal, qtd, minimo, falta }) {
     <h2 class="ap-resumo-titulo">Pagamento</h2>
     <div class="ap-total"><span>${qtd} item(ns)</span><strong>${real(subtotal)}</strong></div>
     <div class="ap-minimo ${falta > 0 ? 'falta' : 'ok'}">${falta > 0 ? `Faltam ${real(falta)} para o mínimo (${real(minimo)})` : 'Pedido mínimo atingido ✓'}</div>
+    ${bonificacaoHtml(subtotal, bonificado)}
     ${opcoes}
     <textarea rows="2" placeholder="Observação (opcional)" data-obs aria-label="Observação">${esc(rascunho.observacoes || '')}</textarea>
     <button type="button" class="botao largo" data-salvar ${falta > 0 || !qtd ? 'disabled' : ''}>${!qtd ? 'Escolha os produtos' : falta > 0 ? 'Complete o pedido mínimo' : 'Salvar pedido'}</button>
     <small class="ap-nota">Funciona sem internet: o pedido fica no celular e é enviado sozinho quando a rede voltar.</small>`;
+}
+
+// Bonificação no resumo: quanto foi bonificado, % do vendido (acima do limite vai para aprovação) e o motivo
+function bonificacaoHtml(subtotal, bonificado) {
+  const regra = pacote.bonificacao;
+  if (!regra || bonificado <= 0) return '';
+  const pct = subtotal > 0 ? bonificado / subtotal * 100 : 100;
+  const acima = pct > regra.max_pct + 0.0001;
+  return `<div class="ap-bonificacao ${acima ? 'acima' : ''}" data-ap-bonificacao>
+      <strong>🎁 Bonificado: ${real(bonificado)} (${pct.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% do vendido)</strong>
+      ${acima ? `<small>Acima de ${regra.max_pct.toLocaleString('pt-BR')}%: o pedido vai para aprovação.</small>` : ''}
+      <select data-bonif-motivo aria-label="Motivo da bonificação"><option value="">Motivo da bonificação…</option>
+        ${regra.motivos.map((m) => `<option ${rascunho.bonificacao_motivo === m ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select>
+      <small>Vai na mesma nota com CFOP de bonificação; a loja não paga.</small>
+    </div>`;
 }
 
 const SITUACAO = {
@@ -172,7 +196,7 @@ async function telaPedidos() {
         const [rotulo, cor] = SITUACAO[chave] || [chave, 'cinza'];
         return `<li class="ap-item" data-item="${esc(i.uuid)}">
           <div class="ap-item-topo"><strong>${i.tipo === 'visita' ? 'Visita' : 'Pedido'}${i.pedido_id ? ' #' + i.pedido_id : ''} · ${esc(i.cliente_nome)}</strong><span class="selo ${cor}">${esc(i.tipo === 'visita' && i.estado === 'enviado' ? 'Registrada' : rotulo)}</span></div>
-          <small>${new Date(i.criado_em).toLocaleString('pt-BR')}${i.tipo === 'pedido' ? ' · ' + real(i.total) + ' · ' + i.qtd + ' item(ns)' : ''}${i.numero_nf ? ' · NF ' + esc(i.numero_nf) : ''}</small>
+          <small>${new Date(i.criado_em).toLocaleString('pt-BR')}${i.tipo === 'pedido' ? ' · ' + real(i.total) + ' · ' + i.qtd + ' item(ns)' + (i.bonificado > 0 ? ' · 🎁 ' + real(i.bonificado) + ' bonificado' : '') : ''}${i.numero_nf ? ' · NF ' + esc(i.numero_nf) : ''}</small>
           ${i.estado === 'erro' ? `<p class="ap-erro">${esc(i.mensagem)}</p><div class="ap-acoes"><button type="button" class="botao contorno pequeno" data-corrigir="${esc(i.uuid)}">Corrigir e reenviar</button><button type="button" class="botao contorno pequeno" data-descartar="${esc(i.uuid)}">Descartar</button></div>` : ''}
           ${i.situacao === 'recusado' && i.motivo ? `<p class="ap-erro">Motivo: ${esc(i.motivo)}</p>` : ''}
         </li>`;
@@ -275,7 +299,7 @@ document.addEventListener('click', async (e) => {
   if (alvo.dataset.aba) { rascunho = null; mostrar(alvo.dataset.aba); return; }
   if (alvo.dataset.ir) { mostrar(alvo.dataset.ir); return; }
   if (alvo.dataset.novoPedido) {
-    rascunho = { uuid: novoUuid(), cliente_id: Number(alvo.dataset.novoPedido), itens: {}, pagamento: '', observacoes: '' };
+    rascunho = { uuid: novoUuid(), cliente_id: Number(alvo.dataset.novoPedido), itens: {}, bonif: {}, bonificacao_motivo: '', pagamento: '', observacoes: '' };
     buscaProdutos = ''; mostrar('pedido'); window.scrollTo(0, 0); return;
   }
   if (alvo.dataset.visita) {
@@ -300,8 +324,11 @@ document.addEventListener('click', async (e) => {
   if (alvo.matches('[data-salvar]')) {
     const t = totais();
     if (!rascunho.pagamento) { toast('Escolha a forma de pagamento.', 'erro'); return; }
+    if (t.bonificado > 0 && !rascunho.bonificacao_motivo) { toast('Escolha o motivo da bonificação.', 'erro'); return; }
     const itens = Object.fromEntries(Object.entries(rascunho.itens).filter(([, q]) => q > 0));
+    const bonificados = Object.fromEntries(Object.entries(rascunho.bonif || {}).filter(([, q]) => q > 0));
     await guardarNaFila({ uuid: rascunho.uuid, tipo: 'pedido', estado: 'pendente', cliente_id: t.c.id, cliente_nome: nomeCliente(t.c), itens, pagamento: rascunho.pagamento,
+      bonificados, bonificacao_motivo: t.bonificado > 0 ? rascunho.bonificacao_motivo : '', bonificado: t.bonificado,
       observacoes: rascunho.observacoes || '', total: t.subtotal, qtd: t.qtd, criado_em: rascunho.criado_em || new Date().toISOString(), mensagem: null });
     toast(navigator.onLine ? 'Pedido salvo e enviado.' : 'Pedido salvo no celular. Será enviado quando houver internet.');
     rascunho = null; mostrar('pedidos'); return;
@@ -309,7 +336,8 @@ document.addEventListener('click', async (e) => {
   if (alvo.matches('[data-enviar]')) { await sincronizar(true); return; }
   if (alvo.dataset.corrigir) {
     const item = (await listarFila()).find((i) => i.uuid === alvo.dataset.corrigir);
-    rascunho = { uuid: item.uuid, cliente_id: item.cliente_id, itens: { ...item.itens }, pagamento: item.pagamento, observacoes: item.observacoes, criado_em: item.criado_em, corrigindo: true };
+    rascunho = { uuid: item.uuid, cliente_id: item.cliente_id, itens: { ...item.itens }, bonif: { ...(item.bonificados || {}) }, bonificacao_motivo: item.bonificacao_motivo || '',
+      pagamento: item.pagamento, observacoes: item.observacoes, criado_em: item.criado_em, corrigindo: true };
     mostrar('pedido'); return;
   }
   if (alvo.dataset.descartar) {
@@ -329,17 +357,29 @@ document.addEventListener('click', async (e) => {
 document.addEventListener('input', (e) => {
   if (e.target.matches('[data-busca-clientes]')) { buscaClientes = e.target.value; const pos = e.target.selectionStart; telaClientes(); const n = tela.querySelector('[data-busca-clientes]'); n.focus(); n.setSelectionRange(pos, pos); return; }
   if (e.target.matches('[data-busca-produtos]')) { buscaProdutos = e.target.value; const pos = e.target.selectionStart; telaPedido(); const n = tela.querySelector('[data-busca-produtos]'); n.focus(); n.setSelectionRange(pos, pos); return; }
+  if (e.target.matches('[data-bonif]') && rascunho) {
+    const id = e.target.dataset.bonif;
+    rascunho.bonif ??= {};
+    rascunho.bonif[id] = Math.max(0, Math.min(9999, Number(e.target.value) || 0));
+    e.target.closest('label').classList.toggle('tem', rascunho.bonif[id] > 0);
+    e.target.closest('li').classList.toggle('escolhido', rascunho.bonif[id] > 0 || (rascunho.itens[id] || 0) > 0);
+    tela.querySelector('[data-resumo]').innerHTML = resumoHtml(totais());
+    return;
+  }
   const caixa = e.target.closest('[data-produto]');
   if (caixa && rascunho) {
     rascunho.itens[caixa.dataset.produto] = Math.max(0, Math.min(String(caixa.dataset.produto).startsWith("t") ? 99999 : 9999, Number(e.target.value) || 0));
-    caixa.closest('li').classList.toggle('escolhido', rascunho.itens[caixa.dataset.produto] > 0);
+    caixa.closest('li').classList.toggle('escolhido', rascunho.itens[caixa.dataset.produto] > 0 || (rascunho.bonif?.[caixa.dataset.produto] || 0) > 0);
     tela.querySelector('[data-resumo]').innerHTML = resumoHtml(totais());
     tela.querySelector('[data-barra]').innerHTML = barraHtml(totais());
     return;
   }
   if (e.target.matches('[data-obs]') && rascunho) rascunho.observacoes = e.target.value;
 });
-document.addEventListener('change', (e) => { if (e.target.name === 'pagamento' && rascunho) rascunho.pagamento = e.target.value; });
+document.addEventListener('change', (e) => {
+  if (e.target.name === 'pagamento' && rascunho) rascunho.pagamento = e.target.value;
+  if (e.target.matches('[data-bonif-motivo]') && rascunho) rascunho.bonificacao_motivo = e.target.value;
+});
 
 window.addEventListener('online', () => { atualizarTopo(); sincronizar(); });
 window.addEventListener('offline', atualizarTopo);

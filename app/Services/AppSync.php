@@ -29,6 +29,7 @@ class AppSync
         [$w, $par] = self::escopo();
         $tolerancia = (int) Config::get('recompra.tolerancia_dias', 3);
         $clientes = Banco::todos("SELECT c.id, c.razao_social, c.nome_fantasia, c.cnpj, c.endereco, c.bairro, c.cidade, c.uf, c.telefone, c.whatsapp,
+                c.entrega_razao, c.entrega_endereco, c.entrega_numero, c.entrega_complemento, c.entrega_bairro, c.entrega_cidade, c.entrega_uf, c.entrega_cep,
                 c.tabela_preco_id, c.credito_situacao, c.ultima_compra_em, c.intervalo_medio_dias, c.tipo,
                 (c.intervalo_medio_dias > 0 AND c.ultima_compra_em + INTERVAL (c.intervalo_medio_dias + $tolerancia) DAY < CURDATE()) AS recompra_atrasada,
                 EXISTS (SELECT 1 FROM cobrancas cb WHERE cb.cliente_id = c.id AND cb.situacao = 'aberta') AS em_cobranca
@@ -39,7 +40,10 @@ class AppSync
             $c['tabela_preco_id'] = (int) ($c['tabela_preco_id'] ?: $padrao);
             $c['boleto_bloqueado'] = $bloquearBoleto && ($c['credito_situacao'] === 'atraso' || $c['em_cobranca']);
             $c['recompra_atrasada'] = (bool) $c['recompra_atrasada'];
-            unset($c['credito_situacao'], $c['em_cobranca']);
+            // V16.3: onde o pedido vai ser entregue (o servidor usa o endereço de entrega quando a loja tem um)
+            $c['entrega'] = \App\Services\EntregaService::tem($c) ? \App\Services\EntregaService::textoEntrega($c) : null;
+            unset($c['credito_situacao'], $c['em_cobranca'], $c['entrega_razao'], $c['entrega_endereco'], $c['entrega_numero'], $c['entrega_complemento'],
+                $c['entrega_bairro'], $c['entrega_cidade'], $c['entrega_uf'], $c['entrega_cep']);
         }
         unset($c);
         $tabelas = array_values(array_unique(array_column($clientes, 'tabela_preco_id'))) ?: [$padrao];
@@ -96,11 +100,14 @@ class AppSync
             'dias_cache' => (int) Config::get('app.dias_cache', 7), 'clientes' => $clientes, 'produtos' => $produtos, 'precos' => $precos,
             'tabelas' => Banco::todos('SELECT id, nome FROM tabelas_preco WHERE ativa = 1'), 'formas' => $formas, 'minimos' => $minimos,
             'whatsapp_empresa' => preg_replace('/\D/', '', (string) Config::get('empresa.whatsapp', '')),
+            // V16.4: bonificação (mesma nota, CFOP de bonificação, a loja não paga)
+            'bonificacao' => ['max_pct' => (float) Config::get('pedidos.bonificacao_max_pct', 15), 'motivos' => PedidoService::motivosBonificacao()],
         ];
     }
 
     /**
-     * Processa a fila do celular. $itens: [{tipo: 'pedido'|'visita', uuid, cliente_id, itens:{produto_id: qtd}, pagamento:'forma:cond', observacoes, resumo, data}]
+     * Processa a fila do celular. $itens: [{tipo: 'pedido'|'visita', uuid, cliente_id, itens:{produto_id: qtd}, bonificados:{produto_id: qtd}, bonificacao_motivo,
+     *   pagamento:'forma:cond', observacoes, resumo, data}]
      * Devolve [uuid => {ok, pedido_id?, situacao?, mensagem}]
      */
     public static function sincronizar(array $itens): array
@@ -125,6 +132,7 @@ class AppSync
             [$id, $erros] = PedidoService::criar($cliente, [
                 'itens' => array_map('intval', (array) ($item['itens'] ?? [])), 'forma_pagamento_id' => $forma, 'condicao_id' => $condicao,
                 'observacoes' => (string) ($item['observacoes'] ?? ''), 'origem' => 'app', 'usuario_id' => Auth::id(), 'vendedor_id' => Auth::id(), 'uuid' => $uuid,
+                'bonificados' => array_map('intval', (array) ($item['bonificados'] ?? [])), 'bonificacao_motivo' => (string) ($item['bonificacao_motivo'] ?? ''),
             ]);
             $resultado[$uuid] = $erros
                 ? ['ok' => false, 'mensagem' => implode(' ', $erros)]
