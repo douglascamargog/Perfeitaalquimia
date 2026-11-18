@@ -44,6 +44,20 @@ if (caixa) {
   });
 }
 
+// Ligações: envia todas as escolhas num campo só (JSON). Formulário com centenas de campos é barrado
+// por algumas hospedagens (limite de campos / filtro de segurança) e voltava "página não encontrada".
+document.querySelector('[data-n10-ligacoes]')?.addEventListener('submit', (e) => {
+  const form = e.currentTarget;
+  const mapa = {};
+  form.querySelectorAll('select[name^="mapa["]').forEach((s) => {
+    const m = s.name.match(/^mapa\[([^\]]+)\]\[(.*)\]$/);
+    if (!m) return;
+    (mapa[m[1]] ??= {})[m[2]] = s.value;
+    s.disabled = true; // não vai como campo separado
+  });
+  form.querySelector('[data-n10-mapa-json]').value = JSON.stringify(mapa);
+});
+
 // Gráfico: valor dos pedidos por ano
 const anos = JSON.parse(document.getElementById('n10-anos')?.textContent || '[]');
 const tela = document.getElementById('n10-grafico-anos');

@@ -79,7 +79,10 @@ const TMP = fs.mkdtempSync('/tmp/one-n10-');
     const tv1 = sql("select id from usuarios where email='televendas1@demo.local'");
     await a.selectOption('select[name="mapa[vendedor][1]"]', tv1);
     await a.selectOption('select[name="mapa[tipo_cadastro][T]"]', 'ignorar');
+    const envio = a.waitForRequest((r) => r.url().endsWith('/sistema/nota10/ligacoes') && r.method() === 'POST');
     await Promise.all([a.waitForNavigation(), a.click('[data-n10-salvar]')]);
+    const corpo = (await envio).postData() || '';
+    ok(corpo.includes('mapa_json=') && !corpo.includes('mapa%5B'), 'ligações vão num campo só (a hospedagem não barra formulário com centenas de campos)');
     ok(sql("select destino from nota10_mapas where tipo='vendedor' and codigo='1'") === tv1, 'ligação do vendedor guardada');
     ok((await a.locator('select[name="mapa[vendedor][1]"]').inputValue()) === tv1 && (await a.locator('select[name="mapa[tipo_cadastro][T]"]').inputValue()) === 'ignorar', 'a tela volta com as escolhas guardadas');
 

@@ -127,6 +127,7 @@ $opcoes = function (array $lista, $atual, string $vazio = 'Escolha…') {
 </div>
 
 <form method="post" action="<?= url('/sistema/nota10/ligacoes') ?>" id="ligacoes" class="n10-ligacoes" data-n10-ligacoes><?= csrf_campo() ?>
+  <input type="hidden" name="mapa_json" value="" data-n10-mapa-json><?php /* o navegador junta as escolhas aqui (um campo só: a hospedagem barra formulário com centenas de campos) */ ?>
   <div class="cabecalho-secao"><div><h2>Ligar o Nota10 ao One</h2>
     <p>Diga para onde vai cada coisa. O One já sugeriu pelo nome; confira e mude o que precisar. Pode guardar e voltar depois.</p></div></div>
 

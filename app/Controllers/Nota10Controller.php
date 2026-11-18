@@ -109,7 +109,9 @@ class Nota10Controller extends Controller
     /** Grava as ligações escolhidas (vendedores, tabelas, formas, segmentos, tipos de cadastro) */
     public function mapas(): void
     {
-        $n = Conferencia::salvarMapas((array) ($_POST['mapa'] ?? []));
+        // As escolhas chegam num campo só (JSON, montado pelo navegador); sem JavaScript, nos campos mapa[...] de sempre
+        $json = json_decode((string) ($_POST['mapa_json'] ?? ''), true);
+        $n = Conferencia::salvarMapas(is_array($json) && $json ? $json : (array) ($_POST['mapa'] ?? []));
         Auditoria::registrar('configuracoes', null, 'nota10_ligacoes', null, ['ligacoes' => $n]);
         Sessao::aviso('sucesso', 'Ligações guardadas. Elas serão usadas na importação.');
         redirecionar('/sistema/nota10#ligacoes');

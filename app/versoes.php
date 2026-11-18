@@ -17,6 +17,13 @@
  */
 return [
     [
+        'versao' => '16.8', 'data' => '2026-11-18', 'titulo' => 'Correção ao guardar as ligações do Nota10',
+        'correcao' => [
+            'Importar Nota10: "Guardar as ligações" podia dar "página não encontrada" com o backup real (muitos vendedores, segmentos e tipos).',
+        ],
+        'admin' => 'As escolhas da tela de ligações agora vão num campo só (JSON), em vez de centenas de campos. A hospedagem barra formulário com campos demais (limite max_input_vars / filtro de segurança mod_security) e devolvia "não encontrada". As ligações já guardadas continuam valendo.',
+    ],
+    [
         'versao' => '16.7', 'data' => '2026-11-18', 'titulo' => 'Importação do Nota10 aceita o backup em .txt',
         'melhoria' => [
             'Preparação para trazer o histórico do Nota10: o One agora aceita o backup do jeito que o Windows gera.',
