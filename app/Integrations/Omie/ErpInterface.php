@@ -40,7 +40,7 @@ interface ErpInterface
 
     /**
      * Envia um pedido como orçamento / etapa "a aprovar".
-     * $pedido: [uuid, cnpj, itens => [[omie_codigo_produto, quantidade, preco_unitario]], forma_pagamento, condicao, observacoes]
+     * $pedido: [uuid, cnpj, itens => [[omie_codigo_produto, quantidade, preco_unitario, cfop, bonificado (1 = vai na nota sem cobrar)]], forma_pagamento, condicao, observacoes]
      *          entrega => null (endereço do cadastro) ou [recebedor, endereco, numero, complemento, bairro, cep, cidade, uf, texto]
      * Devolve: [omie_codigo, numero, etapa]
      */

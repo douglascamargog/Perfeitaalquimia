@@ -17,6 +17,21 @@
  */
 return [
     [
+        'versao' => '16.4', 'data' => '2026-11-18', 'titulo' => 'Produto bonificado no pedido',
+        'novo' => [
+            'Novo pedido: coluna "Bonif." em cada produto. As unidades bonificadas vão na mesma nota da venda, com o CFOP de bonificação, e a loja não paga por elas.',
+            'O resumo mostra quanto foi bonificado e o % sobre o vendido. Ao bonificar, escolha o motivo (campanha, troca, amostra, acordo comercial, primeiro pedido).',
+            'Até 15% do valor vendido, o pedido segue normal. Acima disso, ele vai marcado para aprovação e a gestão recebe um aviso.',
+            'Pedidos › Bonificações: quanto foi bonificado por vendedor, cliente, mês, motivo ou produto.',
+        ],
+        'melhoria' => [
+            'Bonificação não conta como venda: fica fora do faturamento, da meta e da média do cliente.',
+            'Cada item do pedido mostra o CFOP que vai na nota (venda ou bonificação, dentro ou fora do estado, pela UF de entrega).',
+            'Pedido, Aprovação e Depósito mostram o selo "bonificado" nos itens. "Repetir último pedido" traz a bonificação na coluna certa, e no catálogo ela não volta como compra.',
+        ],
+        'admin' => 'Configurações › Pedidos: % máximo de bonificação sem aprovação (15) e a lista de motivos. Configurações › Fiscal: UF da empresa e os CFOPs sugeridos (venda 5102/6102, bonificação 5910/6910). Confira-os com a contadora. Itens com substituição tributária (5405/6404) ainda usam o CFOP de venda padrão: vamos ajustar quando o backup do Nota10 mostrar os CFOPs usados. Ao ERP, cada item vai com o CFOP e a marca de bonificado, e a observação da nota diz "BONIFICAÇÃO (...) não cobrar no boleto". A bonificação vale para pedido montado pela equipe; o app do externo e o orçamento ainda não têm.',
+    ],
+    [
         'versao' => '16.3', 'data' => '2026-11-18', 'titulo' => 'Endereço de entrega diferente do CNPJ',
         'novo' => [
             'Cadastro da loja: "Entregar em outro endereço", para quando a entrega não é no endereço do CNPJ (com quem recebe, número, bairro, cidade, UF e CEP).',

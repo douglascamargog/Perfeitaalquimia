@@ -43,7 +43,8 @@ $origens = ['catalogo' => 'Catálogo (cliente)', 'sistema' => 'Sistema (equipe)'
     <table class="tabela ped-itens">
       <thead><tr><th>Produto</th><th class="direita">Qtd.</th><th class="direita">Preço</th><th class="direita">Total</th></tr></thead>
       <tbody>
-      <?php foreach ($itens as $i): ?><tr><td><?= !empty($i['codigo']) ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><?= e($i['nome']) ?></td><td class="direita"><?= (int) $i['quantidade'] ?></td><td class="direita"><?= dinheiro((float) $i['preco_unitario']) ?><?= (float) ($i['desconto_pct'] ?? 0) > 0 ? '<small class="suave" style="display:block">tabela ' . dinheiro((float) $i['preco_tabela']) . ' · −' . e(rtrim(rtrim(number_format((float) $i['desconto_pct'], 2, ',', ''), '0'), ',')) . '%</small>' : '' ?></td><td class="direita"><?= dinheiro((float) $i['total']) ?></td></tr><?php endforeach; ?>
+      <?php foreach ($itens as $i): ?><tr<?= (int) ($i['bonificado'] ?? 0) ? ' data-item-bonificado' : '' ?>><td><?= !empty($i['codigo']) ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><?= e($i['nome']) ?>
+        <?= (int) ($i['bonificado'] ?? 0) ? ' <span class="selo selo-bonificado">bonificado</span>' : '' ?><?= !empty($i['cfop']) ? ' <small class="suave" title="CFOP do item na nota">CFOP ' . e(substr($i['cfop'], 0, 1) . '.' . substr($i['cfop'], 1)) . '</small>' : '' ?></td><td class="direita"><?= (int) $i['quantidade'] ?></td><td class="direita"><?= dinheiro((float) $i['preco_unitario']) ?><?= (float) ($i['desconto_pct'] ?? 0) > 0 ? '<small class="suave" style="display:block">tabela ' . dinheiro((float) $i['preco_tabela']) . ' · −' . e(rtrim(rtrim(number_format((float) $i['desconto_pct'], 2, ',', ''), '0'), ',')) . '%</small>' : '' ?></td><td class="direita"><?= (int) ($i['bonificado'] ?? 0) ? '<small class="suave">' . dinheiro((float) $i['valor_bonificado']) . '<br>não cobrado</small>' : dinheiro((float) $i['total']) ?></td></tr><?php endforeach; ?>
       </tbody>
       <tfoot>
         <tr><td colspan="3" class="direita">Subtotal</td><td class="direita"><?= dinheiro((float) $p['subtotal']) ?></td></tr>
@@ -53,6 +54,8 @@ $origens = ['catalogo' => 'Catálogo (cliente)', 'sistema' => 'Sistema (equipe)'
         <?php if (!empty($p['campanhas'])): ?><tr data-pedido-campanha><td colspan="3" class="direita">Campanha <?= e($p['campanhas']) ?><?= (float) $p['campanha_desconto'] > 0 ? ' (' . e(\App\Services\CampanhaService::pct((float) $p['campanha_desconto_pct'])) . ', já no desconto)' : '' ?>
           <?= $p['campanha_brindes'] ? '<br>🎁 Brinde: <strong>' . e($p['campanha_brindes']) . '</strong>' : '' ?><?= (int) $p['frete_gratis'] ? '<br><strong>Frete grátis</strong>' : '' ?></td>
           <td class="direita"><?= (float) $p['campanha_desconto'] > 0 ? dinheiro((float) $p['campanha_desconto']) : '' ?></td></tr><?php endif; ?>
+        <?php if ((float) ($p['bonificado_valor'] ?? 0) > 0): ?><tr data-pedido-bonificacao><td colspan="3" class="direita">Bonificação<?= $p['bonificacao_motivo'] ? ' (' . e($p['bonificacao_motivo']) . ')' : '' ?>: vai na nota, a loja não paga
+          <?= $p['bonificacao_acima_limite'] ? '<span class="selo selo-desconto">acima do limite</span>' : '' ?></td><td class="direita"><?= dinheiro((float) $p['bonificado_valor']) ?></td></tr><?php endif; ?>
         <tr class="ped-total-final"><td colspan="3" class="direita">Total</td><td class="direita"><?= dinheiro((float) $p['total']) ?></td></tr>
       </tfoot>
     </table>

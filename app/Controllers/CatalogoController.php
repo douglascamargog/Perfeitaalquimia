@@ -190,6 +190,9 @@ class CatalogoController extends Controller
             redirecionar('/catalogo/pedidos');
         }
         foreach (Pedido::itens((int) $pedido['id']) as $i) {
+            if ((int) $i['bonificado']) {
+                continue; // bonificação não volta como compra
+            }
             if ($i['terceirizacao_produto_id']) {
                 CatalogoAcesso::definirQuantidade('t' . $i['terceirizacao_produto_id'], (int) $i['quantidade']);
             } elseif ($i['produto_id']) {

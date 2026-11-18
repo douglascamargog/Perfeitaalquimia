@@ -17,6 +17,7 @@ $origens = ['catalogo' => 'Catálogo', 'sistema' => 'Sistema', 'app' => 'App ext
   </div>
   <div class="acoes">
     <?php if (Auth::pode('pedidos.criar')): ?><a class="botao" href="<?= url('/pedidos/novo') ?>"><svg class="icone"><use href="<?= $icones ?>#mais"/></svg>Novo pedido</a><?php endif; ?>
+    <a class="botao contorno" href="<?= url('/pedidos/bonificacoes') ?>" data-link-bonificacoes>Bonificações</a>
     <a class="botao contorno" href="<?= url('/catalogo') ?>" target="_blank" rel="noopener"><svg class="icone"><use href="<?= $icones ?>#externo"/></svg>Abrir catálogo</a>
   </div>
 </div>

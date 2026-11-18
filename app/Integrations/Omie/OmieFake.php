@@ -141,7 +141,9 @@ class OmieFake implements ErpInterface
         $numero = count($pedidos) + 1001;
         $total = 0;
         foreach ($pedido['itens'] ?? [] as $item) {
-            $total += $item['quantidade'] * $item['preco_unitario'];
+            if (empty($item['bonificado'])) { // bonificado vai na nota, mas não entra no valor a receber
+                $total += $item['quantidade'] * $item['preco_unitario'];
+            }
         }
         $novo = [
             'uuid'        => $pedido['uuid'],
@@ -154,6 +156,7 @@ class OmieFake implements ErpInterface
             'numero_nf'   => null,
             'faturado_em' => null,
             'entrega'     => $pedido['entrega'] ?? null,
+            'itens'       => $pedido['itens'] ?? [],
             'observacoes' => $pedido['observacoes'] ?? '',
         ];
         $pedidos[] = $novo;

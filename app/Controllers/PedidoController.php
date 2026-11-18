@@ -52,6 +52,7 @@ class PedidoController extends Controller
         }
         $ultimo = Banco::valor("SELECT id FROM pedidos WHERE cliente_id = ? AND situacao IN ('faturado','aprovado') ORDER BY criado_em DESC LIMIT 1", [$cliente['id']]);
         $quantidades = (array) Sessao::antigo('qtd', []);
+        $bonificados = (array) Sessao::antigo('bonif', []);
         if (!$quantidades && $orcamento) {
             foreach (OrcamentoService::itens((int) $orcamento['id']) as $i) {
                 $quantidades[$i['chave']] = $i['quantidade'];
@@ -61,16 +62,27 @@ class PedidoController extends Controller
         $corrigir = ctype_digit((string) ($_GET['corrigir'] ?? '')) ? $this->pedidoParaCorrigir((int) $_GET['corrigir'], (int) $cliente['id']) : null;
         if (!$quantidades && $corrigir) {
             foreach (Pedido::itens((int) $corrigir['id']) as $i) {
-                $quantidades[$i['terceirizacao_produto_id'] ? 't' . $i['terceirizacao_produto_id'] : $i['produto_id']] = $i['quantidade'];
+                $chave = $i['terceirizacao_produto_id'] ? 't' . $i['terceirizacao_produto_id'] : $i['produto_id'];
+                if ((int) $i['bonificado']) {
+                    $bonificados[$chave] = (int) $i['quantidade']; // item bonificado volta na coluna "Bonif."
+                } else {
+                    $quantidades[$chave] = $i['quantidade'];
+                }
             }
         }
         if (!$quantidades && ($_GET['repetir'] ?? '') === '1' && $ultimo) {
             foreach (Pedido::itens((int) $ultimo) as $i) {
-                $quantidades[$i['terceirizacao_produto_id'] ? 't' . $i['terceirizacao_produto_id'] : $i['produto_id']] = $i['quantidade'];
+                $chave = $i['terceirizacao_produto_id'] ? 't' . $i['terceirizacao_produto_id'] : $i['produto_id'];
+                if ((int) $i['bonificado']) {
+                    $bonificados[$chave] = (int) $i['quantidade']; // item bonificado volta na coluna "Bonif."
+                } else {
+                    $quantidades[$chave] = $i['quantidade'];
+                }
             }
         }
         $this->tela('pedidos/novo', [
-            'titulo' => 'Novo pedido', 'c' => $cliente, 'tabela' => $tabela, 'produtos' => $produtos, 'quantidades' => $quantidades,
+            'titulo' => 'Novo pedido', 'c' => $cliente, 'tabela' => $tabela, 'produtos' => $produtos, 'quantidades' => $quantidades, 'bonificados' => $bonificados,
+            'motivosBonificacao' => PedidoService::motivosBonificacao(), 'bonificacaoMax' => (float) \App\Core\Config::get('pedidos.bonificacao_max_pct', 15),
             'minimo' => PedidoService::pedidoMinimo($cliente['uf']), 'formas' => PedidoService::formasDePagamento($cliente, PHP_FLOAT_MAX),
             'boletoBloqueado' => PedidoService::boletoBloqueado($cliente), 'ultimo' => $ultimo, 'uuid' => PedidoService::novoUuid(),
             'orcamento' => $orcamento, 'corrigir' => $corrigir, 'modelos' => ModeloPedidoService::disponiveis((int) Auth::id()),
@@ -91,6 +103,7 @@ class PedidoController extends Controller
             'observacoes' => $this->campo('observacoes'), 'origem' => 'sistema', 'usuario_id' => Auth::id(), 'uuid' => $this->campo('uuid'),
             'descontos' => (array) ($_POST['desconto'] ?? []), 'desconto_pedido_pct' => $this->campo('desconto_pedido'),
             'entrega' => in_array($this->campo('entrega'), ['cadastro', 'entrega'], true) ? $this->campo('entrega') : null,
+            'bonificados' => (array) ($_POST['bonif'] ?? []), 'bonificacao_motivo' => $this->campo('bonificacao_motivo'),
         ]);
         if ($erros) {
             $this->voltarComErros('/pedidos/novo?cliente=' . (int) $cliente['id'], $erros);
@@ -167,5 +180,16 @@ class PedidoController extends Controller
         \App\Services\ErpSync::pedidos();
         Sessao::aviso('sucesso', 'Faturamento simulado: a nota voltou do ERP e a ficha do cliente foi atualizada.');
         redirecionar("/pedidos/$id");
+    }
+
+    /** Pedidos › Bonificações (V16.4): quanto foi bonificado por vendedor, cliente, mês, motivo ou produto */
+    public function bonificacoes(): void
+    {
+        $B = \App\Services\BonificacaoService::class;
+        $periodo = array_key_exists($_GET['periodo'] ?? '', $B::PERIODOS) ? $_GET['periodo'] : '12m';
+        $grupo = array_key_exists($_GET['grupo'] ?? '', $B::GRUPOS) ? $_GET['grupo'] : 'vendedor';
+        $this->tela('pedidos/bonificacoes', ['titulo' => 'Bonificações', 'periodo' => $periodo, 'grupo' => $grupo,
+            'resumo' => $B::resumo($periodo), 'grupos' => $B::agrupado($periodo, $grupo), 'pedidos' => $B::pedidos($periodo),
+            'limite' => (float) \App\Core\Config::get('pedidos.bonificacao_max_pct', 15), 'estilos' => ['carteira.css', 'pedidos.css', 'analise.css']]);
     }
 }

@@ -104,3 +104,4 @@
 
 /* V16.3 — pedido com entrega em outro endereço (destaque para o despacho) */
 .ped-entrega-destaque { border: 2px solid var(--aviso); background: var(--aviso-fundo); border-radius: var(--raio-pequeno); padding: 8px 12px; margin: 8px 0 0; }
+.dep-bonificado { background: var(--secundaria-clara); color: var(--secundaria-escura); }

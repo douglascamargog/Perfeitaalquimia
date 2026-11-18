@@ -171,3 +171,13 @@ tr.ped-do-modelo { animation: ped-pisca 1.2s ease; }
 .ped-entrega-unico { margin: 0; }
 .ped-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .ped-entrega-destaque { border: 2px solid var(--aviso); background: var(--aviso-fundo); border-radius: var(--raio-pequeno); padding: 8px 12px; }
+
+/* V16.4 — bonificação */
+.ped-bonif { width: 64px; }
+.ped-tabela tr.bonificado .ped-bonif { border-color: var(--secundaria-escura); background: var(--secundaria-clara); }
+.ped-bonificacao { display: grid; gap: 6px; padding: 10px; border: 1px dashed var(--secundaria-escura); border-radius: var(--raio-pequeno); }
+.ped-bonificacao[hidden] { display: none; }
+.ped-bonificacao label { display: grid; gap: 4px; font-weight: 600; font-size: .86rem; }
+.selo-bonificado { background: var(--secundaria-clara); color: var(--secundaria-escura); }
+.ped-tabela .ped-qtd, .ped-tabela .ped-bonif { min-width: 66px; }
+.ped-tabela .ped-desc { min-width: 56px; max-width: 70px; }

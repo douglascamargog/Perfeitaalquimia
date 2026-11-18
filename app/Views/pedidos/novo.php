@@ -77,15 +77,17 @@ foreach ($campanhas as $cp) {
     </div>
     <div class="tabela-rolagem">
       <table class="tabela ped-tabela">
-        <thead><tr><th>Produto</th><th class="direita">Preço</th><th>Qtd.</th><th>Desc. %</th><th class="direita">Total</th></tr></thead>
+        <thead><tr><th>Produto</th><th class="direita">Preço</th><th>Qtd.</th><th>Desc. %</th><th title="Unidades bonificadas: vão na mesma nota, com CFOP de bonificação, e a loja não paga">Bonif.</th><th class="direita">Total</th></tr></thead>
         <tbody>
-        <?php foreach ($produtos as $p): $q = (int) ($quantidades[$p['id']] ?? 0); ?>
-          <tr data-linha class="<?= !empty($p['terceirizado']) ? 'ped-linha-marca' : '' ?>" data-nome="<?= e(mb_strtolower(($p['codigo'] ?? '') . ' ' . $p['nome'] . ' ' . $p['categoria'])) ?>" data-preco="<?= e((string) $p['preco']) ?>">
+        <?php foreach ($produtos as $p): $q = (int) ($quantidades[$p['id']] ?? 0); $qb = (int) ($bonificados[$p['id']] ?? 0); ?>
+          <tr data-linha class="<?= !empty($p['terceirizado']) ? 'ped-linha-marca' : '' ?>" data-nome="<?= e(mb_strtolower(($p['codigo'] ?? '') . ' ' . $p['nome'] . ' ' . $p['categoria'])) ?>" data-preco="<?= e((string) $p['preco']) ?>"
+              data-preco-tabela="<?= e((string) ($p['preco_cheio'] ?? $p['preco'])) ?>">
             <td><div class="ped-produto"><?php if ($p['imagem']): ?><img src="<?= url('/' . $p['imagem']) ?>" alt="" width="40" height="40" loading="lazy"><?php endif; ?>
               <span><strong><?= !empty($p['codigo']) ? '<span class="cod-produto">' . e($p['codigo']) . '</span> ' : '' ?><?= e($p['nome']) ?></strong><small><?= !empty($p['terceirizado']) ? '<span class="selo-marca">marca do cliente</span> ' . (int) $p['rotulos'] . ' rótulo(s) · ' : '' ?><?= e($p['embalagem']) ?><?= $p['estoque'] !== null ? ' · estoque ' . (int) $p['estoque'] : '' ?></small></span></div></td>
             <td class="direita"><?php if (!empty($p['preco_cheio'])): ?><s class="ped-preco-cheio"><?= dinheiro((float) $p['preco_cheio']) ?></s><span class="ped-promo">-<?= e(\App\Services\CampanhaService::pct((float) $p['promo_pct'])) ?></span><br><?php endif; ?><?= dinheiro((float) $p['preco']) ?></td>
             <td><input class="ped-qtd" type="number" name="qtd[<?= e((string) $p['id']) ?>]" min="0" max="<?= !empty($p['terceirizado']) ? 99999 : 9999 ?>" value="<?= $q ?: '' ?>" placeholder="0" aria-label="Quantidade de <?= e($p['nome']) ?>"></td>
             <td><input class="ped-desc" type="text" inputmode="decimal" name="desconto[<?= e((string) $p['id']) ?>]" value="<?= e((string) (\App\Core\Sessao::antigo('desconto', [])[$p['id']] ?? '')) ?>" placeholder="0" aria-label="Desconto (%) em <?= e($p['nome']) ?>"></td>
+            <td><input class="ped-bonif" type="number" name="bonif[<?= e((string) $p['id']) ?>]" min="0" max="9999" value="<?= $qb ?: '' ?>" placeholder="0" aria-label="Bonificar unidades de <?= e($p['nome']) ?>"></td>
             <td class="direita" data-total-linha><?= $q ? dinheiro($q * (float) $p['preco']) : '' ?></td>
           </tr>
         <?php endforeach; ?>
@@ -109,6 +111,12 @@ foreach ($campanhas as $cp) {
       <label>Desconto no pedido (%)<input type="text" inputmode="decimal" name="desconto_pedido" value="<?= antigo('desconto_pedido') ?>" placeholder="0" data-desconto-pedido></label>
       <p class="ped-desconto-resumo" data-desconto-resumo hidden></p>
       <p class="ped-desconto-resumo campanha" data-desconto-campanha hidden></p>
+    </div>
+    <div class="ped-bonificacao" data-bonificacao data-bonificacao-max="<?= e((string) $bonificacaoMax) ?>" hidden>
+      <p class="ped-desconto-resumo" data-bonificacao-resumo></p>
+      <label>Motivo da bonificação<select name="bonificacao_motivo" data-bonificacao-motivo>
+        <option value="">Escolha…</option><?php foreach ($motivosBonificacao as $m): ?><option <?= antigo('bonificacao_motivo') === $m ? 'selected' : '' ?>><?= e($m) ?></option><?php endforeach; ?></select></label>
+      <small class="suave">Vai na mesma nota da venda com CFOP de bonificação; a loja não paga e não conta no faturamento nem na meta. Só vale para pedido (o orçamento não leva).</small>
     </div>
     <div class="cat-minimo falta" data-caixa-minimo><span data-texto-minimo></span><div class="cat-minimo-barra"><i data-barra-minimo style="width:0"></i></div></div>
     <h3>Entrega</h3>

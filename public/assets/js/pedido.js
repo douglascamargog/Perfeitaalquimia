@@ -44,6 +44,25 @@ function recalcular() {
     resumo.textContent = `Desconto total: ${real(dado)} (${pctTotal.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%)`
       + (pctTotal > max + 0.0001 ? ` · acima do limite de ${max.toLocaleString('pt-BR')}%: o pedido vai para aprovação` : '');
   }
+  // Bonificação: unidades que vão na nota sem a loja pagar (valor pelo preço de tabela; limite em % do vendido)
+  const caixaBon = form.querySelector('[data-bonificacao]');
+  if (caixaBon) {
+    let bon = 0;
+    form.querySelectorAll('[data-linha]').forEach((linha) => {
+      const qb = Math.max(0, Number(linha.querySelector('.ped-bonif')?.value) || 0);
+      bon += qb * Number(linha.dataset.precoTabela || linha.dataset.preco);
+      linha.classList.toggle('bonificado', qb > 0);
+    });
+    const maxBon = Number(caixaBon.dataset.bonificacaoMax) || 0;
+    const pctBon = tabela > 0 ? bon / tabela * 100 : (bon > 0 ? 100 : 0);
+    caixaBon.hidden = bon <= 0;
+    const motivo = caixaBon.querySelector('[data-bonificacao-motivo]');
+    motivo.required = bon > 0;
+    const r = caixaBon.querySelector('[data-bonificacao-resumo]');
+    r.className = 'ped-desconto-resumo' + (pctBon > maxBon + 0.0001 ? ' acima' : '');
+    r.textContent = `Bonificado: ${real(bon)} (${pctBon.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% do vendido)`
+      + (pctBon > maxBon + 0.0001 ? ` · acima de ${maxBon.toLocaleString('pt-BR')}%: o pedido vai para aprovação` : '');
+  }
   form.querySelector('[data-itens]').textContent = itens;
   form.querySelector('[data-subtotal]').textContent = real(totalPedido);
   const falta = Math.max(0, minimo - tabela); // pedido mínimo pelo preço de tabela (como o servidor confere)
@@ -109,7 +128,7 @@ function filtrar() {
   const so = form.querySelector('[data-so-escolhidos]')?.checked;
   // No link do orçamento a busca vale só para a lista "Adicionar mais produtos"
   (campo.closest('[data-area-filtro]') || form).querySelectorAll('[data-linha]').forEach((linha) => {
-    const visivel = (!termo || linha.dataset.nome.includes(termo)) && (!so || linha.classList.contains('escolhido'));
+    const visivel = (!termo || linha.dataset.nome.includes(termo)) && (!so || linha.classList.contains('escolhido') || linha.classList.contains('bonificado'));
     linha.hidden = !visivel;
   });
 }
@@ -139,7 +158,7 @@ function aplicarModelo() {
 if (form) {
   form.querySelector('[data-modelo-aplicar]')?.addEventListener('click', aplicarModelo);
   form.addEventListener('input', (e) => {
-    if (e.target.matches('.ped-qtd, .ped-desc, [data-desconto-pedido]')) recalcular();
+    if (e.target.matches('.ped-qtd, .ped-desc, .ped-bonif, [data-desconto-pedido]')) recalcular();
     if (e.target.matches('[data-filtro-produtos]')) filtrar();
   });
   form.addEventListener('change', (e) => { if (e.target.matches('[data-so-escolhidos]')) filtrar(); });

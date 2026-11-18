@@ -62,7 +62,7 @@ $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceiriza
         $qtd = $old['qtd'] ?? ($i['qtd_separada'] ?? 0);
         $lotes = $old['lotes'] ?? ($i['lotes'] ? array_map(fn($l) => ['lote' => $l['lote'], 'validade' => $l['validade'], 'qtd' => $l['quantidade']], $i['lotes']) : [['lote' => '', 'validade' => '', 'qtd' => '']]); ?>
         <tr data-item="<?= $iid ?>" data-ean="<?= e((string) $i['ean']) ?>" data-pedido-qtd="<?= (int) $i['quantidade'] ?>">
-          <td><?= !empty($i['codigo']) ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><strong><?= e($i['nome']) ?></strong>
+          <td><?= !empty($i['codigo']) ? '<span class="cod-produto">' . e($i['codigo']) . '</span> ' : '' ?><strong><?= e($i['nome']) ?></strong><?= (int) ($i['bonificado'] ?? 0) ? ' <span class="selo dep-bonificado" data-dep-bonificado>bonificado</span>' : '' ?>
             <small class="suave"><?= e((string) $i['embalagem']) ?><?= $i['ean'] ? ' · EAN ' . e($i['ean']) : '' ?></small>
             <?= $i['terceirizacao_produto_id'] ? '<span class="selo cinza">rótulo do cliente</span>' : '' ?></td>
           <td class="direita"><strong><?= (int) $i['quantidade'] ?></strong></td>

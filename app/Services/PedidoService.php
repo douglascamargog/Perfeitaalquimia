@@ -37,6 +37,24 @@ class PedidoService
         return $tabela ?: Banco::um('SELECT * FROM tabelas_preco WHERE ativa = 1 ORDER BY id LIMIT 1');
     }
 
+    /**
+     * CFOP sugerido para o item (Configurações › Fiscal): venda ou bonificação, dentro ou fora do estado (pela UF de ENTREGA).
+     * Mesma nota fiscal para venda e bonificação: cada item leva o seu CFOP.
+     */
+    public static function cfop(bool $bonificado, ?string $ufEntrega): string
+    {
+        $dentro = strtoupper((string) $ufEntrega) === strtoupper((string) \App\Core\Config::get('fiscal.uf_empresa', 'RS')) || !$ufEntrega;
+        $chave = 'fiscal.cfop_' . ($bonificado ? 'bonificacao' : 'venda') . '_' . ($dentro ? 'dentro' : 'fora');
+        $padrao = ['fiscal.cfop_venda_dentro' => '5102', 'fiscal.cfop_venda_fora' => '6102', 'fiscal.cfop_bonificacao_dentro' => '5910', 'fiscal.cfop_bonificacao_fora' => '6910'][$chave];
+        return preg_replace('/\D/', '', (string) \App\Core\Config::get($chave, $padrao)) ?: $padrao;
+    }
+
+    /** Motivos de bonificação (Configurações › Pedidos) */
+    public static function motivosBonificacao(): array
+    {
+        return (array) \App\Core\Config::get('pedidos.bonificacao_motivos', ['Campanha', 'Troca', 'Amostra', 'Acordo comercial', 'Primeiro pedido']);
+    }
+
     /** Pedido mínimo da UF do cliente */
     public static function pedidoMinimo(?string $uf): float
     {
@@ -215,9 +233,25 @@ class PedidoService
         } elseif ($condicao && $condicao['bloqueio']) {
             $erros[] = $condicao['nome'] . ': ' . $condicao['bloqueio'] . '.';
         }
+        // Bonificação (só em pedido montado pela equipe): itens que vão na mesma nota, com CFOP próprio, sem a loja pagar
+        $bonificados = [];
+        $bonValor = 0.0;
+        $bonMotivo = null;
+        if (in_array($d['origem'] ?? '', ['sistema', 'app'], true) && array_filter(array_map('intval', (array) ($d['bonificados'] ?? [])))) {
+            foreach (self::calcular($cliente, (array) $d['bonificados'])['itens'] as $b) {
+                $preco = (float) ($b['preco_cheio'] ?? $b['preco']); // preço da tabela do cliente (sem promoção)
+                $bonificados[] = $b + ['preco_tabela_bon' => $preco, 'valor_bon' => round($b['quantidade'] * $preco, 2)];
+            }
+            $bonValor = round(array_sum(array_column($bonificados, 'valor_bon')), 2);
+            $bonMotivo = trim((string) ($d['bonificacao_motivo'] ?? ''));
+            if ($bonificados && !in_array($bonMotivo, self::motivosBonificacao(), true)) {
+                $erros[] = 'Escolha o motivo da bonificação.';
+            }
+        }
         if ($erros) {
             return [null, $erros];
         }
+        $entrega = EntregaService::paraPedido($cliente, $d['entrega'] ?? null);
 
         $vendedor = (int) ($d['vendedor_id'] ?? 0) ?: (int) ($d['usuario_id'] ?? 0) ?: (int) $cliente['responsavel_id'] ?: null;
         // Externo em visita do roteiro numa loja de outra carteira: a venda é da dona da loja, ele fica como "tirado por"
@@ -265,8 +299,12 @@ class PedidoService
         $base = $carrinho['subtotal'] - $descontoCampanha - $descontoPedido;
         $desconto = round($descontoCampanha + $descontoPedido + ($condicao ? $base * (float) $condicao['desconto_pct'] / 100 : 0.0), 2);
         $brindes = implode(' · ', array_column($camp['brindes'], 'texto'));
+        $limiteBon = (float) \App\Core\Config::get('pedidos.bonificacao_max_pct', 15);
+        $pctBon = $subtotalTabela > 0 ? $bonValor / $subtotalTabela * 100 : 0;
+        $bonAcima = $bonValor > 0 && $pctBon > $limiteBon + 0.0001;
 
-        $id = Banco::transacao(function () use ($cliente, $carrinho, $forma, $condicao, $desconto, $vendedor, $tiradoPor, $origem, $uuid, $d, $descontoPedidoPct, $descontoVendedor, $acimaLimite, $pctVendedor, $limite, $camp, $campPct, $descontoCampanha, $brindes) {
+        $id = Banco::transacao(function () use ($cliente, $carrinho, $forma, $condicao, $desconto, $vendedor, $tiradoPor, $origem, $uuid, $d, $descontoPedidoPct, $descontoVendedor, $acimaLimite, $pctVendedor, $limite, $camp, $campPct, $descontoCampanha, $brindes,
+                $entrega, $bonificados, $bonValor, $bonMotivo, $bonAcima, $pctBon, $limiteBon) {
             $id = Banco::inserir('pedidos', [
                 'uuid' => $uuid, 'cliente_id' => $cliente['id'], 'vendedor_id' => $vendedor, 'tirado_por_id' => $tiradoPor, 'origem' => $origem,
                 'tabela_preco_id' => $carrinho['tabela']['id'], 'forma_pagamento_id' => $forma['id'], 'condicao_id' => $condicao['id'] ?? null,
@@ -276,13 +314,25 @@ class PedidoService
                 'frete_gratis' => $camp['frete'] ? 1 : 0, 'campanhas' => mb_substr(implode(', ', $camp['nomes']), 0, 255) ?: null,
                 'observacoes' => mb_substr(trim((string) ($d['observacoes'] ?? '')), 0, 1000) ?: null,
                 'criado_por_usuario' => $d['usuario_id'] ?? null, 'criado_por_cliente' => in_array($origem, ['catalogo', 'orcamento'], true) ? 1 : 0,
-            ] + EntregaService::paraPedido($cliente, $d['entrega'] ?? null)); // onde entregar (cópia do endereço)
+                'bonificado_valor' => $bonValor, 'bonificacao_motivo' => $bonificados ? mb_substr((string) $bonMotivo, 0, 60) : null,
+                'bonificacao_acima_limite' => $bonAcima ? 1 : 0,
+            ] + $entrega); // onde entregar (cópia do endereço)
             foreach ($carrinho['itens'] as $i) {
                 Banco::inserir('pedido_itens', ['pedido_id' => $id, 'produto_id' => $i['id'], 'codigo' => $i['codigo'] ?? null, 'nome' => $i['nome'],
                     'quantidade' => $i['quantidade'], 'preco_unitario' => $i['preco'], 'total' => $i['total'],
                     'preco_tabela' => $i['preco_tabela'] ?? null, 'desconto_pct' => $i['desconto_pct'] ?? 0,
                     'promo_pct' => $i['promo_pct'] ?? 0, 'campanha_id' => $i['campanha_id'] ?? null,
-                    'terceirizacao_produto_id' => $i['terceirizacao_produto_id'] ?? null]);
+                    'terceirizacao_produto_id' => $i['terceirizacao_produto_id'] ?? null, 'cfop' => self::cfop(false, $entrega['entrega_uf'])]);
+            }
+            foreach ($bonificados as $b) { // vai na nota com o preço da tabela; a loja não paga (total 0)
+                Banco::inserir('pedido_itens', ['pedido_id' => $id, 'produto_id' => $b['id'], 'codigo' => $b['codigo'] ?? null, 'nome' => $b['nome'],
+                    'quantidade' => $b['quantidade'], 'preco_unitario' => $b['preco_tabela_bon'], 'total' => 0, 'preco_tabela' => $b['preco_tabela_bon'],
+                    'terceirizacao_produto_id' => $b['terceirizacao_produto_id'] ?? null,
+                    'bonificado' => 1, 'valor_bonificado' => $b['valor_bon'], 'cfop' => self::cfop(true, $entrega['entrega_uf'])]);
+            }
+            if ($bonificados) {
+                self::historico($id, 'aguardando_aprovacao', 'Bonificação (' . $bonMotivo . '): ' . dinheiro($bonValor) . ' (' . number_format($pctBon, 1, ',', '.') . '% do vendido)'
+                    . ($bonAcima ? ' · acima do limite de ' . number_format($limiteBon, 1, ',', '.') . '%: precisa de aprovação.' : '.'), $d['usuario_id'] ?? null);
             }
             $quem = ['catalogo' => 'pelo cliente no catálogo', 'sistema' => 'pela equipe', 'app' => 'pelo app do vendedor externo', 'orcamento' => 'pelo cliente, aprovando o orçamento'][$origem];
             self::historico($id, 'aguardando_aprovacao', "Pedido criado $quem.", $d['usuario_id'] ?? null);
@@ -304,6 +354,11 @@ class PedidoService
             RoteiroService::pedidoTirado((int) $id, $cliente, $tiradoPor, round($carrinho['subtotal'] - $desconto, 2));
         }
         NotificacaoService::pedidoCriado((int) $id, $d['usuario_id'] ?? null); // sino do Financeiro (e do vendedor, se veio do catálogo)
+        if ($bonAcima) { // gestores avisados: bonificação acima do limite
+            NotificacaoService::avisar(NotificacaoService::destinatarios('pedidos.ver_todos', 'comercial', 'aprovacao'), 'pedido_desconto',
+                "Pedido #$id com bonificação acima do limite (" . number_format($pctBon, 1, ',', '.') . '%)', '/pedidos/' . $id,
+                ['pedido_id' => (int) $id, 'cliente_id' => (int) $cliente['id'], 'texto' => 'Bonificação: ' . dinheiro($bonValor)], $d['usuario_id'] ?? null);
+        }
         if ($acimaLimite) { // gestores avisados: desconto acima do limite
             NotificacaoService::avisar(NotificacaoService::destinatarios('pedidos.ver_todos', 'comercial', 'aprovacao'), 'pedido_desconto',
                 "Pedido #$id com desconto acima do limite (" . number_format($pctVendedor, 1, ',', '.') . '%)', '/pedidos/' . $id,
@@ -321,7 +376,7 @@ class PedidoService
         if (!$p || $p['omie_codigo'] || in_array($p['situacao'], ['cancelado', 'recusado'], true)) {
             return (bool) ($p['omie_codigo'] ?? false);
         }
-        $itens = Banco::todos('SELECT i.quantidade, i.preco_unitario, COALESCE(pr.omie_codigo, pr.slug) AS omie_codigo_produto FROM pedido_itens i
+        $itens = Banco::todos('SELECT i.quantidade, i.preco_unitario, COALESCE(pr.omie_codigo, pr.slug) AS omie_codigo_produto, i.cfop, i.bonificado FROM pedido_itens i
             LEFT JOIN produtos pr ON pr.id = i.produto_id WHERE i.pedido_id = ?', [$id]);
         try {
             $r = Integracoes::erp()->enviarPedido(['uuid' => $p['uuid'], 'cnpj' => (string) $p['cnpj'], 'itens' => $itens,
@@ -356,7 +411,10 @@ class PedidoService
         }
         $campanha = $extra ? 'Campanha ' . $p['campanhas'] . ': ' . implode(' · ', $extra) : '';
         $entrega = (int) ($p['entrega_outro'] ?? 0) && !empty($p['entrega_texto']) ? 'ENTREGAR EM: ' . $p['entrega_texto'] : '';
-        return trim(implode("\n", array_filter([trim((string) $p['observacoes']), $campanha, $entrega])));
+        $bon = (float) ($p['bonificado_valor'] ?? 0) > 0
+            ? 'BONIFICAÇÃO' . ($p['bonificacao_motivo'] ? ' (' . $p['bonificacao_motivo'] . ')' : '') . ': ' . dinheiro((float) $p['bonificado_valor'])
+              . ' em itens bonificados (CFOP de bonificação), não cobrar no boleto' : '';
+        return trim(implode("\n", array_filter([trim((string) $p['observacoes']), $campanha, $entrega, $bon])));
     }
 
     // ------------------------------------------------------------------

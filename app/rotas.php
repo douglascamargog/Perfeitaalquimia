@@ -173,6 +173,7 @@ return [
     // ---------- Pedidos, aprovação e produtos ----------
     ['GET',  '/pedidos',                        'PedidoController@index',   'pedidos.criar|pedidos.ver_todos|pedidos.aprovar'],
     ['GET',  '/pedidos/novo',                   'PedidoController@novo',    'pedidos.criar'],
+    ['GET',  '/pedidos/bonificacoes',           'PedidoController@bonificacoes', 'pedidos.criar|pedidos.ver_todos'],
     ['GET',  '/pedidos/modelos',                'OrcamentoController@modelos',      'pedidos.criar'],
     ['POST', '/pedidos/modelos',                'OrcamentoController@salvarModelo', 'pedidos.criar'],
     ['POST', '/pedidos/modelos/{id}/remover',   'OrcamentoController@removerModelo', 'pedidos.criar'],
