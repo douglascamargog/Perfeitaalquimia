@@ -3,7 +3,7 @@
 > Resumo de tudo o que já foi decidido e construído na conversa principal do projeto.
 > Leia também o `CLAUDE.md` da raiz (regras do projeto) antes de qualquer coisa.
 
-> ## ⚠️ Situação atual: V17.1 (18/11/2026) — a importação JÁ ESTÁ PRONTA
+> ## ⚠️ Situação atual: V17.2 (18/11/2026) — a importação JÁ ESTÁ PRONTA
 > Este arquivo é o resumo inicial (escrito na V16.8). Depois dele vieram, nesta ordem, e **valem mais que as seções 3 a 5 abaixo**:
 > 1. `docs/nota10/diagnostico.md` — análise do dump real (sem dados pessoais).
 > 2. `docs/nota10/regras-importacao.md` — regras da importação, com as decisões do usuário (ex.: **tudo** do Nota10 entra, inclusive
@@ -13,8 +13,9 @@
 >    `StatusPedido` 0 Cadastrado · 1 Processando · 2 Faturado · 3 Cancelado · 4 Em separação · 5 Despachado (confirmado);
 >    vendedor ativo sem cadastro no One → "Criar funcionário no One" na tela de ligações.
 > 4. O código da importação: `app/Services/Nota10/Importador.php` (etapas), `Conferencia.php` (tela de ligações), `Leitor.php` (leitura).
-> 5. `docs/nota10/revisao-V17.0.md` — revisão feita no computador do usuário e a resposta (V17.1: colunas em qualquer grafia).
-> **Próximo passo:** importar o backup real no One (V17.1) e conferir o relatório "Vindo do Nota10, no One agora" com os números
+> 5. `docs/nota10/revisao-V17.0.md` e `revisao-V17.1.md` — revisões feitas no computador do usuário e as respostas
+>    (V17.1: colunas em qualquer grafia; V17.2: importar o backup da virada por cima sem duplicar e atualizando pedidos e cadastros).
+> **Próximo passo:** importar o backup real no One (V17.2) e conferir o relatório "Vindo do Nota10, no One agora" com os números
 > do `regras-importacao.md` (seção 1.2) e do `diagnostico.md`.
 
 ## 1. A situação

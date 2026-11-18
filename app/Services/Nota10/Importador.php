@@ -242,6 +242,9 @@ class Importador
         // número do cadastro no Nota10 → cliente do One (inclui os juntados pelo CNPJ)
         $pdo->exec('CREATE TABLE IF NOT EXISTS n10_x_cliente (numero INT PRIMARY KEY, cliente_id INT NOT NULL, KEY (cliente_id)) ENGINE=InnoDB');
         $pdo->exec('DELETE m FROM n10_x_cliente m LEFT JOIN clientes c ON c.id = m.cliente_id WHERE c.id IS NULL'); // depois de um "Zerar dados"
+        // um backup novo apaga a área n10_ (inclusive este mapa): refaz pelo que já está no One, para não duplicar quem não tem CNPJ/CPF
+        $pdo->exec('INSERT IGNORE INTO n10_x_cliente (numero, cliente_id) SELECT nota10_numero, MIN(id) FROM clientes
+            WHERE nota10_numero IS NOT NULL AND excluido_em IS NULL GROUP BY nota10_numero');
         // última venda de cada cadastro (para a regra do responsável)
         $data = self::data('n.Data');
         $pdo->exec('DROP TABLE IF EXISTS n10_x_ultima_venda');
@@ -249,6 +252,7 @@ class Importador
             SELECT n.NumeroCliente AS numero, SUBSTRING_INDEX(MAX(CONCAT(COALESCE($data, '2000-01-01'), LPAD(n.id, 12, '0'), '|', COALESCE(n.CodigoVendedor, 0))), '|', -1) + 0 AS vendedor,
                    MAX($data) AS ultima
             FROM n10_notas n WHERE n.TipoOperacao = 'V' AND COALESCE(n.TotalNota, 0) > 0 AND COALESCE(n.PedidoCancelado, 0) = 0 AND COALESCE(n.NumeroCliente, 0) > 0
+              AND UPPER(COALESCE(n.Status_NF, '')) <> 'C'
             GROUP BY n.NumeroCliente");
         $pdo->exec('ALTER TABLE n10_x_ultima_venda ADD PRIMARY KEY (numero)');
         // pedido "gêmeo" de bonificação: V com total 0 e o mesmo número de pedido (e emitente) de um V com total > 0
@@ -429,16 +433,13 @@ class Importador
                 self::somar($rel, "cadastro_$tipo");
                 continue;
             }
-            if (isset($feitos[$numero])) {
-                self::somar($rel, 'clientes_ja_importados');
-                continue;
-            }
-            if ($doc && ($porDoc[$doc] ?? null) === -1) { // mesmo CNPJ de outro cadastro deste lote: junta depois de gravar
+            $ja = isset($feitos[$numero]) ? (int) $feitos[$numero] : null; // já veio num backup anterior: só atualiza (abaixo)
+            if (!$ja && $doc && ($porDoc[$doc] ?? null) === -1) { // mesmo CNPJ de outro cadastro deste lote: junta depois de gravar
                 $juntarLote[$numero] = $doc;
                 self::somar($rel, 'clientes_juntados_cnpj');
                 continue;
             }
-            if ($doc && isset($porDoc[$doc])) { // mesmo CNPJ de uma loja que já está no One: vira uma loja só
+            if (!$ja && $doc && isset($porDoc[$doc])) { // mesmo CNPJ de uma loja que já está no One: vira uma loja só
                 Banco::executar('INSERT IGNORE INTO n10_x_cliente (numero, cliente_id) VALUES (?, ?)', [$numero, $porDoc[$doc]]);
                 Banco::executar('UPDATE clientes SET nota10_numero = COALESCE(nota10_numero, ?) WHERE id = ?', [$numero, $porDoc[$doc]]);
                 self::somar($rel, 'clientes_juntados_cnpj');
@@ -467,7 +468,7 @@ class Importador
             $ativo = strtoupper((string) ($l['ativo'] ?? 'S')) !== 'N';
             $etapa = $tipo === 'validar' || (!$doc && $tipo !== 'lead') ? 'Validar cadastro' : (!$ativo ? 'Inativo' : (isset($ultima[$numero]) ? 'Cliente ativo' : 'Não abordado'));
             $email = trim(preg_split('/[;,\s]+/', (string) ($l['email'] ?? ''))[0] ?? '');
-            $novos[] = [
+            $linha = [
                 'tipo' => $tipo === 'lead' && !isset($ultima[$numero]) ? 'lead' : 'cliente',
                 'razao_social' => mb_substr(trim((string) ($l['razao'] ?: $l['nome'])) ?: "Cadastro $numero", 0, 200),
                 'nome_fantasia' => mb_substr(trim((string) $l['nome']), 0, 200) ?: null, 'cnpj' => $doc,
@@ -503,6 +504,11 @@ class Importador
                 'nota10_numero' => $numero, 'nota10_guid' => mb_substr((string) ($l['chave_guid'] ?? ''), 0, 32) ?: null,
                 'nota10_dados' => json_encode(array_filter($l, fn($v) => $v !== null && $v !== '' && $v !== '0' && $v !== '0.00000'), JSON_UNESCAPED_UNICODE),
             ];
+            if ($ja) {
+                self::atualizarCliente($ja, $linha, $rel);
+                continue;
+            }
+            $novos[] = $linha;
             if ($doc) {
                 $porDoc[$doc] = -1; // repetido dentro deste lote: junta depois (abaixo)
             }
@@ -542,6 +548,30 @@ class Importador
         }
         self::gravarFornecedores($fornecedores, $rel);
         return (int) end($linhas)['id'];
+    }
+
+    /**
+     * Cadastro que já veio de um backup anterior: completa o que está vazio no One (não apaga o que a equipe preencheu)
+     * e atualiza o que é do ERP (situação, motivo, limite de crédito).
+     */
+    private static function atualizarCliente(int $id, array $l, array &$rel): void
+    {
+        $preencher = ['cnpj', 'endereco', 'end_numero', 'end_complemento', 'bairro', 'cep', 'telefone', 'whatsapp', 'celular2', 'email', 'email_nfe',
+            'email_financeiro', 'site', 'contato_nome', 'inscricao_estadual', 'inscricao_municipal', 'contribuinte', 'suframa', 'data_fundacao', 'cliente_desde'];
+        $sets = [];
+        $valores = [];
+        foreach ($preencher as $c) {
+            if ($l[$c] !== null && $l[$c] !== '') {
+                $sets[] = "`$c` = COALESCE(NULLIF(`$c`, ''), ?)";
+                $valores[] = $l[$c];
+            }
+        }
+        foreach (['situacao_erp', 'motivo_inativo', 'limite_credito'] as $c) {
+            $sets[] = "`$c` = ?";
+            $valores[] = $l[$c];
+        }
+        $n = Banco::executar('UPDATE clientes SET ' . implode(', ', $sets) . ' WHERE id = ?', [...$valores, $id]);
+        self::somar($rel, $n ? 'clientes_atualizados' : 'clientes_sem_mudanca');
     }
 
     private static function gravarFornecedores(array $linhas, array &$rel): void
@@ -607,7 +637,7 @@ class Importador
         }
         $guids = array_map(fn($l) => (string) $l['guid_nota'], $linhas);
         $in = implode(',', array_fill(0, count($guids), '?'));
-        $feitos = array_flip(array_column(self::linhas("SELECT nota10_guid FROM pedidos WHERE nota10_guid IN ($in)", $guids), 'nota10_guid'));
+        $feitos = array_column(self::linhas("SELECT * FROM pedidos WHERE nota10_guid IN ($in)", $guids), null, 'nota10_guid');
         $gemeos = array_flip(array_column(self::linhas("SELECT guid FROM n10_x_gemeo WHERE guid IN ($in)", $guids), 'guid'));
         $comPar = array_flip(array_column(self::linhas("SELECT guid_s FROM n10_x_par_saida WHERE guid_s IN ($in)", $guids), 'guid_s'));
         $numeros = array_unique(array_merge(array_map(fn($l) => (int) $l['numerocliente'], $linhas), array_map(fn($l) => (int) $l['codigotransportadora'], $linhas), [0]));
@@ -619,14 +649,15 @@ class Importador
         foreach ($linhas as $n) {
             $guid = (string) $n['guid_nota'];
             $t = strtoupper(trim((string) $n['tipooperacao']));
-            if (isset($feitos[$guid])) {
-                continue;
+            $ja = $feitos[$guid] ?? null; // já veio num backup anterior: atualiza se mudou (abaixo)
+            if ($ja && $ja['origem'] !== 'nota10') {
+                continue; // nunca mexe em pedido que não veio do Nota10
             }
-            if (isset($gemeos[$guid])) {
+            if (!$ja && isset($gemeos[$guid])) {
                 self::somar($rel, 'gemeos_juntados'); // os itens vão para o pedido principal como bonificados (etapa "itens")
                 continue;
             }
-            if (isset($comPar[$guid])) {
+            if (!$ja && isset($comPar[$guid])) {
                 self::somar($rel, 'saidas_ligadas_a_pedido'); // é a NF de um pedido de venda (etapa "ligar")
                 continue;
             }
@@ -670,7 +701,7 @@ class Importador
             $hora = preg_match('/^\d{2}:\d{2}(:\d{2})?$/', trim((string) ($n['hora'] ?? ''))) ? trim((string) $n['hora']) : '00:00:00';
             $vend = (int) ($n['codigovendedor'] ?? 0);
             $uf = strtoupper(trim((string) ($n['uf_destino'] ?? '')));
-            $novos[] = [
+            $linha = [
                 'uuid' => \App\Services\PedidoService::novoUuid(), 'cliente_id' => $cliente, 'vendedor_id' => self::vendedor($vend), 'origem' => 'nota10',
                 'tabela_preco_id' => self::tabelaLojista(), 'forma_pagamento_id' => self::formaId($n['formapgto'] ?? 0),
                 'subtotal' => (float) ($n['totalmercadoria'] ?? 0) ?: $total, 'desconto' => (float) ($n['totaldesconto'] ?? 0), 'total' => $total,
@@ -691,6 +722,11 @@ class Importador
                 'nota10_vendedor_codigo' => $vend ?: null, 'nota10_vendedor_nome' => $vend ? mb_substr(Conferencia::limparNomeVendedor((string) ($nomes[$vend] ?? '')), 0, 100) ?: null : null,
                 'criado_em' => "$data $hora", 'atualizado_em' => "$data $hora",
             ];
+            if ($ja) {
+                self::atualizarPedido($ja, $linha, $rel);
+                continue;
+            }
+            $novos[] = $linha;
             self::somar($rel, 'pedidos_' . $situacao);
             if ($t === 'O') {
                 self::somar($rel, 'orcamentos_historico');
@@ -700,6 +736,42 @@ class Importador
             self::inserirLote('pedidos', $parte);
         }
         return (int) end($linhas)['id'];
+    }
+
+    /**
+     * Pedido que já veio de um backup anterior e mudou no Nota10 (ganhou NF, foi despachado, cancelado...): atualiza a situação,
+     * a NF e os valores, e registra no histórico do pedido. NF ligada pela etapa "ligar" (Outras saídas) não é apagada.
+     */
+    private static function atualizarPedido(array $ja, array $novo, array &$rel): void
+    {
+        if ((int) $ja['possivel_duplicado'] && $novo['situacao'] === 'faturado') { // duplicado continua fora do faturamento
+            $novo['situacao'] = 'historico';
+            $novo['situacao_origem'] = 'faturado_duplicado';
+        }
+        $mudou = [];
+        foreach (['situacao', 'situacao_origem', 'numero_nf', 'nf_serie', 'nf_chave', 'nf_situacao', 'faturado_em', 'emitido_em', 'saida_em', 'entrega_em',
+                  'total', 'subtotal', 'desconto', 'tipo_operacao', 'tipo_venda', 'cfop', 'vendedor_id'] as $c) {
+            $velho = $ja[$c] ?? null;
+            $valor = $novo[$c] ?? null;
+            if ($valor === null && $velho !== null && in_array($c, ['numero_nf', 'nf_chave', 'nf_situacao', 'emitido_em', 'vendedor_id'], true)) {
+                continue; // não apaga o que já estava (ex.: NF ligada pelas "Outras saídas")
+            }
+            $igual = is_numeric($velho) && is_numeric($valor) ? abs((float) $velho - (float) $valor) < 0.005 : (string) $velho === (string) $valor;
+            if (!$igual) {
+                $mudou[$c] = $valor;
+            }
+        }
+        if (!$mudou) {
+            return;
+        }
+        Banco::atualizar('pedidos', (int) $ja['id'], $mudou);
+        $texto = 'Atualizado pelo Nota10: ' . implode(' · ', array_filter([
+            isset($mudou['situacao']) ? 'situação ' . $ja['situacao'] . ' → ' . $mudou['situacao'] : null,
+            isset($mudou['numero_nf']) ? 'NF ' . $mudou['numero_nf'] : null,
+            isset($mudou['total']) ? 'total ' . dinheiro((float) $mudou['total']) : null,
+        ])) ?: 'Atualizado pelo Nota10.';
+        Banco::inserir('pedido_historico', ['pedido_id' => (int) $ja['id'], 'situacao' => $mudou['situacao'] ?? $ja['situacao'], 'texto' => mb_substr($texto, 0, 500)]);
+        self::somar($rel, 'pedidos_atualizados');
     }
 
     // ------------------------------------------------------------------ 6. itens

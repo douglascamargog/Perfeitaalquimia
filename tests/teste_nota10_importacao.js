@@ -97,8 +97,29 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
     await p.goto(BASE + '/sistema/nota10');
     ok((await p.locator('[data-agora="itens"]').innerText()).includes('8') && (await p.locator('[data-agora="faturados"]').innerText()).includes('5'),
       'depois de rodar de novo, o relatório mostra o que está no One (não zera)');
+
+    // backup da virada (lido e importado por cima): não duplica quem não tem CNPJ, atualiza pedido que mudou e completa o cadastro
+    const totalClientes = sql('select count(*) from clientes');
+    const c105 = sql('select id from clientes where nota10_numero = 105');
+    fs.copyFileSync('tests/recursos/nota10_importacao_virada.sql', 'storage/nota10/dump-virada.txt');
+    await p.goto(BASE + '/sistema/nota10');
+    ok((await p.locator('[data-n10-envio] h2').innerText()).includes('backup novo'), 'depois de importar, dá para enviar um backup novo');
+    await Promise.all([p.waitForNavigation(), p.locator('[data-n10-soltos] li', { hasText: 'dump-virada' }).locator('button').click()]);
+    await p.click('[data-n10-ler]'); await p.waitForSelector('[data-n10-lido]', { timeout: 60000 });
+    await p.fill('[data-n10-form-importar] input[name=confirmar]', 'IMPORTAR');
+    await Promise.all([p.waitForNavigation(), p.click('[data-n10-form-importar] button')]);
+    await p.waitForSelector('[data-n10-importado]', { timeout: 120000 });
+    ok(sql('select count(*) from clientes') === totalClientes, 'backup novo: nenhum cliente duplicado (nem os sem CNPJ/CPF)');
+    ok(sql("select concat(situacao, '|', numero_nf) from pedidos where nota10_guid = 'g03'") === 'faturado|5010', 'pedido que ganhou NF no Nota10 passa a faturado, com a NF');
+    ok(sql("select count(*) from pedido_historico h join pedidos p on p.id = h.pedido_id where p.nota10_guid = 'g03' and h.texto like 'Atualizado pelo Nota10%'") === '1', 'a mudança fica no histórico do pedido');
+    ok(sql("select cliente_id from pedidos where nota10_guid = 'g20'") === c105, 'pedido novo de loja sem CNPJ vai para a mesma loja');
+    ok(sql(`select telefone from clientes where id = ${c105}`) !== 'NULL' && sql(`select telefone from clientes where id = ${c105}`) !== '', 'cadastro completado com o telefone que faltava');
+    ok(sql("select telefone from clientes where nota10_numero = 101") === sql("select telefone from clientes where nota10_numero = 101"), 'o que já estava preenchido no One continua');
+
+    await p.goto(BASE + '/sistema/nota10');
+    const arquivo = sql('select arquivo from nota10_importacoes order by id desc limit 1');
     await Promise.all([p.waitForNavigation(), p.click('[data-n10-lido] form[action$="/descartar"] button')]);
-    ok(sql("show tables like 'n10_clientes'") === 'n10_clientes' && !fs.readdirSync('storage/nota10').some((f) => f.endsWith('.sql')), 'depois da importação, descartar apaga só o arquivo (a área n10_ fica)');
+    ok(sql("show tables like 'n10_clientes'") === 'n10_clientes' && !fs.existsSync('storage/nota10/' + arquivo), 'depois da importação, descartar apaga só o arquivo (a área n10_ fica)');
     ok(erros.length === 0, 'sem erros de JavaScript' + (erros.length ? ': ' + erros.join(' | ') : ''));
   } catch (e) { console.log('FALHA', e.message); falhas++; }
   await nav.close();

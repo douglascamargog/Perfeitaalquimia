@@ -17,6 +17,13 @@
  */
 return [
     [
+        'versao' => '17.2', 'data' => '2026-11-18', 'titulo' => 'Importar o backup da virada por cima do teste',
+        'melhoria' => [
+            'Importação do Nota10: importar um backup mais novo por cima atualiza os pedidos que mudaram (ganharam nota, foram despachados ou cancelados) e completa os cadastros, sem duplicar nada.',
+        ],
+        'admin' => 'Depois de importar, a tela Importar Nota10 aceita um backup novo (ex.: o do dia da virada). Ao importar de novo: lojas sem CNPJ/CPF não duplicam; pedidos vindos do Nota10 têm situação, NF e valores atualizados (com "Atualizado pelo Nota10" no histórico do pedido); cadastros recebem só o que está vazio no One, mais situação, motivo e limite de crédito do ERP. A última venda (regra do responsável) ignora pedido com NF cancelada. Revisão e resposta em docs/nota10/revisao-V17.1.md.',
+    ],
+    [
         'versao' => '17.1', 'data' => '2026-11-18', 'titulo' => 'Correção na importação do Nota10',
         'correcao' => [
             'Importação do Nota10: com o backup real, os clientes, pedidos e produtos não entravam (o backup grava os nomes das colunas em letras minúsculas). Corrigido antes da importação de verdade.',

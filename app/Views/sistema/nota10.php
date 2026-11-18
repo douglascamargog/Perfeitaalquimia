@@ -32,9 +32,11 @@ $opcoes = function (array $lista, $atual, string $vazio = 'Escolha…') {
   <li class="<?= $imp && !empty($imp['importado_em']) ? 'feito' : ($lido && !empty($imp['etapa']) ? 'atual' : '') ?>"><b>4</b> Importar</li>
 </ol>
 
-<?php if (!$imp || $imp['situacao'] === 'erro' && !$imp['posicao']): ?>
+<?php if (!$imp || $imp['situacao'] === 'erro' && !$imp['posicao'] || !empty($imp['importado_em'])): ?>
 <section class="card n10-envio" data-n10-envio>
-  <h2>Enviar o backup</h2>
+  <h2><?= !empty($imp['importado_em']) ? 'Enviar um backup novo (ex.: o do dia da virada)' : 'Enviar o backup' ?></h2>
+  <?php if (!empty($imp['importado_em'])): ?><p class="pequeno suave">Importar de novo não duplica: o One completa o que faltou, atualiza os pedidos que mudaram no Nota10
+    (ganharam NF, foram despachados ou cancelados) e completa os cadastros sem apagar o que a equipe preencheu.</p><?php endif; ?>
   <p>No computador do Nota10, exporte o banco <code>nota10</code> inteiro (HeidiSQL: botão direito no banco › Exportar banco de dados como SQL;
     ou <code>mysqldump</code>). Vale <strong>.sql</strong> ou <strong>.txt</strong>, e pode compactar em <strong>.zip</strong> para ficar bem menor.
     Arquivo gerado pelo PowerShell (UTF-16, acentos trocados) é corrigido sozinho.</p>
