@@ -223,6 +223,11 @@ $opcoes = function (array $lista, $atual, string $vazio = 'Escolha…') {
   <h2>4 · Importar para o One</h2>
   <?php if ($imp['importado_em']): ?>
     <div class="aviso sucesso" data-n10-importado>Importação concluída em <?= data_br($imp['importado_em'], true) ?>. Os dados do Nota10 continuam guardados no One (tabelas n10_) para consulta.</div>
+    <form method="post" action="<?= url('/sistema/nota10/' . (int) $imp['id'] . '/importar') ?>" class="n10-form" data-n10-reimportar><?= csrf_campo() ?>
+      <span class="pequeno">Importar de novo este backup (não duplica: completa o que faltou, como os casos de cobrança):</span>
+      <input type="text" name="confirmar" placeholder="digite IMPORTAR" autocomplete="off" required aria-label="Digite IMPORTAR">
+      <button class="botao contorno pequeno" type="submit">Importar de novo</button>
+    </form>
   <?php elseif ($emAndamento): ?>
     <p>Importando… deixe esta página aberta. Se fechar, é só voltar e clicar em continuar: ela segue de onde parou.</p>
     <div class="n10-barra"><span data-n10-imp-pct style="width:0%"></span></div>

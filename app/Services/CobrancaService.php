@@ -137,7 +137,7 @@ class CobrancaService
             if ($novo) {
                 $c = Banco::um('SELECT valor_total FROM cobrancas WHERE id = ?', [$id]);
                 ClienteEvento::registrar($clienteId, 'cobranca', 'Enviado para a Cobrança · ' . dinheiro((float) $c['valor_total'])
-                    . ($observacao !== '' ? " — $observacao" : ''), $usuarioId, $origem === 'erp' ? 'ERP' : null, ['cobranca_id' => $id]);
+                    . ($observacao !== '' ? " — $observacao" : ''), $usuarioId, ['erp' => 'ERP', 'nota10' => 'Nota10'][$origem] ?? null, ['cobranca_id' => $id]);
             } elseif ($acrescentados) {
                 ClienteEvento::registrar($clienteId, 'cobranca', "$acrescentados título(s) novo(s) na cobrança", $usuarioId, null, ['cobranca_id' => $id]);
             }

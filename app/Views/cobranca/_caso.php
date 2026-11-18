@@ -16,7 +16,7 @@ $aberto = $c['situacao'] === 'aberta';
 ?>
 <header class="ficha-topo cob-topo">
   <div>
-    <div class="sobretitulo">CASO DE COBRANÇA · <?= $c['origem'] === 'erp' ? 'VINDO DO ERP' : 'ENVIADO MANUALMENTE' ?></div>
+    <div class="sobretitulo">CASO DE COBRANÇA · <?= ['erp' => 'VINDO DO ERP', 'nota10' => 'VINDO DO NOTA10'][$c['origem']] ?? 'ENVIADO MANUALMENTE' ?></div>
     <h2><?= e($c['nome_fantasia'] ?: $c['razao_social']) ?></h2>
     <p><?= e($c['cidade']) ?> / <?= e($c['uf']) ?><?= $c['cnpj'] ? ' · CNPJ ' . e(cnpj_formatado($c['cnpj'])) : '' ?></p>
     <div class="ficha-selos">

@@ -80,6 +80,13 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
     ok(sql("select concat(sum(situacao = 'aberto'), '|', sum(situacao = 'pago'), '|', sum(situacao = 'cancelado')) from titulos_receber") === '3|1|1', 'contas a receber importadas: 3 abertas, 1 paga, 1 cancelada (a pagar fica guardada)');
     ok(sql("select credito_situacao from clientes where nota10_numero = 108") === 'atraso', 'título vencido de outra empresa do grupo também bloqueia o boleto');
 
+    // cobrança: os títulos vencidos viram casos na tela de Cobrança (um por cliente)
+    ok(sql("select count(*) from cobrancas where origem = 'nota10' and situacao = 'aberta'") === '2', 'títulos vencidos viram 2 casos de cobrança (um por cliente)');
+    ok(sql("select count(*) from cobranca_titulos where omie_codigo like 'n10:%'") === '2', 'cada título vencido entra no caso (o a vencer não entra)');
+    await p.goto(BASE + '/cobranca');
+    const cob = await p.locator('body').innerText();
+    ok(cob.includes('Empório Importado') && cob.includes('Loja da Jeina'), 'os casos aparecem na tela de Cobrança');
+
     // o One usa o histórico: ficha e última compra
     const c101 = sql('select id from clientes where nota10_numero = 101');
     ok(sql(`select ultima_compra_em from clientes where id = ${c101}`) === '2026-10-01', 'última compra recalculada pelos pedidos do Nota10');
@@ -87,6 +94,14 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
     const ficha = await p.locator('body').innerText();
     ok(ficha.includes('Outra empresa do grupo') && ficha.includes('Histórico (Nota10)'), 'ficha mostra os pedidos antigos com as situações novas');
     ok((await p.locator('[data-titulos-cliente]').innerText()).includes('vencido'), 'ficha mostra os títulos do Nota10');
+
+    // "Importar de novo" pela tela (mesmo backup): não duplica nem os casos de cobrança
+    const casos = sql('select count(*) from cobrancas');
+    await p.goto(BASE + '/sistema/nota10');
+    await p.fill('[data-n10-reimportar] input[name=confirmar]', 'IMPORTAR');
+    await Promise.all([p.waitForNavigation(), p.click('[data-n10-reimportar] button')]);
+    await p.waitForSelector('[data-n10-importado]', { timeout: 120000 });
+    ok(sql('select count(*) from cobrancas') === casos, '"Importar de novo" pela tela não repete os casos de cobrança');
 
     // de novo: não duplica
     const antes = sql('select concat((select count(*) from clientes), (select count(*) from pedidos), (select count(*) from pedido_itens), (select count(*) from titulos_receber))');
@@ -113,6 +128,8 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
     ok(sql("select concat(situacao, '|', numero_nf) from pedidos where nota10_guid = 'g03'") === 'faturado|5010', 'pedido que ganhou NF no Nota10 passa a faturado, com a NF');
     ok(sql("select count(*) from pedido_historico h join pedidos p on p.id = h.pedido_id where p.nota10_guid = 'g03' and h.texto like 'Atualizado pelo Nota10%'") === '1', 'a mudança fica no histórico do pedido');
     ok(sql("select cliente_id from pedidos where nota10_guid = 'g20'") === c105, 'pedido novo de loja sem CNPJ vai para a mesma loja');
+    ok(sql("select pago_em is not null from cobranca_titulos where omie_codigo = 'n10:t01'") === '1', 'título pago no Nota10 recebe baixa no caso de cobrança');
+    ok(sql("select count(*) from cobrancas where origem = 'nota10'") === '2', 'reimportar não abre caso de cobrança repetido');
     ok(sql(`select telefone from clientes where id = ${c105}`) !== 'NULL' && sql(`select telefone from clientes where id = ${c105}`) !== '', 'cadastro completado com o telefone que faltava');
     ok(sql("select telefone from clientes where nota10_numero = 101") === sql("select telefone from clientes where nota10_numero = 101"), 'o que já estava preenchido no One continua');
 

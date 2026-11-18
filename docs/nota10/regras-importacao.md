@@ -245,6 +245,10 @@ Mesmo tipo, cliente, data e total > 0: `S` 80 extras, `E` 34, `V` 17, `F` 11, `D
 - **O título vencido bloqueia o boleto** no catálogo. Pendente: título de **outra empresa** (B, C, D) também bloqueia? Padrão sugerido:
   só os da Perfeita Alquimia bloqueiam.
 
+- **(V17.3) Cobrança:** os títulos em aberto vencidos há mais dias que `cobranca.dias_atraso_entrada` viram **casos na tela de Cobrança**
+  (um caso por cliente, `cobrancas.origem = 'nota10'`), como o "Ler títulos vencidos do ERP". Cada título entra em `cobranca_titulos`
+  com `omie_codigo = 'n10:' + chaveguid` (não duplica). Título pago/cancelado num backup mais novo recebe baixa no caso.
+
 ### 4.2 Pagar (`tipo = P`, 32.070) → entra (decisão "tudo")
 
 O One não tem contas a pagar → migration nova `titulos_pagar` (mesmos campos + `centro`, `siglaconta`, fornecedor), ou fica em

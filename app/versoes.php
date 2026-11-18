@@ -17,6 +17,16 @@
  */
 return [
     [
+        'versao' => '17.3', 'data' => '2026-11-18', 'titulo' => 'Cobrança com os títulos do Nota10',
+        'novo' => [
+            'Cobrança: os títulos vencidos que vieram do Nota10 viram casos na tela de Cobrança, um por cliente, com os títulos de cada um ("Vindo do Nota10").',
+        ],
+        'melhoria' => [
+            'Título que foi pago no Nota10 depois recebe baixa sozinho no caso de cobrança quando um backup mais novo é importado.',
+        ],
+        'admin' => 'Os títulos a receber já entravam na ficha do cliente e bloqueavam o boleto, mas não abriam casos na Cobrança. Agora a importação tem a etapa "Casos de cobrança": título em aberto vencido há mais dias que "Dias de atraso para entrar na cobrança" (Configurações › Cobrança) entra num caso, como no "Ler títulos vencidos do ERP". Quem já importou: em Importar Nota10, use "Importar de novo" (não duplica nada; abre só os casos).',
+    ],
+    [
         'versao' => '17.2', 'data' => '2026-11-18', 'titulo' => 'Importar o backup da virada por cima do teste',
         'melhoria' => [
             'Importação do Nota10: importar um backup mais novo por cima atualiza os pedidos que mudaram (ganharam nota, foram despachados ou cancelados) e completa os cadastros, sem duplicar nada.',

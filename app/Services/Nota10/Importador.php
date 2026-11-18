@@ -30,6 +30,7 @@ class Importador
         'itens' => 'Itens dos pedidos (com as bonificações juntadas)',
         'ligar' => 'Ligando as NFs de "Outras saídas" e as bonificações',
         'titulos' => 'Contas a receber',
+        'cobranca' => 'Casos de cobrança (títulos vencidos)',
         'linha_tempo' => 'Follow-up e eventos das NF-e',
         'compras' => 'Compras de fornecedores',
         'recalcular' => 'Recalculando última compra, recompra, crédito e carteiras',
@@ -861,6 +862,40 @@ class Importador
         return $ate;
     }
 
+    // ------------------------------------------------------------------ 8b. cobrança
+
+    /**
+     * Títulos vencidos (há mais dias que a tolerância da Cobrança) viram casos na tela de Cobrança, um por cliente,
+     * do mesmo jeito que "Ler títulos vencidos do ERP". Cada título leva o código "n10:<chaveguid>": rodar de novo não duplica,
+     * e o título que foi pago (ou cancelado) no Nota10 recebe baixa no caso.
+     */
+    private static function etapaCobranca(int $cursor, array &$rel): ?int
+    {
+        if ($cursor === 0) { // baixa do que foi pago ou cancelado no Nota10 desde a última importação
+            foreach (self::linhas("SELECT ct.id FROM cobranca_titulos ct JOIN titulos_receber t ON ct.omie_codigo = CONCAT('n10:', t.nota10_guid)
+                    WHERE ct.pago_em IS NULL AND t.situacao IN ('pago', 'cancelado')") as $b) {
+                \App\Services\CobrancaService::baixarTitulo((int) $b['id'], null);
+                self::somar($rel, 'cobranca_titulos_baixados');
+            }
+        }
+        $dias = max(0, (int) Config::get('cobranca.dias_atraso_entrada', 5));
+        $limite = date('Y-m-d', strtotime("-$dias days"));
+        $clientes = array_column(self::linhas("SELECT DISTINCT cliente_id FROM titulos_receber WHERE origem = 'nota10' AND situacao = 'aberto'
+            AND vencimento <= ? AND cliente_id > ? ORDER BY cliente_id LIMIT 200", [$limite, $cursor]), 'cliente_id');
+        foreach ($clientes as $cid) {
+            $titulos = self::linhas("SELECT t.documento, t.parcela, t.valor, t.vencimento, CONCAT('n10:', t.nota10_guid) AS omie_codigo FROM titulos_receber t
+                WHERE t.cliente_id = ? AND t.origem = 'nota10' AND t.situacao = 'aberto' AND t.vencimento <= ?
+                  AND NOT EXISTS (SELECT 1 FROM cobranca_titulos ct WHERE ct.omie_codigo = CONCAT('n10:', t.nota10_guid)) ORDER BY t.vencimento", [$cid, $limite]);
+            if ($titulos) {
+                $novo = !\App\Services\CobrancaService::casoAberto((int) $cid);
+                \App\Services\CobrancaService::abrir((int) $cid, $titulos, 'nota10', null, 'Títulos vencidos trazidos do Nota10');
+                self::somar($rel, $novo ? 'cobranca_casos' : 'cobranca_casos_com_titulo_novo');
+                self::somar($rel, 'cobranca_titulos', count($titulos));
+            }
+        }
+        return count($clientes) === 200 ? (int) end($clientes) : null;
+    }
+
     // ------------------------------------------------------------------ 9. linha do tempo
 
     private static function etapaLinhaTempo(int $cursor, array &$rel): ?int
@@ -965,6 +1000,7 @@ class Importador
             'titulos' => ['Títulos a receber', $conta("SELECT COUNT(*) FROM titulos_receber WHERE origem = 'nota10'")],
             'abertos' => ['Títulos em aberto e vencidos', $conta("SELECT COUNT(*) FROM titulos_receber WHERE origem = 'nota10' AND situacao = 'aberto' AND vencimento < CURDATE()")],
             'boleto' => ['Clientes com boleto bloqueado', $rel['clientes_boleto_bloqueado']],
+            'cobranca' => ['Casos abertos na Cobrança (títulos vencidos)', $conta("SELECT COUNT(*) FROM cobrancas WHERE origem = 'nota10' AND situacao = 'aberta'")],
             'compras' => ['Compras de fornecedores', $conta("SELECT COUNT(*) FROM compras_lancadas WHERE origem = 'nota10'")],
             'linha' => ['Follow-ups na linha do tempo', $conta("SELECT COUNT(*) FROM cliente_eventos WHERE canal = 'Nota10'")],
             'entrega' => ['Endereços de entrega para revisar', $rel['entrega_para_revisar']],
