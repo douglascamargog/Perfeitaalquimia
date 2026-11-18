@@ -17,6 +17,16 @@
  */
 return [
     [
+        'versao' => '17.6', 'data' => '2026-11-18', 'titulo' => 'Pergunte ao One avisa quando está sem IA',
+        'melhoria' => [
+            'Pergunte ao One: quando estiver respondendo sem IA (só com as aulas), ele avisa no começo da resposta e diz o motivo, em vez de parecer que "não entendeu" a pergunta.',
+        ],
+        'correcao' => [
+            'Pergunte ao One: quem passava do limite de perguntas por hora podia ficar preso respondendo só com as aulas enquanto continuasse perguntando. Agora a trava sai sozinha depois de uma hora.',
+        ],
+        'admin' => 'O One responde com as aulas (sem IA e sem os especialistas) quando: a opção "Pergunte ao One com IA" está desligada (Configurações › One (IA)), a chave não está no servidor (Administração › Chave da IA, arquivo config/segredos.php), ou a pessoa passou do limite por hora. A Administração agora mostra um alerta vermelho com o motivo e quantas perguntas foram barradas pelo limite nos últimos 7 dias. Os especialistas não foram apagados: eles só funcionam com a IA ligada.',
+    ],
+    [
         'versao' => '17.5', 'data' => '2026-11-18', 'titulo' => 'Faturamento pela data do pedido',
         'melhoria' => [
             'Faturamento, metas, Meu mês, painéis e análises passam a contar a venda no mês em que o pedido foi feito (como o relatório do Nota10). Um pedido de 30/10 que teve a nota emitida em 03/11 conta em outubro.',

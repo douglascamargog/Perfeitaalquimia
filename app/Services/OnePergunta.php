@@ -32,6 +32,23 @@ class OnePergunta
         return self::provedor()->nome() === 'claude';
     }
 
+    /** Por que o One está respondendo sem IA (null = está com IA). Para avisar a pessoa e o admin. */
+    public static function motivoSemIa(): ?string
+    {
+        $temChave = (string) config('integracoes.anthropic.chave', '') !== '';
+        $ligada = (bool) Config::get('one.ia_ativa', false);
+        if ($ligada && $temChave) {
+            return null;
+        }
+        if (!$temChave && $ligada) {
+            return 'a chave da IA não está cadastrada neste servidor (Administração › Chave da IA)';
+        }
+        if (!$temChave) {
+            return 'a IA está desligada e sem chave (Administração › Chave da IA e Configurações › One (IA))';
+        }
+        return 'a opção "Pergunte ao One com IA" está desligada (Configurações › One (IA))';
+    }
+
     /** Responde e devolve ['texto', 'ia' => bool] */
     public static function perguntar(string $pergunta, string $especialista = '', string $tela = ''): array
     {
@@ -45,12 +62,19 @@ class OnePergunta
         $ia = self::provedor();
         if ($ia->nome() === 'claude') {
             $limite = max(1, (int) Config::get('one.ia_limite_hora', 20));
-            $feitas = (int) Banco::valor("SELECT COUNT(*) FROM one_perguntas WHERE usuario_id = ? AND provedor = 'claude' AND criado_em >= NOW() - INTERVAL 1 HOUR", [$id]);
+            $feitas = (int) Banco::valor("SELECT COUNT(*) FROM one_perguntas WHERE usuario_id = ? AND provedor = 'claude'
+                AND COALESCE(situacao, 'ok') <> 'limite' AND criado_em >= NOW() - INTERVAL 1 HOUR", [$id]); // as barradas pelo limite não contam (senão a trava não sai nunca)
             if ($feitas >= $limite) {
                 Banco::inserir('one_perguntas', ['usuario_id' => $id, 'provedor' => 'claude', 'situacao' => 'limite']);
                 $ia = new OneIALocal(); // passou do limite da hora: responde sem IA
+                $aviso = "⚠️ Você já fez $limite perguntas com IA na última hora (limite em Configurações › One (IA)). Por enquanto, respondo só com as aulas e os dados do sistema.\n\n";
             }
+        } else {
+            $motivo = self::motivoSemIa();
+            $aviso = $motivo ? '⚠️ **Estou respondendo sem IA** (só com as aulas e os dados do sistema): ' . $motivo
+                . (Auth::pode('config.gerenciar') ? '.' : '. Avise quem administra o One.') . "\n\n" : '';
         }
+        $aviso ??= '';
         $historico = (array) Sessao::get($chaveConversa, []);
         try {
             // A tela em que a pessoa está (ex.: a fórmula aberta) vai junto, para o especialista saber do que se trata
@@ -69,7 +93,7 @@ class OnePergunta
         $historico[] = ['papel' => 'pessoa', 'texto' => $pergunta];
         $historico[] = ['papel' => 'one', 'texto' => mb_substr((string) $r['texto'], 0, 2000)];
         Sessao::set($chaveConversa, array_slice($historico, -self::TROCAS * 2));
-        return ['texto' => (string) $r['texto'], 'ia' => $ia->nome() === 'claude', 'especialista' => $esp['slug'] ?? 'geral'];
+        return ['texto' => $aviso . (string) $r['texto'], 'ia' => $ia->nome() === 'claude', 'especialista' => $esp['slug'] ?? 'geral'];
     }
 
     public static function esquecer(string $especialista = ''): void

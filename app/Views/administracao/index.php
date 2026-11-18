@@ -18,6 +18,9 @@ $icones = asset('img/icones.svg');
 <?php if (\App\Core\Auth::pode('config.gerenciar')): $u = \App\Services\OnePergunta::usoDoMes(); ?>
   <section class="card adm-one" data-uso-one style="margin-top:16px">
     <h2 style="margin:0 0 6px;font-size:1rem">Pergunte ao One <small class="suave"><?= \App\Services\OnePergunta::comIa() ? '✨ com IA (Claude)' : 'sem IA (aulas e dados do sistema)' ?></small></h2>
+    <?php if ($semIa = \App\Services\OnePergunta::motivoSemIa()): ?><p class="aviso alerta" data-one-sem-ia>O One está respondendo <strong>sem IA</strong> (só com as aulas): <?= e($semIa) ?>. Os especialistas só funcionam com a IA ligada.</p><?php endif; ?>
+    <?php $limitadas = (int) \App\Core\Banco::valor("SELECT COUNT(*) FROM one_perguntas WHERE situacao = 'limite' AND criado_em >= NOW() - INTERVAL 7 DAY");
+      if ($limitadas): ?><p class="pequeno" data-one-limite>⚠️ <?= $limitadas ?> pergunta(s) nos últimos 7 dias passaram do limite por hora e foram respondidas sem IA.</p><?php endif; ?>
     <p class="pequeno" style="margin:0"><?= (int) ($u['perguntas'] ?? 0) ?> pergunta(s) este mês, de <?= (int) ($u['pessoas'] ?? 0) ?> pessoa(s)<?= (int) ($u['com_ia'] ?? 0) ? ' · ' . (int) $u['com_ia'] . ' com IA · custo estimado US$ ' . number_format((float) $u['custo'], 2, ',', '.') : '' ?>.
       Ligar ou desligar a IA, o acesso a dados de clientes (LGPD) e o limite por hora: <a href="<?= url('/configuracoes') ?>">Configurações › One (IA)</a>. O texto das perguntas não é guardado.</p>
     <?php $mascara = \App\Services\ChaveIA::mascarada(); ?>
