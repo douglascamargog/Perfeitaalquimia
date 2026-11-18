@@ -35,10 +35,11 @@ $opcoes = function (array $lista, $atual, string $vazio = 'Escolha…') {
 <?php if (!$imp || $imp['situacao'] === 'erro' && !$imp['posicao']): ?>
 <section class="card n10-envio" data-n10-envio>
   <h2>Enviar o backup</h2>
-  <p>No computador do Nota10, exporte o banco <code>nota10</code> inteiro em <strong>.sql</strong> (HeidiSQL: botão direito no banco › Exportar banco de dados como SQL;
-    ou <code>mysqldump nota10 &gt; nota10.sql</code>). Pode compactar em <strong>.zip</strong> para ficar menor.</p>
+  <p>No computador do Nota10, exporte o banco <code>nota10</code> inteiro (HeidiSQL: botão direito no banco › Exportar banco de dados como SQL;
+    ou <code>mysqldump</code>). Vale <strong>.sql</strong> ou <strong>.txt</strong>, e pode compactar em <strong>.zip</strong> para ficar bem menor.
+    Arquivo gerado pelo PowerShell (UTF-16, acentos trocados) é corrigido sozinho.</p>
   <form method="post" action="<?= url('/sistema/nota10/enviar') ?>" enctype="multipart/form-data" class="n10-form"><?= csrf_campo() ?>
-    <input type="file" name="backup" accept=".sql,.zip,.gz" required aria-label="Arquivo do backup">
+    <input type="file" name="backup" accept=".sql,.txt,.zip,.gz" required aria-label="Arquivo do backup">
     <button class="botao" type="submit"><svg class="icone"><use href="<?= $icones ?>#baixar"/></svg>Enviar</button>
   </form>
   <p class="pequeno suave">Limite de envio desta hospedagem: <strong><?= e($limite) ?></strong>. Se o arquivo for maior, coloque-o na pasta

@@ -17,6 +17,13 @@
  */
 return [
     [
+        'versao' => '16.7', 'data' => '2026-11-18', 'titulo' => 'Importação do Nota10 aceita o backup em .txt',
+        'melhoria' => [
+            'Preparação para trazer o histórico do Nota10: o One agora aceita o backup do jeito que o Windows gera.',
+        ],
+        'admin' => 'Administração › Importar Nota10 aceita o backup em .txt (o mysqldump às vezes sai assim), além de .sql, .zip e .gz. Arquivo gerado no PowerShell (UTF-16, com acentos trocados pela página de código do console) é convertido e consertado sozinho. Arquivo que não é backup do banco (sem CREATE TABLE / INSERT INTO) é recusado com explicação. A leitura grava cada parte de uma vez (bem mais rápido com milhões de linhas). Arquivo grande: compacte em .zip ou coloque em storage/nota10 pelo Gerenciador de arquivos do cPanel.',
+    ],
+    [
         'versao' => '16.6', 'data' => '2026-11-18', 'titulo' => 'Bonificação também no orçamento',
         'novo' => [
             'Orçamento: a coluna "Bonif." também vale aqui. Ofereça unidades bonificadas, escolha o motivo e gere o link.',

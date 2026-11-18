@@ -52,15 +52,104 @@ class Leitor
             self::extrairZip($caminho, $destino);
         } elseif ($ext === 'gz') {
             self::extrairGz($caminho, $destino);
-        } elseif ($ext === 'sql') {
+        } elseif (in_array($ext, ['sql', 'txt'], true)) { // o mysqldump às vezes sai como .txt
             if (realpath($caminho) !== realpath($destino) && !@rename($caminho, $destino) && !copy($caminho, $destino)) {
                 throw new \RuntimeException('Não foi possível guardar o arquivo no servidor.');
             }
         } else {
-            throw new \RuntimeException('Envie o backup em .sql, .zip ou .sql.gz.');
+            throw new \RuntimeException('Envie o backup em .sql, .txt, .zip ou .sql.gz.');
+        }
+        self::converterUtf16($destino); // PowerShell do Windows grava "mysqldump > arquivo" em UTF-16
+        self::consertarAcentos($destino); // ...e embaralha os acentos pela página de código do console
+        if (!self::pareceBackup($destino)) {
+            throw new \RuntimeException('Este arquivo não parece um backup do banco: não tem "CREATE TABLE" nem "INSERT INTO" no começo. '
+                . 'Gere de novo pelo HeidiSQL (Exportar banco de dados como SQL) ou pelo mysqldump.');
         }
         return Banco::inserir('nota10_importacoes', ['arquivo' => basename($destino), 'nome_original' => mb_substr($nomeOriginal, 0, 255),
             'tamanho' => filesize($destino), 'criado_por' => $usuarioId]);
+    }
+
+    /** O começo do arquivo tem cara de backup SQL (CREATE TABLE / INSERT INTO)? */
+    public static function pareceBackup(string $arquivo): bool
+    {
+        $fh = @fopen($arquivo, 'rb');
+        if (!$fh) {
+            return false;
+        }
+        $inicio = (string) fread($fh, 4 << 20); // primeiros 4 MB
+        fclose($fh);
+        return (bool) preg_match('/\b(CREATE\s+TABLE|INSERT\s+INTO)\b/i', $inicio);
+    }
+
+    /**
+     * Se o arquivo está em UTF-16 (PowerShell do Windows), converte para UTF-8 no mesmo lugar, em partes (arquivo grande).
+     * Devolve true se converteu.
+     */
+    public static function converterUtf16(string $arquivo): bool
+    {
+        $fh = fopen($arquivo, 'rb');
+        $amostra = (string) fread($fh, 4096);
+        fclose($fh);
+        $bom = substr($amostra, 0, 2);
+        $le = $bom === "\xFF\xFE" || (strlen($amostra) > 100 && substr_count($amostra, "\0") > strlen($amostra) / 3 && $amostra[1] === "\0");
+        $be = $bom === "\xFE\xFF";
+        if (!$le && !$be) {
+            return false;
+        }
+        @set_time_limit(900);
+        $origem = $be ? 'UTF-16BE' : 'UTF-16LE';
+        $saida = $arquivo . '.utf8';
+        $in = fopen($arquivo, 'rb');
+        $out = fopen($saida, 'wb');
+        if (in_array($bom, ["\xFF\xFE", "\xFE\xFF"], true)) {
+            fread($in, 2); // pula o marcador
+        }
+        $resto = '';
+        while (!feof($in)) {
+            $bloco = $resto . fread($in, 8 << 20);
+            $resto = '';
+            if (strlen($bloco) % 2) { // não corta um caractere no meio
+                $resto = substr($bloco, -1);
+                $bloco = substr($bloco, 0, -1);
+            }
+            $ultimo = $be ? ord($bloco[strlen($bloco) - 2] ?? "\0") : ord($bloco[strlen($bloco) - 1] ?? "\0");
+            if (strlen($bloco) >= 2 && $ultimo >= 0xD8 && $ultimo <= 0xDB) { // metade de um emoji: espera a outra metade
+                $resto = substr($bloco, -2) . $resto;
+                $bloco = substr($bloco, 0, -2);
+            }
+            fwrite($out, (string) mb_convert_encoding($bloco, 'UTF-8', $origem));
+        }
+        fclose($in);
+        fclose($out);
+        rename($saida, $arquivo);
+        return true;
+    }
+
+    /**
+     * O PowerShell lê a saída do mysqldump com a página de código do console e embaralha os acentos
+     * ("Farmácia" vira "Farm├ícia" ou "FarmÃ¡cia"). Se o arquivo está assim, desfaz a troca e volta aos bytes originais.
+     */
+    public static function consertarAcentos(string $arquivo): bool
+    {
+        $fh = fopen($arquivo, 'rb');
+        $amostra = (string) fread($fh, 8 << 20);
+        fclose($fh);
+        $cp850 = preg_match_all('/├[\x{00A0}-\x{00FF}\x{2500}-\x{25FF}]|┬[\x{00A0}-\x{00FF}\x{2500}-\x{25FF}]/u', $amostra);
+        $cp1252 = preg_match_all('/Ã[\x{00A0}-\x{00BF}\x{0080}-\x{009F}\x{2013}-\x{203A}]|Â[\x{00A0}-\x{00BF}]/u', $amostra);
+        $de = $cp850 >= 3 && $cp850 >= $cp1252 ? 'CP850' : ($cp1252 >= 3 ? 'Windows-1252' : null);
+        if (!$de) {
+            return false;
+        }
+        $saida = $arquivo . '.acentos';
+        $in = fopen($arquivo, 'rb');
+        $out = fopen($saida, 'wb');
+        while (($linha = fgets($in)) !== false) {
+            fwrite($out, (string) mb_convert_encoding($linha, $de, 'UTF-8')); // volta para os bytes que o mysqldump escreveu
+        }
+        fclose($in);
+        fclose($out);
+        rename($saida, $arquivo);
+        return true;
     }
 
     /** Arquivos colocados direto na pasta (FTP / Gerenciador de arquivos do cPanel) que ainda não foram registrados */
@@ -68,7 +157,7 @@ class Leitor
     {
         $registrados = array_column(Banco::todos('SELECT arquivo, nome_original FROM nota10_importacoes'), 'nome_original', 'arquivo');
         $soltos = [];
-        foreach (glob(self::pasta() . '/*.{sql,zip,gz}', GLOB_BRACE) ?: [] as $f) {
+        foreach (glob(self::pasta() . '/*.{sql,txt,zip,gz}', GLOB_BRACE) ?: [] as $f) {
             $nome = basename($f);
             if (!isset($registrados[$nome]) && !in_array($nome, $registrados, true)) {
                 $soltos[] = ['nome' => $nome, 'tamanho' => filesize($f), 'data' => filemtime($f)];
@@ -85,7 +174,7 @@ class Leitor
         }
         for ($i = 0; $i < $z->numFiles; $i++) {
             $nome = $z->getNameIndex($i);
-            if (preg_match('/\.sql$/i', $nome) && !str_contains($nome, '__MACOSX')) {
+            if (preg_match('/\.(sql|txt)$/i', $nome) && !str_contains($nome, '__MACOSX')) {
                 $in = $z->getStream($nome);
                 $out = fopen($destino, 'wb');
                 stream_copy_to_stream($in, $out);
@@ -96,7 +185,7 @@ class Leitor
             }
         }
         $z->close();
-        throw new \RuntimeException('Não há arquivo .sql dentro do .zip.');
+        throw new \RuntimeException('Não há arquivo .sql (ou .txt) dentro do .zip.');
     }
 
     private static function extrairGz(string $gz, string $destino): void
@@ -159,6 +248,7 @@ class Leitor
         $charset = $imp['charset'] ?: 'utf8mb4';
         $pdo->exec('SET NAMES ' . self::charsetSeguro($charset));
 
+        $pdo->exec('START TRANSACTION'); // grava a parte inteira de uma vez (bem mais rápido com milhões de linhas)
         $inicio = microtime(true);
         $comando = '';
         $aspas = false;          // dentro de um texto '...' que continua na próxima linha?
@@ -220,6 +310,7 @@ class Leitor
         }
         $fim = $linha === false && !$erro;
         fclose($fh);
+        $pdo->exec('COMMIT'); // guarda o que foi lido até aqui (com erro, a próxima tentativa recomeça no comando que falhou)
         $pdo->exec('SET NAMES utf8mb4');
         $dados = ['posicao' => $erro ? $inicioComando : ($fim ? (int) $imp['tamanho'] : $inicioComando), 'comandos' => $feitos, 'ignorados' => $pulados,
             'charset' => $charset, 'situacao' => $erro ? 'erro' : ($fim ? 'lido' : 'lendo'), 'erro' => $erro];

@@ -27,6 +27,11 @@ const TMP = fs.mkdtempSync('/tmp/one-n10-');
     await p.goto(BASE + '/entrar'); await p.fill('#email', email); await p.fill('#senha', 'Demo@2026'); await p.click('button[type=submit]'); await p.waitForLoadState();
     return p;
   };
+  const adm_descartar = async (p) => {
+    await p.goto(BASE + '/sistema/nota10');
+    const f = p.locator('form[action$="/descartar"] button').first();
+    if (await f.count()) await Promise.all([p.waitForNavigation(), f.click()]);
+  };
   const lerTudo = async (p) => {
     await p.click('[data-n10-ler]');
     await p.waitForSelector('[data-n10-lido]', { timeout: 60000 });
@@ -92,6 +97,22 @@ const TMP = fs.mkdtempSync('/tmp/one-n10-');
     await lerTudo(a);
     ok((await a.locator('[data-n10="clientes"]').innerText()) === '6', 'arquivo da pasta lido e conferido');
     ok(fs.readFileSync('storage/nota10/.htaccess', 'utf8').includes('Require all denied'), 'pasta do backup protegida contra acesso pela web');
+
+    // 5b) "dump.txt" gerado pelo PowerShell (UTF-16 e acentos trocados pela página de código do console) e arquivo que não é backup
+    await adm_descartar(a);
+    const ps = path.join(TMP, 'dump.txt');
+    execSync(`python3 -c "import sys; d=open(sys.argv[1],'rb').read(); open(sys.argv[2],'wb').write(d.decode('cp850').encode('utf-16'))" ${AMOSTRA} ${ps}`);
+    await a.goto(BASE + '/sistema/nota10');
+    await a.setInputFiles('input[name=backup]', ps);
+    await Promise.all([a.waitForNavigation(), a.click('[data-n10-envio] button[type=submit]')]);
+    await lerTudo(a);
+    ok(sql("select Nome from n10_clientes where Numero=103") === "D'Ávila Naturais" && sql("select Obs from n10_clientes where Numero=101") === 'Entregar pela manhã;',
+      'dump.txt do PowerShell (UTF-16, acentos trocados) é lido com os acentos certos');
+    await adm_descartar(a);
+    const ruim = path.join(TMP, 'nao-e-backup.txt'); fs.writeFileSync(ruim, 'lista de clientes\nAna;Rua A\n');
+    await a.setInputFiles('input[name=backup]', ruim);
+    await Promise.all([a.waitForNavigation(), a.click('[data-n10-envio] button[type=submit]')]);
+    ok((await a.locator('body').innerText()).includes('não parece um backup do banco'), 'arquivo que não é backup é recusado com explicação');
 
     // 6) backup automático e "Zerar dados" ignoram a área separada
     const lista = execSync(`php -r 'require "app/bootstrap.php"; echo json_encode(App\\Services\\ZerarDadosService::semClassificacao());'`).toString();
