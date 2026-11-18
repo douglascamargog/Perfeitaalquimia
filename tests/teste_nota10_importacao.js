@@ -68,6 +68,11 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
     ok(ped('g06', 'situacao, situacao_origem, emitente_cnpj') === 'outra_empresa|faturado|34773706000108', 'pedido de outra empresa do grupo: guardado, fora do faturamento');
     ok(ped('g08', 'situacao, numero_nf, valor_nf') === 'faturado|7001|150.00', 'NF de "Outras saídas" ligada ao pedido de venda (sem contar duas vezes)');
     ok(sql("select count(*) from pedidos where nota10_guid = 'g07'") === '0', 'a NF de saída ligada não vira outro pedido');
+    // conferência do faturamento (V17.5): o mês conta pela DATA DO PEDIDO; "Outras saídas" ligam pelo nº do pedido + cliente
+    ok(ped('g24', 'situacao, tipo_venda') === 'faturado|nf_avulsa', 'mesmo nº de pedido mas OUTRO cliente: não liga (continua venda avulsa)');
+    ok(ped('g22', 'tipo_venda') === 'nf_avulsa', '(1º backup) saída sem nº de pedido e fora da regra dos 3 dias fica como venda avulsa');
+    ok(sql("select round(sum(total), 2) from pedidos where situacao = 'faturado' and nota10_guid in ('g21') and criado_em >= '2026-10-01' and criado_em < '2026-11-01'") === '400.00'
+      && sql("select date(faturado_em) from pedidos where nota10_guid = 'g21'") === '2026-11-03', 'pedido de 30/10 com NF de 03/11: conta em outubro (data do pedido) e guarda a data da NF');
     ok(ped('g10', 'situacao, tipo_operacao') === 'historico|orcamento' && ped('g11', 'situacao, tipo_operacao') === 'historico|devolucao', 'orçamento e devolução: histórico');
     ok(ped('g16', 'situacao, possivel_duplicado') === 'historico|1', 'duplicado exato: marcado e fora do faturamento');
     ok(sql("select count(*) from pedidos where nota10_guid in ('g12', 'g13', 'g14', 'g15')") === '0', 'entradas, ajustes de estoque, compras e notas sem cliente não viram pedido');
@@ -89,7 +94,7 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
 
     // o One usa o histórico: ficha e última compra
     const c101 = sql('select id from clientes where nota10_numero = 101');
-    ok(sql(`select ultima_compra_em from clientes where id = ${c101}`) === '2026-10-01', 'última compra recalculada pelos pedidos do Nota10');
+    ok(sql(`select ultima_compra_em from clientes where id = ${c101}`) === '2026-11-05', 'última compra recalculada pelos pedidos do Nota10');
     await p.goto(BASE + '/carteira/clientes/' + c101);
     const ficha = await p.locator('body').innerText();
     ok(ficha.includes('Outra empresa do grupo') && ficha.includes('Histórico (Nota10)'), 'ficha mostra os pedidos antigos com as situações novas');
@@ -110,7 +115,7 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
 
     // depois de importado, "descartar" apaga só o arquivo; os dados do Nota10 ficam
     await p.goto(BASE + '/sistema/nota10');
-    ok((await p.locator('[data-agora="itens"]').innerText()).includes('8') && (await p.locator('[data-agora="faturados"]').innerText()).includes('5'),
+    ok((await p.locator('[data-agora="itens"]').innerText()).includes('12') && (await p.locator('[data-agora="faturados"]').innerText()).includes('8'),
       'depois de rodar de novo, o relatório mostra o que está no One (não zera)');
 
     // backup da virada (lido e importado por cima): não duplica quem não tem CNPJ, atualiza pedido que mudou e completa o cadastro
@@ -128,6 +133,9 @@ const sql = (q) => execSync(`mysql perfeita --default-character-set=utf8mb4 -N -
     ok(sql("select concat(situacao, '|', numero_nf) from pedidos where nota10_guid = 'g03'") === 'faturado|5010', 'pedido que ganhou NF no Nota10 passa a faturado, com a NF');
     ok(sql("select count(*) from pedido_historico h join pedidos p on p.id = h.pedido_id where p.nota10_guid = 'g03' and h.texto like 'Atualizado pelo Nota10%'") === '1', 'a mudança fica no histórico do pedido');
     ok(sql("select cliente_id from pedidos where nota10_guid = 'g20'") === c105, 'pedido novo de loja sem CNPJ vai para a mesma loja');
+    ok(ped('g22', 'situacao, situacao_origem') === 'historico|nf_de_pedido' && ped('g21', 'numero_nf') === '5021',
+      '"Outras saídas" com o mesmo nº de pedido e cliente (6 dias depois): sai do faturamento, não conta em dobro');
+    ok(sql("select count(*) from pedidos where situacao = 'faturado' and nota10_guid in ('g21', 'g22')") === '1', 'o pedido e a NF dele somam uma vez só');
     ok(sql("select pago_em is not null from cobranca_titulos where omie_codigo = 'n10:t01'") === '1', 'título pago no Nota10 recebe baixa no caso de cobrança');
     ok(sql("select count(*) from cobrancas where origem = 'nota10'") === '2', 'reimportar não abre caso de cobrança repetido');
     ok(sql(`select telefone from clientes where id = ${c105}`) !== 'NULL' && sql(`select telefone from clientes where id = ${c105}`) !== '', 'cadastro completado com o telefone que faltava');

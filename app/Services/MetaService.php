@@ -113,11 +113,11 @@ class MetaService
     public static function vendas(int $usuarioId, string $mes): array
     {
         if (self::vendasDoOmie()) {
-            return Banco::todos("SELECT p.id, p.id AS pedido_id, DATE(p.faturado_em) AS data, p.total AS valor, p.numero_nf,
+            return Banco::todos("SELECT p.id, p.id AS pedido_id, DATE(p.criado_em) AS data, p.total AS valor, p.numero_nf,
                     CONCAT(COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social), ' · pedido #', p.id) AS descricao
                 FROM pedidos p JOIN clientes c ON c.id = p.cliente_id
-                WHERE p.vendedor_id = ? AND p.situacao = 'faturado' AND p.faturado_em >= ? AND p.faturado_em < ? + INTERVAL 1 MONTH
-                ORDER BY p.faturado_em DESC, p.id DESC", [$usuarioId, "$mes-01", "$mes-01"]);
+                WHERE p.vendedor_id = ? AND p.situacao = 'faturado' AND p.criado_em >= ? AND p.criado_em < ? + INTERVAL 1 MONTH
+                ORDER BY p.criado_em DESC, p.id DESC", [$usuarioId, "$mes-01", "$mes-01"]);
         }
         return Banco::todos('SELECT * FROM vendas_registradas WHERE usuario_id = ? AND data LIKE ? ORDER BY data DESC, id DESC', [$usuarioId, "$mes-%"]);
     }
@@ -127,7 +127,7 @@ class MetaService
     {
         if (self::vendasDoOmie()) {
             return (float) Banco::valor("SELECT COALESCE(SUM(total), 0) FROM pedidos WHERE vendedor_id = ? AND situacao = 'faturado'
-                AND faturado_em >= ? AND faturado_em < ? + INTERVAL 1 MONTH", [$usuarioId, "$mes-01", "$mes-01"]);
+                AND criado_em >= ? AND criado_em < ? + INTERVAL 1 MONTH", [$usuarioId, "$mes-01", "$mes-01"]);
         }
         return (float) Banco::valor('SELECT COALESCE(SUM(valor), 0) FROM vendas_registradas WHERE usuario_id = ? AND data LIKE ?', [$usuarioId, "$mes-%"]);
     }

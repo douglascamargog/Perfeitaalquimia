@@ -414,7 +414,7 @@ class SimuladorService
         // Meta do mês (só se a pessoa ainda não tem)
         $mes = date('Y-m');
         if (!Banco::valor("SELECT 1 FROM metas WHERE mes = ? AND tipo = 'vendedor' AND alvo_id = ?", [$mes, $uid])) {
-            $base = max(15000, (float) Banco::valor("SELECT COALESCE(SUM(total), 0) FROM pedidos WHERE vendedor_id = ? AND situacao = 'faturado' AND faturado_em >= ?", [$uid, "$mes-01"]) * 1.4);
+            $base = max(15000, (float) Banco::valor("SELECT COALESCE(SUM(total), 0) FROM pedidos WHERE vendedor_id = ? AND situacao = 'faturado' AND criado_em >= ?", [$uid, "$mes-01"]) * 1.4);
             Banco::inserir('metas', ['mes' => $mes, 'tipo' => 'vendedor', 'alvo_id' => $uid, 'valor' => round($base / 500) * 500, 'simulado' => 1]);
         }
     }

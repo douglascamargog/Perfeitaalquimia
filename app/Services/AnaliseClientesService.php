@@ -149,8 +149,8 @@ class AnaliseClientesService
             if (!$completos) {
                 $w[] = 'COALESCE(v.meses, 0) >= 1';
             } else {
-                $w[] = '(SELECT COUNT(DISTINCT DATE_FORMAT(pt.faturado_em, \'%Y-%m\')) FROM pedidos pt WHERE pt.cliente_id = c.id AND pt.situacao = \'faturado\''
-                    . ' AND pt.faturado_em >= ? AND pt.faturado_em < ?) = ' . count($completos);
+                $w[] = '(SELECT COUNT(DISTINCT DATE_FORMAT(pt.criado_em, \'%Y-%m\')) FROM pedidos pt WHERE pt.cliente_id = c.id AND pt.situacao = \'faturado\''
+                    . ' AND pt.criado_em >= ? AND pt.criado_em < ?) = ' . count($completos);
                 array_push($p, $completos[0] . '-01', date('Y-m-01'));
             }
         } elseif ($f['frequencia'] === 'recorrentes') {
@@ -162,7 +162,7 @@ class AnaliseClientesService
         }
         // Comprou em TODOS os meses escolhidos
         foreach ($f['meses'] as $m) {
-            $w[] = "EXISTS (SELECT 1 FROM pedidos pm WHERE pm.cliente_id = c.id AND pm.situacao = 'faturado' AND pm.faturado_em >= ? AND pm.faturado_em < ? + INTERVAL 1 MONTH)";
+            $w[] = "EXISTS (SELECT 1 FROM pedidos pm WHERE pm.cliente_id = c.id AND pm.situacao = 'faturado' AND pm.criado_em >= ? AND pm.criado_em < ? + INTERVAL 1 MONTH)";
             array_push($p, "$m-01", "$m-01");
         }
         if ($f['media_min'] !== null) {
@@ -174,8 +174,8 @@ class AnaliseClientesService
             array_push($p, $meses, $f['media_max']);
         }
         $de = "FROM clientes c
-            LEFT JOIN (SELECT cliente_id, SUM(total) AS total, COUNT(*) AS pedidos, COUNT(DISTINCT DATE_FORMAT(faturado_em, '%Y-%m')) AS meses FROM pedidos
-                        WHERE situacao = 'faturado' AND faturado_em >= ? AND faturado_em < ? GROUP BY cliente_id) v ON v.cliente_id = c.id
+            LEFT JOIN (SELECT cliente_id, SUM(total) AS total, COUNT(*) AS pedidos, COUNT(DISTINCT DATE_FORMAT(criado_em, '%Y-%m')) AS meses FROM pedidos
+                        WHERE situacao = 'faturado' AND criado_em >= ? AND criado_em < ? GROUP BY cliente_id) v ON v.cliente_id = c.id
             LEFT JOIN usuarios u ON u.id = c.responsavel_id
             LEFT JOIN carteiras k ON k.id = c.carteira_id
             LEFT JOIN regioes r ON r.id = c.regiao_id
@@ -221,11 +221,11 @@ class AnaliseClientesService
     {
         [$de, $p] = self::base($f);
         [, $ini, $fim] = self::periodos()[$f['periodo']];
-        $linhas = array_column(Banco::todos("SELECT DATE_FORMAT(pe.faturado_em, '%Y-%m') AS mes, SUM(pe.total) AS valor, COUNT(DISTINCT pe.cliente_id) AS clientes, COUNT(*) AS pedidos
-            FROM pedidos pe WHERE pe.situacao = 'faturado' AND pe.faturado_em >= ? AND pe.faturado_em < ? AND pe.cliente_id IN (SELECT c.id $de)
+        $linhas = array_column(Banco::todos("SELECT DATE_FORMAT(pe.criado_em, '%Y-%m') AS mes, SUM(pe.total) AS valor, COUNT(DISTINCT pe.cliente_id) AS clientes, COUNT(*) AS pedidos
+            FROM pedidos pe WHERE pe.situacao = 'faturado' AND pe.criado_em >= ? AND pe.criado_em < ? AND pe.cliente_id IN (SELECT c.id $de)
             GROUP BY mes", array_merge([$ini, $fim], $p)), null, 'mes');
         $novos = array_column(Banco::todos("SELECT DATE_FORMAT(x.primeira, '%Y-%m') AS mes, COUNT(*) AS n FROM (
-                SELECT pe.cliente_id, MIN(pe.faturado_em) AS primeira FROM pedidos pe WHERE pe.situacao = 'faturado' AND pe.cliente_id IN (SELECT c.id $de) GROUP BY pe.cliente_id
+                SELECT pe.cliente_id, MIN(pe.criado_em) AS primeira FROM pedidos pe WHERE pe.situacao = 'faturado' AND pe.cliente_id IN (SELECT c.id $de) GROUP BY pe.cliente_id
             ) x WHERE x.primeira >= ? AND x.primeira < ? GROUP BY mes", array_merge($p, [$ini, $fim])), 'n', 'mes');
         return array_map(fn($m) => ['mes' => $m, 'valor' => (float) ($linhas[$m]['valor'] ?? 0), 'clientes' => (int) ($linhas[$m]['clientes'] ?? 0),
             'pedidos' => (int) ($linhas[$m]['pedidos'] ?? 0), 'novos' => (int) ($novos[$m] ?? 0)], self::mesesDoPeriodo($f['periodo']));
@@ -283,8 +283,8 @@ class AnaliseClientesService
             [, $ini, $fim] = self::periodos()[$f['periodo']];
             $ids = implode(',', array_map(fn($i) => (int) $i['id'], $itens));
             $porLoja = [];
-            foreach (Banco::todos("SELECT cliente_id, DATE_FORMAT(faturado_em, '%Y-%m') AS mes, SUM(total) AS valor FROM pedidos
-                WHERE situacao = 'faturado' AND faturado_em >= ? AND faturado_em < ? AND cliente_id IN ($ids) GROUP BY cliente_id, mes", [$ini, $fim]) as $l) {
+            foreach (Banco::todos("SELECT cliente_id, DATE_FORMAT(criado_em, '%Y-%m') AS mes, SUM(total) AS valor FROM pedidos
+                WHERE situacao = 'faturado' AND criado_em >= ? AND criado_em < ? AND cliente_id IN ($ids) GROUP BY cliente_id, mes", [$ini, $fim]) as $l) {
                 $porLoja[(int) $l['cliente_id']][$l['mes']] = (float) $l['valor'];
             }
             foreach ($itens as &$i) {

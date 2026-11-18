@@ -168,7 +168,7 @@ $situacoesPedido = ['aguardando_aprovacao' => 'Aguardando', 'aprovado' => 'Aprov
     <section class="card"><h2>Reativações</h2>
       <ul class="ac-lista">
         <?php foreach ($det['reativacoes'] as $rv): ?>
-          <li><a href="<?= url('/carteira/clientes/' . (int) $rv['cliente_id']) ?>"><strong><?= e($rv['cliente']) ?></strong></a> — comprou em <?= data_br($rv['faturado_em']) ?>
+          <li><a href="<?= url('/carteira/clientes/' . (int) $rv['cliente_id']) ?>"><strong><?= e($rv['cliente']) ?></strong></a> — comprou em <?= data_br($rv['criado_em']) ?>
             (<?= dinheiro((float) $rv['total']) ?>), estava parado desde <?= data_br($rv['anterior']) ?></li>
         <?php endforeach; ?>
         <?php if (!$det['reativacoes']): ?><li class="suave">Nenhuma reativação no período.</li><?php endif; ?>

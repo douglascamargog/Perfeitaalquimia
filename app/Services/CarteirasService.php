@@ -79,7 +79,7 @@ class CarteirasService
         return Banco::todos("SELECT k.*, u.nome AS vendedor, f.nome AS setor, f.ordem AS setor_ordem,
                 {$c('COUNT(*)')} AS clientes, {$c("SUM(c.tipo = 'cliente')")} AS ativos, {$c('MAX(c.ultima_compra_em)')} AS ultima_compra,
                 (SELECT COALESCE(SUM(p.total), 0) FROM pedidos p JOIN clientes c2 ON c2.id = p.cliente_id
-                  WHERE c2.carteira_id = k.id AND p.situacao = 'faturado' AND p.faturado_em >= CURDATE() - INTERVAL 12 MONTH) AS faturado
+                  WHERE c2.carteira_id = k.id AND p.situacao = 'faturado' AND p.criado_em >= CURDATE() - INTERVAL 12 MONTH) AS faturado
             FROM carteiras k LEFT JOIN usuarios u ON u.id = k.responsavel_id LEFT JOIN funcoes f ON f.id = k.funcao_id
             WHERE " . implode(' AND ', $w) . '
             ORDER BY f.ordem, k.responsavel_id IS NOT NULL, k.nome');

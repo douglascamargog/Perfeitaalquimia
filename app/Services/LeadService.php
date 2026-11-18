@@ -193,7 +193,7 @@ class LeadService
                 COUNT(DISTINCT CASE WHEN c.tipo = 'cliente' THEN c.id END) AS clientes,
                 COALESCE(SUM(f.valor), 0) AS faturado
             FROM leads_recebidos l LEFT JOIN clientes c ON c.id = l.cliente_id
-            LEFT JOIN (SELECT p.cliente_id, SUM(p.total) AS valor, MIN(p.faturado_em) AS primeiro FROM pedidos p WHERE p.situacao = 'faturado' GROUP BY p.cliente_id) f
+            LEFT JOIN (SELECT p.cliente_id, SUM(p.total) AS valor, MIN(p.criado_em) AS primeiro FROM pedidos p WHERE p.situacao = 'faturado' GROUP BY p.cliente_id) f
                    ON f.cliente_id = l.cliente_id AND l.resultado = 'criado'
             WHERE l.resultado IN ('criado', 'existente') AND l.criado_em >= ? AND l.criado_em < ? + INTERVAL 1 DAY
             GROUP BY fonte, campanha, l.origem ORDER BY leads DESC", $par);

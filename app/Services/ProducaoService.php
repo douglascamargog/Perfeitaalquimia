@@ -833,7 +833,7 @@ class ProducaoService
                 EXISTS (SELECT 1 FROM ficha_tecnica ft WHERE ft.produto_id = p.id) AS tem_ficha
             FROM produtos p LEFT JOIN estoque_acabado e ON e.produto_id = p.id
             LEFT JOIN (SELECT i.produto_id, SUM(i.quantidade) AS vendido FROM pedido_itens i JOIN pedidos pe ON pe.id = i.pedido_id
-                       WHERE pe.situacao = \'faturado\' AND pe.faturado_em >= NOW() - INTERVAL ? DAY GROUP BY i.produto_id) v ON v.produto_id = p.id
+                       WHERE pe.situacao = \'faturado\' AND pe.criado_em >= NOW() - INTERVAL ? DAY GROUP BY i.produto_id) v ON v.produto_id = p.id
             LEFT JOIN (SELECT produto_id, SUM(quantidade) AS planejado FROM ordens_producao WHERE situacao = \'planejada\' GROUP BY produto_id) pl ON pl.produto_id = p.id
             WHERE ' . implode(' AND ', $w) . ' ORDER BY p.nome', $par);
         $cobertura = max(1, (int) Config::get('producao.dias_cobertura', 30));

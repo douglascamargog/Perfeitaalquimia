@@ -15,14 +15,14 @@ const id = (email) => sql(`select id from usuarios where email='${email}'`);
     return sql(`select max(id) from clientes where nome_fantasia='${nome}'`);
   };
   // pedido faturado no dia 15 do mês de "k meses atrás" (0 = mês atual)
-  const ped = (cli, dona, total, k) => sql(`insert into pedidos (uuid, cliente_id, vendedor_id, tabela_preco_id, forma_pagamento_id, subtotal, total, situacao, faturado_em, origem)
-      values (UUID(), ${cli}, ${dona}, 1, 1, ${total}, ${total}, 'faturado', LEAST(NOW(), DATE_FORMAT(CURDATE() - INTERVAL ${k} MONTH, '%Y-%m-15 10:00:00')), 'sistema')`);
+  const ped = (cli, dona, total, k) => sql(`insert into pedidos (uuid, cliente_id, vendedor_id, tabela_preco_id, forma_pagamento_id, subtotal, total, situacao, faturado_em, criado_em, origem)
+      values (UUID(), ${cli}, ${dona}, 1, 1, ${total}, ${total}, 'faturado', @d := LEAST(NOW(), DATE_FORMAT(CURDATE() - INTERVAL ${k} MONTH, '%Y-%m-15 10:00:00')), @d, 'sistema')`);
   const todo = loja('Todo Mês Naturais', tv1), duas = loja('Duas Vezes Empório', tv1), uma = loja('Uma Vez Farmácia', tv1), outra = loja('Outra Carteira Loja', tv2);
   const nunca = loja('Nunca Comprou Loja', tv1);
   for (let k = 1; k <= 11; k++) ped(todo, tv1, 500, k);            // todos os 11 meses completos
   ped(duas, tv1, 300, 1); ped(duas, tv1, 300, 3);                   // 2 meses
   ped(uma, tv1, 200, 1); ped(outra, tv2, 900, 1);                   // 1 mês
-  sql(`update clientes c set ultima_compra_em = (select date(max(faturado_em)) from pedidos where cliente_id = c.id) where c.id in (${todo},${duas},${uma},${outra})`);
+  sql(`update clientes c set ultima_compra_em = (select date(max(criado_em)) from pedidos where cliente_id = c.id) where c.id in (${todo},${duas},${uma},${outra})`);
   const mes = (k) => sql(`select date_format(curdate() - interval ${k} month, '%Y-%m')`);
   const filtro = BASE + '/analise?uf=RS&cidade=' + encodeURIComponent('Vila Análise');
 

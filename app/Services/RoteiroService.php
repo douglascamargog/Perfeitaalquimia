@@ -259,7 +259,7 @@ class RoteiroService
                 COALESCE(v.total, 0) AS comprou_12m,
                 EXISTS (SELECT 1 FROM roteiro_paradas rp WHERE rp.roteiro_id = ? AND rp.cliente_id = c.id) AS no_roteiro
             FROM clientes c LEFT JOIN cidades ci ON ci.id = c.cidade_id LEFT JOIN usuarios u ON u.id = c.responsavel_id
-            LEFT JOIN (SELECT cliente_id, SUM(total) AS total FROM pedidos WHERE situacao = 'faturado' AND faturado_em >= ? GROUP BY cliente_id) v ON v.cliente_id = c.id
+            LEFT JOIN (SELECT cliente_id, SUM(total) AS total FROM pedidos WHERE situacao = 'faturado' AND criado_em >= ? GROUP BY cliente_id) v ON v.cliente_id = c.id
             WHERE c.excluido_em IS NULL AND COALESCE(c.lat, ci.lat) BETWEEN ? AND ? AND COALESCE(c.lng, ci.lng) BETWEEN ? AND ?
             LIMIT 5000", [$r['id'], $de, $caixa[0], $caixa[1], $caixa[2], $caixa[3]]);
 

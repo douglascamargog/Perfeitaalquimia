@@ -492,7 +492,7 @@ class PedidoService
             NotificacaoService::pedidoMudou((int) $pedido['id'], 'faturado', null, 'NF ' . $numeroNf);
             DepositoService::entrarNaFila((int) $pedido['id'], $quando); // nota emitida → vai para a separação no depósito
             if (!empty($pedido['vendedor_id']) && MetaService::vendasDoOmie()) { // venda do Meu mês vem do faturamento: bateu a meta?
-                $mes = substr($quando, 0, 7);
+                $mes = substr((string) ($pedido['criado_em'] ?? $quando), 0, 7); // a venda conta no mês do pedido
                 $depois = MetaService::totalMes((int) $pedido['vendedor_id'], $mes);
                 MetaService::avisarSeBateuMeta((int) $pedido['vendedor_id'], $mes, $depois - (float) $pedido['total'], $depois);
             }
@@ -502,7 +502,7 @@ class PedidoService
     /** Recalcula última compra e intervalo médio entre compras (base do alerta de recompra) */
     public static function atualizarCompras(int $clienteId): void
     {
-        $datas = array_column(Banco::todos("SELECT DISTINCT DATE(faturado_em) AS d FROM pedidos WHERE cliente_id = ? AND situacao = 'faturado' ORDER BY d", [$clienteId]), 'd');
+        $datas = array_column(Banco::todos("SELECT DISTINCT DATE(criado_em) AS d FROM pedidos WHERE cliente_id = ? AND situacao = 'faturado' ORDER BY d", [$clienteId]), 'd');
         if (!$datas) {
             return;
         }

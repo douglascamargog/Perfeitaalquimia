@@ -33,8 +33,8 @@ const id = (email) => sql(`select id from usuarios where email='${email}'`);
   const longe = loja('Loja Longe Pelotas', pel, 'Pelotas', -31.7650, -52.3300, tv1);
   sql(`update clientes set ultima_compra_em = CURDATE() - INTERVAL 100 DAY, intervalo_medio_dias = 30 where id = ${b}`); // recompra atrasada e 90+ dias
   // Pedidos faturados da loja A: R$ 4.074,63 em 12 meses (2 pedidos) + um de 14 meses atrás (fora)
-  const ped = (cli, total, dias) => sql(`insert into pedidos (uuid, cliente_id, vendedor_id, tabela_preco_id, forma_pagamento_id, subtotal, total, situacao, faturado_em, origem)
-      values (UUID(), ${cli}, ${tv1}, 1, 1, ${total}, ${total}, 'faturado', NOW() - INTERVAL ${dias} DAY, 'sistema')`);
+  const ped = (cli, total, dias) => sql(`insert into pedidos (uuid, cliente_id, vendedor_id, tabela_preco_id, forma_pagamento_id, subtotal, total, situacao, faturado_em, criado_em, origem)
+      values (UUID(), ${cli}, ${tv1}, 1, 1, ${total}, ${total}, 'faturado', NOW() - INTERVAL ${dias} DAY, NOW() - INTERVAL ${dias} DAY, 'sistema')`);
   ped(a, 2037.31, 40); ped(a, 2037.32, 80); ped(a, 1500, 420);
   sql(`update clientes set ultima_compra_em = CURDATE() - INTERVAL 40 DAY where id = ${a}`);
   // Produto com preço nas 3 tabelas (para o pedido do externo)

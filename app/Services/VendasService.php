@@ -53,7 +53,7 @@ class VendasService
         $w = ["p.situacao = 'faturado'"];
         $par = [];
         if ($comDatas) {
-            $w[] = 'p.faturado_em >= ? AND p.faturado_em < ? + INTERVAL 1 DAY';
+            $w[] = 'p.criado_em >= ? AND p.criado_em < ? + INTERVAL 1 DAY';
             array_push($par, $f['de'], $f['ate']);
         }
         foreach (['vendedor' => 'p.vendedor_id', 'funcao' => 'c.funcao_id', 'regiao' => 'c.regiao_id', 'uf' => 'c.uf', 'origem' => 'p.origem'] as $campo => $coluna) {
@@ -94,7 +94,7 @@ class VendasService
     {
         $g = ['de' => date('Y-m-01', strtotime(substr($f['ate'], 0, 7) . '-01 -11 months')), 'ate' => $f['ate']] + $f;
         [$w, $par] = self::where($g);
-        $linhas = array_column(Banco::todos("SELECT DATE_FORMAT(p.faturado_em, '%Y-%m') AS mes, SUM(p.total) AS valor " . self::BASE . " WHERE $w GROUP BY mes", $par), 'valor', 'mes');
+        $linhas = array_column(Banco::todos("SELECT DATE_FORMAT(p.criado_em, '%Y-%m') AS mes, SUM(p.total) AS valor " . self::BASE . " WHERE $w GROUP BY mes", $par), 'valor', 'mes');
         $metas = array_column(Banco::todos('SELECT mes, meta FROM metas_equipe WHERE mes >= ?', [substr($g['de'], 0, 7)]), 'meta', 'mes');
         $saida = [];
         for ($i = 11; $i >= 0; $i--) {

@@ -218,9 +218,9 @@ class OneAssistente
         }
         // Diretoria e admin: um resumo do mês
         if (Foco::tem('diretoria') && (Auth::pode('painel.ver') || Auth::somenteAcompanha() || Auth::pode('config.gerenciar'))) {
-            $m = Banco::um("SELECT COALESCE(SUM(CASE WHEN faturado_em >= DATE_FORMAT(CURDATE(), '%Y-%m-01') THEN total END), 0) AS mes,
-                COALESCE(SUM(CASE WHEN faturado_em >= DATE_FORMAT(CURDATE() - INTERVAL 1 MONTH, '%Y-%m-01') AND faturado_em < CURDATE() - INTERVAL 1 MONTH + INTERVAL 1 DAY THEN total END), 0) AS anterior
-                FROM pedidos WHERE situacao = 'faturado' AND faturado_em >= DATE_FORMAT(CURDATE() - INTERVAL 1 MONTH, '%Y-%m-01')");
+            $m = Banco::um("SELECT COALESCE(SUM(CASE WHEN criado_em >= DATE_FORMAT(CURDATE(), '%Y-%m-01') THEN total END), 0) AS mes,
+                COALESCE(SUM(CASE WHEN criado_em >= DATE_FORMAT(CURDATE() - INTERVAL 1 MONTH, '%Y-%m-01') AND criado_em < CURDATE() - INTERVAL 1 MONTH + INTERVAL 1 DAY THEN total END), 0) AS anterior
+                FROM pedidos WHERE situacao = 'faturado' AND criado_em >= DATE_FORMAT(CURDATE() - INTERVAL 1 MONTH, '%Y-%m-01')");
             $mes = (float) $m['mes'];
             $ant = (float) $m['anterior'];
             $comp = $ant > 0 ? ' (' . ($mes >= $ant ? '+' : '') . number_format(($mes / $ant - 1) * 100, 0, ',', '.') . '% em relação ao mesmo ponto do mês passado)' : '';

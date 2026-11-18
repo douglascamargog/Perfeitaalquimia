@@ -20,7 +20,7 @@ class EquipeVendasService
         $fat = [];
         foreach (Banco::todos("SELECT f.frente, COALESCE(SUM(p.total), 0) AS faturado, COUNT(*) AS pedidos, COUNT(DISTINCT p.cliente_id) AS compraram
                 FROM pedidos p JOIN clientes c ON c.id = p.cliente_id JOIN funcoes f ON f.id = c.funcao_id
-                WHERE p.situacao = 'faturado' AND p.faturado_em >= ? AND p.faturado_em < ? + INTERVAL 1 DAY AND f.frente IS NOT NULL
+                WHERE p.situacao = 'faturado' AND p.criado_em >= ? AND p.criado_em < ? + INTERVAL 1 DAY AND f.frente IS NOT NULL
                 GROUP BY f.frente", [$de, $ate]) as $l) {
             $fat[$l['frente']] = $l;
         }
@@ -57,7 +57,7 @@ class EquipeVendasService
                     COALESCE(SUM(p.total), 0) AS faturado, COUNT(p.id) AS pedidos,
                     (SELECT m.valor FROM metas m WHERE m.tipo = 'vendedor' AND m.alvo_id = u.id AND m.mes = ?) AS meta
                FROM usuarios u
-               LEFT JOIN pedidos p ON p.vendedor_id = u.id AND p.situacao = 'faturado' AND p.faturado_em >= ? AND p.faturado_em < ? + INTERVAL 1 DAY
+               LEFT JOIN pedidos p ON p.vendedor_id = u.id AND p.situacao = 'faturado' AND p.criado_em >= ? AND p.criado_em < ? + INTERVAL 1 DAY
               WHERE u.ativo = 1 AND EXISTS (SELECT 1 FROM usuario_funcoes uf JOIN funcoes f ON f.id = uf.funcao_id WHERE uf.usuario_id = u.id AND f.frente IS NOT NULL)
               GROUP BY u.id, u.nome, u.apelido, u.foto ORDER BY faturado DESC, u.nome",
             [$mes, $de, $ate]
@@ -75,9 +75,9 @@ class EquipeVendasService
     {
         $inicio = date('Y-m-01', strtotime("$mes-01 -" . ($meses - 1) . ' months'));
         $dados = [];
-        foreach (Banco::todos("SELECT DATE_FORMAT(p.faturado_em, '%Y-%m') AS mes, f.frente, SUM(p.total) AS valor
+        foreach (Banco::todos("SELECT DATE_FORMAT(p.criado_em, '%Y-%m') AS mes, f.frente, SUM(p.total) AS valor
                 FROM pedidos p JOIN clientes c ON c.id = p.cliente_id JOIN funcoes f ON f.id = c.funcao_id
-                WHERE p.situacao = 'faturado' AND p.faturado_em >= ? AND p.faturado_em < ? + INTERVAL 1 MONTH AND f.frente IS NOT NULL
+                WHERE p.situacao = 'faturado' AND p.criado_em >= ? AND p.criado_em < ? + INTERVAL 1 MONTH AND f.frente IS NOT NULL
                 GROUP BY mes, f.frente", [$inicio, "$mes-01"]) as $l) {
             $dados[$l['frente']][$l['mes']] = (float) $l['valor'];
         }

@@ -3,7 +3,7 @@
 > Resumo de tudo o que já foi decidido e construído na conversa principal do projeto.
 > Leia também o `CLAUDE.md` da raiz (regras do projeto) antes de qualquer coisa.
 
-> ## ⚠️ Situação atual: V17.4 (18/11/2026) — a importação JÁ ESTÁ PRONTA
+> ## ⚠️ Situação atual: V17.5 (18/11/2026) — a importação JÁ ESTÁ PRONTA
 > Este arquivo é o resumo inicial (escrito na V16.8). Depois dele vieram, nesta ordem, e **valem mais que as seções 3 a 5 abaixo**:
 > 1. `docs/nota10/diagnostico.md` — análise do dump real (sem dados pessoais).
 > 2. `docs/nota10/regras-importacao.md` — regras da importação, com as decisões do usuário (ex.: **tudo** do Nota10 entra, inclusive
@@ -16,6 +16,7 @@
 > 5. `docs/nota10/revisao-V17.0.md` e `revisao-V17.1.md` — revisões feitas no computador do usuário e as respostas
 >    (V17.1: colunas em qualquer grafia; V17.2: importar o backup da virada por cima sem duplicar e atualizando pedidos e cadastros).
 > (V17.3: os títulos vencidos também abrem casos na Cobrança. V17.4: a Cobrança é montada a partir dos títulos da ficha do cliente — `titulos_receber` é a fonte única; baixa nos dois sentidos.)
+> (V17.5: faturamento pela **data do pedido** em todo o One e "Outras saídas" ligadas pelo nº do pedido + cliente — ver `docs/nota10/conferencia-faturamento.md`.)
 > **Próximo passo:** importar o backup real no One (V17.3) e conferir o relatório "Vindo do Nota10, no One agora" com os números
 > do `regras-importacao.md` (seção 1.2) e do `diagnostico.md`.
 

@@ -17,6 +17,17 @@
  */
 return [
     [
+        'versao' => '17.5', 'data' => '2026-11-18', 'titulo' => 'Faturamento pela data do pedido',
+        'melhoria' => [
+            'Faturamento, metas, Meu mês, painéis e análises passam a contar a venda no mês em que o pedido foi feito (como o relatório do Nota10). Um pedido de 30/10 que teve a nota emitida em 03/11 conta em outubro.',
+            'A data da nota fiscal continua aparecendo no pedido.',
+        ],
+        'correcao' => [
+            'Pedidos que vieram do Nota10: algumas notas de "Outras saídas" que eram a nota de um pedido já existente estavam somando de novo no faturamento. Agora elas são ligadas ao pedido certo (mesmo número de pedido e mesma loja) e contam uma vez só.',
+        ],
+        'admin' => 'Depois de atualizar, vá em Administração › Importar Nota10 e use "Importar de novo" (digite IMPORTAR): a importação liga as "Outras saídas" pela chave forte (empresa + nº do pedido + cliente; depois o gêmeo de bonificação; por último a regra antiga de 3 dias e mesmo nº de itens), e as que já tinham entrado como venda avulsa saem do faturamento (ficam como histórico, "NF de pedido"). As que continuarem sem pedido são vendas avulsas de verdade e continuam somando (decisão do usuário). NF cancelada continua fora do faturamento. Esperado em out/2026 (backup de 17/11): cerca de R$ 660.400 em 250 pedidos; a diferença para o relatório do Nota10 são as 3 NFs canceladas. Base: docs/nota10/conferencia-faturamento.md.',
+    ],
+    [
         'versao' => '17.4', 'data' => '2026-11-18', 'titulo' => 'Cobrança ligada aos títulos da ficha do cliente',
         'novo' => [
             'Cobrança: ao abrir a tela, os títulos em aberto e vencidos que estão na ficha do cliente já entram sozinhos num caso (um por cliente), sem precisar ler nada à parte.',

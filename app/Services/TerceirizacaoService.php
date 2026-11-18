@@ -45,7 +45,7 @@ class TerceirizacaoService
                     (SELECT COUNT(*) FROM terceirizacao_produtos tp WHERE tp.cliente_id = c.id AND tp.ativo = 1) AS produtos,
                     (SELECT COUNT(*) FROM terceirizacao_produtos tp WHERE tp.cliente_id = c.id AND tp.ativo = 1 AND tp.rotulos_estoque <= tp.rotulos_minimo) AS rotulos_alerta,
                     (SELECT COALESCE(SUM(i.total), 0) FROM pedido_itens i JOIN pedidos pd ON pd.id = i.pedido_id
-                      WHERE pd.cliente_id = c.id AND i.terceirizacao_produto_id IS NOT NULL AND pd.situacao = 'faturado' AND pd.faturado_em >= ?) AS faturado_terc
+                      WHERE pd.cliente_id = c.id AND i.terceirizacao_produto_id IS NOT NULL AND pd.situacao = 'faturado' AND pd.criado_em >= ?) AS faturado_terc
                FROM clientes c LEFT JOIN funcoes f ON f.id = c.funcao_id LEFT JOIN usuarios u ON u.id = c.responsavel_id
               WHERE $w ORDER BY COALESCE(NULLIF(c.nome_fantasia, ''), c.razao_social)",
             array_merge([$de], $p)
@@ -233,6 +233,6 @@ class TerceirizacaoService
     public static function faturado(string $de, string $ate): float
     {
         return (float) Banco::valor("SELECT COALESCE(SUM(i.total), 0) FROM pedido_itens i JOIN pedidos p ON p.id = i.pedido_id
-            WHERE i.terceirizacao_produto_id IS NOT NULL AND p.situacao = 'faturado' AND p.faturado_em BETWEEN ? AND ?", [$de . ' 00:00:00', $ate . ' 23:59:59']);
+            WHERE i.terceirizacao_produto_id IS NOT NULL AND p.situacao = 'faturado' AND p.criado_em BETWEEN ? AND ?", [$de . ' 00:00:00', $ate . ' 23:59:59']);
     }
 }

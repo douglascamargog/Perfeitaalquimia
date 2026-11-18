@@ -103,10 +103,10 @@ class AcompanhamentoService
     {
         $dias = max(1, (int) Config::get('carteira.dias_inatividade', 90));
         // Tabela derivada + WHERE (sem HAVING sem GROUP BY: compatível com MySQL 5.7 e MariaDB em modo estrito)
-        return "SELECT x.* FROM (SELECT p.id, p.vendedor_id, p.cliente_id, p.faturado_em, p.total,
-                (SELECT MAX(p2.faturado_em) FROM pedidos p2 WHERE p2.cliente_id = p.cliente_id AND p2.situacao = 'faturado' AND p2.faturado_em < p.faturado_em) AS anterior
-            FROM pedidos p WHERE p.situacao = 'faturado' AND p.vendedor_id IN ($listaVendedores) AND p.faturado_em BETWEEN ? AND ?) x
-            WHERE x.anterior IS NOT NULL AND x.anterior < x.faturado_em - INTERVAL $dias DAY";
+        return "SELECT x.* FROM (SELECT p.id, p.vendedor_id, p.cliente_id, p.criado_em, p.total,
+                (SELECT MAX(p2.criado_em) FROM pedidos p2 WHERE p2.cliente_id = p.cliente_id AND p2.situacao = 'faturado' AND p2.criado_em < p.criado_em) AS anterior
+            FROM pedidos p WHERE p.situacao = 'faturado' AND p.vendedor_id IN ($listaVendedores) AND p.criado_em BETWEEN ? AND ?) x
+            WHERE x.anterior IS NOT NULL AND x.anterior < x.criado_em - INTERVAL $dias DAY";
     }
 
     private static function porPessoa(string $sql, array $par): array
@@ -130,7 +130,7 @@ class AcompanhamentoService
             FROM cliente_eventos e JOIN clientes c ON c.id = e.cliente_id
             WHERE e.usuario_id = ? AND e.tipo IN (' . self::CONTATOS . ') AND e.ocorrido_em BETWEEN ? AND ? ORDER BY e.ocorrido_em DESC LIMIT 100', $par);
         $reativacoes = Banco::todos('SELECT r.*, COALESCE(NULLIF(c.nome_fantasia, \'\'), c.razao_social) AS cliente FROM (' . self::sqlReativacoes((string) $usuarioId) . ') r
-            JOIN clientes c ON c.id = r.cliente_id ORDER BY r.faturado_em DESC', [$de . ' 00:00:00', $ate . ' 23:59:59']);
+            JOIN clientes c ON c.id = r.cliente_id ORDER BY r.criado_em DESC', [$de . ' 00:00:00', $ate . ' 23:59:59']);
         return compact('porDia', 'ligacoes', 'contatos', 'reativacoes');
     }
 

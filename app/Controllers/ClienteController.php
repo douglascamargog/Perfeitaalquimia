@@ -86,17 +86,17 @@ class ClienteController extends Controller
         $cid = (int) $cliente['id'];
         \App\Services\NotificacaoService::marcarDoCliente((int) Auth::id(), $cid);
         $de = date('Y-m-d', strtotime('-12 months'));
-        $resumo = \App\Core\Banco::um("SELECT COALESCE(SUM(total), 0) AS faturado, COUNT(*) AS pedidos, MIN(faturado_em) AS primeira
-            FROM pedidos WHERE cliente_id = ? AND situacao = 'faturado' AND faturado_em >= ?", [$cid, $de]);
+        $resumo = \App\Core\Banco::um("SELECT COALESCE(SUM(total), 0) AS faturado, COUNT(*) AS pedidos, MIN(criado_em) AS primeira
+            FROM pedidos WHERE cliente_id = ? AND situacao = 'faturado' AND criado_em >= ?", [$cid, $de]);
         $this->tela('carteira/cliente', [
             'titulo' => $cliente['nome_fantasia'] ?: $cliente['razao_social'],
             'c' => $cliente, 'resumo' => $resumo,
-            'primeiraCompra' => \App\Core\Banco::valor("SELECT MIN(faturado_em) FROM pedidos WHERE cliente_id = ? AND situacao = 'faturado'", [$cid]),
+            'primeiraCompra' => \App\Core\Banco::valor("SELECT MIN(criado_em) FROM pedidos WHERE cliente_id = ? AND situacao = 'faturado'", [$cid]),
             'todosPedidos' => \App\Models\Pedido::doCliente($cid, 50),
-            'maisComprados' => \App\Core\Banco::todos("SELECT i.nome, COALESCE(i.codigo, pr.codigo) AS codigo, SUM(i.quantidade) AS quantidade, SUM(i.total) AS valor, MAX(p.faturado_em) AS ultima,
+            'maisComprados' => \App\Core\Banco::todos("SELECT i.nome, COALESCE(i.codigo, pr.codigo) AS codigo, SUM(i.quantidade) AS quantidade, SUM(i.total) AS valor, MAX(p.criado_em) AS ultima,
                 MAX(m.arquivo) AS imagem, MAX(pr.slug) AS slug, COUNT(DISTINCT p.id) AS vezes
                 FROM pedido_itens i JOIN pedidos p ON p.id = i.pedido_id LEFT JOIN produtos pr ON pr.id = i.produto_id LEFT JOIN midias m ON m.id = pr.imagem_id
-                WHERE p.cliente_id = ? AND p.situacao = 'faturado' AND p.faturado_em >= ? GROUP BY i.nome, COALESCE(i.codigo, pr.codigo) ORDER BY valor DESC LIMIT 12", [$cid, $de]),
+                WHERE p.cliente_id = ? AND p.situacao = 'faturado' AND p.criado_em >= ? GROUP BY i.nome, COALESCE(i.codigo, pr.codigo) ORDER BY valor DESC LIMIT 12", [$cid, $de]),
             'marca' => \App\Services\TerceirizacaoService::produtos($cid),
             'tarefas' => \App\Core\Banco::todos('SELECT t.*, u.nome AS usuario, u.foto AS usuario_foto FROM tarefas t LEFT JOIN usuarios u ON u.id = t.usuario_id
                 WHERE t.cliente_id = ? AND t.concluida_em IS NULL ORDER BY t.vence_em, t.hora', [$cid]),

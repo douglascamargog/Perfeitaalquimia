@@ -269,22 +269,45 @@ class Importador
         $pdo->exec('DROP TABLE IF EXISTS n10_x_itens');
         $pdo->exec('CREATE TABLE n10_x_itens ENGINE=InnoDB AS SELECT GUID_Nota AS guid, COUNT(*) AS qtd FROM n10_itensnota GROUP BY GUID_Nota');
         $pdo->exec('ALTER TABLE n10_x_itens ADD PRIMARY KEY (guid)');
-        // NF de "Outras saídas" (venda) que é a NF de um pedido de venda: mesmo cliente, mesmo nº de itens, até 3 dias de diferença
+        // NF de "Outras saídas" (venda) que é a NF de um pedido de venda (conferencia-faturamento.md). Em três passes, do mais forte ao mais fraco:
+        //  1) mesma empresa + mesmo nº de pedido + mesmo cliente de um pedido de venda (V com total > 0);
+        //  2) idem, mas o pedido é o gêmeo de bonificação (total 0) → liga ao pedido principal dele;
+        //  3) regra antiga: mesmo cliente e empresa, mesmo nº de itens, até 3 dias de diferença.
+        // O nº de pedido sozinho não basta (há números repetidos entre clientes).
+        try {
+            $pdo->exec('ALTER TABLE n10_notas ADD INDEX ix_Pedido (Pedido)');
+        } catch (\PDOException) {
+            // o índice já existe
+        }
         $ds = self::data('s.Data');
         $dv = self::data('v.Data');
+        $saidas = "FROM n10_notas s JOIN n10_x_itens si ON si.guid = s.GUID_Nota
+            WHERE s.TipoOperacao = 'S' AND COALESCE(s.NumeroCliente, 0) > 0 AND SUBSTRING(REPLACE(COALESCE(s.CFOP, ''), '.', ''), 2) IN
+                  ('101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114', '115', '116', '117', '118', '119', '120', '122', '123', '124', '125', '401', '402', '403', '404', '405')";
+        $mesmoPedido = "v.Pedido = s.Pedido AND v.NumeroCliente = s.NumeroCliente AND COALESCE(v.Emitente, '') = COALESCE(s.Emitente, '') AND v.TipoOperacao = 'V'";
+        $temPedido = "COALESCE(s.Pedido, '') NOT IN ('', '0')";
         $pdo->exec('DROP TABLE IF EXISTS n10_x_par_saida');
-        $pdo->exec("CREATE TABLE n10_x_par_saida ENGINE=InnoDB AS
-            SELECT s.GUID_Nota AS guid_s, (SELECT v.GUID_Nota FROM n10_notas v JOIN n10_x_itens iv ON iv.guid = v.GUID_Nota
+        // mesmo tipo (e collation) da coluna do backup
+        $pdo->exec("CREATE TABLE n10_x_par_saida ENGINE=InnoDB AS SELECT GUID_Nota AS guid_s, GUID_Nota AS guid_v, 'pedido' AS por FROM n10_notas WHERE 1 = 0");
+        $pdo->exec('ALTER TABLE n10_x_par_saida ADD PRIMARY KEY (guid_s), ADD KEY (guid_v)');
+        $pdo->exec("INSERT IGNORE INTO n10_x_par_saida (guid_s, guid_v, por)
+            SELECT x.guid_s, x.guid_v, 'pedido' FROM (SELECT s.GUID_Nota AS guid_s, (SELECT v.GUID_Nota FROM n10_notas v
+                WHERE $mesmoPedido AND COALESCE(v.TotalNota, 0) > 0 ORDER BY v.id LIMIT 1) AS guid_v $saidas AND $temPedido) x WHERE x.guid_v IS NOT NULL");
+        $pdo->exec("INSERT IGNORE INTO n10_x_par_saida (guid_s, guid_v, por)
+            SELECT x.guid_s, x.guid_v, 'gemeo' FROM (SELECT s.GUID_Nota AS guid_s, (SELECT g.principal FROM n10_notas v JOIN n10_x_gemeo g ON g.guid = v.GUID_Nota
+                WHERE $mesmoPedido ORDER BY v.id LIMIT 1) AS guid_v $saidas AND $temPedido
+                AND NOT EXISTS (SELECT 1 FROM n10_x_par_saida j WHERE j.guid_s = s.GUID_Nota)) x WHERE x.guid_v IS NOT NULL");
+        $pdo->exec("INSERT IGNORE INTO n10_x_par_saida (guid_s, guid_v, por)
+            SELECT x.guid_s, x.guid_v, 'data' FROM (SELECT s.GUID_Nota AS guid_s, (SELECT v.GUID_Nota FROM n10_notas v JOIN n10_x_itens iv ON iv.guid = v.GUID_Nota
                     WHERE v.TipoOperacao = 'V' AND v.NumeroCliente = s.NumeroCliente AND COALESCE(v.Emitente, '') = COALESCE(s.Emitente, '')
                       AND iv.qtd = si.qtd AND ABS(DATEDIFF($dv, $ds)) <= 3 AND COALESCE(v.TotalNota, 0) > 0
-                    ORDER BY ABS(DATEDIFF($dv, $ds)), v.id LIMIT 1) AS guid_v
-            FROM n10_notas s JOIN n10_x_itens si ON si.guid = s.GUID_Nota
-            WHERE s.TipoOperacao = 'S' AND COALESCE(s.NumeroCliente, 0) > 0 AND SUBSTRING(REPLACE(COALESCE(s.CFOP, ''), '.', ''), 2) IN
-                  ('101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114', '115', '116', '117', '118', '119', '120', '122', '123', '124', '125', '401', '402', '403', '404', '405')");
-        $pdo->exec('DELETE FROM n10_x_par_saida WHERE guid_v IS NULL');
-        $pdo->exec('ALTER TABLE n10_x_par_saida ADD PRIMARY KEY (guid_s), ADD KEY (guid_v)');
+                    ORDER BY ABS(DATEDIFF($dv, $ds)), v.id LIMIT 1) AS guid_v $saidas
+                AND NOT EXISTS (SELECT 1 FROM n10_x_par_saida j WHERE j.guid_s = s.GUID_Nota)) x WHERE x.guid_v IS NOT NULL");
         $rel['gemeos'] = (int) Banco::valor('SELECT COUNT(*) FROM n10_x_gemeo');
         $rel['saidas_com_par'] = (int) Banco::valor('SELECT COUNT(*) FROM n10_x_par_saida');
+        foreach (self::linhas('SELECT por, COUNT(*) AS q FROM n10_x_par_saida GROUP BY por') as $l) {
+            $rel['saidas_par_' . $l['por']] = (int) $l['q']; // pedido · gemeo · data
+        }
         return null;
     }
 
@@ -723,6 +746,14 @@ class Importador
                 'nota10_vendedor_codigo' => $vend ?: null, 'nota10_vendedor_nome' => $vend ? mb_substr(Conferencia::limparNomeVendedor((string) ($nomes[$vend] ?? '')), 0, 100) ?: null : null,
                 'criado_em' => "$data $hora", 'atualizado_em' => "$data $hora",
             ];
+            if ($ja && isset($comPar[$guid]) && $ja['tipo_venda'] === 'nf_avulsa') {
+                // importada antes como venda avulsa, mas é a NF de um pedido de venda: sai do faturamento (não conta em dobro)
+                $linha['situacao'] = $linha['situacao'] === 'cancelado' ? 'cancelado' : 'historico';
+                $linha['situacao_origem'] = 'nf_de_pedido';
+                $linha['tipo_venda'] = null;
+                $linha['faturado_em'] = null;
+                self::somar($rel, 'saidas_ligadas_a_pedido');
+            }
             if ($ja) {
                 self::atualizarPedido($ja, $linha, $rel);
                 continue;
@@ -949,7 +980,7 @@ class Importador
             WHERE p.id <> x.primeiro AND p.origem = 'nota10' AND p.possivel_duplicado = 0");
         self::somar($rel, 'possiveis_duplicados', $n);
         // última compra, intervalo médio e tipo (lead que comprou vira cliente)
-        Banco::executar("UPDATE clientes c JOIN (SELECT cliente_id, MAX(DATE(faturado_em)) AS u, MIN(DATE(faturado_em)) AS p, COUNT(*) AS n
+        Banco::executar("UPDATE clientes c JOIN (SELECT cliente_id, MAX(DATE(criado_em)) AS u, MIN(DATE(criado_em)) AS p, COUNT(*) AS n
                 FROM pedidos WHERE situacao = 'faturado' GROUP BY cliente_id) x ON x.cliente_id = c.id
             SET c.ultima_compra_em = x.u, c.intervalo_medio_dias = IF(x.n > 1, ROUND(DATEDIFF(x.u, x.p) / (x.n - 1)), NULL), c.tipo = IF(c.tipo = 'lead', 'cliente', c.tipo)
             WHERE c.nota10_numero IS NOT NULL");
@@ -986,7 +1017,7 @@ class Importador
             'entrega' => ['Endereços de entrega para revisar', $rel['entrega_para_revisar']],
         ];
         $rel['faturado_total'] = (float) Banco::valor("SELECT COALESCE(SUM(total), 0) FROM pedidos WHERE origem = 'nota10' AND situacao = 'faturado'");
-        $rel['faturado_por_ano'] = array_column(self::linhas("SELECT YEAR(faturado_em) AS ano, ROUND(SUM(total), 2) AS v FROM pedidos WHERE origem = 'nota10' AND situacao = 'faturado' GROUP BY 1 ORDER BY 1"), 'v', 'ano');
+        $rel['faturado_por_ano'] = array_column(self::linhas("SELECT YEAR(criado_em) AS ano, ROUND(SUM(total), 2) AS v FROM pedidos WHERE origem = 'nota10' AND situacao = 'faturado' GROUP BY 1 ORDER BY 1"), 'v', 'ano');
         return null;
     }
 }

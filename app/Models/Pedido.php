@@ -120,8 +120,8 @@ class Pedido
     /** Quadro de crédito do cliente (tela de aprovação do Financeiro) */
     public static function credito(int $clienteId): array
     {
-        $r = Banco::um("SELECT COUNT(*) AS pedidos_12m, COALESCE(SUM(total), 0) AS comprado_12m, MAX(faturado_em) AS ultima_compra
-            FROM pedidos WHERE cliente_id = ? AND situacao = 'faturado' AND faturado_em >= CURDATE() - INTERVAL 12 MONTH", [$clienteId]);
+        $r = Banco::um("SELECT COUNT(*) AS pedidos_12m, COALESCE(SUM(total), 0) AS comprado_12m, MAX(criado_em) AS ultima_compra
+            FROM pedidos WHERE cliente_id = ? AND situacao = 'faturado' AND criado_em >= CURDATE() - INTERVAL 12 MONTH", [$clienteId]);
         $cob = Banco::um("SELECT COUNT(*) AS casos, COALESCE(SUM(valor_total), 0) AS em_aberto, MIN(vencimento_mais_antigo) AS vencimento
             FROM cobrancas WHERE cliente_id = ? AND situacao = 'aberta'", [$clienteId]);
         $r['cobranca_casos'] = (int) $cob['casos'];

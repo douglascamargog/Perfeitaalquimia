@@ -354,11 +354,11 @@ class OneFerramentas
         $uf = strtoupper(mb_substr(trim($uf), 0, 2));
         $f = ['de' => date('Y-m-d', strtotime('-12 months')), 'ate' => date('Y-m-d'), 'uf' => $uf];
         $cidades = Banco::todos("SELECT c.cidade, c.uf, COUNT(DISTINCT c.id) AS clientes, SUM(p.total) AS faturamento FROM pedidos p JOIN clientes c ON c.id = p.cliente_id AND c.tipo <> 'consumidor'
-            WHERE p.situacao = 'faturado' AND p.faturado_em >= ?" . ($uf ? ' AND c.uf = ?' : '') . " GROUP BY c.cidade, c.uf ORDER BY faturamento DESC LIMIT 15",
+            WHERE p.situacao = 'faturado' AND p.criado_em >= ?" . ($uf ? ' AND c.uf = ?' : '') . " GROUP BY c.cidade, c.uf ORDER BY faturamento DESC LIMIT 15",
             array_filter([$f['de'], $uf]));
         $segmentos = Banco::todos("SELECT COALESCE(s.nome, 'Sem segmento') AS segmento, COUNT(DISTINCT c.id) AS clientes, SUM(p.total) AS faturamento FROM pedidos p
             JOIN clientes c ON c.id = p.cliente_id AND c.tipo <> 'consumidor' LEFT JOIN segmentos s ON s.id = c.segmento_id
-            WHERE p.situacao = 'faturado' AND p.faturado_em >= ?" . ($uf ? ' AND c.uf = ?' : '') . " GROUP BY segmento ORDER BY faturamento DESC", array_filter([$f['de'], $uf]));
+            WHERE p.situacao = 'faturado' AND p.criado_em >= ?" . ($uf ? ' AND c.uf = ?' : '') . " GROUP BY segmento ORDER BY faturamento DESC", array_filter([$f['de'], $uf]));
         return ['ultimos_12_meses' => true,
             'cidades' => array_map(fn($c) => ['cidade' => $c['cidade'] . '/' . $c['uf'], 'clientes_que_compraram' => (int) $c['clientes'], 'faturamento' => dinheiro((float) $c['faturamento'])], $cidades),
             'segmentos' => array_map(fn($s) => ['segmento' => $s['segmento'], 'clientes' => (int) $s['clientes'], 'faturamento' => dinheiro((float) $s['faturamento'])], $segmentos)];
