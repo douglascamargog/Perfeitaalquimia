@@ -25,6 +25,9 @@ class BackupBanco
         gzwrite($gz, "SET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS = 0;\n\n");
 
         foreach ($pdo->query('SHOW FULL TABLES WHERE Table_type = "BASE TABLE"')->fetchAll(\PDO::FETCH_NUM) as [$tabela]) {
+            if (str_starts_with($tabela, 'n10_')) {
+                continue; // área separada do Nota10: é uma cópia do backup que está em storage/nota10
+            }
             $criar = $pdo->query("SHOW CREATE TABLE `$tabela`")->fetch(\PDO::FETCH_NUM)[1];
             gzwrite($gz, "-- Tabela $tabela\nDROP TABLE IF EXISTS `$tabela`;\n$criar;\n");
 

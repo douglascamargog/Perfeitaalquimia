@@ -21,7 +21,7 @@ const totalApagar = () => Object.values(contar(listas.apagar)).reduce((a, b) => 
   fs.writeFileSync('storage/clientes/.htaccess', 'Require all denied\n');
 
   const tabelasBanco = sql("select table_name from information_schema.tables where table_schema='perfeita' and table_type='BASE TABLE'").split('\n');
-  const semLista = tabelasBanco.filter((t) => !listas.apagar.includes(t) && !listas.manter.includes(t));
+  const semLista = tabelasBanco.filter((t) => !t.startsWith('n10_') && !listas.apagar.includes(t) && !listas.manter.includes(t));
   ok(semLista.length === 0, 'toda tabela do banco está classificada em apagar ou manter' + (semLista.length ? ': falta ' + semLista.join(', ') : ''));
   ok(listas.apagar.every((t) => !listas.manter.includes(t)), 'nenhuma tabela está nas duas listas');
   ok(['usuarios', 'perfis', 'produtos', 'produto_precos', 'configuracoes', 'trein_progresso', 'ecommerce_pedidos', 'auditoria'].every((t) => listas.manter.includes(t)),

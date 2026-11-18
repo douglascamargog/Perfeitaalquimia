@@ -27,11 +27,11 @@ class ZerarDadosService
     /** O que é apagado, por grupo (o nome do grupo aparece na tela) */
     public const APAGAR = [
         'Carteira e clientes' => ['cliente_eventos', 'tarefas', 'cliente_anexos', 'cliente_acessos', 'buscas_contato', 'ligacoes',
-            'importacao_linhas', 'importacoes', 'carteiras', 'roteiro_paradas', 'roteiros', 'clientes'],
+            'importacao_linhas', 'importacoes', 'carteiras', 'roteiro_paradas', 'roteiros', 'cliente_contatos', 'clientes'],
         'Pedidos, orçamentos e metas' => ['pedido_historico', 'pedido_item_lotes', 'pedido_embalagens', 'pedido_itens', 'pedidos',
             'orcamento_historico', 'orcamento_itens', 'orcamentos', 'pedido_modelo_itens', 'pedido_modelos',
             'vendas_registradas', 'meu_mes', 'metas', 'metas_equipe', 'metas_equipe_lancamentos'],
-        'Cobrança' => ['cobranca_titulos', 'cobrancas'],
+        'Cobrança' => ['cobranca_titulos', 'cobrancas', 'titulos_receber'],
         'Produção e matérias-primas' => ['mp_movimentos', 'ordem_mp_lotes', 'mp_lotes', 'mp_documentos', 'ficha_tecnica', 'ordens_producao',
             'producao_perdas', 'acabado_movimentos', 'estoque_acabado', 'materias_primas', 'mp_fornecedores'],
         'Fórmulas' => ['formula_historico', 'formula_testes', 'formula_itens', 'formulas'],
@@ -60,6 +60,8 @@ class ZerarDadosService
         'trein_perguntas', 'trein_progresso',
         // e-commerce (o One busca de novo na Tray), auditoria e controle das versões
         'ecommerce_pedidos', 'ecommerce_pedido_itens', 'ecommerce_resumo_diario', 'ecommerce_produtos_mes', 'auditoria', 'migracoes',
+        // importação do Nota10: o registro do backup e as ligações escolhidas (as tabelas n10_ da área separada nunca são apagadas aqui)
+        'nota10_importacoes', 'nota10_mapas',
     ];
 
     /** Pastas de arquivos anexados aos dados apagados (fora da web). A pasta fica, o conteúdo sai. */
@@ -142,7 +144,9 @@ class ZerarDadosService
 
     private static function tabelasDoBanco(): array
     {
-        return array_map(fn($l) => $l[0], Banco::pdo()->query('SHOW FULL TABLES WHERE Table_type = "BASE TABLE"')->fetchAll(\PDO::FETCH_NUM));
+        // a área separada do Nota10 (n10_...) é uma cópia do backup: fica de fora
+        return array_values(array_filter(array_map(fn($l) => $l[0], Banco::pdo()->query('SHOW FULL TABLES WHERE Table_type = "BASE TABLE"')->fetchAll(\PDO::FETCH_NUM)),
+            fn($t) => !str_starts_with($t, 'n10_')));
     }
 
     /** Apaga o conteúdo da pasta (mantém a própria pasta, o .htaccess e o .gitkeep). Devolve quantos arquivos saíram. */

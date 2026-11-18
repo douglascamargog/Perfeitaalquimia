@@ -483,6 +483,14 @@ return [
     ['GET',  '/analise/exportar.csv',                 'AnaliseClientesController@exportar', 'clientes.analise'],
     ['GET',  '/sistema/zerar',                        'ZerarDadosController@index',    'sistema.zerar'], // só o Admin ('*')
     ['POST', '/sistema/zerar',                        'ZerarDadosController@zerar',    'sistema.zerar'],
+    // Importar Nota10 (V16.2: enviar, ler e conferir; só o Admin)
+    ['GET',  '/sistema/nota10',                       'Nota10Controller@index',        'sistema.nota10'],
+    ['POST', '/sistema/nota10/enviar',                'Nota10Controller@enviar',       'sistema.nota10'],
+    ['POST', '/sistema/nota10/usar-arquivo',          'Nota10Controller@usarArquivo',  'sistema.nota10'],
+    ['POST', '/sistema/nota10/{id}/ler',              'Nota10Controller@ler',          'sistema.nota10'],
+    ['POST', '/sistema/nota10/{id}/recomecar',        'Nota10Controller@recomecar',    'sistema.nota10'],
+    ['POST', '/sistema/nota10/{id}/descartar',        'Nota10Controller@descartar',    'sistema.nota10'],
+    ['POST', '/sistema/nota10/ligacoes',              'Nota10Controller@mapas',        'sistema.nota10'],
 
     ['GET',  '/integracao',             'IntegracaoController@index',       'integracao.gerenciar'],
     ['POST', '/integracao/testar',      'IntegracaoController@testar',      'integracao.gerenciar'],

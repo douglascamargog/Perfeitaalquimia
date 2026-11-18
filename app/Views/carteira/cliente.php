@@ -2,7 +2,8 @@
 /**
  * Página do cliente: tudo da empresa numa tela. A gaveta da Carteira continua como acesso rápido.
  * Variáveis: $c, $resumo (12 meses), $primeiraCompra, $todosPedidos, $maisComprados, $marca (produtos com a marca dele),
- *            $tarefas (abertas), $linhaDoTempo, $ficha (HTML da ficha, mesma da gaveta), $cobranca
+ *            $tarefas (abertas), $linhaDoTempo, $ficha (HTML da ficha, mesma da gaveta), $cobranca,
+ *            $contatos, $titulos, $matriz, $filiais (o que vem do ERP: carteira/_erp)
  */
 use App\Core\Auth;
 use App\Models\ClienteEvento;
@@ -124,6 +125,8 @@ $diasSemCompra = $c['ultima_compra_em'] ? (int) floor((time() - strtotime($c['ul
         </table>
       </div>
     </section>
+
+    <?= \App\Core\Visao::renderizar('carteira/_erp', ['c' => $c, 'contatos' => $contatos, 'titulos' => $titulos, 'matriz' => $matriz, 'filiais' => $filiais]) ?>
 
     <?php if ($marca): ?>
     <section class="card sem-espaco">

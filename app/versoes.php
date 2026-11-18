@@ -17,6 +17,18 @@
  */
 return [
     [
+        'versao' => '16.2', 'data' => '2026-11-18', 'titulo' => 'Preparando a chegada dos dados do Nota10',
+        'novo' => [
+            'Página do cliente: novo bloco "Cadastro completo", com inscrição estadual, e-mails da nota e do financeiro, limite de crédito, endereço de entrega, cliente desde e a rede (matriz e filiais).',
+            'Página do cliente: "Pessoas da loja", com cada contato, o aniversário e o atalho para o WhatsApp.',
+            'Página do cliente: "Títulos", com o que está em aberto, o que venceu e quantos dias depois do vencimento cada um foi pago.',
+        ],
+        'melhoria' => [
+            'Os blocos novos só aparecem quando a loja tem essas informações. Eles começam a aparecer quando o histórico do Nota10 for importado.',
+        ],
+        'admin' => 'Nova tela Administração › Importar Nota10 (só Admin). Envie o backup do banco nota10 em .sql ou .zip (ou coloque o arquivo em storage/nota10 pelo cPanel). O One lê em partes numa área separada (tabelas n10_), mostra a conferência (quantidades, período, problemas, venda x bonificação pelo CFOP) e guarda as ligações de vendedores, tipos de cadastro, tabelas de preço, formas de pagamento e segmentos. Nada é gravado nos clientes, pedidos e produtos: a importação de verdade vem na próxima versão. O banco ganhou os campos novos de cliente, pedido, item e produto, e as tabelas de contatos da loja e de títulos a receber. "Descartar" apaga o backup e a área separada do servidor.',
+    ],
+    [
         'versao' => '16.1', 'data' => '2026-11-18', 'titulo' => 'Análise de clientes com gráficos, e para todos os vendedores',
         'novo' => [
             'Análise de clientes agora abre para todos os vendedores, no menu Vendas. Cada pessoa vê a própria carteira; a gestão continua vendo todas.',

@@ -1,0 +1,45 @@
+/* =====================================================================
+   Administração › Importar Nota10
+   ===================================================================== */
+.n10-passos { list-style: none; padding: 0; margin: 4px 0 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+.n10-passos li { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 6px; border-radius: 999px; border: 1px solid var(--borda); font-size: .84rem; font-weight: 600; color: var(--texto-suave); background: var(--card); }
+.n10-passos b { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--borda); color: var(--texto-suave); font-size: .78rem; }
+.n10-passos li.atual { border-color: var(--primaria-escura); color: var(--primaria-escura); }
+.n10-passos li.atual b { background: var(--primaria-escura); color: var(--lima); }
+.n10-passos li.feito b { background: var(--secundaria); color: var(--secundaria-texto); }
+.n10-passos small { font-weight: 500; }
+
+.n10-envio, .n10-leitura, .n10-lido { display: grid; gap: 10px; margin-bottom: 16px; }
+.n10-envio h2, .n10-leitura h2, .n10-lido h2, .n10-bloco h2 { margin: 0; font-size: 1.05rem; }
+.n10-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.n10-soltos { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.n10-soltos li { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; padding: 8px 10px; border: 1px solid var(--borda); border-radius: 10px; }
+.n10-barra { height: 14px; border-radius: 999px; background: var(--borda); overflow: hidden; }
+.n10-barra span { display: block; height: 100%; background: linear-gradient(90deg, var(--primaria), var(--secundaria)); transition: width .3s; }
+.n10-leitura .acoes, .n10-lido .acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.n10-lido { grid-template-columns: 1fr auto; align-items: center; }
+
+.n10-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+.n10-kpis .card { margin: 0; display: grid; gap: 3px; }
+.n10-kpis span { font-size: .78rem; font-weight: 600; color: var(--texto-suave); }
+.n10-kpis strong { font-size: 1.5rem; color: var(--primaria-escura); }
+.n10-kpis small { font-size: .76rem; color: var(--texto-suave); }
+
+.n10-bloco { margin-bottom: 16px; display: grid; gap: 8px; min-width: 0; }
+.n10-bloco h3 { margin: 0; font-size: .98rem; }
+.n10-bloco .tabela { width: 100%; }
+.n10-duas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.n10-duas > * { min-width: 0; overflow-x: auto; }
+.n10-canvas { position: relative; height: 240px; }
+.n10-problemas { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.n10-problemas li { padding: 8px 12px; border-radius: 10px; border-left: 4px solid var(--secundaria); background: var(--fundo); font-size: .88rem; }
+.n10-problemas li.alerta { border-left-color: var(--aviso); background: var(--aviso-fundo); }
+.n10-ligacoes { display: grid; gap: 0; margin-top: 8px; }
+.n10-ligacoes select { max-width: 280px; width: 100%; }
+.n10-salvar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 4px 0 18px; }
+details.n10-bloco summary { cursor: pointer; }
+
+@media (max-width: 900px) {
+  .n10-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .n10-duas, .n10-lido { grid-template-columns: 1fr; }
+}

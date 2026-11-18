@@ -101,3 +101,12 @@
 .cl-ativs > li[hidden], .cl-top > li[hidden] { display: none; }
 .cl-bloco .cl-secao-topo { padding: 16px 18px 8px; }
 .cl-bloco .cl-secao-topo h2 { font-size: 1.02rem; }
+
+/* V16.2 — o que vem do ERP: cadastro completo, pessoas da loja e títulos */
+.cl-erp { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 16px; margin: 0; }
+.cl-erp dt { font-size: .74rem; font-weight: 600; color: var(--texto-suave); }
+.cl-erp dd { margin: 0; font-size: .88rem; overflow-wrap: anywhere; }
+.cl-pessoas { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cl-pessoas li { padding-bottom: 8px; border-bottom: 1px solid var(--borda); font-size: .88rem; }
+.cl-pessoas li:last-child { border-bottom: 0; padding-bottom: 0; }
+.cl-vencido { color: var(--perigo); font-weight: 600; }
