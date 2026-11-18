@@ -59,3 +59,31 @@ $selecionado = fn(string $campo, $valor) => (string) \App\Core\Sessao::antigo($c
     <a class="botao contorno" href="<?= url('/carteira/lista') ?>">Cancelar</a>
   </div>
 </form>
+
+<?php if (!$novo && \App\Core\Auth::pode('carteira.excluir')): $cid = (int) $c['id']; $parecidas = \App\Services\ClienteExclusaoService::parecidas($c); ?>
+  <section class="card" data-cuidado style="margin-top:18px;border:1px solid var(--perigo)">
+    <h2 style="margin-top:0">Juntar ou excluir esta loja</h2>
+    <div class="grade-campos" style="align-items:start">
+      <form method="post" action="<?= url("/carteira/clientes/$cid/juntar") ?>" data-form-juntar
+            data-confirmar="Juntar a loja escolhida a ESTA? O histórico dela vem para cá e ela sai da Carteira."><?= csrf_campo() ?>
+        <p class="pequeno"><strong>Juntar lojas repetidas:</strong> a loja escolhida vem para esta (pedidos, linha do tempo, tarefas, cobrança, anexos) e sai da Carteira.
+          Os campos vazios desta loja são completados com os da outra.</p>
+        <?php if ($parecidas): ?>
+          <p class="pequeno suave" style="margin-bottom:4px">Parecidas (mesmo CNPJ ou mesmo nome na cidade):</p>
+          <?php foreach ($parecidas as $p): ?>
+            <label class="pequeno" style="display:block"><input type="radio" name="origem_id" value="<?= (int) $p['id'] ?>"> <?= e($p['nome_fantasia'] ?: $p['razao_social']) ?> · <?= e($p['cidade']) ?>/<?= e($p['uf']) ?><?= $p['cnpj'] ? ' · ' . e(cnpj_formatado($p['cnpj'])) : '' ?> <small class="suave">#<?= (int) $p['id'] ?></small></label>
+          <?php endforeach; ?>
+        <?php endif; ?>
+        <label class="pequeno" style="display:block;margin-top:6px">Ou o número da loja repetida (aparece no fim do endereço da página dela: /carteira/clientes/<strong>123</strong>)
+          <input type="number" name="origem_numero" min="1" placeholder="ex.: 123" style="max-width:140px"></label>
+        <button class="botao contorno pequeno" type="submit" style="margin-top:8px">Juntar a esta loja</button>
+      </form>
+      <form method="post" action="<?= url("/carteira/clientes/$cid/excluir") ?>" data-form-excluir data-confirmar="Excluir esta loja da Carteira? Dá para restaurar depois em Lojas excluídas."><?= csrf_campo() ?>
+        <p class="pequeno"><strong>Excluir:</strong> a loja sai da Carteira, das listas e da Agenda, mas o histórico fica guardado e dá para
+          <a href="<?= url('/carteira/excluidas') ?>">restaurar depois</a>.</p>
+        <label class="pequeno">Motivo<input type="text" name="motivo" maxlength="300" placeholder="ex.: loja fechou, cadastro repetido" required></label>
+        <button class="botao contorno pequeno" type="submit" style="margin-top:8px;color:var(--perigo);border-color:var(--perigo)">Excluir loja</button>
+      </form>
+    </div>
+  </section>
+<?php endif; ?>

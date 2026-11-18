@@ -31,6 +31,19 @@ $hoje = date('Y-m-d');
         <input type="date" name="data" min="<?= $hoje ?>" aria-label="Outra data"><button class="botao pequeno" type="submit" name="para" value="data">Ok</button>
       </form>
     </details>
+    <details class="ag-reagendar" data-editar-tarefa><summary class="ag-botao" title="Editar ou excluir">✏️</summary>
+      <form method="post" action="<?= url('/agenda/' . (int) $t['id'] . '/editar') ?>"><?= csrf_campo() ?>
+        <input type="hidden" name="voltar" value="<?= e($voltar) ?>">
+        <input type="text" name="titulo" value="<?= e($t['titulo']) ?>" maxlength="200" aria-label="Assunto" required>
+        <input type="date" name="data" value="<?= e($t['vence_em']) ?>" aria-label="Data" required>
+        <input type="time" name="hora" value="<?= $t['hora'] ? e(substr($t['hora'], 0, 5)) : '' ?>" aria-label="Hora">
+        <button class="botao pequeno" type="submit">Salvar</button>
+      </form>
+      <form method="post" action="<?= url('/agenda/' . (int) $t['id'] . '/excluir') ?>" data-confirmar="Excluir esta tarefa? (Se você fez o contato, use “Feito”.)"><?= csrf_campo() ?>
+        <input type="hidden" name="voltar" value="<?= e($voltar) ?>">
+        <button class="botao contorno pequeno" type="submit" style="color:var(--perigo);border-color:var(--perigo)">Excluir tarefa</button>
+      </form>
+    </details>
     <form method="post" action="<?= url('/agenda/' . (int) $t['id'] . '/concluir') ?>"><?= csrf_campo() ?><input type="hidden" name="voltar" value="<?= e($voltar) ?>">
       <button class="ag-botao ag-concluir" type="submit" title="Concluir" data-concluir>✓ Feito</button></form>
   </footer>

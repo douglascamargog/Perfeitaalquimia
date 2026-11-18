@@ -17,6 +17,17 @@
  */
 return [
     [
+        'versao' => '15.7', 'data' => '2026-11-18', 'titulo' => 'Corrigir, editar e excluir',
+        'novo' => [
+            'Linha do tempo: errou ao registrar um contato ou anotação? Clique em "Corrigir" para mudar o texto ou apagar o registro (até 24 horas depois).',
+            'Agenda: o botão ✏️ de cada tarefa permite mudar o assunto, a data e a hora, ou excluir a tarefa criada por engano.',
+            'Carteira (gestão): excluir uma loja (com motivo) e juntar lojas repetidas: o histórico da repetida vem para a loja que fica. As excluídas podem ser restauradas.',
+            'Mensagens prontas e posts do Marketing (ainda não publicados) agora podem ser excluídos.',
+            'Planejador de visitas: botão "Cancelar roteiro".',
+        ],
+        'admin' => 'Permissão nova "carteira.excluir" (Gestor; Admin tem tudo): excluir, restaurar e juntar lojas, e corrigir qualquer registro da linha do tempo a qualquer hora. Juntar move pedidos, linha do tempo, tarefas, cobranças, anexos e roteiros para a loja que fica. Tudo fica na auditoria (inclusive o texto antes de corrigir ou apagar). Lojas excluídas: Carteira › Lojas excluídas.',
+    ],
+    [
         'versao' => '15.6', 'data' => '2026-11-18', 'titulo' => 'Conversa com o One que não se perde e lojas com link',
         'melhoria' => [
             'One: a conversa continua quando você troca de tela. Clicou num link da resposta? A tela abre e o One reabre na mesma conversa, para você continuar perguntando.',

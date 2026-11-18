@@ -39,6 +39,7 @@ $linkAba = fn(string $aba, array $mais = []) => url('/roteiros/' . (int) $r['id'
       <?php if ($podeMexer): ?>
         <a class="botao contorno" href="<?= url('/roteiros/' . (int) $r['id'] . '/editar') ?>">Editar</a>
         <form method="post" action="<?= url('/roteiros/' . (int) $r['id'] . '/situacao') ?>" data-confirmar="Marcar o roteiro como concluído?"><?= csrf_campo() ?><input type="hidden" name="acao" value="concluir"><button class="botao contorno" type="submit">Concluir</button></form>
+        <form method="post" action="<?= url('/roteiros/' . (int) $r['id'] . '/situacao') ?>" data-confirmar="Cancelar este roteiro? As donas das lojas já avisadas não recebem novo aviso."><?= csrf_campo() ?><input type="hidden" name="acao" value="cancelar"><button class="botao contorno" type="submit" data-cancelar-roteiro style="color:var(--perigo);border-color:var(--perigo)">Cancelar roteiro</button></form>
       <?php elseif (R::podeMexer($r)): ?>
         <form method="post" action="<?= url('/roteiros/' . (int) $r['id'] . '/situacao') ?>"><?= csrf_campo() ?><input type="hidden" name="acao" value="reabrir"><button class="botao contorno" type="submit">Reabrir</button></form>
       <?php endif; ?>

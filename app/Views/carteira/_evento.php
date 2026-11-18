@@ -23,5 +23,17 @@ $grupo = ['contato' => 'contato', 'ligacao' => 'contato', 'whatsapp' => 'contato
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
-  <small><?= data_br($ev['ocorrido_em'], true) ?> · <?= pessoa($ev['usuario_nome'] ?? null, null, false, 18, 'Sistema') ?></small>
+  <small><?= data_br($ev['ocorrido_em'], true) ?> · <?= pessoa($ev['usuario_nome'] ?? null, null, false, 18, 'Sistema') ?><?= !empty($ev['editado_em']) ? ' · <em>corrigido</em>' : '' ?></small>
+  <?php if (ClienteEvento::podeMexer($ev)): $base = url('/carteira/clientes/' . (int) $clienteId . '/eventos/' . (int) $ev['id']); ?>
+    <details class="lt-corrigir" data-corrigir-evento="<?= (int) $ev['id'] ?>">
+      <summary class="pequeno">Corrigir</summary>
+      <form method="post" action="<?= $base ?>/editar"><?= csrf_campo() ?>
+        <textarea name="descricao" rows="2" maxlength="2000" aria-label="Texto do registro"><?= e((string) $ev['descricao']) ?></textarea>
+        <button class="botao pequeno" type="submit">Salvar</button>
+      </form>
+      <form method="post" action="<?= $base ?>/apagar" data-confirmar="Apagar este registro da linha do tempo?"><?= csrf_campo() ?>
+        <button class="botao contorno pequeno" type="submit" style="color:var(--perigo);border-color:var(--perigo)">Apagar registro</button>
+      </form>
+    </details>
+  <?php endif; ?>
 </li>

@@ -73,6 +73,18 @@ class MensagemController extends Controller
         }
     }
 
+    /** Excluir mensagem pronta (V15.7). O que já foi enviado continua na linha do tempo das lojas. */
+    public function excluir(string $id): void
+    {
+        $m = \App\Core\Banco::um('SELECT id, titulo FROM mensagens_prontas WHERE id = ?', [(int) $id]);
+        if ($m) {
+            \App\Core\Banco::executar('DELETE FROM mensagens_prontas WHERE id = ?', [$m['id']]);
+            \App\Core\Auditoria::registrar('mensagem', (int) $m['id'], 'excluir', ['titulo' => $m['titulo']], null);
+        }
+        Sessao::aviso('sucesso', 'Mensagem excluída.');
+        redirecionar('/mensagens');
+    }
+
     /** POST da ficha: registra o uso (linha do tempo + contador) antes de abrir o WhatsApp */
     public function usar(string $id): void
     {

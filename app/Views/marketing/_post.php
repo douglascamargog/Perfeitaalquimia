@@ -59,6 +59,10 @@ $acao = $id ? url("/marketing/posts/$id") : url('/marketing/posts');
         </details>
       <?php endif; ?>
       <?php if ($p['link_publicado']): ?><a class="botao contorno" href="<?= e($p['link_publicado']) ?>" target="_blank" rel="noopener noreferrer"><svg class="icone"><use href="<?= $icones ?>#externo"/></svg>Ver no Instagram</a><?php endif; ?>
+      <?php if ($podeEditar && $tipo !== 'publicado'): ?>
+        <form method="post" action="<?= url("/marketing/posts/$id/excluir") ?>" data-confirmar="Excluir este post do mural? (Os comentários vão junto.)"><?= csrf_campo() ?>
+          <button class="botao contorno" type="submit" data-excluir-post style="color:var(--perigo);border-color:var(--perigo)">Excluir post</button></form>
+      <?php endif; ?>
     </div>
   <?php endif; ?>
 

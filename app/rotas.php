@@ -85,6 +85,13 @@ return [
     ['POST', '/carteira/clientes/{id}/agendar', 'ClienteController@agendar',     'carteira.ver_propria|carteira.ver_todas'],
     ['GET',  '/carteira/clientes/{id}/anexos/{anexo}', 'ClienteController@anexo', 'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/carteira/clientes/{id}/etapa',   'ClienteController@etapa',       'carteira.ver_propria|carteira.ver_todas'],
+    ['POST', '/carteira/clientes/{id}/eventos/{evento}/editar', 'EventoController@editar', 'carteira.ver_propria|carteira.ver_todas'],
+    ['POST', '/carteira/clientes/{id}/eventos/{evento}/apagar', 'EventoController@apagar', 'carteira.ver_propria|carteira.ver_todas'],
+    // Excluir, restaurar e juntar lojas repetidas (V15.7): Gestor e Admin
+    ['POST', '/carteira/clientes/{id}/excluir', 'ClienteExclusaoController@excluir',   'carteira.excluir'],
+    ['POST', '/carteira/clientes/{id}/juntar',  'ClienteExclusaoController@juntar',    'carteira.excluir'],
+    ['GET',  '/carteira/excluidas',             'ClienteExclusaoController@excluidas', 'carteira.excluir'],
+    ['POST', '/carteira/excluidas/{id}/restaurar', 'ClienteExclusaoController@restaurar', 'carteira.excluir'],
 
     ['GET',  '/carteira/importar',                    'ImportacaoController@index',     'carteira.importar'],
     ['POST', '/carteira/importar',                    'ImportacaoController@enviar',    'carteira.importar'],
@@ -95,6 +102,8 @@ return [
     ['GET',  '/agenda',                         'AgendaController@index',        'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/agenda/{id}/reagendar',          'AgendaController@reagendar',    'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/agenda/{id}/concluir',           'AgendaController@concluir',     'carteira.ver_propria|carteira.ver_todas'],
+    ['POST', '/agenda/{id}/editar',             'AgendaController@editar',       'carteira.ver_propria|carteira.ver_todas'],
+    ['POST', '/agenda/{id}/excluir',            'AgendaController@excluir',      'carteira.ver_propria|carteira.ver_todas'],
 
     ['GET',  '/reativacao',                     'ReativacaoController@index',    'carteira.ver_propria|carteira.ver_todas'],
     ['POST', '/reativacao/processar',           'ReativacaoController@processar', 'carteira.ver_todas'],
@@ -144,6 +153,7 @@ return [
     ['POST', '/marketing/posts',                   'PostController@criar',             'marketing.editar'],
     ['GET',  '/marketing/posts/{id}',              'PostController@ver',               'marketing.ver'],
     ['POST', '/marketing/posts/{id}',              'PostController@salvar',            'marketing.editar'],
+    ['POST', '/marketing/posts/{id}/excluir',      'PostController@excluir',           'marketing.editar'],
     ['POST', '/marketing/posts/{id}/data',         'PostController@data',              'marketing.editar'],
     ['POST', '/marketing/posts/{id}/etapa',        'PostController@etapa',             'marketing.editar|marketing.aprovar'],
     ['POST', '/marketing/posts/{id}/enviar',       'PostController@enviarAprovacao',   'marketing.editar'],
@@ -279,6 +289,7 @@ return [
     ['POST', '/mensagens',                       'MensagemController@criar',             'mensagens.gerenciar'],
     ['GET',  '/mensagens/{id}',                  'MensagemController@editar',            'mensagens.gerenciar'],
     ['POST', '/mensagens/{id}',                  'MensagemController@atualizar',         'mensagens.gerenciar'],
+    ['POST', '/mensagens/{id}/excluir',          'MensagemController@excluir',           'mensagens.gerenciar'],
     ['POST', '/mensagens/{id}/usar',             'MensagemController@usar',              'mensagens.usar'],
 
     // ---------- Produção e matérias-primas (ver: producao.ver · mexer: producao.gerenciar) ----------

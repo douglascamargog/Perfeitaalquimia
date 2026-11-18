@@ -33,6 +33,24 @@ class ClienteEvento
         ], fn($v) => $v !== null));
     }
 
+    /** Registros que a pessoa digita (os automáticos do sistema — pedido, etapa, importação... — não mudam) */
+    public const EDITAVEIS = ['nota', 'contato', 'ligacao', 'whatsapp', 'visita', 'email'];
+
+    /**
+     * Pode corrigir ou apagar este registro? Quem registrou, em até 24 horas; quem gerencia a Carteira (carteira.excluir), sempre.
+     */
+    public static function podeMexer(array $ev): bool
+    {
+        if (!in_array($ev['tipo'], self::EDITAVEIS, true) || \App\Core\Auth::somenteAcompanha()) {
+            return false;
+        }
+        if (\App\Core\Auth::pode('carteira.excluir')) {
+            return true;
+        }
+        return (int) $ev['usuario_id'] === (int) \App\Core\Auth::id() && !empty($ev['registrado_em'])
+            && strtotime($ev['registrado_em']) > time() - 86400;
+    }
+
     public static function doCliente(int $clienteId, int $limite = 30): array
     {
         return Banco::todos(

@@ -22,7 +22,8 @@ $v = fn(string $campo, $padrao = '') => $m === null ? antigo($campo, $padrao) : 
       <div class="campo"><label for="ordem">Ordem na lista</label><input type="number" id="ordem" name="ordem" value="<?= $v('ordem', '0') ?>"></div>
       <div class="campo"><label class="opcao" style="margin-top:28px"><input type="checkbox" name="ativo" value="1" <?= ($m === null || $m['ativo']) ? 'checked' : '' ?>> Ativa (aparece na ficha)</label></div>
     </div>
-    <div class="acoes-form"><button class="botao" type="submit">Salvar</button><a class="botao contorno" href="<?= url('/mensagens') ?>">Voltar</a></div>
+    <div class="acoes-form"><button class="botao" type="submit">Salvar</button><a class="botao contorno" href="<?= url('/mensagens') ?>">Voltar</a>
+      <?php if ($m): ?><button class="botao contorno" type="submit" form="excluir-mensagem" data-excluir-mensagem style="color:var(--perigo);border-color:var(--perigo)">Excluir</button><?php endif; ?></div>
   </form>
   <section class="card msg-previa">
     <h2>Prévia</h2>
@@ -31,3 +32,6 @@ $v = fn(string $campo, $padrao = '') => $m === null ? antigo($campo, $padrao) : 
     <script type="application/json" id="valores-variaveis"><?= json_encode($valores, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
   </section>
 </div>
+<?php if ($m): ?>
+  <form id="excluir-mensagem" method="post" action="<?= url('/mensagens/' . (int) $m['id'] . '/excluir') ?>" data-confirmar="Excluir esta mensagem pronta? Se ela já foi usada, prefira desmarcar “Ativa”." hidden><?= csrf_campo() ?></form>
+<?php endif; ?>

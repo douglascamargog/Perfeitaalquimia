@@ -69,6 +69,7 @@ return [
         'carteira.ver_todas'  => 'Ver todas as carteiras (não só a própria)',
         'carteira.transferir' => 'Transferir cliente para outro vendedor',
         'carteira.importar'   => 'Importar e exportar planilhas da carteira',
+        'carteira.excluir'    => 'Excluir, restaurar e juntar lojas repetidas',
         'credito.ver'         => 'Ver crédito e títulos do cliente',
         'cobranca.enviar'     => 'Enviar cliente para a Cobrança',
         'contatos.buscar_ia'  => 'Buscar contatos na internet com IA',

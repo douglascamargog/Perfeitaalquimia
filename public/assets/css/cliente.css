@@ -87,6 +87,7 @@
 .cl-linha-tempo li > strong { grid-column: 1; font-size: .8rem; }
 .cl-linha-tempo li > small { grid-column: 2; grid-row: 1; text-align: right; white-space: nowrap; align-self: start; }
 .cl-linha-tempo li > span, .cl-linha-tempo li > .lt-anexos { grid-column: 1 / -1; color: var(--texto-suave); }
+.cl-linha-tempo li > .lt-corrigir { grid-column: 1 / -1; }
 .cl-linha-tempo li[hidden] { display: none; }
 .cl-pedidos { max-height: 360px; overflow: auto; }
 .cl-pedidos thead th { position: sticky; top: 0; background: var(--card); z-index: 1; }

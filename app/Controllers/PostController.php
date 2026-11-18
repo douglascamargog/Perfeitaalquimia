@@ -62,6 +62,23 @@ class PostController extends Controller
         $this->json(['ok' => true, 'mensagem' => 'Post criado.', 'abrir' => $id]);
     }
 
+    /** Excluir um post ainda não publicado (V15.7): sai do mural com os comentários; fica na auditoria */
+    public function excluir(string $id): void
+    {
+        $post = Post::buscar((int) $id);
+        if ($post && $post['etapa_tipo'] !== 'publicado') {
+            \App\Core\Banco::transacao(function () use ($post) {
+                \App\Core\Banco::executar('DELETE FROM mkt_post_comentarios WHERE post_id = ?', [$post['id']]);
+                \App\Core\Banco::executar('DELETE FROM mkt_posts WHERE id = ?', [$post['id']]);
+            });
+            \App\Core\Auditoria::registrar('post', (int) $post['id'], 'excluir', ['titulo' => $post['titulo'], 'data_publicacao' => $post['data_publicacao']], null);
+            \App\Core\Sessao::aviso('sucesso', 'Post excluído do mural.');
+        } else {
+            \App\Core\Sessao::aviso('erro', $post ? 'Post já publicado não é excluído (fica no histórico do mural).' : 'Post não encontrado.');
+        }
+        redirecionar('/marketing');
+    }
+
     public function salvar(string $id): void
     {
         $post = $this->postOuErro($id);

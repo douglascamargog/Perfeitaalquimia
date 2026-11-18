@@ -77,6 +77,52 @@ class AgendaController extends Controller
         redirecionar(str_starts_with($voltar, '/agenda') ? $voltar : '/agenda');
     }
 
+    /** Tarefa aberta que a pessoa pode mexer (dela, da equipe do setor que gerencia, ou ver_todas) — ou volta para a Agenda */
+    private function tarefaAberta(string $id): array
+    {
+        $tarefa = Banco::um('SELECT * FROM tarefas WHERE id = ? AND concluida_em IS NULL', [(int) $id]);
+        $doSetor = $tarefa && $tarefa['cliente_id'] && in_array((int) Banco::valor('SELECT funcao_id FROM clientes WHERE id = ?', [$tarefa['cliente_id']]), \App\Services\Setores::gerenciados(), true);
+        if (!$tarefa || (!Auth::pode('carteira.ver_todas') && (int) $tarefa['usuario_id'] !== Auth::id() && !$doSetor)) {
+            Sessao::aviso('erro', 'Tarefa não encontrada.');
+            redirecionar('/agenda');
+        }
+        return $tarefa;
+    }
+
+    /** Corrigir o assunto, a data e a hora (V15.7) */
+    public function editar(string $id): void
+    {
+        $tarefa = $this->tarefaAberta($id);
+        $titulo = mb_substr(trim((string) ($_POST['titulo'] ?? '')), 0, 200);
+        $data = (string) ($_POST['data'] ?? '');
+        $hora = preg_match('/^\d{2}:\d{2}$/', (string) ($_POST['hora'] ?? '')) ? $_POST['hora'] : null;
+        if ($titulo === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
+            Sessao::aviso('erro', 'Preencha o assunto e a data.');
+        } else {
+            Banco::executar('UPDATE tarefas SET titulo = ?, vence_em = ?, hora = ? WHERE id = ?', [$titulo, $data, $hora, $tarefa['id']]);
+            \App\Core\Auditoria::registrar('tarefa', (int) $tarefa['id'], 'editar', ['titulo' => $tarefa['titulo'], 'vence_em' => $tarefa['vence_em']], ['titulo' => $titulo, 'vence_em' => $data]);
+            Sessao::aviso('sucesso', 'Tarefa atualizada.');
+        }
+        redirecionar($this->voltar('/agenda'));
+    }
+
+    /** Excluir uma tarefa criada por engano (V15.7) — diferente de "concluir", não vai para a linha do tempo como feita */
+    public function excluir(string $id): void
+    {
+        $tarefa = $this->tarefaAberta($id);
+        Banco::executar('DELETE FROM tarefas WHERE id = ?', [$tarefa['id']]);
+        \App\Core\Auditoria::registrar('tarefa', (int) $tarefa['id'], 'excluir', ['titulo' => $tarefa['titulo'], 'vence_em' => $tarefa['vence_em'], 'cliente_id' => $tarefa['cliente_id']], null);
+        Sessao::aviso('sucesso', 'Tarefa excluída.');
+        redirecionar($this->voltar('/agenda'));
+    }
+
+    /** Volta para a tela de onde veio (só caminhos internos) */
+    private function voltar(string $padrao): string
+    {
+        $v = (string) ($_POST['voltar'] ?? '');
+        return preg_match('#^/[a-z0-9/_\-?=&]*$#i', $v) ? $v : $padrao;
+    }
+
     public function concluir(string $id): void
     {
         $tarefa = Banco::um('SELECT * FROM tarefas WHERE id = ? AND concluida_em IS NULL', [(int) $id]);

@@ -13,6 +13,7 @@ return [
     'carteira.ver_todas'      => ['Ver todas as carteiras', ['gestor']],
     'carteira.transferir'     => ['Trocar o vendedor responsável', ['gestor']],
     'carteira.importar'       => ['Importar e exportar planilhas', ['gestor']],
+    'carteira.excluir'        => ['Excluir, restaurar e juntar lojas repetidas', ['gestor']],
     'leads.ver'               => ['Ver leads de tráfego (site e anúncios)', ['gestor', 'marketing']],
     'prospeccao.usar'         => ['Usar a prospecção automática', ['gestor', 'vendedor']],
     'catalogo.acessos'        => ['Gerar acesso do cliente ao catálogo', ['gestor', 'vendedor']],

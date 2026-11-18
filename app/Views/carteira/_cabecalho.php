@@ -27,6 +27,7 @@ $textos = [
       <a class="botao contorno" href="<?= url('/carteira/importar') ?>">Importar</a>
       <a class="botao contorno" href="<?= url('/carteira/exportar.csv') . ($query ? '?' . e($query) : '') ?>"><svg class="icone"><use href="<?= $icones ?>#baixar"/></svg>Exportar CSV</a>
     <?php endif; ?>
+    <?php if (Auth::pode('carteira.excluir')): ?><a class="botao contorno" href="<?= url('/carteira/excluidas') ?>" data-link-excluidas>Lojas excluídas</a><?php endif; ?>
   </div>
 </div>
 
