@@ -199,6 +199,8 @@ html.escuro .mm-equipe-barra i, html.escuro .mm-equipe-barra i * { color: var(--
 html.escuro .n10-barra span, html.escuro .n10-barra span * { color: var(--secundaria-texto); }
 /* nutricional.css */
 html.escuro .tn { color: color-mix(in srgb, #000 45%, #ffffff); }
+/* organograma.css */
+html.escuro .org-chip.ilha { background: color-mix(in srgb, #fde6d6 18%, var(--card)); color: color-mix(in srgb, #b4480f 45%, #ffffff); }
 /* painel.css */
 html.escuro .mk-var.desce { color: color-mix(in srgb, #dc2626 45%, #ffffff); }
 html.escuro .mk-ranking li:first-child .mk-posicao, html.escuro .mk-ranking li:first-child .mk-posicao * { color: var(--secundaria-texto); }

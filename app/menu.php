@@ -14,6 +14,7 @@
 
 return array_values(array_filter([
     ['titulo' => 'Início',          'url' => '/',              'icone' => 'casa',      'grupo' => '',               'permissao' => 'logado',                                  'pronto' => true,  'descricao' => 'Resumo do dia'],
+    ['titulo' => 'Organograma',     'url' => '/organograma',   'icone' => 'alvo',      'grupo' => '',               'permissao' => 'logado',                                  'pronto' => true,  'descricao' => 'Como os setores se ligam e quem faz parte de cada área'],
     ['oculto' => true, 'titulo' => 'Pessoas',         'url' => '/pessoas',       'icone' => 'pessoas',   'grupo' => '',               'permissao' => 'logado',                                  'pronto' => true,  'descricao' => 'Conheça os colegas: perfis, gostos e aniversários'],
     ['titulo' => 'Carteira',        'url' => '/carteira',      'icone' => 'pessoas',   'grupo' => 'Vendas', 'setor' => true,      'permissao' => ['carteira.ver_propria', 'carteira.ver_todas'], 'pronto' => true,  'descricao' => 'Clientes, funil, mapa e linha do tempo'],
     ['titulo' => 'Meu mês',         'url' => '/meu-mes',       'icone' => 'grafico',   'grupo' => 'Vendas', 'setor' => true,      'permissao' => 'meu_mes.usar',                            'pronto' => true,  'descricao' => 'Minha meta, meta da equipe, vendas e tarefas'],

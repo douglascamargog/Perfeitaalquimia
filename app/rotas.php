@@ -488,6 +488,7 @@ return [
     ['POST', '/roteiros/{id}/paradas/{parada}/visita', 'RoteiroController@visita',    'roteiros.usar'],
     ['POST', '/roteiros/{id}/paradas/{parada}/dia',   'RoteiroController@dia',        'roteiros.usar'],
     ['POST', '/roteiros/{id}/paradas/{parada}/remover', 'RoteiroController@remover',  'roteiros.usar'],
+    ['GET',  '/organograma',                         'OrganogramaController@index',        'logado'],   // interligações dos setores e organização da empresa
     ['GET',  '/analise',                              'AnaliseClientesController@index',    'clientes.analise'],
     ['GET',  '/analise/exportar.csv',                 'AnaliseClientesController@exportar', 'clientes.analise'],
     ['GET',  '/sistema/zerar',                        'ZerarDadosController@index',    'sistema.zerar'], // só o Admin ('*')

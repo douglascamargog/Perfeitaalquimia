@@ -51,6 +51,8 @@ class FuncaoController extends Controller
             'frente' => in_array($_POST['frente'] ?? '', ['externo', 'televendas', 'terceirizacao'], true) ? $_POST['frente'] : null,
             // Setor de venda: carteira própria e um grupo no menu lateral com as abas de venda
             'setor_venda' => isset($_POST['setor_venda']) ? 1 : 0,
+            // Área em que a função aparece no Organograma (organização da empresa)
+            'area' => isset(\App\Services\OrganogramaService::AREAS[$_POST['area'] ?? '']) ? $_POST['area'] : null,
         ];
         Banco::atualizar('funcoes', (int) $id, $dados);
         Auditoria::registrar('funcao', (int) $id, 'editar', $antes, $dados);

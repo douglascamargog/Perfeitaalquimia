@@ -12,7 +12,7 @@
 <div class="card">
   <div class="tabela-rolagem">
     <table class="tabela">
-      <thead><tr><th>Função</th><th>Descrição</th><th>Áreas acompanhadas</th><th>Frente de venda</th><th>Setor de venda</th><th>Identificador</th><th>Pessoas</th><th>Ativa</th><th></th></tr></thead>
+      <thead><tr><th>Função</th><th>Descrição</th><th>Áreas acompanhadas</th><th>Frente de venda</th><th>Setor de venda</th><th>Área no organograma</th><th>Identificador</th><th>Pessoas</th><th>Ativa</th><th></th></tr></thead>
       <tbody>
       <?php foreach ($funcoes as $f): $form = 'funcao-' . (int) $f['id']; ?>
         <tr class="<?= $f['ativa'] ? '' : 'inativo' ?>">
@@ -26,6 +26,10 @@
               <option value="<?= $v ?>" <?= (string) ($f['frente'] ?? '') === $v ? 'selected' : '' ?>><?= $nome ?></option>
             <?php endforeach; ?></select></td>
           <td><input type="checkbox" name="setor_venda" value="1" form="<?= $form ?>" <?= !empty($f['setor_venda']) ? 'checked' : '' ?> aria-label="<?= e($f['nome']) ?> é um setor de venda"></td>
+          <td><select name="area" form="<?= $form ?>" aria-label="Área de <?= e($f['nome']) ?> no organograma">
+            <?php foreach (['' => '— outras'] + \App\Services\OrganogramaService::AREAS as $v => $nome): ?>
+              <option value="<?= e($v) ?>" <?= (string) ($f['area'] ?? '') === (string) $v ? 'selected' : '' ?>><?= e($nome) ?></option>
+            <?php endforeach; ?></select></td>
           <td><code class="pequeno"><?= e($f['slug']) ?></code></td>
           <td><?= (int) $f['pessoas'] ?></td>
           <td><input type="checkbox" name="ativa" value="1" form="<?= $form ?>" <?= $f['ativa'] ? 'checked' : '' ?> aria-label="Ativa"></td>

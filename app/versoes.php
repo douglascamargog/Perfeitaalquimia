@@ -17,6 +17,17 @@
  */
 return [
     [
+        'versao' => '17.8', 'data' => '2026-11-18', 'titulo' => 'Organograma da empresa',
+        'novo' => [
+            'Organograma (no menu): mostra como os setores trocam informação no One. Clique num setor para ver de onde vêm as informações que ele usa e para quem ele passa as dele, e abra a tela do setor dali mesmo.',
+            'Organograma › Organização da empresa: as áreas, as funções e as pessoas de cada uma, com quem é gestor(a) do setor em destaque. Clique numa pessoa para ver o perfil dela.',
+        ],
+        'melhoria' => [
+            'O organograma marca o que ainda falta ligar entre os setores, para todos saberem onde a informação ainda não chega sozinha.',
+        ],
+        'admin' => 'Em Funções há a coluna "Área no organograma" (Diretoria, Comercial, Marketing e E-commerce, Financeiro, Operação e Fábrica); as funções atuais já foram colocadas nas áreas (migration 063). Os números vivos de cada setor (faturado no mês, pedidos para aprovar, casos na Cobrança...) só aparecem para quem vê todas as carteiras ou o painel de vendas. As ligações entre os setores ficam em app/dados/interligacoes.php: quando uma ilha for resolvida, troque a situação para "ok".',
+    ],
+    [
         'versao' => '17.7', 'data' => '2026-11-18', 'titulo' => 'Ligar os produtos do Nota10 aos do One',
         'novo' => [
             'Produtos › Ligar produtos do Nota10: os produtos que vieram do Nota10 e não foram reconhecidos podem ser ligados ao produto certo do One. As vendas antigas passam para o produto do One (relatórios, análise de clientes e histórico ficam completos) e pode desfazer.',
