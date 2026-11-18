@@ -56,5 +56,6 @@ continuam com o mesmo número de registros.
 | `editar_excluir` | Excluir, restaurar e juntar lojas; corrigir e apagar registro da linha do tempo (24 h); editar e excluir tarefa da Agenda; excluir mensagem pronta e post; cancelar roteiro |
 | `editar_excluir2` | Corrigir pedido aguardando aprovação, editar pedido ao Marketing, corrigir comunicado e editar ordem de produção planejada |
 | `lote_desfazer` | Filtros lembrados na Carteira, ações com as lojas marcadas (etapa, prioridade, carteira) e Desfazer (concluir/excluir tarefa, apagar registro) |
+| `marketing_divisao` | Marketing sem "quem pegar primeiro": quem cuida de cada função, pedido já nasce com dono, só a dona é avisada, começa e conclui |
 | `qualidade_vida` | Conversa do One que não se perde, link da loja na Cobrança, Pedidos, Aprovação e Meu mês |
 | `zerar` | Administração › Zerar dados: só o Admin, senha + ZERAR, backup antes, apaga o dia a dia e mantém usuários, produtos, catálogo, configurações e treinamento; toda tabela classificada |

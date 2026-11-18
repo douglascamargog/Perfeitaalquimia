@@ -86,8 +86,8 @@ class MarketingTarefaService
             $funcoes = self::minhasFuncoes();
             $cond = ['t.responsavel_id = ?'];
             $par[] = Auth::id();
-            if ($funcoes) {
-                $cond[] = "t.funcao_slug IN ('" . implode("','", array_map(fn($f) => preg_replace('/[^a-z0-9_]/', '', $f), $funcoes)) . "')";
+            if ($funcoes) { // só as que ainda estão sem dono (cada tarefa tem a sua pessoa)
+                $cond[] = "(t.responsavel_id IS NULL AND t.funcao_slug IN ('" . implode("','", array_map(fn($f) => preg_replace('/[^a-z0-9_]/', '', $f), $funcoes)) . "'))";
             }
             if (Auth::pode('marketing.aprovar')) {
                 $cond[] = "t.situacao = 'aprovacao'"; // quem aprova vê tudo que espera aprovação
@@ -138,7 +138,7 @@ class MarketingTarefaService
         if ($funcoes) {
             $lista = "'" . implode("','", array_map(fn($f) => preg_replace('/[^a-z0-9_]/', '', $f), $funcoes)) . "'";
             $n += (int) Banco::valor("SELECT COUNT(*) FROM mkt_tarefas WHERE situacao IN ('a_fazer','fazendo') AND (prazo < CURDATE() OR urgente = 1)
-                AND (funcao_slug IN ($lista) OR responsavel_id = ?)", [$usuarioId]);
+                AND (responsavel_id = ? OR (responsavel_id IS NULL AND funcao_slug IN ($lista)))", [$usuarioId]);
         }
         if (Auth::pode('marketing.aprovar')) {
             $n += (int) Banco::valor("SELECT COUNT(*) FROM mkt_tarefas WHERE situacao = 'aprovacao'");
@@ -186,17 +186,19 @@ class MarketingTarefaService
             $setor = Banco::valor('SELECT f.nome FROM usuario_funcoes uf JOIN funcoes f ON f.id = uf.funcao_id WHERE uf.usuario_id = ? ORDER BY f.ordem LIMIT 1', [$usuarioId])
                 ?: (string) Banco::valor('SELECT p.nome FROM usuarios u JOIN perfis p ON p.id = u.perfil_id WHERE u.id = ?', [$usuarioId]);
         }
+        // Dono desde o começo: quem foi escolhido na tarefa interna, ou quem cuida da função (nada de "quem pegar primeiro")
+        $dono = (!$pedido ? ((int) ($d['responsavel_id'] ?? 0) ?: null) : null) ?? self::responsavelDaFuncao($funcao);
         $id = Banco::inserir('mkt_tarefas', array_filter([
             'titulo' => $titulo, 'descricao' => mb_substr(trim((string) ($d['descricao'] ?? '')), 0, 5000) ?: null, 'tipo_id' => (int) $tipo['id'],
-            'funcao_slug' => $funcao, 'responsavel_id' => !$pedido ? ((int) ($d['responsavel_id'] ?? 0) ?: null) : null,
+            'funcao_slug' => $funcao, 'responsavel_id' => $dono,
             'urgente' => !empty($d['urgente']) ? 1 : 0, 'prazo' => $prazo, 'solicitante_id' => $usuarioId, 'setor' => $setor,
             'anexo' => $anexo, 'anexo_nome' => $anexoNome, 'anexo_mime' => $anexoMime,
         ], fn($v) => $v !== null));
         self::historico_($id, $pedido ? "Pedido feito ($setor)." : 'Tarefa criada.', $usuarioId);
         Auditoria::registrar('mkt_tarefa', $id, 'criar', null, ['titulo' => $titulo, 'funcao' => $funcao]);
-        // Avisa quem é da função que recebe (e o responsável, se já tem)
+        // Avisa SÓ quem cuida (sem ninguém na função: quem aprova o Marketing, para encaminhar)
         $nomeFuncao = (string) Banco::valor('SELECT nome FROM funcoes WHERE slug = ?', [$funcao]);
-        NotificacaoService::avisar(array_merge(self::pessoasDaFuncao($funcao), array_filter([(int) ($d['responsavel_id'] ?? 0)])), 'mkt_tarefa',
+        NotificacaoService::avisar($dono ? [$dono] : NotificacaoService::destinatarios('marketing.aprovar', 'marketing'), 'mkt_tarefa',
             ($pedido ? "Pedido ao Marketing ($nomeFuncao): " : 'Tarefa nova: ') . $titulo, '/marketing/tarefas/' . $id,
             ['texto' => trim(($setor ? "De $setor" : '') . ($prazo ? ' · prazo ' . data_br($prazo) : '') . (!empty($d['urgente']) ? ' · URGENTE' : ''), ' ·')], $usuarioId);
         return [$id, []];
@@ -237,6 +239,12 @@ class MarketingTarefaService
         $marketing = self::podeMexer();
         $sit = $t['situacao'];
         $dados = ['atualizado_em' => $agora];
+        // Cada tarefa tem a sua pessoa: só ela (ou quem gerencia o Marketing) começa, envia para aprovação e conclui
+        if ($marketing && in_array($acao, ['comecar', 'aprovacao', 'concluir'], true) && $t['responsavel_id'] && (int) $t['responsavel_id'] !== $usuarioId
+            && !Auth::pode('marketing.aprovar')) {
+            $dona = (string) Banco::valor('SELECT nome FROM usuarios WHERE id = ?', [$t['responsavel_id']]);
+            return "Esta tarefa é de $dona. Se for para você fazer, peça para quem gerencia o Marketing encaminhar.";
+        }
         switch ($acao) {
             case 'comecar':
                 if (!$marketing || $sit !== 'a_fazer') {
@@ -317,7 +325,7 @@ class MarketingTarefaService
         }
         self::historico_((int) $t['id'], $texto, $usuarioId);
         $para = (int) $t['solicitante_id'] === $usuarioId
-            ? ($t['responsavel_id'] ? [(int) $t['responsavel_id']] : self::pessoasDaFuncao((string) $t['funcao_slug']))
+            ? ($t['responsavel_id'] ? [(int) $t['responsavel_id']] : array_filter([self::responsavelDaFuncao((string) $t['funcao_slug'])]))
             : [(int) $t['solicitante_id'], (int) ($t['responsavel_id'] ?? 0)];
         NotificacaoService::avisar($para, 'mkt_comentario', 'Comentário: ' . $t['titulo'], '/marketing/tarefas/' . (int) $t['id'], ['texto' => $texto], $usuarioId);
         return null;
@@ -333,16 +341,68 @@ class MarketingTarefaService
         if (!Banco::valor('SELECT 1 FROM funcoes WHERE slug = ?', [$funcao])) {
             return 'Escolha a função.';
         }
-        $resp = (int) ($d['responsavel_id'] ?? 0) ?: null;
+        $resp = (int) ($d['responsavel_id'] ?? 0) ?: self::responsavelDaFuncao($funcao); // sem pessoa escolhida: quem cuida da função
         $prazo = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($d['prazo'] ?? '')) ? $d['prazo'] : null;
         Banco::atualizar('mkt_tarefas', (int) $t['id'], ['funcao_slug' => $funcao, 'responsavel_id' => $resp, 'prazo' => $prazo, 'atualizado_em' => date('Y-m-d H:i:s')]);
         $nome = (string) Banco::valor('SELECT nome FROM funcoes WHERE slug = ?', [$funcao]);
         $pessoa = $resp ? (string) Banco::valor('SELECT nome FROM usuarios WHERE id = ?', [$resp]) : '';
         self::historico_((int) $t['id'], "Encaminhou para $nome" . ($pessoa ? " ($pessoa)" : '') . ($prazo ? ' · prazo ' . data_br($prazo) : '') . '.', $usuarioId);
         if ($funcao !== $t['funcao_slug'] || $resp !== ($t['responsavel_id'] ? (int) $t['responsavel_id'] : null)) {
-            NotificacaoService::avisar($resp ? [$resp] : self::pessoasDaFuncao($funcao), 'mkt_tarefa', 'Tarefa para você: ' . $t['titulo'], '/marketing/tarefas/' . (int) $t['id'], [], $usuarioId);
+            NotificacaoService::avisar($resp ? [$resp] : NotificacaoService::destinatarios('marketing.aprovar', 'marketing'), 'mkt_tarefa', 'Tarefa para você: ' . $t['titulo'], '/marketing/tarefas/' . (int) $t['id'], [], $usuarioId);
         }
         return null;
+    }
+
+    /**
+     * A pessoa que cuida de cada função do Marketing (V16.0): nada de "quem pegar primeiro".
+     * Escolhida pelo gestor em Início do Marketing › Quem cuida de quê (configuração marketing.responsavel.<função>).
+     * Sem escolha: a única pessoa da função; com mais de uma, a de cadastro mais antigo (até o gestor escolher).
+     * Sem ninguém na função: null (o pedido vai para quem aprova o Marketing).
+     */
+    public static function responsavelDaFuncao(string $slug): ?int
+    {
+        $pessoas = self::pessoasDaFuncao($slug);
+        $escolhida = (int) \App\Core\Config::get('marketing.responsavel.' . preg_replace('/[^a-z0-9_]/', '', $slug), 0);
+        if ($escolhida && Banco::valor('SELECT 1 FROM usuarios WHERE id = ? AND ativo = 1', [$escolhida])) {
+            return $escolhida;
+        }
+        sort($pessoas);
+        return $pessoas[0] ?? null;
+    }
+
+    /** Quem cuida de cada função, para a tela: [['slug', 'nome', 'responsavel_id', 'pessoas' => [...]], ...] */
+    public static function divisao(): array
+    {
+        $lista = [];
+        foreach (self::funcoes() as $f) {
+            $lista[] = $f + ['responsavel_id' => self::responsavelDaFuncao($f['slug']),
+                'escolhido' => (int) \App\Core\Config::get('marketing.responsavel.' . $f['slug'], 0),
+                'tipos' => array_column(Banco::todos('SELECT nome FROM mkt_tipos WHERE funcao_slug = ? AND ativo = 1 ORDER BY ordem', [$f['slug']]), 'nome')];
+        }
+        return $lista;
+    }
+
+    /** Gestor/Admin define quem cuida de cada função (as tarefas abertas sem dono da função vão para essa pessoa) */
+    public static function definirResponsavel(string $slug, int $usuarioId, int $quem): void
+    {
+        $slug = preg_replace('/[^a-z0-9_]/', '', $slug);
+        if (!in_array($slug, array_column(self::funcoes(), 'slug'), true)) {
+            throw new RuntimeException('Função não encontrada.');
+        }
+        if ($usuarioId && !Banco::valor('SELECT 1 FROM usuarios WHERE id = ? AND ativo = 1', [$usuarioId])) {
+            throw new RuntimeException('Pessoa não encontrada.');
+        }
+        $chave = "marketing.responsavel.$slug";
+        if (!Banco::valor('SELECT 1 FROM configuracoes WHERE chave = ?', [$chave])) {
+            Banco::inserir('configuracoes', ['chave' => $chave, 'rotulo' => 'Marketing: quem cuida de ' . $slug, 'valor' => '', 'tipo' => 'texto', 'grupo' => 'Marketing',
+                'descricao' => 'Escolhido em Início do Marketing › Quem cuida de quê']);
+        }
+        \App\Core\Config::definir($chave, $usuarioId ? (string) $usuarioId : '');
+        $dono = self::responsavelDaFuncao($slug);
+        if ($dono) {
+            Banco::executar("UPDATE mkt_tarefas SET responsavel_id = ? WHERE funcao_slug = ? AND responsavel_id IS NULL AND situacao IN ('a_fazer','fazendo','aprovacao')", [$dono, $slug]);
+        }
+        Auditoria::registrar('configuracao', null, 'marketing_responsavel', null, ['funcao' => $slug, 'usuario_id' => $usuarioId]);
     }
 
     /** Pessoas ativas de uma função */

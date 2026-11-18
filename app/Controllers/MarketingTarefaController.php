@@ -119,6 +119,18 @@ class MarketingTarefaController extends Controller
         redirecionar($this->campo('voltar') === 'inicio' ? '/marketing/inicio' : '/marketing/tarefas/' . (int) $t['id']);
     }
 
+    /** Quem cuida de cada função do Marketing (gestor de Marketing / Admin) */
+    public function responsavel(): void
+    {
+        try {
+            T::definirResponsavel((string) $this->campo('funcao'), (int) $this->campo('usuario_id'), (int) Auth::id());
+            Sessao::aviso('sucesso', 'Pronto: os pedidos dessa função vão direto para essa pessoa.');
+        } catch (\RuntimeException $e) {
+            Sessao::aviso('erro', $e->getMessage());
+        }
+        redirecionar('/marketing/inicio');
+    }
+
     /** Editar o pedido/tarefa (V15.7): quem pediu, enquanto está "A fazer"; o Marketing, até concluir */
     public function editar(string $id): void
     {

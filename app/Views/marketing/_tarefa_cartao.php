@@ -21,9 +21,10 @@ $acao = fn(string $a, string $rotulo, string $classe = 'contorno') => '<form met
   </div>
   <?php if ($c['tipo'] === 'tarefa'): ?>
     <small class="mt-quem"><?= e((string) $c['funcao']) ?><?= $c['responsavel'] ? ' · ' . pessoa($c['responsavel'] ?? null, null, false, 18, '—') : '' ?><?= $c['setor'] ? ' · pedido de ' . e($c['setor']) : '' ?></small>
+    <?php $minha = $pode && (empty($c['responsavel_id']) || (int) $c['responsavel_id'] === \App\Core\Auth::id() || $podeAprovar); // só a dona (ou o gestor) faz ?>
     <?php if ($pode || $podeAprovar): ?><div class="mt-acoes">
-      <?php if ($pode && $c['situacao'] === 'a_fazer'): ?><?= $acao('comecar', 'Começar') ?><?php endif; ?>
-      <?php if ($pode && in_array($c['situacao'], ['a_fazer', 'fazendo'], true)): ?><?= $acao('aprovacao', 'Para aprovação') ?><?= $acao('concluir', 'Concluir', 'lima') ?><?php endif; ?>
+      <?php if ($minha && $c['situacao'] === 'a_fazer'): ?><?= $acao('comecar', 'Começar') ?><?php endif; ?>
+      <?php if ($minha && in_array($c['situacao'], ['a_fazer', 'fazendo'], true)): ?><?= $acao('aprovacao', 'Para aprovação') ?><?= $acao('concluir', 'Concluir', 'lima') ?><?php endif; ?>
       <?php if ($podeAprovar && $c['situacao'] === 'aprovacao'): ?><?= $acao('aprovar', 'Aprovar', 'lima') ?><a class="botao contorno pequeno" href="<?= url($link) ?>#decidir">Pedir ajuste</a><?php endif; ?>
     </div><?php endif; ?>
   <?php elseif ($c['tipo'] === 'projeto'): ?>

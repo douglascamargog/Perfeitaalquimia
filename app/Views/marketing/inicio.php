@@ -25,6 +25,32 @@ $diasSemana = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
   <a class="mk-numero" href="<?= url('/desenvolvimento') ?>"><span>Desenvolvimento</span><strong><?= (int) $resumo['rotulos'] ?></strong><small>etapas do Marketing em andamento</small></a>
 </div>
 
+<?php $divisao = \App\Services\MarketingTarefaService::divisao(); $gerencia = Auth::pode('marketing.aprovar'); ?>
+<section class="card mt-divisao" data-divisao style="margin-bottom:14px">
+  <h2 style="margin:0 0 4px;font-size:1rem">Quem cuida de quê</h2>
+  <p class="pequeno suave" style="margin:0 0 8px">Cada pedido vai direto para a pessoa que cuida da função do assunto, e só ela é avisada. Para passar uma tarefa para outra pessoa, use "Encaminhar" na tarefa.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+    <?php foreach ($divisao as $d): $pessoasFuncao = \App\Services\MarketingTarefaService::pessoasDaFuncao($d['slug']); ?>
+      <div class="mt-divisao-item" data-funcao-mkt="<?= e($d['slug']) ?>">
+        <strong><?= e($d['nome']) ?></strong>
+        <?php if ($gerencia): ?>
+          <form method="post" action="<?= url('/marketing/responsavel') ?>" style="display:flex;gap:6px;margin:4px 0"><?= csrf_campo() ?>
+            <input type="hidden" name="funcao" value="<?= e($d['slug']) ?>">
+            <select name="usuario_id" aria-label="Quem cuida de <?= e($d['nome']) ?>" onchange="this.form.submit()">
+              <?php if (!$pessoasFuncao): ?><option value="">ninguém nesta função</option><?php endif; ?>
+              <?php foreach ($pessoasFuncao as $pid): ?><option value="<?= $pid ?>" <?= (int) $d['responsavel_id'] === $pid ? 'selected' : '' ?>><?= e((string) \App\Core\Banco::valor('SELECT nome FROM usuarios WHERE id = ?', [$pid])) ?></option><?php endforeach; ?>
+            </select>
+            <noscript><button class="botao contorno pequeno" type="submit">Salvar</button></noscript>
+          </form>
+        <?php else: ?>
+          <p style="margin:2px 0"><?= $d['responsavel_id'] ? pessoa((string) \App\Core\Banco::valor('SELECT nome FROM usuarios WHERE id = ?', [$d['responsavel_id']]), null, false, 18) : '<span class="suave">ninguém na função</span>' ?></p>
+        <?php endif; ?>
+        <small class="suave"><?= $d['tipos'] ? e(implode(' · ', $d['tipos'])) : 'tarefas internas e encaminhadas' ?></small>
+      </div>
+    <?php endforeach; ?>
+  </div>
+</section>
+
 <div class="mt-layout">
   <section class="mt-quadro" aria-label="Lista de tarefas">
     <div class="mt-quadro-topo">
@@ -82,7 +108,7 @@ $diasSemana = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
       <label>Função <small>vem do tipo</small><select name="funcao_slug"><option value="">(a do tipo)</option><?php foreach ($funcoes as $f): ?><option value="<?= e($f['slug']) ?>"><?= e($f['nome']) ?></option><?php endforeach; ?></select></label>
     </div>
     <div class="pd-duas">
-      <label>Quem faz <small>opcional</small><select name="responsavel_id"><option value="">Quem pegar primeiro</option><?php foreach ($pessoas as $p): ?><option value="<?= (int) $p['id'] ?>"><?= e($p['nome']) ?></option><?php endforeach; ?></select></label>
+      <label>Quem faz <small>opcional</small><select name="responsavel_id"><option value="">Quem cuida da função</option><?php foreach ($pessoas as $p): ?><option value="<?= (int) $p['id'] ?>"><?= e($p['nome']) ?></option><?php endforeach; ?></select></label>
       <label>Prazo<input type="date" name="prazo" min="<?= $hoje ?>"></label>
     </div>
     <label>Detalhes<textarea name="descricao" rows="3"></textarea></label>

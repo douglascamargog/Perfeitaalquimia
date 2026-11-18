@@ -17,6 +17,20 @@
  */
 return [
     [
+        'versao' => '16.0', 'data' => '2026-11-18', 'titulo' => 'Marketing: cada tarefa tem a sua pessoa',
+        'novo' => [
+            'Marketing: acabou o "quem pegar primeiro". Cada função tem a sua pessoa (Social Media, E-commerce e Marketplaces, Gestor de Marketing), e o pedido vai direto para ela.',
+            'Só quem cuida da tarefa é avisada no sino. As outras pessoas do Marketing não recebem aviso de tarefa que não é delas.',
+            '"Minhas tarefas" mostra só o que é seu: Social Media vê as do Social Media, e quem cuida do e-commerce vê as do e-commerce.',
+            'Início do Marketing: cartão "Quem cuida de quê", onde o gestor escolhe a pessoa de cada função.',
+        ],
+        'melhoria' => [
+            'Só a dona da tarefa começa, envia para aprovação e conclui. Para passar para outra pessoa, o gestor usa "Encaminhar".',
+            'O pedido de ajuste num post vai para a pessoa responsável pelo post.',
+        ],
+        'admin' => 'Quem cuida de cada função: Início do Marketing › Quem cuida de quê (quem tem marketing.aprovar). Sem escolha, fica com a única pessoa da função (ou a de cadastro mais antigo). Função sem ninguém: o pedido avisa quem aprova o Marketing, para encaminhar. Na atualização, as tarefas abertas sem dono passam para quem cuida da função delas.',
+    ],
+    [
         'versao' => '15.9', 'data' => '2026-11-18', 'titulo' => 'Filtros lembrados, ações em lote e Desfazer',
         'novo' => [
             'Carteira › Lista: marque várias lojas (ou todas da página) e mude a etapa ou a prioridade de uma vez. A gestão também move as marcadas para outra carteira.',

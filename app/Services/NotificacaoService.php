@@ -177,7 +177,7 @@ class NotificacaoService
 
     public static function postAjuste(array $post, string $motivo, ?int $quemFez): void
     {
-        self::avisar([(int) ($post['criado_por'] ?? 0)], 'post_ajuste', 'Ajuste pedido no post: ' . $post['titulo'], '/marketing?post=' . (int) $post['id'],
+        self::avisar([(int) (($post['responsavel_id'] ?? 0) ?: ($post['criado_por'] ?? 0))], 'post_ajuste', // a dona do post (Social Media) 'Ajuste pedido no post: ' . $post['titulo'], '/marketing?post=' . (int) $post['id'],
             ['texto' => mb_strimwidth($motivo, 0, 140, '…')], $quemFez);
     }
 

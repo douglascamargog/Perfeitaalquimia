@@ -11,6 +11,8 @@ $acao = url('/marketing/tarefas/' . (int) $t['id']);
 $botao = fn(string $a, string $rotulo, string $classe = 'contorno') => '<form method="post" action="' . $acao . '/mudar">' . csrf_campo()
     . '<input type="hidden" name="acao" value="' . $a . '"><button class="botao ' . $classe . '" type="submit" data-acao="' . $a . '">' . $rotulo . '</button></form>';
 $dono = (int) $t['solicitante_id'] === Auth::id();
+// Cada tarefa tem a sua pessoa: os botões de fazer só aparecem para ela (ou para quem gerencia o Marketing)
+$fazer = $pode && (!$t['responsavel_id'] || (int) $t['responsavel_id'] === Auth::id() || $podeAprovar);
 $imagem = $t['anexo'] && str_starts_with((string) $t['anexo_mime'], 'image/');
 ?>
 <?php $doMarketing = Auth::pode('marketing.editar') || Auth::pode('marketing.aprovar'); ?>
@@ -26,8 +28,9 @@ $imagem = $t['anexo'] && str_starts_with((string) $t['anexo_mime'], 'image/');
       · <?= $t['setor'] ? 'pedido de ' . pessoa($t['solicitante'] ?? null, null, false, 18, '—') . ' (' . e($t['setor']) . ')' : 'criada por ' . pessoa($t['solicitante'] ?? null, null, false, 18, '—') ?> em <?= data_br($t['criado_em']) ?></p>
   </div>
   <div class="acoes mt-botoes">
-    <?php if ($pode && $t['situacao'] === 'a_fazer'): ?><?= $botao('comecar', 'Começar') ?><?php endif; ?>
-    <?php if ($pode && in_array($t['situacao'], ['a_fazer', 'fazendo'], true)): ?><?= $botao('aprovacao', 'Enviar para aprovação') ?><?= $botao('concluir', 'Concluir', 'lima') ?><?php endif; ?>
+    <?php if ($fazer && $t['situacao'] === 'a_fazer'): ?><?= $botao('comecar', 'Começar') ?><?php endif; ?>
+    <?php if ($fazer && in_array($t['situacao'], ['a_fazer', 'fazendo'], true)): ?><?= $botao('aprovacao', 'Enviar para aprovação') ?><?= $botao('concluir', 'Concluir', 'lima') ?><?php endif; ?>
+    <?php if ($pode && !$fazer): ?><span class="pequeno suave" data-tarefa-de-outra>Esta tarefa é de <?= e((string) $t['responsavel']) ?>.</span><?php endif; ?>
     <?php if ($pode && in_array($t['situacao'], ['feito', 'cancelado'], true)): ?><?= $botao('reabrir', 'Reabrir') ?><?php endif; ?>
     <?php if (($pode || ($dono && $t['situacao'] === 'a_fazer')) && !in_array($t['situacao'], ['feito', 'cancelado'], true)): ?>
       <form method="post" action="<?= $acao ?>/mudar" data-confirmar="Cancelar esta tarefa?"><?= csrf_campo() ?><input type="hidden" name="acao" value="cancelar"><button class="botao contorno perigo" type="submit">Cancelar</button></form>
@@ -83,7 +86,7 @@ $imagem = $t['anexo'] && str_starts_with((string) $t['anexo_mime'], 'image/');
     <h2>Encaminhar</h2>
     <form method="post" action="<?= $acao ?>/encaminhar" class="pd-form" data-encaminhar><?= csrf_campo() ?>
       <label>Função<select name="funcao_slug"><?php foreach ($funcoes as $f): ?><option value="<?= e($f['slug']) ?>" <?= $f['slug'] === $t['funcao_slug'] ? 'selected' : '' ?>><?= e($f['nome']) ?></option><?php endforeach; ?></select></label>
-      <label>Quem faz<select name="responsavel_id"><option value="">Quem pegar primeiro</option><?php foreach ($pessoas as $p): ?><option value="<?= (int) $p['id'] ?>" <?= (int) $p['id'] === (int) $t['responsavel_id'] ? 'selected' : '' ?>><?= e($p['nome']) ?></option><?php endforeach; ?></select></label>
+      <label>Quem faz<select name="responsavel_id"><option value="">Quem cuida da função</option><?php foreach ($pessoas as $p): ?><option value="<?= (int) $p['id'] ?>" <?= (int) $p['id'] === (int) $t['responsavel_id'] ? 'selected' : '' ?>><?= e($p['nome']) ?></option><?php endforeach; ?></select></label>
       <label>Prazo<input type="date" name="prazo" value="<?= e((string) $t['prazo']) ?>"></label>
       <button class="botao contorno" type="submit">Salvar</button>
     </form>

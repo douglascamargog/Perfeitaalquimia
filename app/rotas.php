@@ -139,6 +139,7 @@ return [
     ['GET',  '/marketing/tarefas/{id}/anexo',      'MarketingTarefaController@anexo',  'logado'],
     ['POST', '/marketing/tarefas/{id}/mudar',      'MarketingTarefaController@mudar',  'logado'],
     ['POST', '/marketing/tarefas/{id}/comentar',   'MarketingTarefaController@comentar', 'logado'],
+    ['POST', '/marketing/responsavel',             'MarketingTarefaController@responsavel', 'marketing.aprovar'], // quem cuida de cada função
     ['POST', '/marketing/tarefas/{id}/editar',     'MarketingTarefaController@editar',   'logado'], // quem pediu ou o Marketing (regra no serviço)
     ['POST', '/marketing/tarefas/{id}/encaminhar', 'MarketingTarefaController@encaminhar', 'marketing.editar'],
     ['GET',  '/marketing',                         'MarketingController@mural',        'marketing.ver'],
