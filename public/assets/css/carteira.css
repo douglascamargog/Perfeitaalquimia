@@ -220,6 +220,10 @@ form.devolver { display: flex; gap: 6px; }
 form.devolver select { padding: 5px 8px; font-size: .8rem; min-width: 150px; }
 .form-cliente { max-width: 980px; }
 .form-cliente h2 { margin-top: 10px; }
+.form-entrega { border: 1px dashed var(--borda); border-radius: var(--raio-pequeno); padding: 10px 14px 4px; margin: 14px 0; display: grid; gap: 10px; }
+.form-entrega legend { padding: 0 6px; }
+.form-entrega [hidden] { display: none; }
+.form-entrega .aviso { margin: 0; }
 
 /* ---------- Telas menores ---------- */
 @media (max-width: 1210px) {
@@ -328,3 +332,9 @@ details.ficha-secao[open] > summary::before { content: '▾ '; }
 
 /* Ajustar o ponto da loja no mapa (V14.2) */
 .mapa-localizacao { height: min(62vh, 520px); border-radius: 18px; overflow: hidden; border: 1px solid var(--borda); background: var(--fundo); }
+
+/* V16.3 — Endereços de entrega a revisar */
+.entregas-lista { display: grid; gap: 14px; }
+.entregas-loja { display: grid; gap: 10px; margin: 0; }
+.entregas-loja .acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.entregas-trecho { margin: 0; padding: 8px 12px; border-left: 4px solid var(--aviso); background: var(--aviso-fundo); border-radius: 0 var(--raio-pequeno) var(--raio-pequeno) 0; font-size: .9rem; }

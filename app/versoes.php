@@ -17,6 +17,21 @@
  */
 return [
     [
+        'versao' => '16.3', 'data' => '2026-11-18', 'titulo' => 'Endereço de entrega diferente do CNPJ',
+        'novo' => [
+            'Cadastro da loja: "Entregar em outro endereço", para quando a entrega não é no endereço do CNPJ (com quem recebe, número, bairro, cidade, UF e CEP).',
+            'Novo pedido: escolha onde entregar. Se a loja tem endereço de entrega, ele já vem marcado; o endereço do cadastro fica como opção.',
+            'O pedido guarda o endereço usado: se o cadastro mudar depois, o pedido antigo continua igual.',
+            'Depósito: pedido para outro endereço aparece com o aviso "ENTREGAR EM OUTRO ENDEREÇO" e o endereço completo.',
+            'Carteira › Endereços de entrega: lojas que têm um endereço de entrega escrito só na observação, para você conferir e confirmar com um clique (ou dizer que não é).',
+        ],
+        'melhoria' => [
+            'O cadastro agora tem número e complemento separados do endereço.',
+            'Pedidos do catálogo e do app do externo vão para o endereço de entrega da loja quando ele existe.',
+        ],
+        'admin' => 'O pedido vai ao ERP com o endereço de entrega (campo próprio e "ENTREGAR EM:" na observação da nota); a UF de entrega fica guardada no pedido para escolher o CFOP de dentro ou fora do estado. Em Carteira › Endereços de entrega, quem vê todas as carteiras tem o botão "Procurar nas observações das lojas"; a importação do Nota10 vai marcar sozinha as lojas com endereço de entrega só na observação (a conferência já mostra quantas).',
+    ],
+    [
         'versao' => '16.2', 'data' => '2026-11-18', 'titulo' => 'Preparando a chegada dos dados do Nota10',
         'novo' => [
             'Página do cliente: novo bloco "Cadastro completo", com inscrição estadual, e-mails da nota e do financeiro, limite de crédito, endereço de entrega, cliente desde e a rede (matriz e filiais).',

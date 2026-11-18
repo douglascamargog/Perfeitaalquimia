@@ -11,6 +11,12 @@ $primeiro = $r['total'] ? ($r['pagina'] - 1) * $r['por_pagina'] + 1 : 0;
 <?= Visao::renderizar('carteira/_cabecalho', ['aba' => 'lista', 'filtros' => $filtros]) ?>
 <?= Visao::renderizar('carteira/_filtros', ['filtros' => $filtros, 'opcoes' => $opcoes, 'acao' => '/carteira/lista', 'ordem' => $ordem]) ?>
 
+<?php [$wEnt, $pEnt] = \App\Models\Cliente::montarWhere([]);
+  $revisarEntrega = (int) \App\Core\Banco::valor('SELECT COUNT(*) FROM clientes c WHERE ' . $wEnt . ' AND c.entrega_revisar IS NOT NULL', $pEnt); ?>
+<?php if ($revisarEntrega): ?>
+  <p class="aviso alerta" data-aviso-entregas>📦 <?= $revisarEntrega ?> loja(s) com um endereço de entrega escrito na observação, para conferir.
+    <a href="<?= url('/carteira/entregas') ?>"><strong>Revisar endereços de entrega</strong></a></p>
+<?php endif; ?>
 <?php $lote = !\App\Core\Auth::somenteAcompanha() && $r['itens']; $podeCarteira = \App\Services\CarteirasService::podeUsar(); ?>
 <?php if ($lote): ?>
   <form method="post" action="<?= url('/carteira/lote') ?>" id="form-lote" class="card cl-lote" data-lote><?= csrf_campo() ?>

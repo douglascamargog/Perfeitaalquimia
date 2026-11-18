@@ -29,12 +29,39 @@ $selecionado = fn(string $campo, $valor) => (string) \App\Core\Sessao::antigo($c
   <h2>Endereço</h2>
   <div class="grade-campos">
     <div class="campo"><label for="endereco">Endereço</label><input type="text" id="endereco" name="endereco" value="<?= $v('endereco') ?>"></div>
+    <div class="campo"><label for="end_numero">Número</label><input type="text" id="end_numero" name="end_numero" value="<?= $v('end_numero') ?>" maxlength="20"></div>
+    <div class="campo"><label for="end_complemento">Complemento</label><input type="text" id="end_complemento" name="end_complemento" value="<?= $v('end_complemento') ?>" maxlength="60"></div>
     <div class="campo"><label for="bairro">Bairro</label><input type="text" id="bairro" name="bairro" value="<?= $v('bairro') ?>"></div>
     <div class="campo"><label for="cep">CEP</label><input type="text" id="cep" name="cep" value="<?= $v('cep') ?>" inputmode="numeric"></div>
     <div class="campo"><label for="cidade">Cidade *</label><input type="text" id="cidade" name="cidade" value="<?= $v('cidade') ?>" required></div>
     <div class="campo"><label for="uf">UF *</label>
       <select id="uf" name="uf" required><option value="">—</option><?php foreach ($ufs as $uf): ?><option <?= $selecionado('uf', $uf) ?>><?= e($uf) ?></option><?php endforeach; ?></select></div>
   </div>
+
+  <?php $temEntrega = \App\Services\EntregaService::tem($c ?? []) || \App\Core\Sessao::antigo('entrega_outro', '') === '1'; ?>
+  <fieldset class="form-entrega" data-form-entrega>
+    <legend><label class="opcao"><input type="checkbox" name="entrega_outro" value="1" <?= $temEntrega ? 'checked' : '' ?> data-entrega-outro> <strong>Entregar em outro endereço</strong>
+      <small class="suave">(quando a entrega não é no endereço do CNPJ)</small></label></legend>
+    <?php if (!empty($c['entrega_revisar'])): ?>
+      <div class="aviso alerta" data-entrega-revisar>Na observação desta loja tem um endereço que parece ser de entrega: <strong>"<?= e($c['entrega_revisar']) ?>"</strong>.
+        Se for, marque acima e preencha. Se não for: <label class="opcao"><input type="checkbox" name="entrega_revisado" value="1"> não é endereço de entrega</label></div>
+    <?php endif; ?>
+    <div class="grade-campos" data-entrega-campos <?= $temEntrega ? '' : 'hidden' ?>>
+      <div class="campo"><label for="entrega_razao">Recebedor <small>(opcional)</small></label><input type="text" id="entrega_razao" name="entrega_razao" value="<?= $v('entrega_razao') ?>" maxlength="100" placeholder="ex.: Depósito da loja"></div>
+      <div class="campo"><label for="entrega_endereco">Endereço de entrega *</label><input type="text" id="entrega_endereco" name="entrega_endereco" value="<?= $v('entrega_endereco') ?>" maxlength="150"></div>
+      <div class="campo"><label for="entrega_numero">Número</label><input type="text" id="entrega_numero" name="entrega_numero" value="<?= $v('entrega_numero') ?>" maxlength="20"></div>
+      <div class="campo"><label for="entrega_complemento">Complemento</label><input type="text" id="entrega_complemento" name="entrega_complemento" value="<?= $v('entrega_complemento') ?>" maxlength="60"></div>
+      <div class="campo"><label for="entrega_bairro">Bairro</label><input type="text" id="entrega_bairro" name="entrega_bairro" value="<?= $v('entrega_bairro') ?>" maxlength="60"></div>
+      <div class="campo"><label for="entrega_cep">CEP</label><input type="text" id="entrega_cep" name="entrega_cep" value="<?= $v('entrega_cep') ?>" inputmode="numeric"></div>
+      <div class="campo"><label for="entrega_cidade">Cidade *</label><input type="text" id="entrega_cidade" name="entrega_cidade" value="<?= $v('entrega_cidade') ?>" maxlength="80"></div>
+      <div class="campo"><label for="entrega_uf">UF *</label>
+        <select id="entrega_uf" name="entrega_uf"><option value="">—</option><?php foreach ($ufs as $uf): ?><option <?= $selecionado('entrega_uf', $uf) ?>><?= e($uf) ?></option><?php endforeach; ?></select></div>
+    </div>
+  </fieldset>
+  <script>
+    // mostra/esconde os campos de entrega
+    document.querySelector('[data-entrega-outro]')?.addEventListener('change', (ev) => { document.querySelector('[data-entrega-campos]').hidden = !ev.target.checked; });
+  </script>
 
   <h2>Contato e redes</h2>
   <div class="grade-campos">

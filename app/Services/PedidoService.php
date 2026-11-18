@@ -276,7 +276,7 @@ class PedidoService
                 'frete_gratis' => $camp['frete'] ? 1 : 0, 'campanhas' => mb_substr(implode(', ', $camp['nomes']), 0, 255) ?: null,
                 'observacoes' => mb_substr(trim((string) ($d['observacoes'] ?? '')), 0, 1000) ?: null,
                 'criado_por_usuario' => $d['usuario_id'] ?? null, 'criado_por_cliente' => in_array($origem, ['catalogo', 'orcamento'], true) ? 1 : 0,
-            ]);
+            ] + EntregaService::paraPedido($cliente, $d['entrega'] ?? null)); // onde entregar (cópia do endereço)
             foreach ($carrinho['itens'] as $i) {
                 Banco::inserir('pedido_itens', ['pedido_id' => $id, 'produto_id' => $i['id'], 'codigo' => $i['codigo'] ?? null, 'nome' => $i['nome'],
                     'quantidade' => $i['quantidade'], 'preco_unitario' => $i['preco'], 'total' => $i['total'],
@@ -315,7 +315,8 @@ class PedidoService
     /** Envia ao ERP como orçamento. Se falhar, fica pendente e o cron tenta de novo (o uuid evita duplicar no ERP) */
     public static function enviarAoErp(int $id): bool
     {
-        $p = Banco::um('SELECT p.*, c.cnpj, f.slug AS forma, cp.nome AS condicao FROM pedidos p JOIN clientes c ON c.id = p.cliente_id
+        $p = Banco::um('SELECT p.*, c.cnpj, c.entrega_razao, c.entrega_endereco, c.entrega_numero, c.entrega_complemento, c.entrega_bairro, c.entrega_cep,
+            f.slug AS forma, cp.nome AS condicao FROM pedidos p JOIN clientes c ON c.id = p.cliente_id
             JOIN formas_pagamento f ON f.id = p.forma_pagamento_id LEFT JOIN condicoes_pagamento cp ON cp.id = p.condicao_id WHERE p.id = ?', [$id]);
         if (!$p || $p['omie_codigo'] || in_array($p['situacao'], ['cancelado', 'recusado'], true)) {
             return (bool) ($p['omie_codigo'] ?? false);
@@ -324,7 +325,11 @@ class PedidoService
             LEFT JOIN produtos pr ON pr.id = i.produto_id WHERE i.pedido_id = ?', [$id]);
         try {
             $r = Integracoes::erp()->enviarPedido(['uuid' => $p['uuid'], 'cnpj' => (string) $p['cnpj'], 'itens' => $itens,
-                'forma_pagamento' => $p['forma'], 'condicao' => $p['condicao'], 'observacoes' => self::observacoesErp($p)]);
+                'forma_pagamento' => $p['forma'], 'condicao' => $p['condicao'], 'observacoes' => self::observacoesErp($p),
+                // entrega em outro endereço: vai separado (cadastro de entrega do cliente no ERP) e também na observação da nota
+                'entrega' => (int) $p['entrega_outro'] ? ['recebedor' => $p['entrega_razao'], 'endereco' => $p['entrega_endereco'], 'numero' => $p['entrega_numero'],
+                    'complemento' => $p['entrega_complemento'], 'bairro' => $p['entrega_bairro'], 'cep' => $p['entrega_cep'], 'cidade' => $p['entrega_cidade'],
+                    'uf' => $p['entrega_uf'], 'texto' => $p['entrega_texto']] : null]);
         } catch (\Throwable $erro) {
             error_log('Envio do pedido ' . $id . ' ao ERP: ' . $erro->getMessage());
             return false;
@@ -350,7 +355,8 @@ class PedidoService
             }
         }
         $campanha = $extra ? 'Campanha ' . $p['campanhas'] . ': ' . implode(' · ', $extra) : '';
-        return trim((string) $p['observacoes'] . ($campanha ? "\n" . $campanha : ''));
+        $entrega = (int) ($p['entrega_outro'] ?? 0) && !empty($p['entrega_texto']) ? 'ENTREGAR EM: ' . $p['entrega_texto'] : '';
+        return trim(implode("\n", array_filter([trim((string) $p['observacoes']), $campanha, $entrega])));
     }
 
     // ------------------------------------------------------------------

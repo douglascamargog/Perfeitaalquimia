@@ -138,6 +138,20 @@ class Conferencia
             'cnpj_repetido' => (int) Banco::valor("SELECT COUNT(*) FROM (SELECT $digitos AS d FROM n10_clientes WHERE LENGTH($digitos) = 14 GROUP BY d HAVING COUNT(*) > 1) x"),
             'sem_vendedor' => $rep ? self::contar('clientes', "COALESCE(`$rep`, 0) = 0 AND " . self::soClientes()) : null,
         ];
+        // Endereço de entrega: nos campos próprios do Nota10, ou só escrito na observação (vai para a revisão; o One não adivinha)
+        $entEnd = self::col('clientes', 'entrega_Endereco');
+        $r['entrega_campos'] = $entEnd ? self::contar('clientes', "COALESCE(TRIM(`$entEnd`), '') <> '' AND " . self::soClientes()) : 0;
+        $r['entrega_na_obs'] = 0;
+        $obs = array_filter([self::col('clientes', 'Obs'), self::col('clientes', 'Ocorrencias'), self::col('clientes', 'Refer')]);
+        if ($obs) {
+            $consulta = Banco::pdo()->query('SELECT ' . implode(', ', array_map(fn($c) => "`$c`", $obs)) . ' FROM n10_clientes WHERE '
+                . ($entEnd ? "COALESCE(TRIM(`$entEnd`), '') = '' AND " : '') . self::soClientes(), \PDO::FETCH_NUM);
+            while ($l = $consulta->fetch()) {
+                if (\App\Services\EntregaService::trechoNaObservacao(implode("\n", array_filter($l)))) {
+                    $r['entrega_na_obs']++;
+                }
+            }
+        }
         $r['ja_no_one'] = (int) Banco::valor("SELECT COUNT(DISTINCT c.id) FROM clientes c JOIN n10_clientes n ON c.cnpj = $digitos
             WHERE c.excluido_em IS NULL AND LENGTH($digitos) = 14 AND " . self::soClientes('n.'));
         return $r;
@@ -256,6 +270,9 @@ class Conferencia
         }
         if (($cli['sem_documento'] ?? 0) > 0) {
             $p[] = ['info', $cli['sem_documento'] . ' cadastro(s) sem CNPJ nem CPF válido. Entram assim mesmo; a ficha mostra "Validar cadastro".'];
+        }
+        if (($cli['entrega_na_obs'] ?? 0) > 0) {
+            $p[] = ['info', $cli['entrega_na_obs'] . ' cliente(s) com endereço de entrega escrito só na observação. Entram marcados para revisar em Carteira › Endereços de entrega (o One não adivinha).'];
         }
         if (($cli['sem_vendedor'] ?? 0) > 0) {
             $p[] = ['info', $cli['sem_vendedor'] . ' cliente(s) sem vendedor no Nota10. Vão para a fila de Prospecção e Reativação.'];

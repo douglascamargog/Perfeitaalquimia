@@ -384,7 +384,22 @@ class ClienteController extends Controller
             'tabela_preco_id' => (int) $this->campo('tabela_preco_id') ?: null,
             'origem_id'     => (int) $this->campo('origem_id') ?: null,
             'observacoes'   => Normalizar::texto($this->campo('observacoes'), 5000),
+            'end_numero'    => Normalizar::texto($this->campo('end_numero'), 20),
+            'end_complemento' => Normalizar::texto($this->campo('end_complemento'), 60),
         ];
+        // Endereço de entrega (só quando marcado "entregar em outro endereço"; desmarcado, apaga)
+        $outro = $this->campo('entrega_outro') === '1';
+        foreach (['entrega_razao' => 100, 'entrega_endereco' => 150, 'entrega_numero' => 20, 'entrega_complemento' => 60, 'entrega_bairro' => 60, 'entrega_cidade' => 80] as $k => $max) {
+            $dados[$k] = $outro ? Normalizar::texto($this->campo($k), $max) : null;
+        }
+        $dados['entrega_uf'] = $outro && in_array($this->campo('entrega_uf'), Listas::ufs(), true) ? $this->campo('entrega_uf') : null;
+        $dados['entrega_cep'] = $outro ? (preg_replace('/\D/', '', $this->campo('entrega_cep')) ?: null) : null;
+        if ($outro && (!$dados['entrega_endereco'] || !$dados['entrega_cidade'] || !$dados['entrega_uf'])) {
+            $erros[] = 'Endereço de entrega: informe pelo menos o endereço, a cidade e a UF.';
+        }
+        if ($this->campo('entrega_revisado') === '1' || $outro) {
+            $dados['entrega_revisar'] = null; // conferido: sai da lista de revisão
+        }
         if (!$dados['razao_social']) {
             $erros[] = 'Informe o nome do estabelecimento.';
         }

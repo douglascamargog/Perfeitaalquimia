@@ -161,3 +161,13 @@ tr.ped-do-modelo { animation: ped-pisca 1.2s ease; }
 .ped-desconto-resumo.campanha { color: var(--sucesso); }
 .ped-preco-cheio { color: var(--texto-suave); font-size: .78rem; }
 .ped-promo { margin-left: 4px; font-size: .7rem; font-weight: 800; background: var(--secundaria); color: var(--secundaria-texto); padding: 1px 6px; border-radius: 6px; }
+
+/* V16.3 — onde entregar */
+.ped-entrega { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; }
+.ped-entrega .opcao { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--borda); border-radius: var(--raio-pequeno); }
+.ped-entrega .opcao span { display: grid; gap: 2px; }
+.ped-entrega .opcao small { color: var(--texto-suave); font-size: .78rem; }
+.ped-entrega .opcao:has(input:checked) { border-color: var(--primaria); background: var(--primaria-clara); }
+.ped-entrega-unico { margin: 0; }
+.ped-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.ped-entrega-destaque { border: 2px solid var(--aviso); background: var(--aviso-fundo); border-radius: var(--raio-pequeno); padding: 8px 12px; }

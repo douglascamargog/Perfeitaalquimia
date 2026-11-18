@@ -153,6 +153,8 @@ class OmieFake implements ErpInterface
             'recebido_em' => date('Y-m-d H:i:s'),
             'numero_nf'   => null,
             'faturado_em' => null,
+            'entrega'     => $pedido['entrega'] ?? null,
+            'observacoes' => $pedido['observacoes'] ?? '',
         ];
         $pedidos[] = $novo;
         $this->gravarPedidos($pedidos);

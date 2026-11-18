@@ -33,6 +33,10 @@ $diasSemCompra = $c['ultima_compra_em'] ? (int) floor((time() - strtotime($c['ul
   </div>
 </div>
 
+<?php if (!empty($c['entrega_revisar'])): ?>
+  <div class="aviso alerta" data-entrega-revisar>📦 A observação desta loja cita um endereço de entrega: “<?= e($c['entrega_revisar']) ?>”.
+    <a href="<?= url('/carteira/clientes/' . $id . '/editar') ?>">Conferir no cadastro</a> ou <a href="<?= url('/carteira/entregas#loja-' . $id) ?>">na lista de revisão</a>.</div>
+<?php endif; ?>
 <?php if (!Auth::pode('carteira.ver_propria') && !Auth::pode('carteira.ver_todas')): ?>
   <div class="aviso" data-so-consulta>Você está consultando esta loja (pela Cobrança ou pela Aprovação). Para mudar o cadastro, fale com a vendedora responsável.</div>
 <?php endif; ?>

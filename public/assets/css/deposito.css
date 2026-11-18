@@ -101,3 +101,6 @@
 .dep-cartao.prazo-atrasado { box-shadow: 0 0 0 2px #f2b8b5; }
 @keyframes dep-pisca { 50% { opacity: .65; } }
 @media (prefers-reduced-motion: reduce) { .dep-prazo.atrasado { animation: none; } }
+
+/* V16.3 — pedido com entrega em outro endereço (destaque para o despacho) */
+.ped-entrega-destaque { border: 2px solid var(--aviso); background: var(--aviso-fundo); border-radius: var(--raio-pequeno); padding: 8px 12px; margin: 8px 0 0; }

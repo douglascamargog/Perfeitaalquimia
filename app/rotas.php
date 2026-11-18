@@ -92,6 +92,10 @@ return [
     // Excluir, restaurar e juntar lojas repetidas (V15.7): Gestor e Admin
     ['POST', '/carteira/clientes/{id}/excluir', 'ClienteExclusaoController@excluir',   'carteira.excluir'],
     ['POST', '/carteira/clientes/{id}/juntar',  'ClienteExclusaoController@juntar',    'carteira.excluir'],
+    // V16.3 — endereços de entrega a revisar (texto na observação que parece endereço de entrega)
+    ['GET',  '/carteira/entregas',              'EntregaController@index',    'carteira.ver_propria|carteira.ver_todas'],
+    ['POST', '/carteira/entregas/procurar',     'EntregaController@procurar', 'carteira.ver_todas'],
+    ['POST', '/carteira/entregas/{id}',         'EntregaController@salvar',   'carteira.ver_propria|carteira.ver_todas'],
     ['GET',  '/carteira/excluidas',             'ClienteExclusaoController@excluidas', 'carteira.excluir'],
     ['POST', '/carteira/excluidas/{id}/restaurar', 'ClienteExclusaoController@restaurar', 'carteira.excluir'],
 

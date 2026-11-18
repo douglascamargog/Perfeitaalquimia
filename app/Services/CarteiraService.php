@@ -24,7 +24,10 @@ class CarteiraService
 {
     /** Campos que a ficha/formulário pode alterar diretamente */
     public const CAMPOS_CADASTRO = ['razao_social', 'nome_fantasia', 'cnpj', 'endereco', 'bairro', 'cep', 'cidade', 'uf', 'segmento_id',
-        'telefone', 'whatsapp', 'email', 'instagram', 'facebook', 'site', 'mix_produtos', 'tabela_preco_id', 'origem_id', 'observacoes'];
+        'telefone', 'whatsapp', 'email', 'instagram', 'facebook', 'site', 'mix_produtos', 'tabela_preco_id', 'origem_id', 'observacoes',
+        // V16.3: número/complemento e o endereço de entrega (quando é diferente do endereço do CNPJ)
+        'end_numero', 'end_complemento', 'entrega_razao', 'entrega_endereco', 'entrega_numero', 'entrega_complemento', 'entrega_bairro',
+        'entrega_cidade', 'entrega_uf', 'entrega_cep', 'entrega_revisar'];
 
     // ------------------------------------------------------------------
     // Responsável e funções

@@ -60,6 +60,8 @@ const TMP = fs.mkdtempSync('/tmp/one-n10-');
     ok(conferir.includes('1 CNPJ(s) aparecem em mais de um cadastro'), 'avisa CNPJ repetido');
     ok(conferir.includes('1 cliente(s) sem vendedor'), 'sem vendedor conta só clientes (não fornecedor nem transportadora)');
     ok(conferir.includes('de cliente que não está no cadastro'), 'avisa pedido de cliente fora do cadastro');
+    ok(conferir.includes('1 cliente(s) com endereço de entrega escrito só na observação'), 'avisa endereço de entrega escrito só na observação');
+    ok((await a.locator('[data-n10-numeros]').innerText()).includes('2 com outro endereço de entrega'), 'conta os clientes com outro endereço de entrega');
     const ops = await a.locator('[data-n10-operacoes]').innerText();
     ok(ops.includes('Venda') && ops.includes('R$ 3.050,00') && ops.includes('Bonificação'), 'separa venda de bonificação pelo CFOP (cancelado fica de fora)');
     ok(await a.evaluate(() => !!(window.Chart && Chart.getChart(document.getElementById('n10-grafico-anos')))), 'gráfico de pedidos por ano');

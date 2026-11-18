@@ -111,6 +111,19 @@ foreach ($campanhas as $cp) {
       <p class="ped-desconto-resumo campanha" data-desconto-campanha hidden></p>
     </div>
     <div class="cat-minimo falta" data-caixa-minimo><span data-texto-minimo></span><div class="cat-minimo-barra"><i data-barra-minimo style="width:0"></i></div></div>
+    <h3>Entrega</h3>
+    <?php if (\App\Services\EntregaService::tem($c)): $escolha = antigo('entrega') ?: 'entrega'; ?>
+      <fieldset class="ped-entrega" data-entrega-pedido>
+        <legend class="ped-oculto">Onde entregar</legend>
+        <label class="opcao"><input type="radio" name="entrega" value="entrega" <?= $escolha === 'entrega' ? 'checked' : '' ?>>
+          <span><strong>Endereço de entrega</strong><small><?= e(\App\Services\EntregaService::textoEntrega($c)) ?></small></span></label>
+        <label class="opcao"><input type="radio" name="entrega" value="cadastro" <?= $escolha === 'cadastro' ? 'checked' : '' ?>>
+          <span><strong>Endereço do cadastro (CNPJ)</strong><small><?= e(\App\Services\EntregaService::textoCadastro($c)) ?></small></span></label>
+      </fieldset>
+    <?php else: ?>
+      <p class="pequeno ped-entrega-unico" data-entrega-pedido>No endereço do cadastro: <?= e(\App\Services\EntregaService::textoCadastro($c)) ?: '<span class="suave">sem endereço no cadastro</span>' ?>
+        <?php if (!empty($c['entrega_revisar'])): ?><br><span class="selo laranja">Revisar: a observação da loja cita outro endereço de entrega</span><?php endif; ?></p>
+    <?php endif; ?>
     <h3>Pagamento</h3>
     <?php foreach ($formas as $f): ?>
       <fieldset class="cat-forma <?= $f['bloqueio'] ? 'bloqueada' : '' ?>">

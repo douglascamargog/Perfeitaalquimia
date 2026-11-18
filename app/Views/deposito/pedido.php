@@ -25,7 +25,10 @@ $terceirizado = (bool) array_filter($p['itens'], fn($i) => !empty($i['terceiriza
       <?= $p['expedicao_aguarda_produto'] ? '<span class="selo laranja">aguardando produto</span>' : '' ?>
       <?php if ($eco): ?>comprador <?= e((string) $p['comprador_nome']) ?> · <?= e(trim(($p['comprador_cidade'] ?? '') . '/' . ($p['comprador_uf'] ?? ''), '/')) ?><?= $p['separador'] ? ' · separando: ' . pessoa($p['separador'] ?? null, null, false, 18, '—') : '' ?>
       <?php else: ?><?= e($p['cidade']) ?>/<?= e($p['uf']) ?> · vendedor <?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null, false, 18) ?><?= $p['separador'] ? ' · separando: ' . pessoa($p['separador'] ?? null, null, false, 18, '—') : '' ?><?php endif; ?></p>
-    <?php if ($prazo): ?><p class="dep-prazo grande <?= $prazo[1] ?>" data-prazo>⏰ <?= e($prazo[0]) ?></p><?php endif; ?></div>
+    <?php if ($prazo): ?><p class="dep-prazo grande <?= $prazo[1] ?>" data-prazo>⏰ <?= e($prazo[0]) ?></p><?php endif; ?>
+    <?php if (!$eco && !empty($p['entrega_texto'])): ?>
+      <p class="<?= (int) $p['entrega_outro'] ? 'ped-entrega-destaque' : 'pequeno' ?>" data-entrega-deposito>📦 <?= (int) $p['entrega_outro'] ? '<strong>ENTREGAR EM OUTRO ENDEREÇO:</strong> ' : 'Entrega: ' ?><?= e($p['entrega_texto']) ?></p>
+    <?php endif; ?></div>
   <div class="acoes">
     <a class="botao contorno pequeno" href="<?= url('/pedidos/' . (int) $p['id']) ?>">Ver o pedido</a>
     <?php if ($pode && $p['expedicao'] !== 'despachado'): ?>

@@ -90,7 +90,7 @@ $opcoes = function (array $lista, $atual, string $vazio = 'Escolha…') {
 </section>
 
 <div class="n10-kpis" data-n10-numeros>
-  <div class="card"><span>Cadastros</span><strong data-n10="clientes"><?= $n($cli['total'] ?? 0) ?></strong><small><?= $n($cli['com_cnpj'] ?? 0) ?> com CNPJ · <?= $n($cli['ja_no_one'] ?? 0) ?> já estão no One</small></div>
+  <div class="card"><span>Cadastros</span><strong data-n10="clientes"><?= $n($cli['total'] ?? 0) ?></strong><small><?= $n($cli['com_cnpj'] ?? 0) ?> com CNPJ · <?= $n($cli['ja_no_one'] ?? 0) ?> já estão no One · <?= $n(($cli['entrega_campos'] ?? 0) + ($cli['entrega_na_obs'] ?? 0)) ?> com outro endereço de entrega</small></div>
   <div class="card"><span>Pedidos e notas</span><strong data-n10="notas"><?= $n($notas['total'] ?? 0) ?></strong>
     <small><?= !empty($notas['periodo']['de']) ? 'de ' . data_br($notas['periodo']['de']) . ' a ' . data_br($notas['periodo']['ate']) : 'sem datas' ?></small></div>
   <div class="card"><span>Itens vendidos</span><strong data-n10="itens"><?= $n($itens['total'] ?? 0) ?></strong><small><?= $n($itens['com_custo'] ?? 0) ?> com custo · <?= $n($itens['com_lote'] ?? 0) ?> com lote</small></div>

@@ -33,6 +33,7 @@ $origens = ['catalogo' => 'Catálogo (cliente)', 'sistema' => 'Sistema (equipe)'
     <dl class="ped-dados">
       <div><dt>Cliente</dt><dd><?php if (\App\Models\Cliente::podeVer(['id' => (int) $p['cliente_id'], 'responsavel_id' => $p['responsavel_id']])): ?><a href="<?= url('/carteira/clientes/' . (int) $p['cliente_id']) ?>" data-link-loja><?= e($p['razao_social']) ?></a><?php else: ?><?= e($p['razao_social']) ?><?php endif; ?><?= $p['cnpj'] ? '<br><small>CNPJ ' . e(cnpj_formatado($p['cnpj'])) . '</small>' : '' ?></dd></div>
       <div><dt>Cidade</dt><dd><?= e($p['cidade']) ?>/<?= e($p['uf']) ?></dd></div>
+      <?php if (!empty($p['entrega_texto'])): ?><div data-entrega-ver><dt>Entregar em</dt><dd><?= (int) $p['entrega_outro'] ? '<strong>Endereço de entrega:</strong> ' : '' ?><?= e($p['entrega_texto']) ?></dd></div><?php endif; ?>
       <div><dt>Vendedor</dt><dd><?= pessoa($p['vendedor'] ?? null, $p['vendedor_foto'] ?? null, false, 28) ?></dd></div>
       <div><dt>Tabela</dt><dd><?= e($p['tabela']) ?></dd></div>
       <div><dt>Pagamento</dt><dd><?= e($p['forma']) ?><?= $p['condicao'] ? ' · ' . e($p['condicao']) : '' ?></dd></div>
