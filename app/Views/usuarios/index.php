@@ -9,7 +9,7 @@
   <div class="tabela-rolagem">
     <table class="tabela">
       <thead>
-        <tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Funções</th><th>Código vendedor</th><th>Último acesso</th><th></th></tr>
+        <tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Funções</th><th>Código do funcionário</th><th>Último acesso</th><th></th></tr>
       </thead>
       <tbody>
       <?php foreach ($usuarios as $u): ?>

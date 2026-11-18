@@ -13,8 +13,17 @@ use App\Core\Banco;
 class Conferencia
 {
     /** Escolhas possíveis para cada tipo de cadastro do Nota10 */
-    public const TIPOS_CADASTRO = ['cliente' => 'Cliente (vai para a Carteira)', 'fornecedor' => 'Fornecedor (Compras › Fornecedores)',
-        'transportadora' => 'Transportadora', 'ignorar' => 'Não trazer'];
+    public const TIPOS_CADASTRO = ['cliente' => 'Cliente (vai para a Carteira)', 'lead' => 'Lead "Não abordado" (prospect)',
+        'cliente_fornecedor' => 'Cliente e também fornecedor', 'cliente_transportadora' => 'Cliente e também transportadora',
+        'fornecedor' => 'Fornecedor', 'transportadora' => 'Transportadora', 'vendedor' => 'Vendedor/representante (fica guardado)',
+        'validar' => 'Cliente em "Validar cadastro"', 'ignorar' => 'Só guardar (não vai para telas)'];
+
+    /** Tipos que viram cliente na Carteira */
+    public const VIRAM_CLIENTE = ['cliente', 'cliente_fornecedor', 'cliente_transportadora', 'validar'];
+
+    /** Destinos de um grupo de produto do Nota10 */
+    public const DESTINOS_GRUPO = ['produto' => 'Produto (catálogo, inativo se for novo)', 'materia_prima' => 'Matéria-prima / insumo (Produção)',
+        'ignorar' => 'Só guardar'];
 
     private static ?array $tabelas = null;
     private static array $colunas = [];
@@ -69,7 +78,7 @@ class Conferencia
         $salvo = self::mapas()['tipo_cadastro'] ?? [];
         $tipos = [];
         foreach (Banco::todos("SELECT DISTINCT COALESCE(NULLIF(TRIM(`$tipo`), ''), '(vazio)') AS t FROM n10_clientes") as $l) {
-            if (($salvo[$l['t']] ?? self::palpiteTipo($l['t'])) === 'cliente') {
+            if (in_array($salvo[$l['t']] ?? self::palpiteTipo($l['t']), self::VIRAM_CLIENTE, true)) {
                 $tipos[] = Banco::pdo()->quote($l['t']);
             }
         }
@@ -311,7 +320,7 @@ class Conferencia
     public static function salvarMapas(array $entrada): int
     {
         $n = 0;
-        foreach (['vendedor', 'tabela', 'forma', 'segmento', 'tipo_cadastro'] as $tipo) {
+        foreach (['vendedor', 'tabela', 'forma', 'segmento', 'tipo_cadastro', 'grupo'] as $tipo) {
             foreach ((array) ($entrada[$tipo] ?? []) as $codigo => $destino) {
                 $codigo = mb_substr((string) $codigo, 0, 40);
                 $destino = mb_substr(trim((string) $destino), 0, 40);
@@ -327,7 +336,7 @@ class Conferencia
     public static function paraLigar(): array
     {
         $salvo = self::mapas();
-        $r = ['tipo_cadastro' => [], 'vendedor' => [], 'tabela' => [], 'forma' => [], 'segmento' => []];
+        $r = ['tipo_cadastro' => [], 'vendedor' => [], 'tabela' => [], 'forma' => [], 'segmento' => [], 'grupo' => []];
 
         // tipos de cadastro (cliente, fornecedor, transportadora...)
         foreach (self::clientes()['por_tipo'] ?? [] as $t) {
@@ -335,32 +344,44 @@ class Conferencia
                 'destino' => $salvo['tipo_cadastro'][$t['tipo']] ?? self::palpiteTipo($t['tipo'])];
         }
 
-        // vendedores: o representante do cliente e o vendedor do pedido
-        $usuariosOne = Banco::todos('SELECT id, nome FROM usuarios WHERE ativo = 1 ORDER BY nome');
+        // vendedores: no Nota10 o vendedor é um cadastro (normalmente tipo R) e o código é o número desse cadastro.
+        // Palpite: o funcionário do One com o mesmo "código do funcionário"; senão, "criar funcionário" para quem ainda vende
+        // (ativo no Nota10 ou com venda nos últimos 90 dias) e tem carteira ou venda no último ano.
+        $porCodigo = array_column(Banco::todos("SELECT id, codigo_vendedor FROM usuarios WHERE ativo = 1 AND COALESCE(codigo_vendedor, '') <> ''"), 'id', 'codigo_vendedor');
         $codigos = [];
         if ($rep = self::col('clientes', 'Representante')) {
-            foreach (Banco::todos("SELECT `$rep` AS c, COUNT(*) AS q FROM n10_clientes WHERE COALESCE(`$rep`, 0) <> 0 GROUP BY c") as $l) {
+            foreach (Banco::todos("SELECT `$rep` AS c, COUNT(*) AS q FROM n10_clientes WHERE COALESCE(`$rep`, 0) <> 0 GROUP BY 1") as $l) {
                 $codigos[(string) $l['c']]['clientes'] = (int) $l['q'];
             }
         }
         if ($cv = self::col('notas', 'CodigoVendedor')) {
-            foreach (Banco::todos("SELECT `$cv` AS c, COUNT(*) AS q FROM n10_notas WHERE COALESCE(`$cv`, 0) <> 0 GROUP BY c") as $l) {
+            $data = self::col('notas', 'Data') ? self::data('`' . self::col('notas', 'Data') . '`') : 'NULL';
+            foreach (Banco::todos("SELECT `$cv` AS c, COUNT(*) AS q, MAX($data) AS ultima FROM n10_notas WHERE COALESCE(`$cv`, 0) <> 0 GROUP BY 1") as $l) {
                 $codigos[(string) $l['c']]['pedidos'] = (int) $l['q'];
+                $codigos[(string) $l['c']]['ultima'] = $l['ultima'];
             }
         }
+        $ativoCol = self::col('clientes', 'Ativo');
         foreach ($codigos as $codigo => $q) {
             $nome = self::nomeVendedor((string) $codigo);
+            $ativo = $ativoCol ? strtoupper((string) Banco::valor("SELECT `$ativoCol` FROM n10_clientes WHERE Numero = ? LIMIT 1", [$codigo])) === 'S' : true;
+            $ultima = $q['ultima'] ?? null;
+            $vendeAinda = $ativo || ($ultima && $ultima >= date('Y-m-d', strtotime('-90 days')));
+            $temCarteira = ($q['clientes'] ?? 0) > 0 || ($ultima && $ultima >= date('Y-m-d', strtotime('-12 months')));
+            $palpite = isset($porCodigo[(string) $codigo]) ? (string) $porCodigo[(string) $codigo] : ($vendeAinda && $temCarteira ? 'novo' : null);
             $r['vendedor'][] = ['codigo' => (string) $codigo, 'nome' => $nome, 'clientes' => $q['clientes'] ?? 0, 'pedidos' => $q['pedidos'] ?? 0,
-                'destino' => $salvo['vendedor'][$codigo] ?? self::palpitePessoa($nome, $usuariosOne)];
+                'ultima' => $ultima, 'ativo' => $ativo, 'destino' => array_key_exists((string) $codigo, $salvo['vendedor'] ?? []) ? $salvo['vendedor'][(string) $codigo] : $palpite];
         }
-        usort($r['vendedor'], fn($a, $b) => [$b['clientes'], $b['pedidos']] <=> [$a['clientes'], $a['pedidos']]);
+        usort($r['vendedor'], fn($a, $b) => [$b['destino'] !== null, $b['ultima'], $b['clientes']] <=> [$a['destino'] !== null, $a['ultima'], $a['clientes']]);
 
         // tabelas de preço
         if (self::col('tabelaprecos', 'Numero')) {
             $tabelasOne = Banco::todos('SELECT id, nome, slug FROM tabelas_preco');
             foreach (Banco::todos('SELECT Numero AS codigo, Nome AS nome FROM n10_tabelaprecos ORDER BY Numero') as $t) {
                 $r['tabela'][] = ['codigo' => (string) $t['codigo'], 'nome' => (string) $t['nome'],
-                    'destino' => $salvo['tabela'][(string) $t['codigo']] ?? self::palpiteNome((string) $t['nome'], $tabelasOne, ['lojista', 'distrib', 'terceir'])];
+                    // decisão do usuário: a tabela "Base" (a única do Nota10) vira a Lojista
+                    'destino' => $salvo['tabela'][(string) $t['codigo']] ?? self::palpiteNome((string) $t['nome'], $tabelasOne, ['lojista', 'distrib', 'terceir'])
+                        ?? (string) (Banco::valor("SELECT id FROM tabelas_preco WHERE slug = 'lojista'") ?: '')];
             }
         }
         // formas de pagamento
@@ -371,20 +392,44 @@ class Conferencia
                     'destino' => $salvo['forma'][(string) $t['codigo']] ?? self::palpiteNome((string) $t['nome'], $formasOne, ['pix', 'cart', 'bolet'])];
             }
         }
-        // segmentos do cliente (IdSegmento); o nome vem da tabela de apoio quando existe
-        if ($seg = self::col('clientes', 'IdSegmento')) {
-            $segOne = Banco::todos('SELECT id, nome FROM segmentos WHERE ativo = 1');
-            foreach (Banco::todos("SELECT `$seg` AS codigo, COUNT(*) AS qtd FROM n10_clientes WHERE COALESCE(`$seg`, 0) <> 0 GROUP BY codigo ORDER BY qtd DESC") as $s) {
-                $nome = self::nomeApoio('segm', (string) $s['codigo']) ?? 'Segmento ' . $s['codigo'];
-                $r['segmento'][] = ['codigo' => (string) $s['codigo'], 'nome' => $nome, 'qtd' => (int) $s['qtd'],
-                    'destino' => $salvo['segmento'][(string) $s['codigo']] ?? self::palpiteSegmento($nome, $segOne)];
+        // segmentos do cliente: no Nota10 ficam em segmento1, segmento2 (ou IdSegmento) e só têm código: o admin liga ao segmento do One
+        $segOne = Banco::todos('SELECT id, nome FROM segmentos WHERE ativo = 1');
+        foreach (['IdSegmento' => 'seg', 'segmento1' => 's1', 'segmento2' => 's2'] as $campo => $pref) {
+            if (!($col = self::col('clientes', $campo))) {
+                continue;
+            }
+            foreach (Banco::todos("SELECT `$col` AS codigo, COUNT(*) AS qtd FROM n10_clientes WHERE COALESCE(`$col`, 0) <> 0 GROUP BY 1 ORDER BY qtd DESC") as $sg) {
+                $chave = "$pref:" . $sg['codigo'];
+                $nome = self::nomeApoio('segm', (string) $sg['codigo']) ?? "$campo = " . $sg['codigo'];
+                $r['segmento'][] = ['codigo' => $chave, 'nome' => $nome, 'qtd' => (int) $sg['qtd'],
+                    'destino' => $salvo['segmento'][$chave] ?? self::palpiteSegmento($nome, $segOne)];
+            }
+        }
+        // grupos de produto: produto de venda, matéria-prima (insumos, rótulos, embalagens...) ou só guardar
+        if (self::existe('grupos') && self::col('produtos', 'Grupo')) {
+            $nomeCol = self::col('grupos', 'Nome') ?: 'Nome';
+            foreach (Banco::todos("SELECT g.Numero AS codigo, g.`$nomeCol` AS nome, (SELECT COUNT(*) FROM n10_produtos p WHERE p.Grupo = g.Numero) AS qtd
+                    FROM n10_grupos g ORDER BY qtd DESC") as $g) {
+                $r['grupo'][] = ['codigo' => (string) $g['codigo'], 'nome' => (string) $g['nome'], 'qtd' => (int) $g['qtd'],
+                    'destino' => $salvo['grupo'][(string) $g['codigo']] ?? self::palpiteGrupo((string) $g['nome'])];
+            }
+            $sem = (int) Banco::valor('SELECT COUNT(*) FROM n10_produtos p LEFT JOIN n10_grupos g ON g.Numero = p.Grupo WHERE g.id IS NULL');
+            if ($sem) {
+                $r['grupo'][] = ['codigo' => '0', 'nome' => 'Sem grupo', 'qtd' => $sem, 'destino' => $salvo['grupo']['0'] ?? 'produto'];
             }
         }
         return $r;
     }
 
-    private static function nomeVendedor(string $codigo): string
+    /** Nome do vendedor no Nota10: o cadastro dele (tipo R) sem o sufixo " - FUNCIONÁRIO(A)" */
+    public static function nomeVendedor(string $codigo): string
     {
+        if (self::col('clientes', 'Numero')) {
+            $n = Banco::valor('SELECT COALESCE(NULLIF(Nome, \'\'), Razao) FROM n10_clientes WHERE Numero = ? LIMIT 1', [$codigo]);
+            if ($n) {
+                return self::limparNomeVendedor((string) $n);
+            }
+        }
         if (self::existe('usuarios')) {
             $n = Banco::valor('SELECT nome FROM n10_usuarios WHERE ' . (self::col('usuarios', 'Numero') ? 'Numero = ? OR ' : '') . 'id = ? ORDER BY ' . (self::col('usuarios', 'Numero') ? '(Numero = ?) DESC' : 'id') . ' LIMIT 1',
                 self::col('usuarios', 'Numero') ? [$codigo, $codigo, $codigo] : [$codigo]);
@@ -410,15 +455,37 @@ class Conferencia
         return $n ? (string) $n : null;
     }
 
-    private static function palpiteTipo(string $tipo): string
+    public static function limparNomeVendedor(string $nome): string
+    {
+        return trim(preg_replace('/\s*-\s*(FUNCION[ÁA]RI[OA](\s*\(A\))?|CLIENTE|VENDEDOR[A]?(\s*\(A\))?)\s*$/iu', '', $nome));
+    }
+
+    /** Palpite pelo código do Nota10: P prospect, C cliente, F fornecedor, T transportadora, R vendedor (e as combinações) */
+    public static function palpiteTipo(string $tipo): string
     {
         $t = mb_strtoupper(trim($tipo));
         return match (true) {
-            str_starts_with($t, 'F') => 'fornecedor',
-            str_starts_with($t, 'T') => 'transportadora',
-            str_starts_with($t, 'R'), str_starts_with($t, 'V'), str_starts_with($t, 'U') => 'ignorar',
-            default => 'cliente',
+            $t === 'P' => 'lead',
+            in_array($t, ['C', 'CP', 'RC', 'PC'], true) => 'cliente',
+            in_array($t, ['CF', 'FC'], true) => 'cliente_fornecedor',
+            in_array($t, ['TC', 'CT'], true) => 'cliente_transportadora',
+            $t === 'F' => 'fornecedor',
+            in_array($t, ['T', 'TF', 'TR', 'FT'], true) => 'transportadora',
+            $t === 'R' => 'vendedor',
+            default => 'validar', // tipo digitado errado no Nota10
         };
+    }
+
+    /** Grupo de produto que não é produto de venda → matéria-prima */
+    public static function palpiteGrupo(string $nome): string
+    {
+        $n = self::semAcento($nome);
+        foreach (['insumo', 'rotulo', 'embalage', 'escritorio', 'limpeza', 'epi', 'imobilizad', 'informatica', 'maquina', 'uso e consumo', 'materia', 'manutenc'] as $k) {
+            if (str_contains($n, $k)) {
+                return 'materia_prima';
+            }
+        }
+        return 'produto';
     }
 
     private static function semAcento(string $s): string

@@ -29,7 +29,7 @@ $opcoes = function (array $lista, $atual, string $vazio = 'Escolha…') {
   <li class="<?= !$imp ? 'atual' : 'feito' ?>"><b>1</b> Enviar o backup</li>
   <li class="<?= $imp && !$lido ? 'atual' : ($lido ? 'feito' : '') ?>"><b>2</b> Ler</li>
   <li class="<?= $lido ? 'atual' : '' ?>"><b>3</b> Conferir e ligar</li>
-  <li><b>4</b> Importar <small>(próxima versão)</small></li>
+  <li class="<?= $imp && !empty($imp['importado_em']) ? 'feito' : ($lido && !empty($imp['etapa']) ? 'atual' : '') ?>"><b>4</b> Importar</li>
 </ol>
 
 <?php if (!$imp || $imp['situacao'] === 'erro' && !$imp['posicao']): ?>
@@ -146,13 +146,18 @@ $opcoes = function (array $lista, $atual, string $vazio = 'Escolha…') {
   <section class="card n10-bloco" data-n10-vendedores>
     <h3>Vendedores</h3>
     <p class="pequeno suave">O representante de cada cliente e o vendedor de cada pedido no Nota10. Quem ficar sem pessoa: os clientes vão para a fila de Prospecção e Reativação, e os pedidos ficam sem vendedor.</p>
-    <table class="tabela"><thead><tr><th>Vendedor no Nota10</th><th class="direita">Clientes</th><th class="direita">Pedidos</th><th>Pessoa no One</th></tr></thead><tbody>
+    <p class="pequeno suave">"➕ Criar funcionário no One" já vem marcado para quem ainda vende (ativo no Nota10 ou com venda nos últimos 90 dias) e não existe no One:
+      na importação o One cria o funcionário com o código do Nota10, sem acesso até você definir o e-mail e a senha em Administração › Usuários.</p>
+    <table class="tabela"><thead><tr><th>Vendedor no Nota10</th><th class="direita">Clientes</th><th class="direita">Pedidos</th><th>Última venda</th><th>Pessoa no One</th></tr></thead><tbody>
       <?php foreach ($ligar['vendedor'] as $v): ?>
-        <tr data-vendedor="<?= e($v['codigo']) ?>"><td><strong><?= e($v['nome']) ?></strong> <small class="suave">código <?= e($v['codigo']) ?></small></td>
-          <td class="direita"><?= $n($v['clientes']) ?></td><td class="direita"><?= $n($v['pedidos']) ?></td>
-          <td><select name="mapa[vendedor][<?= e($v['codigo']) ?>]" aria-label="Pessoa para <?= e($v['nome']) ?>"><?= $opcoes($usuarios, $v['destino'], 'Ninguém (fila de reativação)') ?></select></td></tr>
+        <tr data-vendedor="<?= e($v['codigo']) ?>"><td><strong><?= e($v['nome']) ?></strong> <small class="suave">código <?= e($v['codigo']) ?><?= empty($v['ativo']) ? ' · inativo no Nota10' : '' ?></small></td>
+          <td class="direita"><?= $n($v['clientes']) ?></td><td class="direita"><?= $n($v['pedidos']) ?></td><td class="pequeno"><?= !empty($v['ultima']) ? data_br($v['ultima']) : '—' ?></td>
+          <td><select name="mapa[vendedor][<?= e($v['codigo']) ?>]" aria-label="Pessoa para <?= e($v['nome']) ?>">
+            <?php // "Ninguém" primeiro: é o que fica marcado quando não há escolha ?>
+            <?= preg_replace('/^(<option value="">[^<]*<\/option>)/', '$1<option value="novo"' . ($v['destino'] === 'novo' ? ' selected' : '') . '>➕ Criar funcionário no One</option>',
+                $opcoes($usuarios, $v['destino'], 'Ninguém (fila de reativação)')) ?></select></td></tr>
       <?php endforeach; ?>
-      <?php if (!$ligar['vendedor']): ?><tr><td colspan="4" class="suave">O backup não tem vendedores nos clientes nem nos pedidos.</td></tr><?php endif; ?>
+      <?php if (!$ligar['vendedor']): ?><tr><td colspan="5" class="suave">O backup não tem vendedores nos clientes nem nos pedidos.</td></tr><?php endif; ?>
     </tbody></table>
   </section>
 
@@ -183,9 +188,69 @@ $opcoes = function (array $lista, $atual, string $vazio = 'Escolha…') {
   </section>
   <?php endif; ?>
 
+  <?php if ($ligar['grupo']): ?>
+  <section class="card n10-bloco" data-n10-grupos>
+    <h3>Grupos de produto</h3>
+    <p class="pequeno suave">Insumos, rótulos, embalagens e material de uso viram matéria-prima (Produção), não produto do catálogo.</p>
+    <table class="tabela"><thead><tr><th>Grupo no Nota10</th><th class="direita">Produtos</th><th>No One vira</th></tr></thead><tbody>
+      <?php foreach ($ligar['grupo'] as $g): ?><tr><td><?= e($g['nome']) ?></td><td class="direita"><?= $n($g['qtd']) ?></td>
+        <td><select name="mapa[grupo][<?= e($g['codigo']) ?>]" aria-label="Grupo <?= e($g['nome']) ?>">
+          <?php foreach (Conferencia::DESTINOS_GRUPO as $k => $r): ?><option value="<?= $k ?>" <?= $g['destino'] === $k ? 'selected' : '' ?>><?= e($r) ?></option><?php endforeach; ?></select></td></tr><?php endforeach; ?>
+    </tbody></table>
+  </section>
+  <?php endif; ?>
+
   <div class="n10-salvar"><button class="botao" type="submit" data-n10-salvar>Guardar as ligações</button>
-    <span class="pequeno suave">A importação (próxima versão) usa estas escolhas. Nada é gravado nos dados do One agora.</span></div>
+    <span class="pequeno suave">A importação (passo 4, abaixo) usa estas escolhas. Guardar não grava nada nos clientes e pedidos.</span></div>
 </form>
+
+<?php
+  $rel = json_decode((string) ($imp['relatorio'] ?? ''), true) ?: [];
+  $rotulos = ['funcionarios_criados' => 'Funcionários criados', 'clientes' => 'Clientes', 'leads' => 'Leads (prospects)', 'sem_responsavel_fila' => 'Sem responsável (fila de Prospecção e Reativação)',
+    'clientes_juntados_cnpj' => 'Cadastros juntados pelo mesmo CNPJ', 'fornecedores' => 'Fornecedores', 'transportadoras' => 'Transportadoras',
+    'produtos_ligados' => 'Produtos ligados aos do One', 'produtos_novos_inativos' => 'Produtos novos (inativos, fora do catálogo)', 'materias_primas' => 'Matérias-primas', 'precos' => 'Preços (tabela Lojista)',
+    'pedidos_faturado' => 'Pedidos faturados', 'pedidos_historico' => 'Pedidos só de histórico', 'pedidos_cancelado' => 'Pedidos cancelados', 'pedidos_outra_empresa' => 'Pedidos de outras empresas do grupo',
+    'orcamentos_historico' => 'Orçamentos (histórico)', 'gemeos_juntados' => 'Bonificações juntadas ao pedido principal', 'saidas_ligadas_a_pedido' => 'NFs de "Outras saídas" ligadas a pedidos',
+    'itens' => 'Itens de pedido', 'titulos_receber' => 'Títulos a receber', 'titulos_a_pagar_guardados' => 'Contas a pagar (guardadas)', 'compras' => 'Compras de fornecedores',
+    'followups' => 'Follow-ups na linha do tempo', 'eventos_nfe' => 'Eventos de NF-e', 'clientes_boleto_bloqueado' => 'Clientes com boleto bloqueado (título vencido)',
+    'entrega_para_revisar' => 'Endereços de entrega para revisar', 'possiveis_duplicados' => 'Possíveis duplicados (não somam)', 'alerta_cancelado_com_nf' => 'Pedidos cancelados com NF autorizada (ficaram faturados)',
+    'notas_sem_cliente' => 'Notas sem cliente (guardadas)', 'itens_sem_nota_guardados' => 'Itens sem nota (guardados)', 'ajustes_estoque_guardados' => 'Ajustes manuais de estoque (guardados)'];
+  $emAndamento = !empty($imp['etapa']) && $imp['etapa'] !== 'fim';
+?>
+<section class="card n10-bloco" id="importar" data-n10-importar data-url="<?= url('/sistema/nota10/' . (int) $imp['id'] . '/importar-parte') ?>" data-andamento="<?= $emAndamento ? '1' : '0' ?>">
+  <h2>4 · Importar para o One</h2>
+  <?php if ($imp['importado_em']): ?>
+    <div class="aviso sucesso" data-n10-importado>Importação concluída em <?= data_br($imp['importado_em'], true) ?>. Os dados do Nota10 continuam guardados no One (tabelas n10_) para consulta.</div>
+  <?php elseif ($emAndamento): ?>
+    <p>Importando… deixe esta página aberta. Se fechar, é só voltar e clicar em continuar: ela segue de onde parou.</p>
+    <div class="n10-barra"><span data-n10-imp-pct style="width:0%"></span></div>
+    <p class="pequeno suave" data-n10-imp-status><?= e(\App\Services\Nota10\Importador::ETAPAS[$imp['etapa']] ?? '') ?></p>
+    <button class="botao" type="button" data-n10-imp-continuar>Continuar a importação</button>
+  <?php else:
+      $foraNota10 = (int) \App\Core\Banco::valor('SELECT COUNT(*) FROM clientes WHERE nota10_numero IS NULL AND excluido_em IS NULL AND tipo <> \'consumidor\''); ?>
+    <p>Grava no One: clientes e leads, fornecedores, produtos e matérias-primas, preços, pedidos e itens (com as bonificações juntadas), contas a receber,
+      follow-up e compras. Pode rodar de novo sem duplicar. Antes de começar, o One faz um backup completo do banco (pasta storage/backups).</p>
+    <?php if ($foraNota10): ?><p class="aviso alerta" data-n10-fora>O One já tem <?= $n($foraNota10) ?> cliente(s) que não vieram do Nota10. Se forem de teste, use
+      <a href="<?= url('/sistema/zerar') ?>">Administração › Zerar dados</a> antes de importar.</p><?php endif; ?>
+    <form method="post" action="<?= url('/sistema/nota10/' . (int) $imp['id'] . '/importar') ?>" class="n10-form" data-n10-form-importar><?= csrf_campo() ?>
+      <label>Para confirmar, digite <strong>IMPORTAR</strong> <input type="text" name="confirmar" autocomplete="off" required></label>
+      <button class="botao" type="submit">Importar agora</button>
+    </form>
+    <p class="pequeno suave">Confira e guarde as ligações acima antes: vendedores, tipos de cadastro, grupos de produto e formas de pagamento.</p>
+  <?php endif; ?>
+  <?php if ($rel && count($rel) > 1): $agora = (array) ($rel['no_one'] ?? []); ?>
+    <table class="tabela" data-n10-relatorio style="margin-top:12px"><thead><tr><th>Vindo do Nota10, no One agora</th><th class="direita">Quantidade</th></tr></thead><tbody>
+      <?php foreach ($agora as $k => [$r, $q]): ?><tr data-agora="<?= e($k) ?>"><td><?= e($r) ?></td><td class="direita"><?= $n($q) ?></td></tr><?php endforeach; ?>
+      <?php if (!$agora): foreach ($rotulos as $k => $r): if (!isset($rel[$k])) continue; ?><tr data-rel="<?= e($k) ?>"><td><?= e($r) ?></td><td class="direita"><?= $n($rel[$k]) ?></td></tr><?php endforeach; endif; ?>
+      <?php if (isset($rel['faturado_total'])): ?><tr><td><strong>Faturamento importado (Perfeita Alquimia)</strong></td><td class="direita"><strong><?= dinheiro((float) $rel['faturado_total']) ?></strong></td></tr><?php endif; ?>
+      <?php foreach ((array) ($rel['faturado_por_ano'] ?? []) as $ano => $v): ?><tr><td class="pequeno">· faturado em <?= (int) $ano ?></td><td class="direita pequeno"><?= dinheiro((float) $v) ?></td></tr><?php endforeach; ?>
+    </tbody></table>
+    <?php $avisos = array_intersect_key($rel, array_flip(['gemeos_juntados', 'saidas_ligadas_a_pedido', 'alerta_cancelado_com_nf', 'possiveis_duplicados', 'notas_sem_cliente',
+        'itens_sem_nota_guardados', 'ajustes_estoque_guardados', 'funcionarios_criados', 'clientes_juntados_cnpj'])); ?>
+    <?php if ($avisos && $agora): ?><details style="margin-top:8px"><summary class="pequeno">O que a última rodada fez</summary>
+      <ul class="pequeno"><?php foreach ($avisos as $k => $q): ?><li><?= e($rotulos[$k] ?? $k) ?>: <?= $n($q) ?></li><?php endforeach; ?></ul></details><?php endif; ?>
+  <?php endif; ?>
+</section>
 
 <details class="card n10-bloco" data-n10-detalhes>
   <summary><strong>Detalhes do backup</strong> <span class="suave pequeno">tabelas recebidas e como o Nota10 marca os pedidos</span></summary>

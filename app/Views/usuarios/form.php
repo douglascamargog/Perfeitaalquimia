@@ -29,7 +29,7 @@ $ativo = $novo || $usuario['ativo'];
       </select>
     </div>
     <div class="campo">
-      <label for="codigo_vendedor">Código de vendedor</label>
+      <label for="codigo_vendedor">Código do funcionário <small class="suave">(o mesmo do Nota10)</small></label>
       <input type="text" id="codigo_vendedor" name="codigo_vendedor" value="<?= $valor('codigo_vendedor') ?>" maxlength="20">
       <div class="ajuda">Usado no link do catálogo: /catalogo/v/CÓDIGO. Deixe vazio se a pessoa não vende.</div>
     </div>

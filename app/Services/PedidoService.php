@@ -24,6 +24,9 @@ class PedidoService
         'faturado'             => ['Faturado', 'verde'],
         'recusado'             => ['Recusado', 'vermelho'],
         'cancelado'            => ['Cancelado', 'cinza'],
+        // V17.0 — pedidos vindos do Nota10 que não contam no faturamento
+        'historico'            => ['Histórico (Nota10)', 'cinza'],
+        'outra_empresa'        => ['Outra empresa do grupo', 'cinza'],
     ];
 
     // ------------------------------------------------------------------

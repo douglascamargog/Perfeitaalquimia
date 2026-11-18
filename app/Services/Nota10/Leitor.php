@@ -10,7 +10,8 @@ use App\Core\Banco;
  * A leitura é feita em partes (cada chamada trabalha alguns segundos e guarda até onde chegou),
  * para caber no limite de tempo da hospedagem compartilhada. A tela chama de novo até terminar.
  *
- * Só as tabelas úteis para o One são lidas (lista TABELAS); as do PDV de balcão, fiscais e de configuração são puladas.
+ * TODAS as tabelas do backup são guardadas (decisão: nada do Nota10 fica de fora). A lista TABELAS são as que a conferência e a
+ * importação usam; as outras (logs, configuração, contas bancárias, fiscais...) ficam só na área n10_ para consulta.
  */
 class Leitor
 {
@@ -333,8 +334,8 @@ class Leitor
             return false;
         }
         $re = '/^(\s*(?:INSERT\s+(?:IGNORE\s+)?INTO|REPLACE\s+INTO|CREATE\s+TABLE(?:\s+IF\s+NOT\s+EXISTS)?)\s+)(?:`?\w+`?\.)?`?(\w+)`?/i';
-        if (!preg_match($re, $t, $m) || !in_array(strtolower($m[2]), self::TABELAS, true)) {
-            return false; // DROP, LOCK, SET, USE, CREATE DATABASE, views e tabelas que o One não usa
+        if (!preg_match($re, $t, $m) || str_starts_with(strtolower($m[2]), 'n10_')) {
+            return false; // DROP, LOCK, SET, USE, CREATE DATABASE e views
         }
         $tabela = self::PREFIXO . strtolower($m[2]);
         $t = preg_replace($re, '$1`' . $tabela . '`', $t, 1);

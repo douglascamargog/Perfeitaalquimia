@@ -174,7 +174,7 @@ class UsuarioController extends Controller
             $erros[] = 'Escolha o perfil de acesso.';
         }
         if ($dados['codigo_vendedor'] && Banco::valor('SELECT 1 FROM usuarios WHERE codigo_vendedor = ? AND id <> ?', [$dados['codigo_vendedor'], $id ?? 0])) {
-            $erros[] = 'Este código de vendedor já está em uso.';
+            $erros[] = 'Este código de funcionário já está em uso.';
         }
         return $erros;
     }

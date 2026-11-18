@@ -106,6 +106,35 @@ class Nota10Controller extends Controller
         redirecionar('/sistema/nota10');
     }
 
+    /** Começa a importação de verdade (o backup precisa estar lido) */
+    public function importar(string $id): void
+    {
+        $imp = Banco::um('SELECT * FROM nota10_importacoes WHERE id = ?', [(int) $id]);
+        if (!$imp || $imp['situacao'] !== 'lido') {
+            Sessao::aviso('erro', 'Leia o backup antes de importar.');
+            redirecionar('/sistema/nota10');
+        }
+        if (mb_strtoupper(trim($this->campo('confirmar'))) !== 'IMPORTAR') {
+            Sessao::aviso('erro', 'Para começar, digite IMPORTAR.');
+            redirecionar('/sistema/nota10#importar');
+        }
+        \App\Services\Nota10\Importador::iniciar((int) $id, (int) Auth::id());
+        redirecionar('/sistema/nota10#importar');
+    }
+
+    /** Roda mais uma parte da importação (a tela chama de novo até terminar). Responde JSON. */
+    public function importarParte(string $id): void
+    {
+        try {
+            $r = \App\Services\Nota10\Importador::parte((int) $id);
+        } catch (\Throwable $e) {
+            error_log((string) $e);
+            $this->json(['erro' => 'Falha na importação: ' . mb_substr($e->getMessage(), 0, 400)], 500);
+            return;
+        }
+        $this->json($r);
+    }
+
     /** Grava as ligações escolhidas (vendedores, tabelas, formas, segmentos, tipos de cadastro) */
     public function mapas(): void
     {
@@ -121,6 +150,12 @@ class Nota10Controller extends Controller
     public function descartar(string $id): void
     {
         $imp = Banco::um('SELECT * FROM nota10_importacoes WHERE id = ?', [(int) $id]);
+        if ($imp && $imp['importado_em']) {
+            @unlink(Leitor::PASTA . '/' . basename($imp['arquivo']));
+            Auditoria::registrar('configuracoes', (int) $id, 'nota10_arquivo_apagado', null, ['arquivo' => $imp['nome_original']]);
+            Sessao::aviso('sucesso', 'Arquivo do backup apagado do servidor. Os dados do Nota10 continuam guardados no One.');
+            redirecionar('/sistema/nota10');
+        }
         if ($imp) {
             Leitor::limparArea();
             @unlink(Leitor::PASTA . '/' . basename($imp['arquivo']));

@@ -36,7 +36,7 @@ class ZerarDadosService
             'producao_perdas', 'acabado_movimentos', 'estoque_acabado', 'materias_primas', 'mp_fornecedores'],
         'Fórmulas' => ['formula_historico', 'formula_testes', 'formula_itens', 'formulas'],
         'Projetos de produtos novos' => ['dp_historico', 'dp_aprovacoes', 'dp_projeto_etapas', 'dp_projetos'],
-        'Compras' => ['compra_historico', 'compra_cotacoes', 'compras', 'compras_lancadas_itens', 'compras_lancadas'],
+        'Compras' => ['compra_historico', 'compra_cotacoes', 'compras', 'compras_lancadas_itens', 'compras_lancadas', 'fornecedores'],
         'Marketing e campanhas' => ['mkt_post_comentarios', 'mkt_posts', 'mkt_campanhas', 'mkt_tarefa_historico', 'mkt_tarefas',
             'campanha_faixas', 'campanha_produtos', 'campanhas'],
         'Terceirização' => ['terceirizacao_rotulos_mov', 'terceirizacao_produtos'],

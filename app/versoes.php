@@ -17,6 +17,21 @@
  */
 return [
     [
+        'versao' => '17.0', 'data' => '2026-11-18', 'titulo' => 'O histórico do Nota10 dentro do One',
+        'novo' => [
+            'Os clientes, leads, pedidos, itens, títulos, follow-ups e compras do Nota10 podem ser trazidos para o One (a importação é feita pela administração).',
+            'Na ficha de cada loja aparecem os pedidos antigos do Nota10, com nota fiscal, CFOP e as bonificações juntas no mesmo pedido.',
+            'Pedidos novos: "Histórico (Nota10)" (orçamentos, devoluções, pedidos sem nota que não foram despachados) e "Outra empresa do grupo". Eles ficam guardados, mas fora do faturamento, das metas e das análises.',
+            'Fornecedores e transportadoras ganharam um cadastro próprio.',
+        ],
+        'melhoria' => [
+            'Última compra, intervalo de recompra e "boleto bloqueado" passam a considerar o histórico completo do Nota10.',
+            'Os prospects do Nota10 entram como leads "Não abordado", na fila de Prospecção e Reativação.',
+            'Cadastro de usuários: "Código de vendedor" agora se chama "Código do funcionário" (é o mesmo código do Nota10).',
+        ],
+        'admin' => 'Administração › Importar Nota10: depois de ler e conferir, guarde as ligações (vendedores, tipos de cadastro, grupos de produto, formas de pagamento, segmentos) e use "4 · Importar" (digite IMPORTAR). O One faz um backup completo antes (storage/backups) e importa em partes; dá para rodar de novo sem duplicar. Vendedores marcados "➕ Criar funcionário no One" viram usuários sem acesso: defina e-mail e senha em Administração › Usuários. Painéis mostram só a Perfeita Alquimia (CNPJ em Configurações › Empresa); título vencido de qualquer empresa do grupo bloqueia o boleto. A tabela "Base" vira a Lojista. Tudo o que não tem tela (contas a pagar, logs, configuração, itens sem nota) continua nas tabelas n10_ — que não são apagadas nem pelo "Zerar dados". Regras completas em docs/nota10/regras-importacao.md.',
+    ],
+    [
         'versao' => '16.8', 'data' => '2026-11-18', 'titulo' => 'Correção ao guardar as ligações do Nota10',
         'correcao' => [
             'Importar Nota10: "Guardar as ligações" podia dar "página não encontrada" com o backup real (muitos vendedores, segmentos e tipos).',

@@ -53,7 +53,7 @@ const TMP = fs.mkdtempSync('/tmp/one-n10-');
     await lerTudo(a);
     ok(sql("select situacao from nota10_importacoes order by id desc limit 1") === 'lido', 'leitura em partes até o fim');
     ok(Number(sql('select count(*) from n10_clientes')) === 6 && Number(sql('select count(*) from n10_notas')) === 5, 'área separada com os clientes e pedidos do backup');
-    ok(sql("show tables like 'n10_comandas'") === '', 'tabelas que o One não usa (PDV) são puladas');
+    ok(sql("show tables like 'n10_comandas'") === 'n10_comandas', 'todas as tabelas do backup são guardadas (até as do PDV), nada fica de fora');
     ok(sql("select Nome from n10_clientes where Numero=103") === "D'Ávila Naturais", 'acentos e apóstrofo preservados');
     ok(sql("select Obs from n10_clientes where Numero=101") === 'Entregar pela manhã;', 'texto com ponto e vírgula no fim não quebra a leitura');
 
@@ -72,7 +72,7 @@ const TMP = fs.mkdtempSync('/tmp/one-n10-');
     ok(await a.evaluate(() => !!(window.Chart && Chart.getChart(document.getElementById('n10-grafico-anos')))), 'gráfico de pedidos por ano');
     ok((await a.locator('[data-n10-tipos] select[name="mapa[tipo_cadastro][F]"]').inputValue()) === 'fornecedor', 'palpite: tipo F vira fornecedor');
     ok((await a.locator('select[name="mapa[forma][1]"] option:checked').innerText()).includes('Boleto'), 'palpite: "BOLETO 28 DD" liga com Boleto');
-    ok((await a.locator('select[name="mapa[segmento][7]"] option:checked').innerText()).includes('Farm'), 'segmento com nome da tabela de apoio e palpite Farmácia');
+    ok((await a.locator('select[name="mapa[segmento][seg:7]"] option:checked').innerText()).includes('Farm'), 'segmento com nome da tabela de apoio e palpite Farmácia');
     ok((await a.locator('[data-n10-vendedores]').innerText()).includes('MARIA VENDAS'), 'vendedores com o nome do Nota10');
 
     // 3) guardar as ligações

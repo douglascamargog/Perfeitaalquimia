@@ -28,7 +28,7 @@ $status = ['previa' => ['Aguardando confirmação', 'lima'], 'concluida' => ['Co
       <li>Segmento (qualquer escrita: vira Produtos naturais, Suplementos, Farmácia ou Outros)</li>
       <li>Telefone, WhatsApp, e-mail, Instagram, Facebook, site</li>
       <li>Etapa, prioridade, observações</li>
-      <li><strong>Vendedor</strong>: e-mail ou código do vendedor (ex.: TV01). Sem vendedor, o cliente vai para a função de novos leads.</li>
+      <li><strong>Vendedor</strong>: e-mail ou código do funcionário (ex.: TV01). Sem vendedor, o cliente vai para a função de novos leads.</li>
     </ul>
     <p class="pequeno suave">Duplicados: pelo CNPJ; sem CNPJ, pelo nome + cidade. CNPJ já cadastrado só completa os campos vazios.</p>
   </div>

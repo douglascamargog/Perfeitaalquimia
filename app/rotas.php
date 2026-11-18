@@ -496,6 +496,8 @@ return [
     ['POST', '/sistema/nota10/{id}/recomecar',        'Nota10Controller@recomecar',    'sistema.nota10'],
     ['POST', '/sistema/nota10/{id}/descartar',        'Nota10Controller@descartar',    'sistema.nota10'],
     ['POST', '/sistema/nota10/ligacoes',              'Nota10Controller@mapas',        'sistema.nota10'],
+    ['POST', '/sistema/nota10/{id}/importar',         'Nota10Controller@importar',     'sistema.nota10'],
+    ['POST', '/sistema/nota10/{id}/importar-parte',   'Nota10Controller@importarParte', 'sistema.nota10'],
 
     ['GET',  '/integracao',             'IntegracaoController@index',       'integracao.gerenciar'],
     ['POST', '/integracao/testar',      'IntegracaoController@testar',      'integracao.gerenciar'],

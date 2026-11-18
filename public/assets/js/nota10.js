@@ -44,6 +44,40 @@ if (caixa) {
   });
 }
 
+// Importação: chama o servidor parte por parte até terminar (cada parte trabalha alguns segundos e guarda até onde chegou)
+const imp = document.querySelector('[data-n10-importar]');
+if (imp && imp.dataset.andamento === '1') {
+  const barra = imp.querySelector('[data-n10-imp-pct]');
+  const status = imp.querySelector('[data-n10-imp-status]');
+  const botao = imp.querySelector('[data-n10-imp-continuar]');
+  let rodando = false;
+  const rodar = async () => {
+    if (rodando) return;
+    rodando = true; if (botao) botao.disabled = true;
+    window.onbeforeunload = () => 'A importação ainda não terminou.';
+    let falhas = 0;
+    for (;;) {
+      let r;
+      try {
+        const resp = await fetch(imp.dataset.url, { method: 'POST', body: new URLSearchParams({ _csrf: CSRF }), headers: { Accept: 'application/json', 'X-CSRF-Token': CSRF } });
+        r = await resp.json().catch(() => ({ erro: 'O servidor não respondeu direito (código ' + resp.status + ').' }));
+      } catch { r = { erro: 'Sem conexão com o servidor.' }; }
+      if (r.erro) {
+        if (++falhas <= 3) { await new Promise((ok) => setTimeout(ok, 3000)); continue; }
+        status.textContent = 'Parou: ' + r.erro;
+        window.onbeforeunload = null; rodando = false; if (botao) { botao.disabled = false; botao.textContent = 'Tentar continuar'; }
+        return;
+      }
+      falhas = 0;
+      barra.style.width = r.pct + '%';
+      status.textContent = `${r.rotulo}… ${Math.round(r.pct)}%. Deixe esta página aberta.`;
+      if (r.fim) { status.textContent = 'Pronto! Abrindo o relatório…'; window.onbeforeunload = null; location.reload(); return; }
+    }
+  };
+  botao?.addEventListener('click', rodar);
+  rodar();
+}
+
 // Ligações: envia todas as escolhas num campo só (JSON). Formulário com centenas de campos é barrado
 // por algumas hospedagens (limite de campos / filtro de segurança) e voltava "página não encontrada".
 document.querySelector('[data-n10-ligacoes]')?.addEventListener('submit', (e) => {
